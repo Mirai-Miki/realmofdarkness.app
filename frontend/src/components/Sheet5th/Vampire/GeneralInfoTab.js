@@ -3,7 +3,7 @@ import SheetControls from "../SheetControls";
 import DialogueTextField from "../../Sheet/DialogueTextField";
 import ExpTextField from "../../Sheet/ExpTextField";
 import ApiTextField from "../../Sheet/ApiTextField";
-import { getClans, getPredatorTypes } from "../../../constants/";
+import { getClans, getClanInfo, getPredatorTypes } from "../../../constants/";
 import ApiSelect from "../../Sheet/ApiSelect";
 import GenerationMenuItems from "./GenerationMenuItems";
 import SheetStatusMenuItems from "../../Sheet/SheetStatusMenuItems";
@@ -93,6 +93,7 @@ export default function GeneralInfoTab(props) {
             label="Clan"
             value={sheet.clan}
             getData={getClans}
+            getItemInfo={getClanInfo}
           />
           <ApiSelect
             label="Generation"

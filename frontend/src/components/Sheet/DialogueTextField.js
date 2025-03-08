@@ -4,7 +4,7 @@ import { useState } from "react";
 import SelectionDialogue from "./SelectionDialogue";
 
 export default function DialogueTextField(props) {
-  const { label, value, xs, getData } = props;
+  const { label, value, xs, getData, getItemInfo } = props;
   const { lock } = useSheetContext();
   const [open, setOpen] = useState(false);
 
@@ -46,6 +46,7 @@ export default function DialogueTextField(props) {
         open={open}
         onClose={handleClose}
         getData={getData}
+        getItemInfo={getItemInfo}
       />
       <Grid2
         size={{
