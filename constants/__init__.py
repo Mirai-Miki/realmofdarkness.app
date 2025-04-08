@@ -1,3 +1,7 @@
+"""
+Central location for application-wide constants
+"""
+
 from .splats import Splats, Versions
 
 
@@ -42,3 +46,13 @@ class CharacterSheetLimit:
             return CharacterSheetLimit.NEONATE
         elif supporterLevel >= Supporter.ANCILLA:
             return CharacterSheetLimit.ANCILLA
+
+
+class ImageError:
+    """Constants for image download errors"""
+
+    NO_URL = "NO_URL"
+    TOO_LARGE = "TOO_LARGE"
+    DOWNLOAD_FAILED = "DOWNLOAD_FAILED"
+    INVALID_IMAGE = "INVALID_IMAGE"
+    SUCCESS = "SUCCESS"

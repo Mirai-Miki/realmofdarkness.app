@@ -4,6 +4,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib.auth import get_user_model
 from time import time
+from rest_framework import status
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,6 +14,7 @@ from ..Authenticate import authenticate
 from haven.serializers import validation_error_handler
 from gateway.constants import Group
 from bot.downloadAndVerifyImage import download_and_verify_image
+from constants import ImageError
 from haven.utility import (
     get_character_model,
     get_deserializer,
@@ -36,9 +38,24 @@ class SaveCharacter(APIView):
         if image_url and match(r"^https:\/\/realmofdarkness\.app", image_url):
             image_url = None
         elif image_url:
-            image_file = download_and_verify_image(image_url)
+            image_file, failure_reason = download_and_verify_image(image_url)
+
         if image_url and not image_file:
-            return HttpResponse(status=406)
+            if failure_reason == ImageError.TOO_LARGE:
+                return HttpResponse(
+                    "Image too large (max 5MB)",
+                    status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                )
+            elif failure_reason == ImageError.INVALID_IMAGE:
+                return HttpResponse(
+                    "Invalid image format",
+                    status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                )
+            else:
+                return HttpResponse(
+                    "Failed to download image",
+                    status=status.HTTP_406_NOT_ACCEPTABLE,
+                )
 
         splat = request.data["character"]["splat"]
         Character = get_character_model(splat)
