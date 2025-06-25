@@ -11,8 +11,13 @@ from chronicle.models import Member, Chronicle
 from chronicle.serializers import MemberDeserializer
 from gateway.serializers import serialize_member, serialize_user
 from gateway.constants import Group
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from typing import List, Dict
+from discordauth.models import User as CustomUser
 
-User = get_user_model()
+User: type[CustomUser] = get_user_model()
 channel_layer = get_channel_layer()
 
 
@@ -133,3 +138,18 @@ def get_admins_storytellers(request):
             "members": members,
         }
     )
+
+
+class GetAllSupportersView(APIView):
+    """
+    API endpoint to get all supporter users and their levels.
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request) -> Response:
+        supporters = User.objects.filter(supporter__gt=0)
+        data: List[Dict[str, int | str]] = [
+            {"user_id": str(user.id), "level": user.supporter} for user in supporters
+        ]
+        return Response(data)

@@ -40,7 +40,7 @@ if [ "$1" != "--services-only" ]; then
     # Create virtual environment if it doesn't exist
     if [ ! -d "venv" ]; then
         echo "      → Creating virtual environment..."
-        run_as_web "cd $PROJECT_PATH && python3 -m venv venv"
+        run_as_web "cd $PROJECT_PATH && python3.12 -m venv venv"
         if [ $? -ne 0 ]; then
             echo "      ❌ Failed to create virtual environment!"
             exit 1

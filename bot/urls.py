@@ -57,6 +57,7 @@ urlpatterns = [
     path("user/supporter/get", get_supporter_level),
     path("user/supporter/set", set_supporter_level),
     path("user/update", update_user),
+    path("user/supporter/get_all", views.GetAllSupportersView.as_view()),
     # Initiative Tracker
     path("initiative/set", init_set),
     path("initiative/get", init_get),

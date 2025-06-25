@@ -15,7 +15,7 @@ echo "[1/9] 🔧 Setting up Python virtual environment..."
 # Create virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
     echo "      → Creating virtual environment..."
-    python3 -m venv venv
+    python3.12 -m venv venv
     if [ $? -ne 0 ]; then
         echo "      ❌ Failed to create virtual environment!"
         read -p "Press Enter to exit..."

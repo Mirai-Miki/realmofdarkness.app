@@ -20,7 +20,7 @@ With this application, users can easily create and update character sheets, trac
 
 ### Prerequisites
 
-- Python 3.12 or higher
+- Python 3.12
 - Node.js and npm
 - Redis (WSL required for Windows users)
 - MariaDB/MySQL (for production environments only)
