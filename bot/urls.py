@@ -28,7 +28,7 @@ from .views.userViews import (
     get_admins_storytellers,
 )
 from .views.initiativeViews import init_set, init_get, init_delete
-from .views.statsViews import get_stats, command_used
+from .views.statsViews import StatsAPIView, CommandUsedAPIView
 
 app_name = "bot"
 urlpatterns = [
@@ -63,8 +63,8 @@ urlpatterns = [
     path("initiative/get", init_get),
     path("initiative/delete", init_delete),
     # Stats
-    path("stats/get", get_stats),
-    path("stats/command/update", command_used),
+    path("stats/get", StatsAPIView.as_view()),
+    path("stats/command/update", CommandUsedAPIView.as_view()),
     # Bot Info
     path("data/set", update_bot),
 ]
