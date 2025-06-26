@@ -120,10 +120,16 @@ We welcome contributions to improve realmofdarkness.app! Here's how you can help
 2. Create a branch following our naming conventions:
    - `feature/description` - New functionality or enhancements
    - `bugfix/issue-description` - Bug fixes
-   - `refactor/component-name` - Code improvements
+   - `refactor/component-name` - Code improvements or restructuring
    - `docs/description` - Documentation updates
-   - `test/description` - Test additions
-   - `chore/description` - Maintenance tasks
+   - `test/description` - Test additions or updates
+   - `chore/description` - Maintenance tasks (e.g. cleanup, scripts)
+   - `deps/description` - Dependency updates
+   - `config/description` - Configuration or static value changes
+   - `ci/description` - Continuous integration or workflow changes
+   - `style/description` - Formatting or stylistic changes
+   - `perf/description` - Performance improvements
+   - `revert/description` - Reverting previous changes
 3. Commit your changes with clear messages
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
