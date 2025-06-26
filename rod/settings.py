@@ -189,10 +189,10 @@ REST_FRAMEWORK = {
         # Other authentication classes...
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "10/day",  # Anonymous users - restricted
-        "standard_user": "300/day",  # Regular authenticated users
-        "supporter_user": "600/day",  # Supporters (tier 1-2)
-        "premium_user": "1200/day",  # Premium supporters (tier 3+)
+        "anon": "50/day",  # Anonymous users - restricted
+        "standard_user": "2000/day",  # Regular authenticated users
+        "supporter_user": "5000/day",  # Supporters (tier 1-2)
+        "premium_user": "10000/day",  # Premium supporters (tier 3+)
     },
 }
 
