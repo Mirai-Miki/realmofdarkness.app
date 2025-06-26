@@ -1,196 +1,227 @@
-# Realm of Darkness App
+# Realm of Darkness
 
 ![Project Banner](https://res.cloudinary.com/dze64d7cr/image/upload/v1701410603/Logo/banner_bg_index.webp)
 
-Welcome to the https://github.com/Mirai-Miki/realmofdarkness.app codebase! This repository contains the source code for a web application built with Django framework and React frontend.
+Welcome to the Realm of Darkness monorepo! This is a comprehensive platform designed for World of Darkness tabletop roleplaying enthusiasts, providing web-based character sheets, Discord bot integration, and real-time collaboration tools for storytellers and players.
 
-The Realm of Darkness is a platform designed for World of Darkness tabletop roleplaying enthusiasts, providing a space to create and manage character sheets, chronicles, and more within the World of Darkness setting.
-
-With this application, users can easily create and update character sheets, track their progress in various chronicles, and interact with other players in a collaborative environment.
+The Realm of Darkness combines a modern web application with Discord bots to create an integrated experience for managing characters, chronicles, and gameplay across multiple World of Darkness game systems including Vampire: The Masquerade V5, V20 edition, and Chronicles of Darkness.
 
 ## ✨ Features
 
-- **Discord Integration**: Seamless login and server synchronization
-- **Character Sheets**: Create and manage World of Darkness character sheets
-- **Chronicles**: Organize characters into shared storytelling environments
-- **Real-time Updates**: Live notifications and character sheet changes
-- **Responsive Design**: Works on both desktop and mobile devices
+- **🌐 Web Application**: Modern React frontend with Django REST API backend
+- **🤖 Discord Integration**: Suite of Discord bots for dice rolling and character management
+- **📊 Character Sheets**: Full character sheet support for multiple World of Darkness systems
+- **⚡ Real-time Collaboration**: Live character sheet updates via WebSockets
+- **🎲 Dice Rolling**: Game-specific dice mechanics with Discord slash commands
+- **🏰 Chronicle Management**: Organize characters into shared storytelling environments
+- **🔐 Discord OAuth**: Seamless login and server synchronization
+- **📱 Responsive Design**: Works on desktop, tablet, and mobile devices
 
-## 🚀 Installation and Setup
+## 🏗️ Project Structure
+
+This monorepo contains three main components:
+
+```
+realm-of-darkness/
+├── backend/           # Django REST API backend
+│   ├── rod/          # Core Django project settings
+│   ├── api/          # RESTful API endpoints
+│   ├── haven/        # Character sheet models and logic
+│   ├── chronicle/    # Chronicle/campaign management
+│   ├── discordauth/  # Discord OAuth integration
+│   ├── gateway/      # WebSocket services
+│   └── scripts/      # Development and deployment scripts
+├── frontend/         # React SPA frontend
+│   ├── src/
+│   │   ├── components/  # UI components
+│   │   ├── routes/      # Page routing
+│   │   └── gateway/     # WebSocket client
+│   └── public/
+├── discord_bots/     # Discord bot suite
+│   ├── src/
+│   │   ├── commands/    # Slash commands
+│   │   ├── events/      # Discord event handlers
+│   │   └── modules/     # Dice rolling and utilities
+│   └── scripts/
+└── dev.bat/.sh       # Full-stack development scripts
+```
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Python 3.12
-- Node.js and npm
-- Redis (WSL required for Windows users)
-- MariaDB/MySQL (for production environments only)
+- **Python 3.12+** for the Django backend
+- **Node.js 18+** and npm for frontend and Discord bots
+- **Redis** for WebSocket and caching (WSL required for Windows)
+- **Git** for version control
 
-### First-time Setup
+### Development Setup
 
-We provide automated setup scripts to create your environment configuration:
+1. **Clone the repository**
 
-#### Windows Setup
+   ```bash
+   git clone https://github.com/Mirai-Miki/realm-of-darkness-site.git
+   cd realm-of-darkness-site
+   ```
 
-1. Navigate to the scripts directory: `cd scripts`
-2. Run the setup script: `setup.bat`
-3. Follow the prompts to configure your environment
+2. **Run the setup script** (creates .env files and installs dependencies)
 
-#### Linux/macOS Setup
+   ```bash
+   # Windows
+   backend\scripts\setup.bat
 
-1. Navigate to the scripts directory: `cd scripts`
-2. Make scripts executable: `chmod +x *.sh`
-3. Run the setup script: `./setup.sh`
-4. Follow the prompts to configure your environment
+   # Linux/macOS
+   chmod +x backend/scripts/*.sh
+   backend/scripts/setup.sh
+   ```
 
-This will create a .env file with your configuration settings. The setup process will ask for:
+3. **Start the full development environment**
 
-- Environment type (development or production)
-- Database configuration (for production)
-- Django security keys
-- Discord integration settings
-- Patreon integration settings (optional)
+   ```bash
+   # Windows
+   dev.bat
 
-### Running the Application
+   # Linux/macOS
+   ./dev.sh
+   ```
 
-After initial setup, use these scripts to start the application:
+This will start:
 
-#### Development Environment (with hot reloading)
+- **Backend API**: http://localhost:8080
+- **Frontend**: http://localhost:3000
+- **Redis server**: Running in background
+- **Database migrations**: Applied automatically
 
-- Windows: `cd scripts` then run `dev.bat`
-- Linux/macOS: `cd scripts` then run `./dev.sh`
+### Individual Component Development
 
-This will:
+You can also run components separately:
 
-- Install/update all Python and npm dependencies
-- Apply database migrations
-- Start Redis server
-- Start Django development server on http://localhost:8080
-- Start React development server on http://localhost:3000
+```bash
+# Backend only
+cd backend/scripts && ./dev.bat
 
-#### Production Environment
+# Frontend only
+cd frontend && ./dev.bat
 
-- Linux only: `cd scripts` then run `./run.sh`
+# Discord bots only
+cd discord_bots && npm run dev
+```
 
-This will:
+## 🎯 Usage
 
-- Pull latest code from Git
-- Install/update all dependencies
-- Build the frontend
-- Apply database migrations
-- Ensure Redis is running
-- Restart Gunicorn and reload services
+### For Players
 
-## 🔧 Project Structure
+1. Visit https://realmofdarkness.app (or http://localhost:3000 in development)
+2. Login with your Discord account
+3. Create character sheets for your campaigns
+4. Join Discord servers with the bots installed
+5. Use slash commands to roll dice and manage characters
 
-### Core Components
+### For Storytellers
 
-- rod - Core Django project settings, configuration, and URL routing
-- main - Main application views, templates, and site-wide functionality
-- manage.py - Django command-line utility for administrative tasks
+1. Set up chronicles on the website
+2. Invite the Discord bots to your server
+3. Manage player characters and track campaign progress
+4. Use real-time features for collaborative storytelling
 
-### Authentication & Integration
+### For Developers
 
-- discordauth - Discord OAuth2 authentication and server integration
-- patreon - Patreon integration for premium features and webhooks
+1. Each component has its own README with detailed development information
+2. Use the monorepo dev scripts for full-stack development
+3. See individual component READMEs for specific development guidelines
 
-### Game Content & Logic
+## 🔧 Technology Stack
 
-- haven - Character sheet models, views, and game mechanics
-- chronicle - Chronicle/campaign management and Discord server connections
-- constants - Game constants, configuration, and reference data
-- bot - Discord bot functionality and command handling
+### Backend
 
-### API & Frontend
+- **Django 5.2** - Web framework
+- **Django REST Framework** - API development
+- **Django Channels** - WebSocket support
+- **Redis** - Caching and WebSocket backend
+- **SQLite/MySQL** - Database (SQLite for dev, MySQL for production)
 
-- api - RESTful API endpoints for frontend communication
-- gateway - WebSocket-based real-time communication services
-- frontend - React-based single page application (SPA) with component structure
-- media - User-uploaded content and static media files
+### Frontend
 
-### Utilities & Deployment
+- **React 19** - UI framework
+- **Material-UI** - Component library
+- **React Router** - Client-side routing
+- **WebSocket** - Real-time updates
 
-- scripts - Setup, deployment, and maintenance automation scripts
-- .env - Environment variable configuration (not tracked in git)
+### Discord Bots
+
+- **Discord.js 14** - Discord API wrapper
+- **Node.js** - JavaScript runtime
+- **TypeScript** - Type safety (transitioning)
+
+## 📝 Environment Configuration
+
+Key environment variables needed:
+
+| Variable             | Description                   | Required |
+| -------------------- | ----------------------------- | -------- |
+| `DEBUG`              | Development mode              | Yes      |
+| `SECRET_KEY`         | Django security key           | Yes      |
+| `API_KEY`            | Bot-to-backend authentication | Yes      |
+| `DISCORD_APP_ID`     | Discord OAuth app ID          | Yes      |
+| `DISCORD_APP_SECRET` | Discord OAuth secret          | Yes      |
+| `DISCORD_BOT_TOKEN`  | Discord bot token             | For bots |
+| `REDIS_DB_INDEX`     | Redis database index          | No       |
+
+The setup scripts will help you configure these values.
 
 ## 🤝 Contributing
 
-We welcome contributions to improve realmofdarkness.app! Here's how you can help:
+We welcome contributions to improve the Realm of Darkness platform! Here's how:
 
 1. Fork the repository
-2. Create a branch following our naming conventions:
-   - `feature/description` - New functionality or enhancements
-   - `bugfix/issue-description` - Bug fixes
-   - `refactor/component-name` - Code improvements or restructuring
-   - `docs/description` - Documentation updates
-   - `test/description` - Test additions or updates
-   - `chore/description` - Maintenance tasks (e.g. cleanup, scripts)
-   - `deps/description` - Dependency updates
-   - `config/description` - Configuration or static value changes
-   - `ci/description` - Continuous integration or workflow changes
-   - `style/description` - Formatting or stylistic changes
-   - `perf/description` - Performance improvements
-   - `revert/description` - Reverting previous changes
-3. Commit your changes with clear messages
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes following our coding standards
+4. Test your changes thoroughly
+5. Submit a pull request with a clear description
 
-Please ensure your code follows our coding standards and includes appropriate tests.
+### Branch Naming Conventions
 
-## 🐛 Known Issues
-
-- On sheet update from another user the nickname changes to your own and clicking on the sheet will bring up a nickname error and fail to load
-- Updated sheets with a chronicle change will not automatically be added to another person's home page even if they should be able to see it
-- A character sheet is not setting the chronicle to None when a member leaves a server
-- Pressing enter when creating a new sheet should work as well
-- Being in a sheet when the character is deleted should redirect the user back home
-- Leaving a server does not automatically update a sheet; you need to refresh the page
-
-## 🗺️ Roadmap
-
-- Put a timer on returning Archived/Dead character to Active
-- Implement Draft/Active/Dead/Retired features more thoroughly
-- Server pages: Settings, Exp Management, Server stats (clan stats etc.)
-- Make Character profiles Public (Add settings to allow what is shown)
+- `feature/description` - New functionality
+- `bugfix/issue-description` - Bug fixes
+- `refactor/component-name` - Code improvements
+- `docs/description` - Documentation updates
 
 ## 🔍 Troubleshooting
 
-### Redis Connection Issues
+### Common Issues
 
-- Windows: Ensure WSL is properly installed and running
-- Linux: Check that the Redis service is active with `systemctl status redis-server`
+**Backend won't start**
 
-### Frontend Build Failures
+- Check Python version (requires 3.12)
+- Ensure Redis is running
+- Verify .env file exists in backend/
+
+**Frontend build errors**
 
 - Clear npm cache: `npm cache clean --force`
-- Remove node_modules: `rm -rf node_modules/`
-- Reinstall dependencies: `npm install`
+- Delete node_modules and reinstall: `rm -rf node_modules && npm install`
 
-## ⚙️ Environment Variables
+**Discord bots not responding**
 
-Key environment variables used by the application:
+- Verify bot tokens are correct
+- Check API_KEY matches between backend and bots
+- Ensure backend server is running and accessible
 
-| Variable               | Description                                                        | Required |
-| ---------------------- | ------------------------------------------------------------------ | -------- |
-| DEBUG                  | Development mode when True                                         | Yes      |
-| SECRET_KEY             | Django security key                                                | Yes      |
-| API_KEY                | Internal API authentication - must match API key in bot repository | Yes      |
-| DISCORD_APP_ID         | Discord OAuth application ID                                       | Yes      |
-| DISCORD_APP_SECRET     | Discord OAuth secret                                               | Yes      |
-| DISCORD_BOT_TOKEN      | Bot integration token                                              | No       |
-| PATREON_WEBHOOK_SECRET | Patreon integration                                                | No       |
+### Getting Help
 
-**Note:** The API_KEY value must match the API key configured in the companion Discord bot repository for proper integration. See the [Realm of Darkness Bot Repository](https://github.com/Mirai-Miki/Realm-of-Darkness-Bot) for more information.
+- Check component-specific READMEs for detailed troubleshooting
+- Join our Discord community for support
+- Report bugs via GitHub issues
 
 ## 🔄 Connect
 
-- **Website**: [Realm of Darkness](https://realmofdarkness.app)
-- **Discord**: [Join our community](https://discord.com/invite/p82yc8sKx2)
-- **Issues**: [Report bugs](https://github.com/Mirai-Miki/realm-of-darkness-site/issues)
-- **Bot Repository**: [Discord Bot Companion](https://github.com/Mirai-Miki/Realm-of-Darkness-Bot)
+- **🌐 Website**: [Realm of Darkness](https://realmofdarkness.app)
+- **💬 Discord**: [Join our community](https://discord.com/invite/p82yc8sKx2)
+- **🐛 Issues**: [Report bugs](https://github.com/Mirai-Miki/realmofdarkness.app/issues)
 
 ## 📄 License
 
-This project is licensed under the AGPL License. See the LICENSE file for details.
+This project is licensed under the AGPL License. See the [LICENSE](LICENSE) file for details.
 
 ---
 

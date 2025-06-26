@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "rootDir": "./",
+    "outDir": "./dist/",
+    "typeRoots": ["node_modules/@types"],
+    "strict": false,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "removeComments": true,
+    "sourceMap": false,
+    "baseUrl": "./",
+    "allowJs": true, // Allow JS files alongside TS
+    "checkJs": false, // Don't type-check JS files by default
+    "paths": {
+      // Configure path aliases
+      "@src/*": ["./src/*"],
+      "@commands/*": ["./src/commands/*", "src/commands/*"],
+      "@modules/*": ["./src/modules/*", "src/modules/*"],
+      "@errors/*": ["src/errors/*"],
+      "@api/*": ["src/realmAPI/*"],
+      "@constants/*": ["src/constants/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "*.js",
+    "src/commands/**/*",
+    "src/modules/**/*",
+    "src/errors/**/*",
+    "src/realmAPI/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

@@ -49,116 +49,79 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
-
+ 
 # Translations
 *.mo
 *.pot
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-*.sqlite3
-config.py
-*/migrations copy/*
-dump.rdb
+# Django backend
+backend/db.sqlite3
+backend/db.sqlite3-journal
+backend/*.sqlite3
+backend/.env
+backend/config.py
+backend/dump.rdb
+backend/local_settings.py
+backend/*.log
+backend/venv/
+backend/.venv/
+backend/env/
+backend/env.bak/
+backend/venv.bak/
+backend/__pycache__/
+backend/*/migrations copy/*
+backend/patreon_test.txt
+backend/media/
+backend/rod/management/
+backend/haven/management/
 
-# Flask stuff:
-instance/
-.webassets-cache
+# Backend-specific logs and runtime files
+backend/gunicorn-error.out
+backend/gunicorn.pid
+backend/supervisor*.log
 
-# Scrapy stuff:
-.scrapy
+# Discord bots (Node.js & Python)
+discord_bots/node_modules/
+discord_bots/.env
+discord_bots/.env.*.local
+discord_bots/dist/
+discord_bots/build/
+discord_bots/coverage/
+discord_bots/npm-debug.log*
+discord_bots/yarn-debug.log*
+discord_bots/yarn-error.log*
+discord_bots/venv/
+discord_bots/.venv/
+discord_bots/__pycache__/
+discord_bots/database/
 
-# Sphinx documentation
-docs/_build/
+# React frontend
+frontend/node_modules/
+frontend/build/
+frontend/coverage/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
 
-# PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# celery beat schedule file
-celerybeat-schedule
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
+# General environments and node
 .env
-.venv
 .venv/
 env/
-venv/
 ENV/
 env.bak/
 venv.bak/
+node_modules/
+build/
+dist/
+coverage/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# React App
-frontend/node_modules/
-frontend/README.md
-
-# dependencies
-.pnp
-.pnp.js
-
-# testing
-frontend/coverage
-
-# production
-frontend/build
-
-# misc
+# Miscellaneous
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
 *.out
-
 .VSCodeCounter
-media/
-rod/management/
-haven/management/
 
 .vscode
-patreon_test.txt
 
 # Temporary and backup files
 *.save
@@ -171,7 +134,39 @@ patreon_test.txt
 # Deployment markers
 .update_complete
 
-# Server-specific logs and runtime files
-gunicorn-error.out
-gunicorn.pid
-supervisor*.log
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+#Pipfile.lock
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site

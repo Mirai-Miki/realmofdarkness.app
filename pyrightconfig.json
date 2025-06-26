@@ -1,14 +1,14 @@
 {
   "include": [
-    "api",
-    "bot",
-    "chronicle",
-    "discordauth",
-    "gateway",
-    "haven",
-    "main",
-    "patreon",
-    "rod"
+    "backend/api",
+    "backend/bot",
+    "backend/chronicle",
+    "backend/discordauth",
+    "backend/gateway",
+    "backend/haven",
+    "backend/main",
+    "backend/patreon",
+    "backend/rod"
   ],
   "exclude": ["**/node_modules", "**/__pycache__", "**/migrations", "frontend"],
   "reportMissingImports": true,
