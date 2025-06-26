@@ -111,7 +111,7 @@ cd discord_bots && npm run dev
 
 ### For Players
 
-1. Visit https://realmofdarkness.app (or http://localhost:3000 in development)
+1. Visit https://realmofdarkness.app
 2. Login with your Discord account
 3. Create character sheets for your campaigns
 4. Join Discord servers with the bots installed
@@ -155,19 +155,19 @@ cd discord_bots && npm run dev
 
 ## 📝 Environment Configuration
 
-Key environment variables needed:
+Each component has its own `.env` file for environment variables:
 
-| Variable             | Description                   | Required |
-| -------------------- | ----------------------------- | -------- |
-| `DEBUG`              | Development mode              | Yes      |
-| `SECRET_KEY`         | Django security key           | Yes      |
-| `API_KEY`            | Bot-to-backend authentication | Yes      |
-| `DISCORD_APP_ID`     | Discord OAuth app ID          | Yes      |
-| `DISCORD_APP_SECRET` | Discord OAuth secret          | Yes      |
-| `DISCORD_BOT_TOKEN`  | Discord bot token             | For bots |
-| `REDIS_DB_INDEX`     | Redis database index          | No       |
+| Component        | Env File Location        | Key Variables (examples)                                 |
+| ---------------- | ------------------------ | -------------------------------------------------------- |
+| **Backend**      | `backend/.env`           | `DEBUG`, `SECRET_KEY`, `API_KEY`, `REDIS_DB_INDEX`, etc. |
+| **Discord Bots** | `discord_bots/.env`      | `DISCORD_BOT_TOKEN`, `API_KEY`, etc.                     |
+| **Frontend**     | `frontend/.env` (rarely) | (Usually only for frontend-specific overrides)           |
 
-The setup scripts will help you configure these values.
+> The setup scripts will help you configure these values for each component.
+
+**Note:**
+
+- The backend and Discord bots each require their own `.env` file with the appropriate variables for their service.
 
 ## 🤝 Contributing
 
@@ -181,10 +181,18 @@ We welcome contributions to improve the Realm of Darkness platform! Here's how:
 
 ### Branch Naming Conventions
 
-- `feature/description` - New functionality
+- `feature/description` - New functionality or enhancements
 - `bugfix/issue-description` - Bug fixes
-- `refactor/component-name` - Code improvements
+- `refactor/component-name` - Code improvements or restructuring
 - `docs/description` - Documentation updates
+- `test/description` - Test additions or updates
+- `chore/description` - Maintenance tasks (e.g. cleanup, scripts)
+- `deps/description` - Dependency updates
+- `config/description` - Configuration or static value changes
+- `ci/description` - Continuous integration or workflow changes
+- `style/description` - Formatting or stylistic changes
+- `perf/description` - Performance improvements
+- `revert/description` - Reverting previous changes
 
 ## 🔍 Troubleshooting
 
