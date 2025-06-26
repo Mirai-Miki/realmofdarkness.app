@@ -13,14 +13,12 @@ from haven.models import Character
 from haven.serializers import validation_error_handler
 from gateway.constants import Group
 from bot.downloadAndVerifyImage import download_and_verify_image
-from constants import ImageError
+from constants import ImageError, TrackerLimit, Supporter
 from haven.utility import get_deserializer, get_tracker_serializer
 
 
 channel_layer = get_channel_layer()
 User = get_user_model()
-
-MAX_TRACKERS = 50
 
 
 class NewCharacter(APIView):
@@ -51,11 +49,12 @@ class NewCharacter(APIView):
                     status=status.HTTP_406_NOT_ACCEPTABLE,
                 )
 
-        count = Character.objects.filter(user=character["user"]).count()
-        if count > MAX_TRACKERS:  # 409 Conflict - Too many Characters
-            return HttpResponse(status=409)
         user = User.objects.get(pk=character["user"])
-
+        supporter_level = getattr(user, "supporter", Supporter.NONE)
+        max_trackers = TrackerLimit.get_amount(supporter_level)
+        count = Character.objects.filter(user=character["user"]).count()
+        if count > max_trackers:  # 409 Conflict - Too many Characters
+            return HttpResponse(status=409)
         char = Character.objects.filter(
             name__iexact=character["name"], user=character["user"]
         )
