@@ -1,12 +1,13 @@
 from django.urls import path
 from . import views
-from .views.characterViews import (
+from .views.character_views import (
     GetCharacter,
     GetDisciplineNames,
     GetNames,
     DeleteCharacters,
     NewCharacter,
     SaveCharacter,
+    GetSheet,
 )
 from .views.chronicleViews import (
     MemberDeleteView,

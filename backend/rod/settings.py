@@ -54,14 +54,16 @@ else:
         "127.0.0.1",
         "[::1]",
     ]
-    
+
     if ENV == "preproduction":
         ALLOWED_HOSTS.append("dev.realmofdarkness.app")
     else:
-        ALLOWED_HOSTS.extend([
-            "realmofdarkness.app",
-            "www.realmofdarkness.app",
-        ])
+        ALLOWED_HOSTS.extend(
+            [
+                "realmofdarkness.app",
+                "www.realmofdarkness.app",
+            ]
+        )
 
     SECURE_SSL_REDIRECT = False  # handled by nginx
     CSRF_COOKIE_SECURE = True
