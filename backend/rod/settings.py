@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+from backend.discordauth.views import ENV
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -20,6 +21,7 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ENV = os.getenv("ENV", "development")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -34,10 +36,11 @@ DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
 DISCORD_DEBUG_CHANNEL = os.getenv("DISCORD_DEBUG_CHANNEL", "")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = os.getenv("ENV", "development") == "development"
 
-# Conditional settings based on DEBUG
-if DEBUG:
+
+# Conditional settings based on ENV
+if ENV == "development":
     # Development environment
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
     SECURE_SSL_REDIRECT = False
@@ -45,14 +48,21 @@ if DEBUG:
     SESSION_COOKIE_SECURE = False
     CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
 else:
-    # Production environment
+    # Production & preproduction environment
     ALLOWED_HOSTS = [
-        "realmofdarkness.app",
-        "www.realmofdarkness.app",
         ".localhost",
         "127.0.0.1",
         "[::1]",
     ]
+    
+    if ENV == "preproduction":
+        ALLOWED_HOSTS.append("dev.realmofdarkness.app")
+    else:
+        ALLOWED_HOSTS.extend([
+            "realmofdarkness.app",
+            "www.realmofdarkness.app",
+        ])
+
     SECURE_SSL_REDIRECT = False  # handled by nginx
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True

@@ -5,7 +5,7 @@ const path = require("path");
 const rootDir = __dirname;
 
 // Check if we're running from a built distribution
-const runningFromDist = process.env.NODE_ENV === "production";
+const runningFromDist = process.env.NODE_ENV !== "development";
 
 // Set source directory based on environment
 const srcDir = runningFromDist

@@ -21,7 +21,7 @@ const {
 dotenv.config();
 
 // Determine environment and source directory
-const runningFromDist = process.env.NODE_ENV === "production";
+const runningFromDist = process.env.NODE_ENV !== "development";
 const srcDir = runningFromDist ? "dist" : "src";
 
 // Initialize Discord client with required intents and partials

@@ -12,6 +12,8 @@ const cooldownTimer = {
 let host;
 if (process.env.NODE_ENV === "production")
   host = "wss://realmofdarkness.app/gateway/web/";
+else if (process.env.NODE_ENV === "preproduction")
+  host = "wss://dev.realmofdarkness.app/gateway/web/";
 else host = "ws://localhost:8080/gateway/web/";
 
 function incrementCooldown(cooldown) {

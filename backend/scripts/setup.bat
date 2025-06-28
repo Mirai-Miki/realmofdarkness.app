@@ -27,13 +27,13 @@ echo. >> .env
 
 echo === Environment Type ===
 echo Select environment type:
-echo 1. Development (SQLite, Debug mode)
+echo 1. Development (SQLite, Dev mode)
 echo 2. Production (MariaDB, Production mode)
 set /p "env_type=Enter choice (1/2, default: 1) "
 
 if "!env_type!"=="2" (
     echo # Production Environment >> .env
-    echo DEBUG=False >> .env
+    echo ENV=production >> .env
     
     echo === Database Configuration ===
     echo DB_ENGINE=mysql >> .env
@@ -52,7 +52,7 @@ if "!env_type!"=="2" (
     echo DB_PORT=!db_port! >> .env
 ) else (
     echo # Development Environment >> .env
-    echo DEBUG=True >> .env
+    echo ENV=development >> .env
     echo DB_ENGINE=sqlite3 >> .env
     echo DB_NAME=db.sqlite3 >> .env
 )

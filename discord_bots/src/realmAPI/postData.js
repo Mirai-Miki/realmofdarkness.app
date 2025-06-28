@@ -26,8 +26,8 @@ module.exports.postData = async (path, data) => {
   // Use API_KEY from environment variables
   data.APIKey = process.env.API_KEY;
 
-  // Determine if we're in development mode
-  const isDev = process.env.NODE_ENV === "development";
+  // Determine if we're in development OR preproduction mode
+  const isDev = process.env.NODE_ENV !== "production";
 
   try {
     // Use different port based on environment

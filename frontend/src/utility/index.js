@@ -9,9 +9,11 @@ export function slugify(name) {
 }
 
 /**
- * Gets the correct hostname for Development and Production
- * @param {Boolean} proxy If the Dev enviroment should proxy the request
- * @returns Hostname for dev or production
+ * Gets the correct hostname for Development, Preproduction, and Production
+ * - For localhost/127.0.0.1: returns dev/proxy host
+ * - For any other domain (including preproduction like dev.realmofdarkness.app): returns https://currentHost
+ * @param {Boolean} proxy If the Dev environment should proxy the request
+ * @returns Hostname for dev, preproduction, or production
  */
 export function getHost(proxy) {
   const currentHost = window.location.hostname;
@@ -26,7 +28,10 @@ export function getHost(proxy) {
     return "";
   } else if (currentHost === "localhost" || currentHost === "127.0.0.1") {
     return "http://127.0.0.1";
-  } else return `https://${currentHost}`;
+  } else {
+    // Handles production and preproduction (e.g., dev.realmofdarkness.app)
+    return `https://${currentHost}`;
+  }
 }
 
 /**

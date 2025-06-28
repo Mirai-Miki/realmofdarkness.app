@@ -86,7 +86,7 @@ module.exports.handleErrorDebug = async function (error, client) {
   if (error.debug?.raise === false) return;
 
   // Development environment handling
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV === "development") {
     console.error("========== ERROR ==========");
     console.error(error.stack);
     if (error.cause) {

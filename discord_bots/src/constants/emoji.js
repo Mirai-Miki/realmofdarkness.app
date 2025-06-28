@@ -2,7 +2,7 @@
 require("dotenv").config(); // Add this to load the environment variables
 
 // Set up Unicode fallbacks for development environment
-const isDev = process.env.NODE_ENV !== "production";
+const isDev = process.env.NODE_ENV === "development";
 
 // Define Discord emoji and Unicode fallbacks
 const emojiDefinitions = {

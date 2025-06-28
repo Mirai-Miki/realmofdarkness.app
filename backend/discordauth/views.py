@@ -13,13 +13,17 @@ load_dotenv()
 # Get environment variables
 DISCORD_APP_ID = os.getenv("DISCORD_APP_ID", "")
 DISCORD_APP_SECRET = os.getenv("DISCORD_APP_SECRET", "")
-DEBUG = os.getenv("DEBUG", "True") == "True"
+ENV = os.getenv("ENV", "development")
 
 # Set URLs based on environment
-if DEBUG:
+if ENV:
     # Development environment
     REDIRECT_URI = "http://localhost:8080/auth/login/success/"
     FINAL_REDIRECT = "http://localhost:3000/"
+elif ENV == "preproduction":
+    # Preproduction environment
+    REDIRECT_URI = "https://dev.realmofdarkness.app/auth/login/success/"
+    FINAL_REDIRECT = "https://dev.realmofdarkness.app/"
 else:
     # Production environment
     REDIRECT_URI = "https://realmofdarkness.app/auth/login/success/"

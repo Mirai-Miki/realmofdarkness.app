@@ -9,7 +9,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 // Determine environment and source directory
-const runningFromDist = process.env.NODE_ENV === "production";
+const runningFromDist = process.env.NODE_ENV !== "development";
 const srcDir = runningFromDist ? "dist" : "src";
 
 // Store all character classes

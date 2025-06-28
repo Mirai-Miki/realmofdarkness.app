@@ -7,7 +7,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 // Determine environment and file extension
-const isDev = process.env.NODE_ENV !== "production";
+const isDev = process.env.NODE_ENV === "development";
 const rootDir = isDev ? "src" : "dist";
 const botFile = path.join(__dirname, "..", "bots", "v5-bot.js");
 
