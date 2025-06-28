@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
-from backend.discordauth.views import ENV
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
