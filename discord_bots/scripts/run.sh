@@ -1,11 +1,9 @@
 #!/bin/bash
-# filepath: /home/bot/Realm-of-Darkness-Bot/scripts/run.sh
-
-# Discord bot deployment script
+# Discord bot production deployment script for Realm of Darkness
 # Exit on regular errors
 set -e
 
-# Navigate to project root
+# Navigate to discord_bots directory
 cd "$(dirname "$0")"
 cd ..
 
@@ -37,19 +35,15 @@ run_as_bot() {
 # Ensure log directory exists
 run_as_bot "mkdir -p $LOG_DIR"
 
-echo "[1/7] 📥 Updating from git repository..."
-run_as_bot "cd $PROJECT_PATH && git pull"
-echo "      ✅ Code updated successfully."
-
-echo "[2/7] 📦 Updating Node.js dependencies..."
+echo "[1/6] 📦 Updating Node.js dependencies..."
 run_as_bot "cd $PROJECT_PATH && npm install"
 echo "      ✅ Dependencies updated successfully."
 
-echo "[3/7] 🚀 Deploying Discord commands..."
+echo "[2/6] 🚀 Deploying Discord commands..."
 run_as_bot "cd $PROJECT_PATH && npm run deploy:all"
 echo "      ✅ Discord commands deployed successfully."
 
-echo "[4/7] 🏗️ Building project..."
+echo "[3/6] 🏗️ Building project..."
 run_as_bot "cd $PROJECT_PATH && npm run build" > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "      ❌ Build failed!"
@@ -57,11 +51,11 @@ if [ $? -ne 0 ]; then
 fi
 echo "      ✅ Project built successfully."
 
-echo "[5/7] 🧹 Flushing PM2 logs..."
+echo "[4/6] 🧹 Flushing PM2 logs..."
 run_as_bot "cd $PROJECT_PATH && pm2 flush v5 && pm2 flush v20 && pm2 flush cod"
 echo "      ✅ PM2 logs flushed."
 
-echo "[6/7] 🔍 Checking PM2 processes..."
+echo "[5/6] 🔍 Checking PM2 processes..."
 # PM2 process parameters
 PM2_PARAMS="--restart-delay 30000 --time --max-memory-restart 1500M"
 
@@ -92,19 +86,12 @@ else
     run_as_bot "cd $PROJECT_PATH && pm2 start dist/shards/index-cod.js $PM2_PARAMS --log $LOG_DIR/cod.log --name cod"
 fi
 
-echo "[7/7] 🔄 Saving PM2 process list..."
+echo "[6/6] 🔄 Saving PM2 process list..."
 run_as_bot "pm2 save"
 echo "      ✅ PM2 process list saved."
 
 echo
 echo "=========================================================="
-echo "=       ✅ Bot deployment completed successfully! ✅     ="
+echo "=       🤖 Bot deployment completed successfully! 🤖     ="
 echo "=========================================================="
 echo
-echo "🤖 Discord bots are now running with the latest code"
-echo "🔎 Monitor with: pm2 status"
-echo "📋 View logs with: pm2 logs [v5|v20|cod]"
-echo
-echo
-echo "Bot status:"
-run_as_bot "cd $PROJECT_PATH && pm2 status"

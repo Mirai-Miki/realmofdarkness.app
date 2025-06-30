@@ -1,16 +1,14 @@
 #!/bin/bash
-# filepath: f:\programming\Django\realm-of-darkness-site\scripts\run.sh
-
-# Production deployment script for Realm of Darkness
+# Backend production deployment script for Realm of Darkness
 # Exit on regular errors
 set -e
 
-# Navigate to project root
+# Navigate to backend directory
 cd "$(dirname "$0")"
 cd ..
 
 echo "=========================================================="
-echo "=     🚀 Realm of Darkness Production Deployment 🚀     ="
+echo "=     🐍 Realm of Darkness Backend Production 🐍        ="
 echo "=========================================================="
 echo
 
@@ -32,11 +30,7 @@ run_as_web() {
 
 # Application update steps (run as web user)
 if [ "$1" != "--services-only" ]; then
-    echo "[1/7] 📥 Updating from git repository..."
-    run_as_web "cd $PROJECT_PATH && git pull"
-    echo "      ✅ Code updated successfully."
-    
-    echo "[2/7] 🔧 Setting up Python virtual environment..."
+    echo "[1/5] 🔧 Setting up Python virtual environment..."
     # Create virtual environment if it doesn't exist
     if [ ! -d "venv" ]; then
         echo "      → Creating virtual environment..."
@@ -57,15 +51,11 @@ if [ "$1" != "--services-only" ]; then
     fi
     echo "      ✅ Virtual environment ready."
     
-    echo "[3/7] 📦 Updating Python dependencies..."
+    echo "[2/5] 📦 Updating Python dependencies..."
     run_as_web "cd $PROJECT_PATH && $VENV_PYTHON -m pip install -r requirements.txt"
     echo "      ✅ Python dependencies updated successfully."
     
-    echo "[4/7] 🏗️  Building frontend..."
-    run_as_web "cd $PROJECT_PATH/frontend && npm install && npm run build"
-    echo "      ✅ Frontend built successfully."
-    
-    echo "[5/7] 🗃️  Applying database migrations..."
+    echo "[3/5] 🗃️  Applying database migrations..."
     run_as_web "cd $PROJECT_PATH && $VENV_PYTHON manage.py migrate --no-input"
     echo "      ✅ Database schema up to date."
     
@@ -74,7 +64,7 @@ if [ "$1" != "--services-only" ]; then
 fi
 
 # Service restart steps (need sudo)
-echo "[6/7] 📋 Ensuring Redis is running..."
+echo "[4/5] 📋 Ensuring Redis is running..."
 if ! systemctl is-active --quiet redis-server; then
     echo "      → Starting Redis..."
     if [ "$CURRENT_USER" != "root" ] && id -nG "$CURRENT_USER" | grep -qw "sudo"; then
@@ -87,23 +77,21 @@ else
     echo "      ✅ Redis is already running."
 fi
 
-echo "[7/7] 🔄 Updating and restarting web services..."
+echo "[5/5] 🔄 Starting web services..."
 if [ "$CURRENT_USER" != "root" ] && id -nG "$CURRENT_USER" | grep -qw "sudo"; then
     sudo systemctl daemon-reload
-    sudo systemctl restart gunicorn
-    echo "      ✅ Web services restarted successfully."
+    sudo systemctl start gunicorn
+    sudo systemctl enable gunicorn
+    echo "      ✅ Web services started successfully."
 else
-    echo "      ⚠️  Cannot restart services - sudo required."
-    echo "      → Please ask your administrator to run: sudo systemctl restart gunicorn"
+    echo "      ⚠️  Cannot start services - sudo required."
+    echo "      → Please ask your administrator to run: sudo systemctl start gunicorn"
     # Create a touch file to signal that restart is needed
     run_as_web "cd $PROJECT_PATH && touch .restart_needed"
 fi
 
 echo
 echo "=========================================================="
-echo "=      ✅ Deployment completed successfully! ✅         ="
+echo "=      🐍 Backend deployment completed! 🐍              ="
 echo "=========================================================="
-echo
-echo "🌐 Application is running at: https://realmofdarkness.app"
-echo "🐍 Using Python virtual environment: ./venv"
 echo
