@@ -3,6 +3,60 @@ setlocal EnableDelayedExpansion
 cd /d %~dp0
 cd..
 
+REM Check if .env file exists and has required keys
+if not exist ".env" goto run_setup
+
+REM Check for essential keys in .env file
+findstr /C:"ENV=" .env >nul 2>&1
+if %ERRORLEVEL% neq 0 goto run_setup
+
+findstr /C:"DB_ENGINE=" .env >nul 2>&1
+if %ERRORLEVEL% neq 0 goto run_setup
+
+findstr /C:"DB_NAME=" .env >nul 2>&1
+if %ERRORLEVEL% neq 0 goto run_setup
+
+findstr /C:"SECRET_KEY=" .env >nul 2>&1
+if %ERRORLEVEL% neq 0 goto run_setup
+
+findstr /C:"API_KEY=" .env >nul 2>&1
+if %ERRORLEVEL% neq 0 goto run_setup
+
+findstr /C:"DISCORD_APP_ID=" .env >nul 2>&1
+if %ERRORLEVEL% neq 0 goto run_setup
+
+findstr /C:"DISCORD_APP_SECRET=" .env >nul 2>&1
+if %ERRORLEVEL% neq 0 goto run_setup
+
+goto start_dev
+
+:run_setup
+echo ==========================================================
+echo =       Environment Setup Required                      =
+echo ==========================================================
+echo.
+echo The .env configuration file is missing or incomplete.
+echo Running setup script first...
+echo.
+
+if exist "scripts\setup.bat" (
+    call "scripts\setup.bat"
+    if !ERRORLEVEL! neq 0 (
+        echo Setup failed. Cannot continue.
+        pause
+        exit /b 1
+    )
+) else (
+    echo Setup script not found at scripts\setup.bat
+    pause
+    exit /b 1
+)
+
+echo.
+echo Setup complete! Starting development environment...
+echo.
+
+:start_dev
 echo ==========================================================
 echo =      Realm of Darkness Backend Development            =
 echo ==========================================================

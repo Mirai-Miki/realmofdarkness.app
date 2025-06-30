@@ -6,12 +6,55 @@
 cd "$(dirname "$0")"
 cd ..
 
+# Check if .env file exists and has required keys
+check_env_config() {
+    if [ ! -f ".env" ]; then
+        return 1
+    fi
+    
+    # Check for essential keys
+    local required_keys=("ENV" "DB_ENGINE" "DB_NAME" "SECRET_KEY" "API_KEY" "DISCORD_APP_ID" "DISCORD_APP_SECRET")
+    for key in "${required_keys[@]}"; do
+        if ! grep -q "^$key=" .env; then
+            return 1
+        fi
+    done
+    return 0
+}
+
+# Run environment setup if needed
+if ! check_env_config; then
+    echo "=========================================================="
+    echo "=    ⚙️  Environment Setup Required ⚙️               ="
+    echo "=========================================================="
+    echo
+    echo "The .env configuration file is missing or incomplete."
+    echo "Running setup script first..."
+    echo
+    
+    # Run the setup script
+    if [ -f "scripts/setup.sh" ]; then
+        bash scripts/setup.sh
+        if [ $? -ne 0 ]; then
+            echo "Setup failed. Cannot continue."
+            exit 1
+        fi
+    else
+        echo "Setup script not found at scripts/setup.sh"
+        exit 1
+    fi
+    
+    echo
+    echo "Setup complete! Starting development environment..."
+    echo
+fi
+
 echo "=========================================================="
 echo "=    ✨ Realm of Darkness Development Environment ✨    ="
 echo "=========================================================="
 echo
 
-echo "[1/9] 🔧 Setting up Python virtual environment..."
+echo "[1/6] 🔧 Setting up Python virtual environment..."
 # Create virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
     echo "      → Creating virtual environment..."
@@ -35,7 +78,7 @@ if [ ! -f "$VENV_PYTHON" ]; then
 fi
 echo "      ✅ Virtual environment ready."
 
-echo "[2/9] 📦 Checking Python dependencies..."
+echo "[2/6] 📦 Checking Python dependencies..."
 $VENV_PYTHON -m pip install -r requirements-dev.txt --quiet
 if [ $? -ne 0 ]; then
     echo "      ❌ Failed to install Python dependencies!"
@@ -44,7 +87,7 @@ if [ $? -ne 0 ]; then
 fi
 echo "      ✅ Python dependencies updated successfully."
 
-echo "[3/9] 🎨 Formatting Python code with Black..."
+echo "[3/6] 🎨 Formatting Python code with Black..."
 $VENV_PYTHON -m black .
 if [ $? -ne 0 ]; then
     echo "      ⚠️  Warning: Black formatting had issues!"

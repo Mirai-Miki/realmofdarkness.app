@@ -1,726 +1,302 @@
-# Backend - Django REST API
+# Django Backend
 
-Django 5.2 backend providing REST APIs, WebSocket services, and Discord integration for World of Darkness character sheet management.
+The Django backend provides a REST API for character management, real-time updates via WebSockets, and Discord bot integration for the Realm of Darkness tabletop gaming platform.
 
-## 🛠️ Technology Stack
+## 🏗️ Architecture Overview
 
-| Component            | Technology                         | Purpose                     |
-| -------------------- | ---------------------------------- | --------------------------- |
-| **Web Framework**    | Django 5.2.3                       | Core backend framework      |
-| **API Framework**    | Django REST Framework 3.16.0       | RESTful API endpoints       |
-| **WebSocket**        | Django Channels 4.2.2              | Real-time communication     |
-| **Message Broker**   | Redis 6.2.0 + channels-redis 4.2.1 | WebSocket backend & caching |
-| **Database**         | SQLite (dev) / MySQL (prod)        | Data persistence            |
-| **Image Processing** | Pillow 11.2.1                      | Character avatar handling   |
-| **Environment**      | python-dotenv 1.1.1                | Configuration management    |
-
-## 🚀 Development Setup
-
-### Backend-Only Development
-
-```bash
-# From backend/scripts/
-./dev.bat     # Windows
-./dev.sh      # Linux/macOS
-```
-
-### Full-Stack Development
-
-```bash
-# From project root
-./dev.bat     # Windows - starts backend + frontend + Discord bots
-./dev.sh      # Linux/macOS
-```
-
-**Services Started:**
-
-- Django dev server: `http://localhost:8080`
-- Redis server (WSL on Windows, native on Linux/macOS)
-- Auto-migration on startup
-
-## 📁 Django App Architecture
+### Project Structure
 
 ```
 backend/
-├── rod/                    # Django project configuration
-│   ├── settings.py        # Environment-based configuration
+├── rod/                    # Django project settings
+│   ├── settings.py        # Main configuration file
 │   ├── urls.py           # Root URL routing
-│   ├── asgi.py           # ASGI application (WebSocket support)
-│   └── wsgi.py           # WSGI application (HTTP only)
-├── api/                   # Public REST API layer
-│   ├── views.py          # DRF ViewSets for CRUD operations
-│   ├── urls.py           # API endpoint routing
-│   └── throttling.py     # API rate limiting
-├── haven/                 # Character sheet core system
-│   ├── models/           # Character models by game system
-│   │   ├── Character5th.py    # 5th Edition Shared data
-│   │   ├── Character20th.py   # 20th Edition Shared data
-│   │   ├── Vampire5th.py      # V5-specific vampire data
-│   │   └── Mortal.py          # Mortal character sheets
-│   ├── serializers/      # DRF serializers for API responses
-│   └── utility.py        # Character validation & helpers
-├── gateway/              # WebSocket real-time services
+│   ├── asgi.py           # ASGI configuration for WebSockets
+│   └── wsgi.py           # WSGI configuration for HTTP
+├── haven/                 # Character management app
+│   ├── models/           # Character data models
+│   ├── serializers/      # DRF serializers for API
+│   └── utility.py        # Helper functions
+├── api/                   # Public REST API endpoints
+│   ├── views.py          # API view classes
+│   └── urls.py           # API URL routing
+├── bot/                   # Discord bot internal API
+│   ├── views/            # Bot-specific endpoints
+│   │   └── character_views/  # Character operations for bots
+│   └── urls.py           # Bot API routing
+├── gateway/              # WebSocket gateway
 │   ├── consumers.py      # WebSocket message handlers
 │   ├── routing.py        # WebSocket URL routing
-│   └── serializers/      # WebSocket message serialization
-├── chronicle/            # Campaign/chronicle management
-│   ├── models.py         # Chronicle and members models
-│   └── serializers.py    # Chronicle API serialization
-├── discordauth/          # Discord OAuth2 integration
-│   ├── backends.py       # Custom authentication backend
-│   ├── models.py         # Extended user model with Discord data
-│   └── views.py          # OAuth flow handling
-├── bot/                  # Discord bot API endpoints
-│   ├── views/            # Internal bot API views
-│   ├── models.py         # Bot-specific data models
-│   └── serializers.py    # Bot API serialization
-├── patreon/             # Patreon webhook integration
-├── main/                # Core site functionality
-├── constants/           # Game system constants and enums
-│   └── splats.py        # Vampire clans, werewolf tribes, etc.
-└── media/               # User uploaded files (avatars)
+│   └── constants.py      # Channel group definitions
+├── discordauth/          # Discord OAuth authentication
+│   ├── models.py         # User model extensions
+│   ├── views.py          # OAuth flow handlers
+│   └── backends.py       # Custom auth backend
+├── chronicle/            # Chronicle/campaign management
+├── patreon/              # Patreon integration
+├── main/                 # Frontend serving
+├── scripts/              # Setup and utility scripts
+│   ├── setup.sh          # Environment setup (Unix)
+│   ├── setup.bat         # Environment setup (Windows)
+│   ├── dev.sh            # Development server
+│   └── run.sh            # Production server
+├── media/                # User-uploaded files
+├── manage.py             # Django management script
+└── .env                  # Environment configuration
 ```
 
-## 🏗️ Key Django Applications
+### Data Model Hierarchy
 
-### `haven` - Character Sheet Engine
-
-**Purpose**: Core character sheet system supporting multiple World of Darkness game lines
-
-**Models**:
-
-- `Character` (base model): Name, avatar, chronicle association, user ownership
-- `Character5th`: 5th Edition shared data
-- `Character20th`: 20th Edition shared data
-- `Vampire5th`: V5-specific data (hunger, compulsions)
-- `Mortal`: Human character data
-
-**Key Features**:
-
-- Multi-inheritance character model system
-- Game-specific field validation
-- Avatar upload and processing
-- Character-chronicle relationship management
-
-### `gateway` - WebSocket Real-time Engine
-
-**Purpose**: Real-time character sheet synchronization and live updates
-
-**Architecture**:
-
-- **Consumer**: `CharacterConsumer` handles WebSocket connections
-- **Groups**: Redis-backed channel groups organized by chronicle
-- **Authentication**: Token-based WebSocket authentication
-- **Message Types**: Character updates, user notifications, system events
-
-**Message Flow**:
+The backend uses a multi-level inheritance structure to represent characters across different game systems and types:
 
 ```python
-# Frontend → WebSocket → Redis → Other clients
-{
-    "type": "character.update",
-    "character_id": 123,
-    "field": "health",
-    "value": 5,
-    "user": "username"
-}
-```
+# Base model: fields common to all characters
+Character (haven/models/Character.py)
+├── name, user, chronicle, avatar, experience, timestamps, splat, etc.
 
-### `chronicle` - Campaign Management
-
-**Purpose**: Organize characters into shared storytelling environments
-
-**Models**:
-
-- `Chronicle`: Campaign/game session container
-- `ChronicleSettings`: Chronicle-specific configuration
-- **Relationships**: Many-to-many character-chronicle associations
-
-**Discord Integration**:
-
-- Links chronicles to Discord servers
-- Permission-based character access control
-- Server member synchronization
-
-### `discordauth` - Authentication & User Management
-
-**Purpose**: Discord OAuth2 integration and user session management
-
-**Components**:
-
-- **OAuth Backend**: Custom Django authentication backend
-- **User Model Extension**: Discord profile data storage
-- **Session Management**: Token-based API authentication
-- **Middleware**: Request authentication for Discord bot APIs
-
-### `api` - Public REST API Layer
-
-**Purpose**: RESTful API endpoints for frontend and external integrations
-
-**Endpoints Structure**:
-
-```python
-# Character CRUD
-GET/POST    /api/characters/
-GET/PUT/DELETE /api/characters/{id}/
-
-# Chronicle management
-GET/POST    /api/chronicles/
-GET/PUT/DELETE /api/chronicles/{id}/
-
-# User profile
-GET/PUT     /api/profile/
-```
-
-### `bot` - Discord Bot Internal API
-
-**Purpose**: Internal API endpoints for Discord bot communication
-
-**Security**: API key authentication for bot requests
-**Features**:
-
-- Character updates from Discord commands
-- Server member synchronization
-- Permission validation for bot operations
-
-## 💾 Database Schema Overview
-
-### Character System Architecture
-
-```sql
--- Base character model (multi-table inheritance)
-Character
-├── id (PK)
-├── name
-├── avatar (ImageField)
-├── user_id (FK to auth.User)
-├── chronicle_id (FK to Chronicle)
-└── created_at
-
--- Version-specific character extensions
+# System version models: fields common to all characters in a game edition
 Character5th (extends Character)
-├── generation, hunger, humanity
-├── clan, coterie, sect
-└── v5_specific_fields...
+├── core stats: health, willpower, attributes, skills, etc. (All 5th edition characters)
 
 Character20th (extends Character)
-├── generation, blood_pool, humanity
-├── clan, nature, demeanor
-└── v20_specific_fields...
+├── core stats: health, willpower, attributes, skills, etc. (All 20th anniversary edition characters)
 
--- Game-specific character extenstions
+# Splats: actual character types (used in practice)
 Vampire5th (extends Character5th)
-├── compulsions, touchstones
-├── discipline_powers
-└── vampire_specific_mechanics...
+├── Clan, generation, predator_type, humanity, disciplines, etc. (Vampire, 5th edition)
+
+Vampire20th (extends Character20th)
+├── Clan, morality, blood_pool, etc. (Vampire, 20th anniversary edition)
+
+# ...other splats (e.g., Ghoul5th, Human5th, Werewolf5th, etc.) also extend the appropriate system version model
 ```
 
-### WebSocket Channel Architecture
+- **Character**: The abstract base model. Only contains fields that every character (regardless of system or type) must have.
+- **Character5th / Character20th**: System version models. Contain fields shared by all characters in that edition (e.g., all 5th edition characters have the same set of attributes/skills).
+- **Splats (e.g., Vampire5th, Vampire20th, etc.)**: The actual character types used in the game. These contain fields specific to that type (e.g., humanity, clan, blood pool) and are the models you interact with most in practice.
 
-```python
-# Redis Channel Groups Structure
-channel_groups = {
-    f"chronicle_{chronicle.id}": [
-        "user_123_websocket",
-        "user_456_websocket"
-    ],
-    f"user_{user.id}_notifications": [
-        "user_123_websocket"
-    ]
-}
-```
+The `splat` field on `Character` is used to identify and retrieve the specific derived instance (the actual splat/type) for a given character.
 
-## 🔌 API Reference
+### API Architecture
 
-### REST API Endpoints (`/api/`)
+**Public API (`/api/`)** - Frontend and general client access
 
-#### Character Management
+- Character CRUD operations
+- Chronicle management
+- User profile management
+- Uses Django REST Framework with session authentication
 
-```http
-GET    /api/characters/                # List user's characters
-POST   /api/characters/                # Create new character
-GET    /api/characters/{id}/           # Retrieve character details
-PUT    /api/characters/{id}/           # Update character (full)
-PATCH  /api/characters/{id}/           # Partial character update
-DELETE /api/characters/{id}/           # Delete character
+**Bot API (`/bot/`)** - Discord bot internal endpoints
 
-# Character avatar upload
-POST   /api/characters/{id}/avatar/    # Upload character avatar image
-DELETE /api/characters/{id}/avatar/    # Remove character avatar
-```
+- Character operations triggered by bot commands
+- Server synchronization
+- Uses API key authentication
 
-#### Chronicle Management
+**WebSocket Gateway (`/ws/gateway/`)** - Real-time updates
 
-```http
-GET    /api/chronicles/                # List user's chronicles
-POST   /api/chronicles/                # Create new chronicle
-GET    /api/chronicles/{id}/           # Chronicle details
-PUT    /api/chronicles/{id}/           # Update chronicle
-DELETE /api/chronicles/{id}/           # Delete chronicle
+- Character field updates
+- User presence
+- Chronicle notifications
+- Uses Redis for channel layers
 
-# Chronicle membership
-GET    /api/chronicles/{id}/members/   # List chronicle members
-POST   /api/chronicles/{id}/join/      # Join chronicle
-DELETE /api/chronicles/{id}/leave/     # Leave chronicle
-```
+## ⚙️ Configuration & Setup
 
-#### User Profile
+### Environment Configuration
 
-```http
-GET    /api/profile/                   # Current user profile
-PUT    /api/profile/                   # Update user profile
-GET    /api/profile/characters/        # User's characters across all chronicles
-```
-
-### Discord Bot Internal API (`/bot/`)
-
-#### Character Operations
-
-```http
-POST   /bot/characters/{id}/update/    # Bot-triggered character updates
-GET    /bot/server/{server_id}/characters/ # List server characters
-POST   /bot/characters/create/         # Create character via bot
-```
-
-#### Server Synchronization
-
-```http
-POST   /bot/users/sync/                # Sync Discord user data
-GET    /bot/server/{server_id}/info/   # Server information
-POST   /bot/server/{server_id}/sync/   # Sync server members
-```
-
-### WebSocket API (`/ws/gateway/web/`)
-
-#### Connection Flow
-
-```javascript
-// 1. Connect with authentication
-const ws = new WebSocket("ws://localhost:8080/ws/gateway/web/", [], {
-  headers: { Authorization: `Token ${userToken}` },
-});
-
-// 2. Join chronicle groups (automatic on connect)
-// 3. Listen for character updates
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  if (data.type === "character.update") {
-    updateCharacterInUI(data.character_id, data.field, data.value);
-  }
-};
-
-// 4. Send character updates
-ws.send(
-  JSON.stringify({
-    type: "character.update",
-    character_id: 123,
-    field: "health",
-    value: 5,
-  })
-);
-```
-
-#### Message Types
-
-```typescript
-// Character update message
-interface CharacterUpdateMessage {
-  type: "character.update";
-  character_id: number;
-  field: string;
-  value: any;
-  user: string;
-  timestamp: string;
-}
-
-// User notification message
-interface NotificationMessage {
-  type: "notification";
-  message: string;
-  level: "info" | "warning" | "error" | "success";
-  timestamp: string;
-}
-
-// System event message
-interface SystemMessage {
-  type: "system.event";
-  event: "user_joined" | "user_left" | "chronicle_updated";
-  data: any;
-  timestamp: string;
-}
-```
-
-## 🔧 Development Workflows
-
-### Database Operations
+The backend uses environment variables for configuration. You can run the setup script directly to create your `.env` file, or simply use the development script, which will automatically run the setup if your environment is not configured:
 
 ```bash
-# Create migration files after model changes
-python manage.py makemigrations
+# Windows (runs setup if needed)
+scripts\dev.bat
 
-# Apply migrations to database
-python manage.py migrate
-
-# Create Django superuser
-python manage.py createsuperuser
-
-# Database shell access
-python manage.py dbshell
-
-# Django shell with models loaded
-python manage.py shell
+# Unix/Linux/macOS (runs setup if needed)
+scripts/dev.sh
 ```
 
-### Adding New Game Systems
-
-#### 1. Create Character Model
-
-```python
-# In haven/models/NewGameSystem.py
-from .Character import Character
-
-class NewGameCharacter(Character):
-    # Game-specific fields
-    power_level = models.IntegerField(default=1)
-    faction = models.CharField(max_length=50)
-
-    class Meta:
-        db_table = 'haven_newgame_character'
-```
-
-#### 2. Create DRF Serializer
-
-```python
-# In haven/serializers/NewGameSystem.py
-from rest_framework import serializers
-from ..models.NewGameSystem import NewGameCharacter
-
-class NewGameCharacterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = NewGameCharacter
-        fields = '__all__'
-```
-
-#### 3. Add API Views
-
-```python
-# In api/views.py
-from haven.serializers.NewGameSystem import NewGameCharacterSerializer
-
-class NewGameCharacterViewSet(viewsets.ModelViewSet):
-    serializer_class = NewGameCharacterSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return NewGameCharacter.objects.filter(user=self.request.user)
-```
-
-#### 4. Update WebSocket Consumer
-
-```python
-# In gateway/consumers.py
-async def character_update(self, event):
-    character_id = event['character_id']
-    # Handle NewGameCharacter updates
-    await self.send(text_data=json.dumps({
-        'type': 'character.update',
-        'character_id': character_id,
-        'data': event['data']
-    }))
-```
-
-### WebSocket Development
-
-#### Testing WebSocket Connections
+Alternatively, you can run the setup script manually:
 
 ```bash
-# Test Redis connection
-python manage.py shell
->>> import redis
->>> r = redis.Redis(host='localhost', port=6379, db=1)
->>> r.ping()
-True
+# Windows
+scripts\setup.bat
 
-# Test WebSocket consumer
-python manage.py test gateway.tests.ConsumerTestCase
+# Unix/Linux/macOS
+scripts/setup.sh
 ```
 
-#### WebSocket Message Flow
+The setup script will prompt you for:
 
-```python
-# 1. Frontend sends update
-websocket.send({
-    'type': 'character.update',
-    'character_id': 123,
-    'field': 'health',
-    'value': 8
-})
-
-# 2. Consumer processes message
-async def receive(self, text_data):
-    data = json.loads(text_data)
-    await self.channel_layer.group_send(
-        f"chronicle_{self.chronicle_id}",
-        {
-            'type': 'character.update',
-            'character_id': data['character_id'],
-            'field': data['field'],
-            'value': data['value'],
-            'user': self.user.username
-        }
-    )
-
-# 3. All chronicle members receive update
-async def character_update(self, event):
-    await self.send(text_data=json.dumps({
-        'type': 'character.update',
-        'character_id': event['character_id'],
-        'field': event['field'],
-        'value': event['value'],
-        'user': event['user']
-    }))
-```
-
-### Discord Bot Integration
-
-#### Bot API Authentication
-
-```python
-# Bot requests must include API key header
-headers = {
-    'Authorization': f'ApiKey {settings.API_KEY}',
-    'Content-Type': 'application/json'
-}
-
-response = requests.post(
-    'http://localhost:8080/bot/characters/123/update/',
-    headers=headers,
-    json={'field': 'health', 'value': 5}
-)
-```
-
-#### Character Update Flow
-
-```python
-# 1. Discord bot receives command
-@slash_command(name="damage")
-async def damage_character(ctx, character_id: int, damage: int):
-    # 2. Bot calls Django API
-    response = await bot_api_client.update_character(
-        character_id=character_id,
-        field='health',
-        value=current_health - damage
-    )
-
-    # 3. Django API updates database and notifies WebSocket
-    # 4. Frontend receives real-time update
-    # 5. Bot responds to Discord
-    await ctx.respond(f"Character took {damage} damage!")
-```
-
-## ⚙️ Configuration & Environment
+- Environment type (development/production/preproduction)
+- Database configuration
+- Django secret keys
+- Discord integration settings
+- Patreon webhook settings
 
 ### Environment Variables
 
 ```bash
-# Core Django settings
-SECRET_KEY=your-secret-key-here
-DEBUG=True                          # False for production
-API_KEY=your-api-key-for-bots      # Discord bot authentication
+# Environment type
+ENV=development                     # development|preproduction|production
 
 # Database configuration
-DB_ENGINE=sqlite3                   # or mysql for production
-DB_NAME=db.sqlite3                 # SQLite file or MySQL database name
-DB_HOST=localhost                  # MySQL host (production only)
-DB_USER=username                   # MySQL username (production only)
-DB_PASSWORD=password               # MySQL password (production only)
-DB_PORT=3306                       # MySQL port (production only)
+DB_ENGINE=sqlite3                   # sqlite3 for dev, mysql for prod
+DB_NAME=db.sqlite3                  # Database name/file
+DB_HOST=localhost                   # MySQL host (production only)
+DB_USER=username                    # MySQL username (production only)
+DB_PASSWORD=password                # MySQL password (production only)
+DB_PORT=3306                        # MySQL port (production only)
 
 # Redis configuration
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_DB_INDEX=1                   # Redis database index for channels
+REDIS_DB_INDEX=0                    # Redis database index for channels
+
+# Django security
+SECRET_KEY=your-secret-key-here     # Django secret key
+API_KEY=your-api-key-for-bots      # Discord bot authentication
 
 # Discord integration
+DISCORD_APP_ID=your-app-id
+DISCORD_APP_SECRET=your-app-secret
 DISCORD_BOT_TOKEN=your-bot-token
-DISCORD_DEBUG_CHANNEL=channel-id   # For error logging
+DISCORD_DEBUG_CHANNEL=channel-id    # For error logging
 
-# File storage
-MEDIA_ROOT=media/                  # Local media storage path
-MEDIA_URL=/media/                  # URL prefix for media files
-
-# Production-only settings
-ALLOWED_HOSTS=your-domain.com      # Comma-separated domains
-CSRF_TRUSTED_ORIGINS=https://your-domain.com
+# Patreon integration
+PATREON_WEBHOOK_SECRET=your-webhook-secret
 ```
 
 ### Settings Architecture
 
+The `settings.py` file uses environment-based configuration:
+
 ```python
-# settings.py structure
-if DEBUG:
+ENV = os.getenv("ENV", "development")
+DEBUG = ENV == "development"
+
+if ENV == "development":
     # Development settings
     ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-    INSTALLED_APPS = ["daphne"] + COMMON_APPS  # WebSocket support
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-else:
+elif ENV == "preproduction":
+    # Preproduction settings
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", "dev.realmofdarkness.app"]
+    # Production-like settings but accessible for testing
+else:  # production
     # Production settings
-    ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
-    INSTALLED_APPS = COMMON_APPS
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.getenv('DB_NAME'),
-            'USER': os.getenv('DB_USER'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '3306'),
-        }
-    }
+    ALLOWED_HOSTS = ["realmofdarkness.app", "www.realmofdarkness.app"]
+    # Full production security and performance settings
 ```
 
-## 🧪 Testing & Debugging
+## 🚀 Running the Backend
 
-### Running Tests
+> **Note:** A Redis server must be installed and available on your system for WebSocket and real-time features to work. The provided dev scripts will attempt to start Redis automatically if possible, but you may need to ensure Redis is installed and running. If you encounter backend issues, try manually starting Redis yourself.
+
+**Recommended:** Use the provided development script to start everything you need for backend development. The script will also check for a valid `.env` file and run the setup script automatically if configuration is missing or incomplete:
 
 ```bash
-# Run all tests
-python manage.py test
-
-# Run specific app tests
-python manage.py test haven
-python manage.py test gateway
-python manage.py test api
-
-# Run with coverage
-pip install coverage
-coverage run --source='.' manage.py test
-coverage report
-coverage html  # Generates htmlcov/ directory
+# From backend/ directory
+scripts/dev.sh    # Unix/Linux/macOS (runs setup if needed)
+scripts/dev.bat   # Windows (runs setup if needed)
 ```
 
-### Debugging WebSocket Issues
+These scripts will:
 
-```python
-# Enable Django Channels logging
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'channels': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-    },
-}
-```
+- Check for a valid `.env` file and run the setup script if needed
+- Set up and activate a Python virtual environment (creating it if needed)
+- Install/update all Python dependencies
+- Format code with Black
+- Apply database migrations
+- Attempt to start a Redis server (if possible on your platform)
+- Start the Django development server at http://localhost:8080
 
-### Common Debugging Commands
+> If Redis is not installed or cannot be started automatically, you must install and start it manually. See below for platform-specific instructions.
 
-```bash
-# Check current migrations
-python manage.py showmigrations
+#### Manual Redis Startup (if needed)
 
-# Create SQL for migrations (without applying)
-python manage.py sqlmigrate haven 0001
+If you have issues with real-time features or see errors related to Redis, try starting Redis manually:
 
-# Check for model issues
-python manage.py check
+- **Ubuntu/Debian:**
+  ```bash
+  sudo systemctl start redis-server
+  ```
+- **macOS:**
+  ```bash
+  brew services start redis
+  ```
+- **Windows (WSL required):**
+  ```bash
+  wsl -e redis-server --daemonize yes
+  ```
+  Or, if you have Redis installed natively:
+  ```bash
+  redis-server
+  ```
 
-# Collect static files
-python manage.py collectstatic
+Once Redis is running, re-run the dev script if needed.
 
-# Clear Redis cache
-python manage.py shell
->>> import redis
->>> r = redis.Redis()
->>> r.flushdb()
-```
-
-### Performance Optimization
-
-```python
-# Database query optimization
-from django.db import connection
-from django.conf import settings
-
-# Enable SQL query logging in development
-if settings.DEBUG:
-    print(f"Queries executed: {len(connection.queries)}")
-    for query in connection.queries:
-        print(query['sql'])
-
-# Use select_related for foreign keys
-characters = Character.objects.select_related('user', 'chronicle')
-
-# Use prefetch_related for many-to-many
-chronicles = Chronicle.objects.prefetch_related('members')
-```
-
-## 🚀 Production Deployment
-
-### Production Checklist
-
-- [ ] Set `DEBUG=False`
-- [ ] Configure MySQL database
-- [ ] Set proper `ALLOWED_HOSTS`
-- [ ] Configure Redis with persistence
-- [ ] Set up proper logging
-- [ ] Configure media file serving (nginx/cloudinary)
-- [ ] Set up SSL certificates
-- [ ] Configure environment variables securely
-
-### Production Settings
-
-```python
-# Additional production settings in settings.py
-if not DEBUG:
-    # Security settings
-    SECURE_SSL_REDIRECT = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
-
-    # Static files
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-    # Logging
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'file': {
-                'level': 'INFO',
-                'class': 'logging.FileHandler',
-                'filename': '/var/log/django/debug.log',
-            },
-        },
-        'loggers': {
-            'django': {
-                'handlers': ['file'],
-                'level': 'INFO',
-                'propagate': True,
-            },
-        },
-    }
-```
+When finished the backend will be available at http://localhost:8080
 
 ---
 
-**Backend Development Tips:**
+## 📦 Updating Python Packages
 
-- Always test WebSocket functionality after character model changes
-- Use Django's built-in admin interface for debugging data issues
-- Monitor Redis memory usage in production
-- Implement proper error handling for Discord API failures
-- Use database transactions for complex character updates
+To update your Python dependencies, use the provided scripts. These will launch an interactive helper that checks for outdated packages and lets you choose which to update:
+
+```bash
+# Windows
+scripts\update_packages.bat
+
+# Unix/Linux/macOS
+scripts/update_packages.sh
+```
+
+### Recommended Workflow for Updating Packages
+
+1. **Create a new branch for dependency updates**
+   - For example: `deps/update-backend-packages`
+2. **Run the update script**
+   - This will check for outdated packages and let you choose which to update.
+   - The script will automatically update `requirements-dev.txt` with the new versions.
+3. **Test your environment**
+   - Make sure the backend runs and all tests pass after updating dependencies.
+4. **Synchronize production requirements**
+
+   - Use the sync script to automatically update `requirements.txt` with matching package versions from `requirements-dev.txt`:
+
+   ```bash
+   # Windows
+   scripts\sync_requirements.bat
+
+   # Unix/Linux/macOS
+   scripts/sync_requirements.sh
+   ```
+
+   - This script will only update versions of packages that exist in both files and will report any development-only packages.
+
+5. **Commit your changes and open a pull request**
+   - Include both `requirements-dev.txt` and `requirements.txt` in your commit.
+
+> If you see errors about the virtual environment, make sure to run the dev script first to set up your environment.
+
+### Synchronizing Requirements Files
+
+After updating packages in development, you can use the sync script to automatically update production requirements:
+
+```bash
+# Windows
+scripts\sync_requirements.bat
+
+# Unix/Linux/macOS
+scripts/sync_requirements.sh
+```
+
+This script will:
+
+- Compare package versions between `requirements-dev.txt` and `requirements.txt`
+- Update `requirements.txt` with newer versions from development requirements
+- Only update packages that exist in both files (won't add new packages to production)
+- Handle packages with extras correctly (e.g., `channels[daphne]` in dev becomes `channels` in production)
+- Report which packages were updated and list development-only packages
