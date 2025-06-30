@@ -25,7 +25,7 @@
       "@commands/*": ["./src/commands/*", "src/commands/*"],
       "@modules/*": ["./src/modules/*", "src/modules/*"],
       "@errors/*": ["src/errors/*"],
-      "@api/*": ["src/realm-api/*"],
+      "@api/*": ["src/realm_api/*"],
       "@constants/*": ["src/constants/*"]
     }
   },
@@ -35,7 +35,7 @@
     "src/commands/**/*",
     "src/modules/**/*",
     "src/errors/**/*",
-    "src/realm-api/**/*"
+    "src/realm_api/**/*"
   ],
   "exclude": ["node_modules", "dist"]
 }

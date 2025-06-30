@@ -22,7 +22,7 @@ moduleAlias.addAliases({
   "@events": path.join(srcDir, "events"),
   "@modules": path.join(srcDir, "modules"),
   "@errors": path.join(srcDir, "errors"),
-  "@api": path.join(srcDir, "realm-api"),
+  "@api": path.join(srcDir, "realm_api"),
   "@constants": path.join(srcDir, "constants"),
 });
 
