@@ -115,6 +115,7 @@ node_modules/
 build/
 dist/
 coverage/
+*dump.rdb
 
 # Miscellaneous
 .DS_Store

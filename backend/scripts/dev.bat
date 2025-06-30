@@ -118,14 +118,17 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-REM Use WSL with daemon mode and redirect output to nul to prevent window from showing
-wsl -e redis-server --daemonize yes > nul 2>&1
-if %ERRORLEVEL% neq 0 (
-    echo      [X] Failed to start Redis server.
-    pause
-    exit /b 1
+REM Check if Redis is already running
+wsl pgrep redis-server >nul 2>&1
+if %ERRORLEVEL% equ 0 (
+    echo      [+] Redis server is already running.
+) else (
+    REM Start Redis in a new window using PowerShell
+    start "Redis Server" powershell -NoExit -Command "wsl redis-server"
+    echo      [+] Redis server started in new window.
+    REM Give Redis a moment to start
+    timeout /t 2 /nobreak >nul
 )
-echo      [+] Redis server started successfully.
 
 echo [6/6] Starting Django server...
 start "Django Server" cmd /k "%VENV_PYTHON%" manage.py runserver 8080
