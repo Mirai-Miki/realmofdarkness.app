@@ -1,14 +1,13 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: "[Feature]: "
-labels: feature
+labels: enhancement
 assignees: Mirai-Miki
-
 ---
 
 **Which part of the project is this feature for?**
 _Select all that apply:_
+
 - [ ] Website
 - [ ] Discord Bots
 - [ ] Backend/API

@@ -4,11 +4,11 @@ about: Request help or guidance with the Realm of Darkness project
 title: "[Help]: "
 labels: help wanted
 assignees: Mirai-Miki
-
 ---
 
 **Which part of the project do you need help with?**
 _Select all that apply:_
+
 - [ ] Website
 - [ ] Discord Bots
 - [ ] Backend/API
