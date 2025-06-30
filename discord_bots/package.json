@@ -2,50 +2,41 @@
   "scripts": {
     "start": "./scripts/run.sh",
     "build": "node scripts/build.js",
-
     "dev:5th": "node scripts/deploy.js 5th dev && nodemon src/shards/index-5th.js",
     "dev:20th": "node scripts/deploy.js 20th dev && nodemon src/shards/index-20th.js",
     "dev:cod": "node scripts/deploy.js cod dev && nodemon src/shards/index-cod.js",
-
     "dev:5th:global": "node scripts/deploy.js 5th dev-global && nodemon src/shards/index-5th.js",
     "dev:20th:global": "node scripts/deploy.js 20th dev-global && nodemon src/shards/index-20th.js",
     "dev:cod:global": "node scripts/deploy.js cod dev-global && nodemon src/shards/index-cod.js",
-
     "deploy:5th": "node scripts/deploy.js 5th prod",
     "deploy:20th": "node scripts/deploy.js 20th prod",
     "deploy:cod": "node scripts/deploy.js cod prod",
     "deploy:all": "node scripts/deploy.js 5th prod && node scripts/deploy.js 20th prod && node scripts/deploy.js cod prod",
-
     "clear:5th:dev": "node scripts/deploy.js 5th clear-dev",
     "clear:20th:dev": "node scripts/deploy.js 20th clear-dev",
     "clear:cod:dev": "node scripts/deploy.js cod clear-dev",
     "clear:all:dev": "node scripts/deploy.js 5th clear-dev && node scripts/deploy.js 20th clear-dev && node scripts/deploy.js cod clear-dev",
-
     "clear:5th:global": "node scripts/deploy.js 5th clear-global",
     "clear:20th:global": "node scripts/deploy.js 20th clear-global",
     "clear:cod:global": "node scripts/deploy.js cod clear-global",
     "clear:all:global": "node scripts/deploy.js 5th clear-global && node scripts/deploy.js 20th clear-global && node scripts/deploy.js cod clear-global",
-
     "test": "jest",
-
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,ts,json}\"",
     "lint": "eslint . --ext .js,.ts"
   },
-
   "dependencies": {
     "@discordjs/builders": "^1.4.0",
     "@discordjs/rest": "^2.0.1",
     "axios": "^1.8.2",
     "common-tags": "^1.8.2",
-    "discord-api-types": "^0.37.31",
+    "discord-api-types": "^0.38.13",
     "discord.js": "^14.13.0",
-    "dotenv": "^16.4.7",
+    "dotenv": "^17.0.0",
     "module-alias": "^2.2.3"
   },
-  
   "devDependencies": {
-    "@types/node": "^22.13.8",
+    "@types/node": "^24.0.7",
     "fs-extra": "^11.3.0",
     "glob": "^11.0.1",
     "nodemon": "^3.1.9",
