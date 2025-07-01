@@ -14,6 +14,10 @@ const { Splats } = require("@constants");
  */
 module.exports = async function riteRoll(interaction) {
   interaction.arguments = await getArgs(interaction);
+  console.log(interaction.arguments.character.tracked.rage.current);
+  if (interaction.arguments.character?.tracked && interaction.arguments.character.tracked.splat.slug === "werewolf5th") {
+    interaction.arguments.rage = interaction.arguments.character.tracked.rage.current;
+  }
   interaction.rollResults = await roll(interaction);
 
   await handleButtonPress(interaction, getEmbed, getComponents, getContent);
