@@ -9,28 +9,11 @@ const API = require("@api");
 const { Splats } = require("@constants");
 
 /**
- * Applies character rage value to rite arguments if user didn't specify it manually
- * @param {Object} args - The arguments object
- * @returns {Object} - The arguments object with character rage applied
- */
-function applyCharacterRageToRite(args) {
-  // Only use character's rage if user didn't specify one manually
-  if (args.rage === null && 
-      args.character?.tracked && 
-      args.character.tracked.splat.slug === "werewolf5th") {
-    args.rage = args.character.tracked.rage.current;
-  }
- 
-  return args;
-}
-
-/**
  *
  * @param {Interaction} interaction
  */
 module.exports = async function riteRoll(interaction) {
   interaction.arguments = await getArgs(interaction);
-  interaction.arguments = applyCharacterRageToRite(interaction.arguments);
   interaction.rollResults = await roll(interaction);
 
   await handleButtonPress(interaction, getEmbed, getComponents, getContent);
@@ -45,6 +28,7 @@ async function getArgs(interaction) {
   const args = {
     pool: interaction.options.getInteger("pool"),
     rage: interaction.options.getInteger("rage"),
+    useCharRage: interaction.options.getBoolean("use_character_rage") || true,
     trainedParticipants: interaction.options.getInteger("trained_participants"),
     participants: interaction.options.getInteger("participants"),
     difficulty: interaction.options.getInteger("difficulty"),
@@ -73,6 +57,11 @@ async function getArgs(interaction) {
         tracked: defaults.character,
       };
     }
+  }
+
+  // Use linked character's rage if available
+  if (args.useCharRage && args.rage === null && args.character?.tracked?.rage) {
+    args.rage = args.character.tracked.rage.current;
   }
 
   return args;

@@ -206,6 +206,15 @@ function getCommand() {
         return option;
       })
 
+      .addBooleanOption((option) => {
+        option
+          .setName("use_char_rage")
+          .setDescription(
+            "Use rage dice from your linked character (Defaults to true)."
+          );
+        return option;
+      })
+
       .addIntegerOption((option) => {
         option
           .setName("trained_participants")
