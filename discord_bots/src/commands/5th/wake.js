@@ -22,13 +22,13 @@ function getCommand() {
   return new SlashCommandBuilder()
     .setName("wake")
     .setDescription(
-      "Wake your vampire for the night with options for healing and Blush of Life."
+      "Wake your vampire for the night. Options for healing and Blush of Life."
     )
 
     .addStringOption((option) =>
       option
         .setName("character")
-        .setDescription("Name of the character waking.")
+        .setDescription("Character name for this wake roll.")
         .setMaxLength(50)
         .setAutocomplete(true)
     )
@@ -37,7 +37,7 @@ function getCommand() {
       option
         .setName("heal_agg")
         .setDescription(
-          "Attempt to heal 1 aggravated health damage (requires 3 additional rouse checks)."
+          "Try to heal 1 aggravated health (3 extra rouse checks required)."
         )
     )
 
@@ -45,22 +45,20 @@ function getCommand() {
       option
         .setName("heal_willpower")
         .setDescription(
-          "Heal superficial willpower damage based on your Resolve or Composure."
+          "Heal superficial willpower (uses Resolve or Composure) [Sheet required]."
         )
     )
 
     .addBooleanOption((option) =>
       option
         .setName("blush_of_life")
-        .setDescription(
-          "Activate Blush of Life (requires additional rouse check)."
-        )
+        .setDescription("Activate Blush of Life (adds a rouse check).")
     )
 
     .addStringOption((option) =>
       option
         .setName("notes")
-        .setDescription("Any extra information you would like to include.")
+        .setDescription("Extra info to include.")
         .setMaxLength(300)
     );
 }

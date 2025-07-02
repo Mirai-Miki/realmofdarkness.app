@@ -33,21 +33,19 @@ module.exports = {
 function getCommand() {
   const command = new SlashCommandBuilder();
 
-  command.setName("h").setDescription("Dice rolls for the hunter v5 game.");
+  command.setName("h").setDescription("Dice rolls for the Hunter 5th game.");
 
   ///////////////////// Hunter Command ///////////////////
   command
     .addSubcommand((subcommand) =>
       subcommand
         .setName("roll")
-        .setDescription("Standard roll")
+        .setDescription("Standard Hunter 5th roll.")
 
         .addIntegerOption((option) =>
           option
             .setName("pool")
-            .setDescription(
-              "The Number of dice to roll. Must be between 1 and 50"
-            )
+            .setDescription("Number of dice to roll (1-50).")
             .setMaxValue(50)
             .setMinValue(1)
             .setRequired(true)
@@ -56,9 +54,7 @@ function getCommand() {
         .addIntegerOption((option) =>
           option
             .setName("desperation")
-            .setDescription(
-              "The number of desperation dice to add to the pool. Must be between 0 to 5. Defaults to 0."
-            )
+            .setDescription("Desperation dice to add (0-5). Defaults to 0.")
             .setMaxValue(5)
             .setMinValue(0)
         )
@@ -67,7 +63,7 @@ function getCommand() {
           option
             .setName("use_char_desperation")
             .setDescription(
-              "Add the Desperation dice value from your linked character (if available)."
+              "Use desperation dice from your linked character (if available)."
             );
           return option;
         })
@@ -76,7 +72,7 @@ function getCommand() {
           option
             .setName("difficulty")
             .setDescription(
-              "The Difficulty is the number of dice 6+ needed. Must be between 1 and 50. Defaults to 1."
+              "Number of dice successes needed to pass (1-50). Defaults to 1."
             )
             .setMaxValue(50)
             .setMinValue(1)
@@ -86,7 +82,7 @@ function getCommand() {
           option
             .setName("speciality")
             .setDescription(
-              "The speciality applied to the roll. This adds one dice to your pool."
+              "Speciality applied to the roll (adds 1 die to your pool)."
             )
             .setMaxLength(100)
         )
@@ -102,7 +98,7 @@ function getCommand() {
         .addStringOption((option) =>
           option
             .setName("notes")
-            .setDescription("Any extra information you would like to include.")
+            .setDescription("Any additional information you want to include.")
             .setMaxLength(300)
         )
     )
@@ -111,14 +107,12 @@ function getCommand() {
     .addSubcommand((subcommand) =>
       subcommand
         .setName("general")
-        .setDescription("Roll a number of X-sided dice.")
+        .setDescription("Roll X-sided dice.")
 
         .addStringOption((option) =>
           option
             .setName("dice_set_01")
-            .setDescription(
-              'A dice set is defined as "(x)d(y)" where (x) is the number of dice and (y) is the number of sides.'
-            )
+            .setDescription('Dice set: "(x)d(y)", e.g. "2d6".')
             .setRequired(true)
             .setMaxLength(9)
         )
@@ -126,7 +120,7 @@ function getCommand() {
         .addIntegerOption((option) =>
           option
             .setName("modifier")
-            .setDescription("Adds or removes the number from the total.")
+            .setDescription("Add or remove from the total result.")
             .setMaxValue(1000)
             .setMinValue(-1000)
         )
@@ -134,43 +128,35 @@ function getCommand() {
         .addStringOption((option) =>
           option
             .setName("dice_set_02")
-            .setDescription(
-              'A dice set is defined as "(x)d(y)" where (x) is the number of dice and (y) is the number of sides.'
-            )
+            .setDescription('Dice set: "(x)d(y)", e.g. "2d6".')
             .setMaxLength(9)
         )
 
         .addStringOption((option) =>
           option
             .setName("dice_set_03")
-            .setDescription(
-              'A dice set is defined as "(x)d(y)" where (x) is the number of dice and (y) is the number of sides.'
-            )
+            .setDescription('Dice set: "(x)d(y)", e.g. "2d6".')
             .setMaxLength(9)
         )
 
         .addStringOption((option) =>
           option
             .setName("dice_set_04")
-            .setDescription(
-              'A dice set is defined as "(x)d(y)" where (x) is the number of dice and (y) is the number of sides.'
-            )
+            .setDescription('Dice set: "(x)d(y)", e.g. "2d6".')
             .setMaxLength(9)
         )
 
         .addStringOption((option) =>
           option
             .setName("dice_set_05")
-            .setDescription(
-              'A dice set is defined as "(x)d(y)" where (x) is the number of dice and (y) is the number of sides.'
-            )
+            .setDescription('Dice set: "(x)d(y)", e.g. "2d6".')
             .setMaxLength(9)
         )
 
         .addIntegerOption((option) =>
           option
             .setName("difficulty")
-            .setDescription("The total needed to pass the Roll.")
+            .setDescription("Total needed to pass the roll.")
             .setMaxValue(1000)
             .setMinValue(1)
         )
@@ -178,9 +164,7 @@ function getCommand() {
         .addStringOption((option) =>
           option
             .setName("notes")
-            .setDescription(
-              "Any additional information you would like to include."
-            )
+            .setDescription("Any additional information you want to include.")
             .setMaxLength(300)
         )
     );

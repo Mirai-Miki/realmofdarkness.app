@@ -34,6 +34,7 @@ async function getV5RollArgs(interaction) {
   const args = {
     pool: interaction.options.getInteger("pool"),
     hunger: interaction.options.getInteger("hunger"),
+    autoHunger: interaction.options.getBoolean("use_char_hunger") ?? true,
     difficulty: interaction.options.getInteger("difficulty"),
     bp: interaction.options.getInteger("blood_surge"),
     spec: interaction.options.getString("speciality"),
@@ -44,7 +45,6 @@ async function getV5RollArgs(interaction) {
       interaction,
       false
     ),
-    autoHunger: interaction.options.getBoolean("auto_hunger") ?? true,
   };
 
   if (interaction.guild && (!args.character || args.autoHunger === null)) {

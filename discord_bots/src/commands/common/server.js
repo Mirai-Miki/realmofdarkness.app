@@ -26,23 +26,21 @@ function getCommands() {
   return (
     new SlashCommandBuilder()
       .setName("server")
-      .setDescription("server Commands")
+      .setDescription("Server management commands.")
 
       /////////////////// Server Tracker Command ////////////////////////////
       .addSubcommand((subcommand) =>
         subcommand
           .setName("tracker")
           .setDescription(
-            "Selects a channel for copies of all tracking posts" +
-              " to be sent to. [ST only]"
+            "Set or remove the channel for tracking posts. [ST only]"
           )
 
           .addChannelOption((option) =>
             option
               .setName("channel")
               .setDescription(
-                "The channel to be selected. Or removes a channel" +
-                  " if already selected."
+                "Channel to use for tracking posts, or remove if already set."
               )
           )
       )
@@ -51,14 +49,11 @@ function getCommands() {
         subcommand
           .setName("storytellers")
           .setDescription(
-            "Sets the ST permissions for the ST only commands" +
-              ". [Admin only]"
+            "Set or remove Storyteller (ST) role permissions. [Admin only]"
           )
 
           .addRoleOption((option) =>
-            option
-              .setName("role")
-              .setDescription("The ST role to be added or removed.")
+            option.setName("role").setDescription("ST role to add or remove.")
           )
       )
   );

@@ -57,12 +57,12 @@ async function getArgs(interaction) {
 function getCommands() {
   const slashCommand = new SlashCommandBuilder()
     .setName("changeling_set")
-    .setDescription("Set values for your Changeling 20th")
+    .setDescription("Set values for your Changeling character.")
 
     .addStringOption((option) =>
       option
         .setName("name")
-        .setDescription("The name of your Character")
+        .setDescription("Character name.")
         .setMaxLength(50)
         .setRequired(true)
         .setAutocomplete(true)
@@ -71,10 +71,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("willpower")
-        .setDescription(
-          "Sets you total Willpower to the number. " +
-            "Must be between 1 and 10. CtD 20th Corebook p258"
-        )
+        .setDescription("Set total Willpower (1-10).")
         .setMinValue(1)
         .setMaxValue(10)
     )
@@ -82,10 +79,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("glamour")
-        .setDescription(
-          "Sets you total Glamour to the number. " +
-            "Must be between 1 and 10. CtD 20th Corebook p259"
-        )
+        .setDescription("Set total Glamour (1-10).")
         .setMinValue(1)
         .setMaxValue(10)
     )
@@ -93,10 +87,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("banality")
-        .setDescription(
-          "Sets you total Banality to the number. " +
-            "Must be between 1 and 10. CtD 20th Corebook p267"
-        )
+        .setDescription("Set total Banality (1-10).")
         .setMinValue(1)
         .setMaxValue(10)
     )
@@ -104,10 +95,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("nightmare")
-        .setDescription(
-          "Sets you Nightmare to the number. " +
-            "Must be between 0 and 10. CtD 20th Corebook p274"
-        )
+        .setDescription("Set Nightmare (0-10).")
         .setMinValue(0)
         .setMaxValue(10)
     )
@@ -115,10 +103,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("imbalance")
-        .setDescription(
-          "Sets you imbalance to the number. " +
-            "Must be between 0 and 10. CtD 20th Corebook p275"
-        )
+        .setDescription("Set Imbalance (0-10).")
         .setMinValue(0)
         .setMaxValue(10)
     )
@@ -127,8 +112,7 @@ function getCommands() {
       option
         .setName("exp")
         .setDescription(
-          "Sets your total Exp to the number. " +
-            "+ values will update current exp as well. CtD 20th Corebook p175"
+          "Set total Experience. Positive values also update current."
         )
         .setMinValue(0)
         .setMaxValue(1000)
@@ -137,10 +121,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("health")
-        .setDescription(
-          "Sets your Health to the number. " +
-            "Must be between 7 and 15. CtD 20th Corebook p290"
-        )
+        .setDescription("Set Health (7-15).")
         .setMinValue(7)
         .setMaxValue(15)
     )
@@ -148,9 +129,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("bashing_damage")
-        .setDescription(
-          "The total bashing damage inflicted. CtD 20th Corebook p290"
-        )
+        .setDescription("Total bashing damage.")
         .setMinValue(0)
         .setMaxValue(15)
     )
@@ -158,9 +137,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("lethal_damage")
-        .setDescription(
-          "The total lethal damage inflicted. CtD 20th Corebook p290"
-        )
+        .setDescription("Total lethal damage.")
         .setMinValue(0)
         .setMaxValue(15)
     )
@@ -168,9 +145,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("agg_damage")
-        .setDescription(
-          "The total Agg damage inflicted. CtD 20th Corebook p290"
-        )
+        .setDescription("Total aggravated damage.")
         .setMinValue(0)
         .setMaxValue(15)
     )
@@ -178,10 +153,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("health_chimerical")
-        .setDescription(
-          "Your total Chimerical Health. Defaults to 7. " +
-            "Must be between 7 and 15. CtD 20th Corebook p290"
-        )
+        .setDescription("Set Chimerical Health (7-15). Defaults to 7.")
         .setMinValue(7)
         .setMaxValue(15)
     )
@@ -189,10 +161,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("bashing_chimerical")
-        .setDescription(
-          "The total Chimerical bashing damage inflicted. " +
-            "CtD 20th Corebook p290"
-        )
+        .setDescription("Total Chimerical bashing damage.")
         .setMinValue(0)
         .setMaxValue(15)
     )
@@ -200,10 +169,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("lethal_chimerical")
-        .setDescription(
-          "The total Chimerical lethal damage inflicted. " +
-            "CtD 20th Corebook p290"
-        )
+        .setDescription("Total Chimerical lethal damage.")
         .setMinValue(0)
         .setMaxValue(15)
     )
@@ -211,10 +177,7 @@ function getCommands() {
     .addIntegerOption((option) =>
       option
         .setName("agg_chimerical")
-        .setDescription(
-          "The total Chimerical Agg damage inflicted. " +
-            "CtD 20th Corebook p290"
-        )
+        .setDescription("Total Chimerical aggravated damage.")
         .setMinValue(0)
         .setMaxValue(15)
     )
@@ -222,14 +185,14 @@ function getCommands() {
     .addStringOption((option) =>
       option
         .setName("notes")
-        .setDescription("Any aditional information you would like to include.")
+        .setDescription("Any extra info to include.")
         .setMaxLength(300)
     )
 
     .addStringOption((option) =>
       option
         .setName("change_name")
-        .setDescription("Change your Character's name.")
+        .setDescription("Change your character's name.")
         .setMaxLength(50)
     )
 
@@ -237,8 +200,7 @@ function getCommands() {
       option
         .setName("color")
         .setDescription(
-          "Changes the side bar color." +
-            " Enter a color hex code eg #6f82ab. [Supporter Only]"
+          "Sidebar color hex code (e.g. #6f82ab). [Supporter Only]"
         )
         .setMaxLength(7)
         .setMinLength(7)
@@ -248,7 +210,7 @@ function getCommands() {
       option
         .setName("image")
         .setDescription(
-          "Changes your Character's Thumbnail" + " Image. [Supporter Only]"
+          "Set your character's thumbnail image. [Supporter Only]"
         )
     );
   return slashCommand;

@@ -42,20 +42,18 @@ module.exports = {
 function getCommands() {
   let slashcommand = new SlashCommandBuilder()
     .setName("dice")
-    .setDescription("Dice rolls for the 20th Anniversary Edition Game.")
+    .setDescription("Dice rolls for 20th Anniversary Edition games.")
 
-    //////////////////////// Dice Roll Command /////////////////////////////////
+    //////////////// Dice Roll Command ////////////////
     .addSubcommand((subcommand) =>
       subcommand
         .setName("roll")
-        .setDescription("Standard roll p246")
+        .setDescription("Standard dice roll.")
 
         .addIntegerOption((option) =>
           option
             .setName("pool")
-            .setDescription(
-              "The Number of dice to roll. " + "Must be between 1 and 50. p247"
-            )
+            .setDescription("Number of dice to roll (1-50).")
             .setMaxValue(50)
             .setMinValue(1)
             .setRequired(true)
@@ -64,9 +62,7 @@ function getCommands() {
         .addIntegerOption((option) =>
           option
             .setName("difficulty")
-            .setDescription(
-              "The Difficulty of the roll." + " Must be between 2 to 10. p249"
-            )
+            .setDescription("Difficulty (2-10).")
             .setMaxValue(10)
             .setMinValue(2)
             .setRequired(true)
@@ -75,13 +71,13 @@ function getCommands() {
         .addBooleanOption((option) =>
           option
             .setName("willpower")
-            .setDescription("Select to add 1 auto success. p250")
+            .setDescription("Add 1 automatic success (Willpower).")
         )
 
         .addIntegerOption((option) =>
           option
             .setName("modifier")
-            .setDescription("The number of automatic successes. p250")
+            .setDescription("Number of automatic successes.")
             .setMaxValue(20)
             .setMinValue(-20)
         )
@@ -89,17 +85,14 @@ function getCommands() {
         .addStringOption((option) =>
           option
             .setName("speciality")
-            .setDescription("The speciality applied to the roll. p96")
+            .setDescription("Specialty applied to the roll.")
             .setMaxLength(100)
         )
 
         .addIntegerOption((option) =>
           option
             .setName("nightmare")
-            .setDescription(
-              "Replaces x number of dice in your" +
-                " pool with Nightmare dice. p274"
-            )
+            .setDescription("Replace X dice with Nightmare dice (1-50).")
             .setMaxValue(50)
             .setMinValue(1)
         )
@@ -107,7 +100,7 @@ function getCommands() {
         .addStringOption((option) =>
           option
             .setName("character")
-            .setDescription("Name of the character making the roll.")
+            .setDescription("Character name for this roll.")
             .setMaxLength(50)
             .setAutocomplete(true)
         )
@@ -115,31 +108,27 @@ function getCommands() {
         .addBooleanOption((option) =>
           option
             .setName("no_botch")
-            .setDescription(
-              "Stops any 1s from removing successes from the result."
-            )
+            .setDescription("1s do not remove successes from the result.")
         )
 
         .addStringOption((option) =>
           option
             .setName("notes")
-            .setDescription("Any extra information you would like to include.")
+            .setDescription("Additional notes or info.")
             .setMaxLength(300)
         )
     )
 
-    //////////////////////// Dice Initiative Command ///////////////////////////
+    //////////////////// Dice Initiative Command ////////////////////
     .addSubcommand((subcommand) =>
       subcommand
         .setName("initiative")
-        .setDescription("Initiative roll using Dex + Wits")
+        .setDescription("Initiative roll (Dexterity + Wits).")
 
         .addIntegerOption((option) =>
           option
             .setName("dexterity_wits")
-            .setDescription(
-              "Your Dexterity plus you Wits. Must be between 0 and 50"
-            )
+            .setDescription("Dexterity + Wits (0-50).")
             .setMaxValue(50)
             .setMinValue(0)
             .setRequired(true)
@@ -148,7 +137,7 @@ function getCommands() {
         .addStringOption((option) =>
           option
             .setName("character")
-            .setDescription("Name of the character making the roll.")
+            .setDescription("Character name for this roll.")
             .setMaxLength(50)
             .setAutocomplete(true)
         )
@@ -156,24 +145,21 @@ function getCommands() {
         .addStringOption((option) =>
           option
             .setName("notes")
-            .setDescription("Any extra information you would like to include.")
+            .setDescription("Additional notes or info.")
             .setMaxLength(300)
         )
     )
 
-    ////////////////////// Dice General Command ////////////////////////////////
+    ////////////////// Dice General Command ////////////////////////////
     .addSubcommand((subcommand) =>
       subcommand
         .setName("general")
-        .setDescription("Roll a number of X-sided dice.")
+        .setDescription("Roll X-sided dice (e.g. 2d6, 1d20, etc.)")
 
         .addStringOption((option) =>
           option
             .setName("dice_set_01")
-            .setDescription(
-              'A dice set is defined as "(x)d(y)"' +
-                " where (x) is the number of dice and (y) is the number of sides."
-            )
+            .setDescription("Dice set in format (x)d(y), e.g. 2d6. Required.")
             .setMaxLength(9)
             .setRequired(true)
         )
@@ -181,7 +167,7 @@ function getCommands() {
         .addIntegerOption((option) =>
           option
             .setName("modifier")
-            .setDescription("Adds or removes the number from the total.")
+            .setDescription("Add or subtract from the total result.")
             .setMaxValue(1000)
             .setMinValue(-1000)
         )
@@ -189,47 +175,35 @@ function getCommands() {
         .addStringOption((option) =>
           option
             .setName("dice_set_02")
-            .setDescription(
-              'A dice set is defined as "(x)d(y)"' +
-                " where (x) is the number of dice and (y) is the number of sides."
-            )
+            .setDescription("Additional dice set in format (x)d(y), e.g. 1d8.")
             .setMaxLength(9)
         )
 
         .addStringOption((option) =>
           option
             .setName("dice_set_03")
-            .setDescription(
-              'A dice set is defined as "(x)d(y)"' +
-                " where (x) is the number of dice and (y) is the number of sides."
-            )
+            .setDescription("Additional dice set in format (x)d(y), e.g. 1d8.")
             .setMaxLength(9)
         )
 
         .addStringOption((option) =>
           option
             .setName("dice_set_04")
-            .setDescription(
-              'A dice set is defined as "(x)d(y)"' +
-                " where (x) is the number of dice and (y) is the number of sides."
-            )
+            .setDescription("Additional dice set in format (x)d(y), e.g. 1d8.")
             .setMaxLength(9)
         )
 
         .addStringOption((option) =>
           option
             .setName("dice_set_05")
-            .setDescription(
-              'A dice set is defined as "(x)d(y)"' +
-                " where (x) is the number of dice and (y) is the number of sides."
-            )
+            .setDescription("Additional dice set in format (x)d(y), e.g. 1d8.")
             .setMaxLength(9)
         )
 
         .addIntegerOption((option) =>
           option
             .setName("difficulty")
-            .setDescription("The total needed to pass the Roll.")
+            .setDescription("Total needed to pass the roll.")
             .setMaxValue(1000)
             .setMinValue(1)
         )
@@ -237,9 +211,7 @@ function getCommands() {
         .addStringOption((option) =>
           option
             .setName("notes")
-            .setDescription(
-              "Any additional information you would like to include."
-            )
+            .setDescription("Additional notes or info.")
             .setMaxLength(300)
         )
     );

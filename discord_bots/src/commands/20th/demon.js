@@ -57,17 +57,19 @@ async function getArgs(interaction) {
 function getCommands() {
   const slashCommand = new SlashCommandBuilder();
 
-  slashCommand.setName("demon").setDescription(".");
-  /////////////////////////// Demon New //////////////////////////////////
+  slashCommand
+    .setName("demon")
+    .setDescription("Demon 20th character commands.");
+  /////////////////// Demon New /////////////////////////////////////
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("new")
-      .setDescription("Create a new Demon 20th.")
+      .setDescription("Create a new Demon 20th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Your character's name.")
           .setMaxLength(50)
           .setRequired(true)
       )
@@ -75,10 +77,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Your total Willpower. " +
-              "Must be between 1 and 10. DtF Corebook p162"
-          )
+          .setDescription("Total Willpower (1-10).")
           .setMinValue(1)
           .setMaxValue(10)
           .setRequired(true)
@@ -87,9 +86,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("faith")
-          .setDescription(
-            "Your total Faith. " + "Must be between 1 and 10. DtF Corebook p249"
-          )
+          .setDescription("Total Faith (1-10).")
           .setMinValue(1)
           .setMaxValue(10)
           .setRequired(true)
@@ -98,10 +95,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("torment")
-          .setDescription(
-            "Your Permanent Torment. " +
-              "Must be between 1 and 10. DtF Corebook p160"
-          )
+          .setDescription("Permanent Torment (1-10).")
           .setMinValue(1)
           .setMaxValue(10)
           .setRequired(true)
@@ -110,7 +104,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("exp")
-          .setDescription("Your total Experiance. DtF Corebook p164")
+          .setDescription("Total Experience (0-1000).")
           .setMinValue(0)
           .setMaxValue(1000)
       )
@@ -118,10 +112,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Your total Health. Defaults to 7." +
-              "Must be between 7 and 15. DtF Corebook p245"
-          )
+          .setDescription("Total Health (7-15). Defaults to 7 (DtF p245).")
           .setMinValue(7)
           .setMaxValue(15)
       )
@@ -129,9 +120,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("bashing_damage")
-          .setDescription(
-            "The total bashing damage inflicted. DtF Corebook p247"
-          )
+          .setDescription("Total bashing damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -139,9 +128,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("lethal_damage")
-          .setDescription(
-            "The total lethal damage inflicted. DtF Corebook p247"
-          )
+          .setDescription("Total lethal damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -149,7 +136,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("agg_damage")
-          .setDescription("The total Agg damage inflicted. DtF Corebook p247")
+          .setDescription("Total aggravated damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -157,19 +144,14 @@ function getCommands() {
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you would like to include."
-          )
+          .setDescription("Additional notes or info.")
           .setMaxLength(300)
       )
 
       .addStringOption((option) =>
         option
           .setName("color")
-          .setDescription(
-            "Changes the side bar color." +
-              " Enter a color hex code eg #6f82ab. [Supporter Only]"
-          )
+          .setDescription("Sidebar color hex (e.g. #6f82ab). [Supporter Only]")
           .setMaxLength(7)
           .setMinLength(7)
       )
@@ -177,22 +159,20 @@ function getCommands() {
       .addAttachmentOption((option) =>
         option
           .setName("image")
-          .setDescription(
-            "Changes your Character's Thumbnail" + " Image. [Supporter Only]"
-          )
+          .setDescription("Set character thumbnail image. [Supporter Only]")
       )
   );
 
-  ////////////////////////// Demon Set ///////////////////////////////////////
+  /////////////////////// Demon Set /////////////////////////////////////
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("set")
-      .setDescription("Sets values for your Demon 20th")
+      .setDescription("Set values for your Demon character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Your character's name.")
           .setMaxLength(50)
           .setRequired(true)
           .setAutocomplete(true)
@@ -201,10 +181,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Sets you total Willpower to the number. " +
-              "Must be between 1 and 10. DtF Corebook p162"
-          )
+          .setDescription("Set Willpower (1-10).")
           .setMinValue(1)
           .setMaxValue(10)
       )
@@ -212,10 +189,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("faith")
-          .setDescription(
-            "Sets you total Faith to the number. " +
-              "Must be between 1 and 10. DtF Corebook p249"
-          )
+          .setDescription("Set Faith (1-10).")
           .setMinValue(1)
           .setMaxValue(10)
       )
@@ -223,10 +197,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("torment")
-          .setDescription(
-            "Sets you Permanent Torment to the number. " +
-              "Must be between 1 and 10. DtF Corebook p160"
-          )
+          .setDescription("Set Permanent Torment (1-10).")
           .setMinValue(1)
           .setMaxValue(10)
       )
@@ -234,10 +205,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("exp")
-          .setDescription(
-            "Sets your total Exp to the number. " +
-              "+ values will update current exp as well. DtF Corebook p164"
-          )
+          .setDescription("Set total XP. Positive values also update current.")
           .setMinValue(0)
           .setMaxValue(1000)
       )
@@ -245,10 +213,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Sets your Health to the number. " +
-              "Must be between 7 and 15. DtF Corebook p245"
-          )
+          .setDescription("Set Health (7-15).")
           .setMinValue(7)
           .setMaxValue(15)
       )
@@ -256,9 +221,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("bashing_damage")
-          .setDescription(
-            "The total bashing damage inflicted. DtF Corebook p247"
-          )
+          .setDescription("Total bashing damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -266,9 +229,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("lethal_damage")
-          .setDescription(
-            "The total lethal damage inflicted. DtF Corebook p247"
-          )
+          .setDescription("Total lethal damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -276,7 +237,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("agg_damage")
-          .setDescription("The total Agg damage inflicted. DtF Corebook p247")
+          .setDescription("Total aggravated damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -284,26 +245,21 @@ function getCommands() {
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you would like to include."
-          )
+          .setDescription("Additional notes or info.")
           .setMaxLength(300)
       )
 
       .addStringOption((option) =>
         option
           .setName("change_name")
-          .setDescription("Change your Character's name.")
+          .setDescription("Change your character's name.")
           .setMaxLength(50)
       )
 
       .addStringOption((option) =>
         option
           .setName("color")
-          .setDescription(
-            "Changes the side bar color." +
-              " Enter a color hex code eg #6f82ab. [Supporter Only]"
-          )
+          .setDescription("Sidebar color hex (e.g. #6f82ab). [Supporter Only]")
           .setMaxLength(7)
           .setMinLength(7)
       )
@@ -311,22 +267,20 @@ function getCommands() {
       .addAttachmentOption((option) =>
         option
           .setName("image")
-          .setDescription(
-            "Changes your Character's Thumbnail" + " Image. [Supporter Only]"
-          )
+          .setDescription("Set character thumbnail image. [Supporter Only]")
       )
   );
 
-  /////////////////////////// Demon Update //////////////////////////////////
+  /////////////////////// Demon Update /////////////////////////////////////
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("update")
-      .setDescription("Updates you Demon 20th")
+      .setDescription("Update your Demon 20th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Your character's name.")
           .setMaxLength(50)
           .setRequired(true)
           .setAutocomplete(true)
@@ -335,10 +289,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Updates your Willpower by the amount. " +
-              "Must be between -15 and 15. DtF Corebook p162"
-          )
+          .setDescription("Change Willpower by amount (-15 to 15).")
           .setMinValue(-15)
           .setMaxValue(15)
       )
@@ -346,10 +297,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("faith")
-          .setDescription(
-            "Updates your Faith by the amount. " +
-              "Must be between -15 and 15. DtF Corebook p249"
-          )
+          .setDescription("Change Faith by amount (-15 to 15).")
           .setMinValue(-15)
           .setMaxValue(15)
       )
@@ -357,10 +305,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("torment")
-          .setDescription(
-            "Updates your Temporary Torment by the amount. " +
-              "Must be between -15 and 15. DtF Corebook p160"
-          )
+          .setDescription("Change Temporary Torment (-15 to 15).")
           .setMinValue(-15)
           .setMaxValue(15)
       )
@@ -368,10 +313,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("exp")
-          .setDescription(
-            "Updates your current exp. + values will increase" +
-              " total as well. DtF Corebook p164"
-          )
+          .setDescription("Change current XP. + values also raise total.")
           .setMinValue(-3000)
           .setMaxValue(3000)
       )
@@ -379,10 +321,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Updates your Health by the amount. " +
-              "Must be between -20 and 20. DtF Corebook p245"
-          )
+          .setDescription("Change Health by amount (-20 to 20).")
           .setMinValue(-20)
           .setMaxValue(20)
       )
@@ -390,9 +329,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("bashing_damage")
-          .setDescription(
-            "Updates your Bashing damage by the amount. DtF Corebook p247"
-          )
+          .setDescription("Change bashing damage by amount (-50 to 50).")
           .setMinValue(-50)
           .setMaxValue(50)
       )
@@ -400,9 +337,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("lethal_damage")
-          .setDescription(
-            "Updates your Lethal damage by the amount. DtF Corebook p247"
-          )
+          .setDescription("Change lethal damage by amount (-50 to 50).")
           .setMinValue(-50)
           .setMaxValue(50)
       )
@@ -410,9 +345,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("agg_damage")
-          .setDescription(
-            "Updates your Agg damage by the amount. DtF Corebook p247"
-          )
+          .setDescription("Change aggravated damage by amount (-50 to 50).")
           .setMinValue(-50)
           .setMaxValue(50)
       )
@@ -421,17 +354,14 @@ function getCommands() {
         option
           .setName("player")
           .setDescription(
-            "The player the character belongs to. Used by STs" +
-              " to update another players Char [ST Only]"
+            "Storytellers must select the player this character belongs to."
           )
       )
 
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you would like to include."
-          )
+          .setDescription("Additional notes or info.")
           .setMaxLength(300)
       )
   );

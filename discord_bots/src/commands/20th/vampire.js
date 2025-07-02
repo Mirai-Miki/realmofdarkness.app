@@ -61,18 +61,18 @@ async function getArgs(interaction) {
 function getCommands() {
   const slashCommand = new SlashCommandBuilder()
     .setName("vampire")
-    .setDescription("Vampire 20th tracker commands");
+    .setDescription("Vampire 20th character commands.");
 
   /////////////////////// New Vampire ////////////////////////////
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("new")
-      .setDescription("Create a new Vampire 20th")
+      .setDescription("Create a new Vampire 20th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Character name.")
           .setRequired(true)
           .setMaxLength(50)
       )
@@ -80,10 +80,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Your total Willpower. " +
-              "Must be between 1 and 10. VtM 20th Corebook p120"
-          )
+          .setDescription("Total Willpower (1-10).")
           .setMinValue(1)
           .setMaxValue(10)
           .setRequired(true)
@@ -92,10 +89,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("blood")
-          .setDescription(
-            "Your total Blood Pool. " +
-              "Must be between 1 and 100. VtM 20th Corebook p121"
-          )
+          .setDescription("Total Blood Pool (1-100).")
           .setMinValue(1)
           .setMaxValue(100)
           .setRequired(true)
@@ -104,10 +98,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("morality")
-          .setDescription(
-            "Your total Humanity or Path. " +
-              "Must be between 0 and 10. VtM 20th Corebook p309"
-          )
+          .setDescription("Total Humanity or Path (0-10).")
           .setMinValue(0)
           .setMaxValue(10)
           .setRequired(true)
@@ -117,8 +108,7 @@ function getCommands() {
         option
           .setName("morality_name")
           .setDescription(
-            "The name of your chosen Morality. " +
-              "Default to 'Humanity'. VtM 20th Corebook p309"
+            "Name of your chosen Morality. Defaults to 'Humanity'."
           )
           .addChoices(
             { name: "Humanity", value: "1" },
@@ -150,7 +140,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("exp")
-          .setDescription("Your total Experiance. " + "VtM 20th Corebook p122")
+          .setDescription("Total experience points.")
           .setMinValue(0)
           .setMaxValue(1000)
       )
@@ -158,10 +148,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Your total Health. Defaults to 7. " +
-              "Must be between 7 and 15. VtM 20th Corebook p282"
-          )
+          .setDescription("Total Health (7-15). Defaults to 7.")
           .setMinValue(7)
           .setMaxValue(15)
       )
@@ -169,9 +156,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("bashing_damage")
-          .setDescription(
-            "The total bashing damage inflicted. " + "VtM 20th Corebook p285"
-          )
+          .setDescription("Total bashing damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -179,9 +164,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("lethal_damage")
-          .setDescription(
-            "The total lethal damage inflicted. " + "VtM 20th Corebook p285"
-          )
+          .setDescription("Total lethal damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -189,9 +172,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("agg_damage")
-          .setDescription(
-            "The total Agg damage inflicted. " + "VtM 20th Corebook p285"
-          )
+          .setDescription("Total aggravated damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -199,19 +180,14 @@ function getCommands() {
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you" + " would like to include."
-          )
+          .setDescription("Additional notes or info.")
           .setMaxLength(300)
       )
 
       .addStringOption((option) =>
         option
           .setName("color")
-          .setDescription(
-            "Changes the side bar color." +
-              " Enter a color hex code eg #6f82ab. [Supporter Only]"
-          )
+          .setDescription("Sidebar color hex (e.g. #6f82ab). [Supporter Only]")
           .setMaxLength(7)
           .setMinLength(7)
       )
@@ -219,9 +195,7 @@ function getCommands() {
       .addAttachmentOption((option) =>
         option
           .setName("image")
-          .setDescription(
-            "Changes your Character's Thumbnail Image. [Supporter Only]"
-          )
+          .setDescription("Set character thumbnail image. [Supporter Only]")
       )
   );
 
@@ -229,12 +203,12 @@ function getCommands() {
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("set")
-      .setDescription("Set values for your Vampire 20th")
+      .setDescription("Set values for your Vampire 20th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Character name.")
           .setMaxLength(50)
           .setRequired(true)
           .setAutocomplete(true)
@@ -243,10 +217,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Sets you total Willpower to the number. " +
-              "Must be between 1 and 10. VtM 20th Corebook p120"
-          )
+          .setDescription("Set total Willpower (1-10).")
           .setMinValue(1)
           .setMaxValue(10)
       )
@@ -254,10 +225,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("blood")
-          .setDescription(
-            "Sets you total Blood Pool to the number. " +
-              "Must be between 1 and 100. VtM 20th Corebook p121"
-          )
+          .setDescription("Set total Blood Pool (1-100).")
           .setMinValue(1)
           .setMaxValue(100)
       )
@@ -265,10 +233,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("morality")
-          .setDescription(
-            "Sets your Mortality to the number. " +
-              "Must be between 0 and 10. VtM 20th Corebook p309"
-          )
+          .setDescription("Set Humanity or Path (0-10).")
           .setMinValue(0)
           .setMaxValue(10)
       )
@@ -276,9 +241,7 @@ function getCommands() {
       .addStringOption((option) =>
         option
           .setName("morality_name")
-          .setDescription(
-            "Sets the name of your chosen Morality. " + "VtM 20th Corebook p309"
-          )
+          .setDescription("Set name of your chosen Morality.")
           .addChoices(
             { name: "Humanity", value: "1" },
             { name: "Path of Asakku", value: "2" },
@@ -310,8 +273,7 @@ function getCommands() {
         option
           .setName("exp")
           .setDescription(
-            "Sets your total Exp to the number. " +
-              "Positive value will update current exp as well. V20 Core p122"
+            "Set total experience points. Positive values also update current."
           )
           .setMinValue(0)
           .setMaxValue(1000)
@@ -320,10 +282,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Sets your Health to the number. " +
-              "Must be between 7 and 15. VtM 20th Corebook p282"
-          )
+          .setDescription("Set Health (7-15).")
           .setMinValue(7)
           .setMaxValue(15)
       )
@@ -331,9 +290,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("bashing_damage")
-          .setDescription(
-            "The total bashing damage inflicted. VtM 20th Corebook p285"
-          )
+          .setDescription("Total bashing damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -341,9 +298,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("lethal_damage")
-          .setDescription(
-            "The total lethal damage inflicted. VtM 20th Corebook p285"
-          )
+          .setDescription("Total lethal damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -351,9 +306,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("agg_damage")
-          .setDescription(
-            "The total Agg damage inflicted. VtM 20th Corebook p285"
-          )
+          .setDescription("Total aggravated damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -361,26 +314,21 @@ function getCommands() {
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you would like to include."
-          )
+          .setDescription("Additional notes or info.")
           .setMaxLength(300)
       )
 
       .addStringOption((option) =>
         option
           .setName("change_name")
-          .setDescription("Change your Character's name.")
+          .setDescription("Change character name.")
           .setMaxLength(50)
       )
 
       .addStringOption((option) =>
         option
           .setName("color")
-          .setDescription(
-            "Changes the side bar color." +
-              " Enter a color hex code eg #6f82ab. [Supporter Only]"
-          )
+          .setDescription("Sidebar color hex (e.g. #6f82ab). [Supporter Only]")
           .setMaxLength(7)
           .setMinLength(7)
       )
@@ -388,9 +336,7 @@ function getCommands() {
       .addAttachmentOption((option) =>
         option
           .setName("image")
-          .setDescription(
-            "Changes your Character's Thumbnail Image. [Supporter Only]"
-          )
+          .setDescription("Set character thumbnail image. [Supporter Only]")
       )
   );
 
@@ -398,12 +344,12 @@ function getCommands() {
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("update")
-      .setDescription("Update values for your Vampire 20th")
+      .setDescription("Update values for your Vampire 20th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Character name.")
           .setRequired(true)
           .setMaxLength(50)
           .setAutocomplete(true)
@@ -412,10 +358,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Updates your Willpower by the amount. " +
-              "Must be between -15 and 15. VtM 20th Corebook p120"
-          )
+          .setDescription("Change Willpower by amount (-15 to 15).")
           .setMinValue(-15)
           .setMaxValue(15)
       )
@@ -423,10 +366,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("blood")
-          .setDescription(
-            "Updates you Blood Pool by the amount. " +
-              "Must be between -200 and 200. VtM 20th Corebook p121"
-          )
+          .setDescription("Change Blood Pool by amount (-200 to 200).")
           .setMinValue(-200)
           .setMaxValue(200)
       )
@@ -434,10 +374,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("morality")
-          .setDescription(
-            "Updates your Morality by the amount. " +
-              "Must be between -20 and 20. VtM 20th Corebook p309"
-          )
+          .setDescription("Change Humanity or Path by amount (-20 to 20).")
           .setMinValue(-20)
           .setMaxValue(20)
       )
@@ -446,8 +383,7 @@ function getCommands() {
         option
           .setName("exp")
           .setDescription(
-            "Updates your current exp. + values will increase" +
-              " total as well. VtM 20th Corebook p122"
+            "Change current experience. Positive values also increase total."
           )
           .setMinValue(-3000)
           .setMaxValue(3000)
@@ -456,10 +392,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Updates your Health by the amount. " +
-              "Must be between -20 and 20. VtM 20th Corebook p282"
-          )
+          .setDescription("Change Health by amount (-20 to 20).")
           .setMinValue(-20)
           .setMaxValue(20)
       )
@@ -467,10 +400,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("bashing_damage")
-          .setDescription(
-            "Updates your Bashing damage by the amount. " +
-              "VtM 20th Corebook p285"
-          )
+          .setDescription("Change bashing damage by amount (-50 to 50).")
           .setMinValue(-50)
           .setMaxValue(50)
       )
@@ -478,10 +408,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("lethal_damage")
-          .setDescription(
-            "Updates your Lethal damage by the amount. " +
-              "VtM 20th Corebook p285"
-          )
+          .setDescription("Change lethal damage by amount (-50 to 50).")
           .setMinValue(-50)
           .setMaxValue(50)
       )
@@ -489,9 +416,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("agg_damage")
-          .setDescription(
-            "Updates your Agg damage by the amount. " + "VtM 20th Corebook p285"
-          )
+          .setDescription("Change aggravated damage by amount (-50 to 50).")
           .setMinValue(-50)
           .setMaxValue(50)
       )
@@ -500,17 +425,14 @@ function getCommands() {
         option
           .setName("player")
           .setDescription(
-            "The player the character belongs to. Used by STs" +
-              " to update another players Char [ST Only]"
+            "Storytellers must select the player this character belongs to."
           )
       )
 
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you would like to include."
-          )
+          .setDescription("Additional notes or info.")
           .setMaxLength(300)
       )
   );

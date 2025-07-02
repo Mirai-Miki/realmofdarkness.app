@@ -56,18 +56,20 @@ async function getArgs(interaction) {
 
 function getCommands() {
   const slashCommand = new SlashCommandBuilder();
-  slashCommand.setName("wraith").setDescription("x");
+  slashCommand
+    .setName("wraith")
+    .setDescription("Wraith 20th character commands.");
 
   ////////////////////////////// Wraith New ///////////////////////////////////
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("new")
-      .setDescription("Create a new Wraith 20th")
+      .setDescription("Create a new Wraith 20th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Character name.")
           .setMaxLength(50)
           .setRequired(true)
       )
@@ -75,10 +77,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Your total Willpower. " +
-              "Must be between 1 and 10. WtO 20th Corebook p115"
-          )
+          .setDescription("Total Willpower (1-10).")
           .setMinValue(1)
           .setMaxValue(10)
           .setRequired(true)
@@ -87,10 +86,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("corpus")
-          .setDescription(
-            "Your total Corpus. " +
-              "Must be between 0 and 10. WtO 20th Corebook p291"
-          )
+          .setDescription("Total Corpus (0-10).")
           .setMinValue(0)
           .setMaxValue(10)
           .setRequired(true)
@@ -99,10 +95,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("pathos")
-          .setDescription(
-            "Your Pathos rating. " +
-              "Must be between 0 and 10. WtO 20th Corebook p114"
-          )
+          .setDescription("Pathos rating (0-10).")
           .setMinValue(0)
           .setMaxValue(10)
           .setRequired(true)
@@ -111,7 +104,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("exp")
-          .setDescription("Your total Experiance. WtO 20th Corebook p301")
+          .setDescription("Total experience points.")
           .setMinValue(0)
           .setMaxValue(1000)
       )
@@ -119,10 +112,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Your total Health. Defaults to 7. " +
-              "Must be between 7 and 15. WtO 20th Corebook p293"
-          )
+          .setDescription("Total Health (7-15). Defaults to 7.")
           .setMinValue(7)
           .setMaxValue(15)
       )
@@ -130,9 +120,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("bashing_damage")
-          .setDescription(
-            "The total bashing damage inflicted. WtO 20th Corebook p293"
-          )
+          .setDescription("Total bashing damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -140,9 +128,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("lethal_damage")
-          .setDescription(
-            "The total lethal damage inflicted. WtO 20th Corebook p294"
-          )
+          .setDescription("Total lethal damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -150,9 +136,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("agg_damage")
-          .setDescription(
-            "The total Agg damage inflicted. WtO 20th Corebook p294"
-          )
+          .setDescription("Total aggravated damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -160,19 +144,14 @@ function getCommands() {
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you would like to include."
-          )
+          .setDescription("Additional notes or info.")
           .setMaxLength(300)
       )
 
       .addStringOption((option) =>
         option
           .setName("color")
-          .setDescription(
-            "Changes the side bar color." +
-              " Enter a color hex code eg #6f82ab. [Supporter Only]"
-          )
+          .setDescription("Sidebar color hex (e.g. #6f82ab). [Supporter Only]")
           .setMaxLength(7)
           .setMinLength(7)
       )
@@ -180,9 +159,7 @@ function getCommands() {
       .addAttachmentOption((option) =>
         option
           .setName("image")
-          .setDescription(
-            "Changes your Character's Thumbnail Image. [Supporter Only]"
-          )
+          .setDescription("Set character thumbnail image. [Supporter Only]")
       )
   );
 
@@ -190,12 +167,12 @@ function getCommands() {
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("set")
-      .setDescription("Set values for your Wraith 20th")
+      .setDescription("Set values for your Wraith 20th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Character name.")
           .setMaxLength(50)
           .setRequired(true)
           .setAutocomplete(true)
@@ -204,10 +181,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Sets you total Willpower to the number. " +
-              "Must be between 1 and 10. WtO 20th Corebook p115"
-          )
+          .setDescription("Set total Willpower (1-10).")
           .setMinValue(1)
           .setMaxValue(10)
       )
@@ -215,10 +189,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("corpus")
-          .setDescription(
-            "Sets you Total Corpus to the number. " +
-              "Must be between 0 and 10. WtO 20th Corebook p291"
-          )
+          .setDescription("Set total Corpus (0-10).")
           .setMinValue(0)
           .setMaxValue(10)
       )
@@ -226,10 +197,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("pathos")
-          .setDescription(
-            "Sets your Pathos to the number. " +
-              "Must be between 0 and 10. WtO 20th Corebook p114"
-          )
+          .setDescription("Set Pathos rating (0-10).")
           .setMinValue(0)
           .setMaxValue(10)
       )
@@ -238,8 +206,7 @@ function getCommands() {
         option
           .setName("exp")
           .setDescription(
-            "Sets your total Exp to the number. " +
-              "+ values will update current exp as well. WtO 20th Corebook p301"
+            "Set total experience points. Positive values also update current."
           )
           .setMinValue(0)
           .setMaxValue(1000)
@@ -248,10 +215,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Sets your Health to the number. " +
-              "Must be between 7 and 15. WtO 20th Corebook p293"
-          )
+          .setDescription("Set Health (7-15).")
           .setMinValue(7)
           .setMaxValue(15)
       )
@@ -259,9 +223,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("bashing_damage")
-          .setDescription(
-            "The total bashing damage inflicted. WtO 20th Corebook p293"
-          )
+          .setDescription("Total bashing damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -269,9 +231,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("lethal_damage")
-          .setDescription(
-            "The total lethal damage inflicted. WtO 20th Corebook p294"
-          )
+          .setDescription("Total lethal damage.")
           .setMinValue(0)
           .setMaxValue(15)
       )
@@ -279,9 +239,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("agg_damage")
-          .setDescription(
-            "The total Agg damage inflicted. WtO 20th Corebook p294"
-          )
+          .setDescription("Total aggravated damage.")
           .setMinValue(0)
           .setMaxValue(10)
       )
@@ -289,26 +247,21 @@ function getCommands() {
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you would like to include."
-          )
+          .setDescription("Additional notes or info.")
           .setMaxLength(300)
       )
 
       .addStringOption((option) =>
         option
           .setName("change_name")
-          .setDescription("Change your Character's name.")
+          .setDescription("Change character name.")
           .setMaxLength(50)
       )
 
       .addStringOption((option) =>
         option
           .setName("color")
-          .setDescription(
-            "Changes the side bar color." +
-              " Enter a color hex code eg #6f82ab. [Supporter Only]"
-          )
+          .setDescription("Sidebar color hex (e.g. #6f82ab). [Supporter Only]")
           .setMaxLength(7)
           .setMinLength(7)
       )
@@ -316,9 +269,7 @@ function getCommands() {
       .addAttachmentOption((option) =>
         option
           .setName("image")
-          .setDescription(
-            "Changes your Character's Thumbnail Image. [Supporter Only]"
-          )
+          .setDescription("Set character thumbnail image. [Supporter Only]")
       )
   );
 
@@ -326,12 +277,12 @@ function getCommands() {
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("update")
-      .setDescription("Update values for your Wraith 20th")
+      .setDescription("Update values for your Wraith 20th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Character name.")
           .setMaxLength(50)
           .setRequired(true)
           .setAutocomplete(true)
@@ -340,10 +291,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Updates your Willpower by the amount. " +
-              "Must be between -15 and 15. WtO 20th Corebook p115"
-          )
+          .setDescription("Change Willpower by this amount (-15 to 15).")
           .setMinValue(-15)
           .setMaxValue(15)
       )
@@ -351,10 +299,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("corpus")
-          .setDescription(
-            "Updates you current Corpus by the amount. " +
-              "Must be between -20 and 20. WtO 20th Corebook p291"
-          )
+          .setDescription("Change current Corpus by this amount (-20 to 20).")
           .setMinValue(-20)
           .setMaxValue(20)
       )
@@ -362,10 +307,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("pathos")
-          .setDescription(
-            "Updates your Pathos by the amount. " +
-              "Must be between -20 and 20. WtO 20th Corebook p114"
-          )
+          .setDescription("Change Pathos by this amount (-20 to 20).")
           .setMinValue(-20)
           .setMaxValue(20)
       )
@@ -374,8 +316,7 @@ function getCommands() {
         option
           .setName("exp")
           .setDescription(
-            "Updates your current exp. + values will increase" +
-              " total as well. WtO 20th Corebook p301"
+            "Change current EXP. Positive values also increase total."
           )
           .setMinValue(-3000)
           .setMaxValue(3000)
@@ -384,10 +325,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Updates your Health by the amount. " +
-              "Must be between -20 and 20. WtO 20th Corebook p293"
-          )
+          .setDescription("Change Health by this amount (-20 to 20).")
           .setMinValue(-20)
           .setMaxValue(20)
       )
@@ -395,10 +333,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("bashing_damage")
-          .setDescription(
-            "Updates your Bashing damage by the amount. " +
-              "WtO 20th Corebook p293"
-          )
+          .setDescription("Change Bashing damage by this amount (-50 to 50).")
           .setMinValue(-50)
           .setMaxValue(50)
       )
@@ -406,10 +341,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("lethal_damage")
-          .setDescription(
-            "Updates your Lethal damage by the amount. " +
-              "WtO 20th Corebook p294"
-          )
+          .setDescription("Change Lethal damage by this amount (-50 to 50).")
           .setMinValue(-50)
           .setMaxValue(50)
       )
@@ -418,7 +350,7 @@ function getCommands() {
         option
           .setName("agg_damage")
           .setDescription(
-            "Updates your Agg damage by the amount. " + "WtO 20th Corebook p294"
+            "Change Aggravated damage by this amount (-50 to 50)."
           )
           .setMinValue(-50)
           .setMaxValue(50)
@@ -428,17 +360,14 @@ function getCommands() {
         option
           .setName("player")
           .setDescription(
-            "The player the character belongs to. Used by STs" +
-              " to update another players Char [ST Only]"
+            "Storytellers must select the player this character belongs to."
           )
       )
 
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you would like to include."
-          )
+          .setDescription("Additional notes or info.")
           .setMaxLength(300)
       )
   );

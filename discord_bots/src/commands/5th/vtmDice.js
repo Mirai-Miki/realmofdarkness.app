@@ -1,7 +1,6 @@
 "use strict";
 require(`${process.cwd()}/alias`);
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { oneLineTrim } = require("common-tags");
 const { v5Roll } = require("@modules/dice/5th/vtmRoll");
 const rouse = require("@src/modules/dice/5th/rouse");
 const resonance = require("@src/modules/dice/5th/resonance");
@@ -48,27 +47,19 @@ module.exports = {
 function getCommand() {
   const command = new SlashCommandBuilder()
     .setName("v")
-    .setDescription("Dice rolls for the vtm v5 Game.");
+    .setDescription("Dice rolls for the VTM V5 game.");
 
   ///////////////////////// VtM Roll Command //////////////////////
   command.addSubcommand((subcommand) =>
     subcommand
       .setName("roll")
-      .setDescription(
-        oneLineTrim`
-      Makes a dice roll following the standard Vampire: 
-      the Masquerade v5 rules. page 117 Corebook
-    `
-      )
+      .setDescription("Roll dice using Vampire: the Masquerade V5 rules.")
 
       .addIntegerOption((option) => {
         option
           .setName("pool")
           .setDescription(
-            oneLineTrim`
-        The base pool you will be rolling whith, can be modified by other 
-        arguments. p118 corebook
-      `
+            "Base dice pool to roll. Can be modified by other options."
           )
           .setMaxValue(50)
           .setMinValue(1)
@@ -79,12 +70,18 @@ function getCommand() {
       .addIntegerOption((option) => {
         option
           .setName("hunger")
-          .setDescription(
-            "The number of hunger dice included in " +
-              "the pool. Must be between 0 to 5. Defaults to 0. p205"
-          )
+          .setDescription("Number of hunger dice (0-5). Defaults to 0.")
           .setMaxValue(5)
           .setMinValue(0);
+        return option;
+      })
+
+      .addBooleanOption((option) => {
+        option
+          .setName("use_char_hunger")
+          .setDescription(
+            "Use hunger dice from your linked character (Defaults to true)."
+          );
         return option;
       })
 
@@ -92,9 +89,7 @@ function getCommand() {
         option
           .setName("difficulty")
           .setDescription(
-            "The Difficulty is the number of dice " +
-              " 6+ needed. Must be between 1 and 50." +
-              " Defaults to 1. p119"
+            "Number of successes needed to succeed (1-50). Defaults to 1."
           )
           .setMaxValue(50)
           .setMinValue(1);
@@ -105,8 +100,7 @@ function getCommand() {
         option
           .setName("blood_surge")
           .setDescription(
-            "Enter your current " +
-              " Blood Potency. Must be between 0 and 10. Also Rouses the blood. p218"
+            "Current Blood Potency (0-10). Rouses the Blood and adds BP dice."
           )
           .setMaxValue(10)
           .setMinValue(0);
@@ -116,10 +110,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("speciality")
-          .setDescription(
-            "The speciality applied to the roll. " +
-              " This adds one dice to your pool. p159"
-          )
+          .setDescription("Specialty applied to the roll. Adds 1 die.")
           .setMaxLength(100);
         return option;
       })
@@ -127,9 +118,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("rouse")
-          .setDescription(
-            "Select if you would also like to Rouse the blood. p211"
-          )
+          .setDescription("Choose if you want to Rouse the blood.")
           .setChoices(
             { name: "No Reroll", value: "No Reroll" },
             { name: "Reroll", value: "Reroll" }
@@ -140,28 +129,18 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("character")
-          .setDescription("Name of the character making the roll.")
+          .setDescription(
+            "Character name for this roll. Links a character (if available)."
+          )
           .setMaxLength(50)
           .setAutocomplete(true);
-        return option;
-      })
-
-      .addBooleanOption((option) => {
-        option
-          .setName("auto_hunger")
-          .setDescription(
-            "Select if you would like your hunger" +
-              " to be taken from your character."
-          );
         return option;
       })
 
       .addStringOption((option) => {
         option
           .setName("notes")
-          .setDescription(
-            "Any extra information you would like to include about this roll."
-          )
+          .setDescription("Extra info to include about this roll.")
           .setMaxLength(300);
         return option;
       })
@@ -171,19 +150,17 @@ function getCommand() {
   command.addSubcommand((subcommand) =>
     subcommand
       .setName("rouse")
-      .setDescription("Rouse the blood for special feats. p211")
+      .setDescription("Rouse the blood for special feats.")
 
       .addBooleanOption((option) => {
-        option
-          .setName("reroll")
-          .setDescription("Select if you are able to roll 2 dice. p211");
+        option.setName("reroll").setDescription("Can you roll 2 dice?");
         return option;
       })
 
       .addStringOption((option) => {
         option
           .setName("character")
-          .setDescription("Name of the character making the roll.")
+          .setDescription("Character name for this roll.")
           .setMaxLength(50)
           .setAutocomplete(true);
         return option;
@@ -192,9 +169,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("notes")
-          .setDescription(
-            "Any extra information you would like to include about this roll."
-          )
+          .setDescription("Extra info to include about this roll.")
           .setMaxLength(300);
         return option;
       })
@@ -204,14 +179,12 @@ function getCommand() {
   command.addSubcommand((subcommand) =>
     subcommand
       .setName("resonance")
-      .setDescription("Temperament and Resonance roll. p228")
+      .setDescription("Temperament and Resonance roll.")
 
       .addStringOption((option) => {
         option
           .setName("resonance")
-          .setDescription(
-            "Select if you already know the what" + " the resonance will be."
-          )
+          .setDescription("Choose the resonance if known.")
           .addChoices(
             { name: "Phlegmatic", value: "Phlegmatic" },
             { name: "Melancholy", value: "Melancholy" },
@@ -225,9 +198,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("temperament")
-          .setDescription(
-            "Select if you already know the what the temperament will be."
-          )
+          .setDescription("Choose the temperament if known.")
           .addChoices(
             { name: "Fleeting", value: "Fleeting" },
             { name: "Intense", value: "Intense" },
@@ -239,7 +210,9 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("min_temperament")
-          .setDescription("The lowest the temperament will be.")
+          .setDescription(
+            "Temperaments below this are not included in the roll."
+          )
           .addChoices(
             { name: "Fleeting", value: "Fleeting" },
             { name: "Intense", value: "Intense" }
@@ -250,9 +223,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("notes")
-          .setDescription(
-            "Any extra information you would like to include about this roll."
-          )
+          .setDescription("Extra info to include about this roll.")
           .setMaxLength(300);
         return option;
       })
@@ -262,12 +233,12 @@ function getCommand() {
   command.addSubcommand((subcommand) =>
     subcommand
       .setName("compulsion")
-      .setDescription("Random Compulsion roll. p208")
+      .setDescription("Random Compulsion roll.")
 
       .addStringOption((option) => {
         option
           .setName("clan")
-          .setDescription("Select if you wish to show Clan Compulsion info.")
+          .setDescription("Show Clan Compulsion info.")
           .addChoices(
             { name: "Banu Haqim", value: "BANU_HAQIM" },
             { name: "Brujah", value: "BRUJAH" },
@@ -290,16 +261,14 @@ function getCommand() {
       .addBooleanOption((option) => {
         option
           .setName("no_clan")
-          .setDescription("Select if you can not get a Clan Compulsion.");
+          .setDescription("Cannot get a Clan Compulsion.");
         return option;
       })
 
       .addStringOption((option) => {
         option
           .setName("notes")
-          .setDescription(
-            "Any extra information you would like to include about this roll."
-          )
+          .setDescription("Extra info to include about this roll.")
           .setMaxLength(300);
         return option;
       })
@@ -309,12 +278,12 @@ function getCommand() {
   command.addSubcommand((subcommand) =>
     subcommand
       .setName("healsuperficial")
-      .setDescription("Heals Superficial Damage")
+      .setDescription("Heal Superficial Damage.")
 
       .addStringOption((option) => {
         option
           .setName("type")
-          .setDescription("Type of damage being healed.")
+          .setDescription("Type of damage to heal.")
           .setRequired(true)
           .addChoices(
             { name: "Health", value: "health" },
@@ -326,7 +295,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("name")
-          .setDescription("Name of the character making the roll.")
+          .setDescription("Character name for this roll.")
           .setMaxLength(50)
           .setAutocomplete(true);
         return option;
@@ -335,9 +304,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("notes")
-          .setDescription(
-            "Any extra information you would like to include about this roll."
-          )
+          .setDescription("Extra info to include about this roll.")
           .setMaxLength(300);
         return option;
       })
@@ -347,14 +314,13 @@ function getCommand() {
   command.addSubcommand((subcommand) =>
     subcommand
       .setName("general")
-      .setDescription("Roll a number of X-sided dice.")
+      .setDescription("Roll X-sided dice.")
 
       .addStringOption((option) => {
         option
           .setName("dice_set_01")
           .setDescription(
-            'A dice set is defined as "(x)d(y)"' +
-              " where (x) is the number of dice and (y) is the number of sides."
+            'Format: "(x)d(y)" where x = dice, y = sides. E.g. "2d6".'
           )
           .setRequired(true)
           .setMaxLength(9);
@@ -364,7 +330,7 @@ function getCommand() {
       .addIntegerOption((option) => {
         option
           .setName("modifier")
-          .setDescription("Adds or removes the number from the total.")
+          .setDescription("Add or subtract from the total.")
           .setMaxValue(1000)
           .setMinValue(-1000);
         return option;
@@ -374,8 +340,7 @@ function getCommand() {
         option
           .setName("dice_set_02")
           .setDescription(
-            'A dice set is defined as "(x)d(y)"' +
-              " where (x) is the number of dice and (y) is the number of sides."
+            'Format: "(x)d(y)" where x = dice, y = sides. E.g. "2d6".'
           )
           .setMaxLength(9);
         return option;
@@ -385,8 +350,7 @@ function getCommand() {
         option
           .setName("dice_set_03")
           .setDescription(
-            'A dice set is defined as "(x)d(y)"' +
-              " where (x) is the number of dice and (y) is the number of sides."
+            'Format: "(x)d(y)" where x = dice, y = sides. E.g. "2d6".'
           )
           .setMaxLength(9);
         return option;
@@ -396,8 +360,7 @@ function getCommand() {
         option
           .setName("dice_set_04")
           .setDescription(
-            'A dice set is defined as "(x)d(y)"' +
-              " where (x) is the number of dice and (y) is the number of sides."
+            'Format: "(x)d(y)" where x = dice, y = sides. E.g. "2d6".'
           )
           .setMaxLength(9);
         return option;
@@ -407,8 +370,7 @@ function getCommand() {
         option
           .setName("dice_set_05")
           .setDescription(
-            'A dice set is defined as "(x)d(y)"' +
-              " where (x) is the number of dice and (y) is the number of sides."
+            'Format: "(x)d(y)" where x = dice, y = sides. E.g. "2d6".'
           )
           .setMaxLength(9);
         return option;
@@ -417,7 +379,7 @@ function getCommand() {
       .addIntegerOption((option) => {
         option
           .setName("difficulty")
-          .setDescription("The total needed to pass the Roll.")
+          .setDescription("Total needed to pass the roll.")
           .setMaxValue(1000)
           .setMinValue(1);
         return option;
@@ -426,9 +388,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("notes")
-          .setDescription(
-            "Any extra information you would like to include about this roll."
-          )
+          .setDescription("Extra info to include about this roll.")
           .setMaxLength(300);
         return option;
       })
