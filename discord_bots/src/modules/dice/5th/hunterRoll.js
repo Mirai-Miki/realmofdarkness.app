@@ -29,6 +29,8 @@ async function getArgs(interaction) {
   const args = {
     pool: interaction.options.getInteger("pool"),
     desperation: interaction.options.getInteger("desperation") ?? null,
+    useCharDesperation:
+      interaction.options.getBoolean("use_char_desperation") ?? false,
     difficulty: interaction.options.getInteger("difficulty") ?? 0,
     spec: interaction.options.getString("speciality") ?? null,
     notes: interaction.options.getString("notes") ?? null,
@@ -56,15 +58,16 @@ async function getArgs(interaction) {
     }
   }
 
-  // Use character's desperation if available and no explicit value was provided
+  // Use character's desperation if useCharDesperation is true
   if (
     args.desperation === null &&
     args.character?.tracked &&
-    // Ensure we have a hunter character with desperation
+    args.useCharDesperation &&
     args.character.tracked.desperation?.current !== undefined
   ) {
     args.desperation = args.character.tracked.desperation.current;
   }
+
   return args;
 }
 
