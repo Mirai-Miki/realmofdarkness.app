@@ -29,60 +29,58 @@ function getCommands() {
   return (
     new SlashCommandBuilder()
       .setName("character")
-      .setDescription("Character Commands")
+      .setDescription("Character commands.")
 
-      //////////////////////////// Character find Command ///////////////////////
+      /////////// Character Find Command ///////////
       .addSubcommand((subcommand) =>
         subcommand
           .setName("find")
-          .setDescription("Finds a tracked Character")
-          /*
-      .addBooleanOption(option =>
-        option.setName("history")
-        .setDescription("Select if you would like to display" +
-          " the history information.")
-      )
-      */
+          .setDescription("Find a tracked character.")
+
           .addUserOption((option) =>
             option
               .setName("player")
               .setDescription(
-                "The player the character belongs to. Used by" +
-                  " STs to find another players Char [ST Only]"
+                "Player to search for. For STs to find another player's characters. [Storyteller Only]"
               )
           )
       )
-      ///////////////////// Character Delete Command ////////////////////////////
+      /////////// Character Delete Command ///////////
       .addSubcommand((subcommand) =>
         subcommand
           .setName("delete")
-          .setDescription("Choose which Character you wish to Delete.")
+          .setDescription(
+            "Delete a character you own or have permission to remove."
+          )
 
           .addUserOption((option) =>
             option
               .setName("player")
-              .setDescription("The player the character belongs to. [ST Only]")
+              .setDescription(
+                "Player who owns the character. [Storyteller Only]"
+              )
           )
       )
-      ///////////////////////// Character Defaults /////////////////////
+      /////////// Character Default Command ///////////
       .addSubcommand((subcommand) =>
         subcommand
           .setName("default")
           .setDescription(
-            "Sets a default character for this server to be " +
-              "used for dice rolls and character updates."
+            "Set a default character for this server for dice rolls and updates."
           )
 
           .addStringOption((option) =>
             option
               .setName("name")
-              .setDescription("Name of the character to default to.")
+              .setDescription("Name of the character to set as default.")
               .setMaxLength(50)
               .setRequired(true)
           )
 
           .addBooleanOption((option) =>
-            option.setName("disable").setDescription("Turns defaults off.")
+            option
+              .setName("disable")
+              .setDescription("Disable default character.")
           )
       )
   );

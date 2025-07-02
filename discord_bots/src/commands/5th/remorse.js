@@ -29,14 +29,13 @@ module.exports = {
 function getCommand() {
   const command = new SlashCommandBuilder()
     .setName("remorse")
-    .setDescription("Humanity Remorse roll. p239")
+    .setDescription("Humanity Remorse roll (p239).")
 
     .addStringOption((option) => {
       option
         .setName("name")
         .setDescription(
-          "Name of the character making the roll. " +
-            "Must be a sheet character."
+          "Name of the character making the roll (must be a sheet character)."
         )
         .setMaxLength(50)
         .setAutocomplete(true);
@@ -47,7 +46,7 @@ function getCommand() {
       option
         .setName("notes")
         .setDescription(
-          "Any extra information you would like to include about this roll."
+          "Any additional information you want to include about this roll."
         )
         .setMaxLength(300);
       return option;

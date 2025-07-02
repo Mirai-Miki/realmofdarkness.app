@@ -59,18 +59,18 @@ async function getArgs(interaction) {
 function getCommands() {
   const command = new SlashCommandBuilder()
     .setName("hunter")
-    .setDescription("Hunter tracker commands");
+    .setDescription("Hunter tracker commands.");
 
   ////////////////// New Vampire ////////////////////////////
   command.addSubcommand((subcommand) =>
     subcommand
       .setName("new")
-      .setDescription("Create a new Hunter 5th.")
+      .setDescription("Create a new Hunter 5th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Name of your character.")
           .setRequired(true)
           .setMaxLength(50)
       )
@@ -78,10 +78,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Your total Willpower. " +
-              "Must be between 1 and 20. HtR 5th Corebook p60"
-          )
+          .setDescription("Total Willpower (1-20).")
           .setMaxValue(20)
           .setMinValue(1)
           .setRequired(true)
@@ -90,10 +87,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Your total Health. " +
-              "Must be between 1 and 20. HtR 5th Corebook p60"
-          )
+          .setDescription("Total Health (1-20).")
           .setMaxValue(20)
           .setMinValue(1)
           .setRequired(true)
@@ -102,10 +96,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("desperation")
-          .setDescription(
-            "Your current Desperation rating. " +
-              "Must be between 1 and 5. HtR 5th Corebook p125"
-          )
+          .setDescription("Current Desperation (1-5).")
           .setMaxValue(5)
           .setMinValue(1)
       )
@@ -113,10 +104,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("danger")
-          .setDescription(
-            "Your current Danger rating. " +
-              "Must be between 1 and 5. HtR 5th Corebook p125"
-          )
+          .setDescription("Current Danger (1-5).")
           .setMaxValue(5)
           .setMinValue(1)
       )
@@ -124,15 +112,13 @@ function getCommands() {
       .addBooleanOption((option) =>
         option
           .setName("despair")
-          .setDescription(
-            "If you are currently in despair. HtR 5th Corebook p128"
-          )
+          .setDescription("If you are currently in despair.")
       )
 
       .addIntegerOption((option) =>
         option
           .setName("exp")
-          .setDescription("Your total Experiance. HtR 5th Corebook p82")
+          .setDescription("Total Experience.")
           .setMaxValue(1000)
           .setMinValue(0)
       )
@@ -140,10 +126,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower_superficial")
-          .setDescription(
-            "Your current Superficial Willpower Damage. " +
-              "Must be between 0 and 15. HtR 5th Corebook p123"
-          )
+          .setDescription("Superficial Willpower Damage (0-15).")
           .setMaxValue(15)
           .setMinValue(0)
       )
@@ -151,10 +134,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower_agg")
-          .setDescription(
-            "Your current Aggravated Willpower Damage. " +
-              "HtR 5th Corebook p123"
-          )
+          .setDescription("Aggravated Willpower Damage (0-15).")
           .setMaxValue(15)
           .setMinValue(0)
       )
@@ -162,10 +142,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health_superficial")
-          .setDescription(
-            "Your current Superficial Health Damage. " +
-              "Must be between 0 and 20. HtR 5th Corebook p123"
-          )
+          .setDescription("Superficial Health Damage (0-20).")
           .setMaxValue(20)
           .setMinValue(0)
       )
@@ -173,10 +150,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health_agg")
-          .setDescription(
-            "Your current Aggravated Health Damage. " +
-              "Must be between 0 and 20. HtR 5th Corebook p123"
-          )
+          .setDescription("Aggravated Health Damage (0-20).")
           .setMaxValue(20)
           .setMinValue(0)
       )
@@ -184,9 +158,7 @@ function getCommands() {
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any additional information you would like to include."
-          )
+          .setDescription("Any additional information you want to include.")
           .setMaxLength(300)
       )
 
@@ -194,8 +166,7 @@ function getCommands() {
         option
           .setName("color")
           .setDescription(
-            "Changes the side bar color." +
-              " Enter a color hex code eg #6f82ab. [Supporter Only]"
+            "Sidebar color. Enter hex code (e.g. #6f82ab). [Supporter Only]"
           )
           .setMaxLength(7)
           .setMinLength(7)
@@ -205,7 +176,7 @@ function getCommands() {
         option
           .setName("image")
           .setDescription(
-            "Changes your Character's Thumbnail" + " Image. [Supporter Only]"
+            "Change your character's thumbnail image. [Supporter Only]"
           )
       )
   );
@@ -214,12 +185,12 @@ function getCommands() {
   command.addSubcommand((subcommand) =>
     subcommand
       .setName("set")
-      .setDescription("Set values for your Hunter 5th.")
+      .setDescription("Set values for your Hunter 5th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Name of your character.")
           .setRequired(true)
           .setMaxLength(50)
           .setAutocomplete(true)
@@ -228,10 +199,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Your total Willpower. " +
-              "Must be between 1 and 20. HtR 5th Corebook p60"
-          )
+          .setDescription("Total Willpower (1-20).")
           .setMaxValue(20)
           .setMinValue(1)
       )
@@ -239,10 +207,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Your total Health. " +
-              "Must be between 1 and 20. HtR 5th Corebook p60"
-          )
+          .setDescription("Total Health (1-20).")
           .setMaxValue(20)
           .setMinValue(1)
       )
@@ -250,10 +215,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("desperation")
-          .setDescription(
-            "Your current Desperation rating. " +
-              "Must be between 1 and 5. HtR 5th Corebook p125"
-          )
+          .setDescription("Current Desperation (1-5).")
           .setMaxValue(5)
           .setMinValue(1)
       )
@@ -261,10 +223,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("danger")
-          .setDescription(
-            "Your current Danger rating. " +
-              "Must be between 1 and 5. HtR 5th Corebook p125"
-          )
+          .setDescription("Current Danger (1-5).")
           .setMaxValue(5)
           .setMinValue(1)
       )
@@ -272,17 +231,14 @@ function getCommands() {
       .addBooleanOption((option) =>
         option
           .setName("despair")
-          .setDescription(
-            "If you are currently in despair. HtR 5th Corebook p128"
-          )
+          .setDescription("If you are currently in despair.")
       )
 
       .addIntegerOption((option) =>
         option
           .setName("exp")
           .setDescription(
-            "Your total Experiance. " +
-              "+ values will also increase your current. HtR 5th Corebook p82"
+            "Total Experience. Positive values increase current exp."
           )
           .setMaxValue(1000)
           .setMinValue(0)
@@ -291,10 +247,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower_superficial")
-          .setDescription(
-            "Your current Superficial Willpower Damage. " +
-              "Must be between 0 and 15. HtR 5th Corebook p123"
-          )
+          .setDescription("Superficial Willpower Damage (0-15).")
           .setMaxValue(15)
           .setMinValue(0)
       )
@@ -302,10 +255,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower_agg")
-          .setDescription(
-            "Your current Aggravated Willpower Damage. " +
-              "HtR 5th Corebook p123"
-          )
+          .setDescription("Aggravated Willpower Damage (0-15).")
           .setMaxValue(15)
           .setMinValue(0)
       )
@@ -313,10 +263,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health_superficial")
-          .setDescription(
-            "Your current Superficial Health Damage. " +
-              "Must be between 0 and 20. HtR 5th Corebook p123"
-          )
+          .setDescription("Superficial Health Damage (0-20).")
           .setMaxValue(20)
           .setMinValue(0)
       )
@@ -324,10 +271,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health_agg")
-          .setDescription(
-            "Your current Aggravated Health Damage. " +
-              "Must be between 0 and 20. HtR 5th Corebook p123"
-          )
+          .setDescription("Aggravated Health Damage (0-20).")
           .setMaxValue(20)
           .setMinValue(0)
       )
@@ -335,16 +279,14 @@ function getCommands() {
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you would like to include."
-          )
+          .setDescription("Any additional information you want to include.")
           .setMaxLength(300)
       )
 
       .addStringOption((option) =>
         option
           .setName("change_name")
-          .setDescription("Change your Character's name.")
+          .setDescription("Change your character's name.")
           .setMaxLength(50)
       )
 
@@ -352,8 +294,7 @@ function getCommands() {
         option
           .setName("color")
           .setDescription(
-            "Changes the side bar color." +
-              " Enter a color hex code eg #6f82ab. [Supporter Only]"
+            "Sidebar color. Enter hex code (e.g. #6f82ab). [Supporter Only]"
           )
           .setMaxLength(7)
           .setMinLength(7)
@@ -363,7 +304,7 @@ function getCommands() {
         option
           .setName("image")
           .setDescription(
-            "Changes your Character's Thumbnail" + " Image. [Supporter Only]"
+            "Change your character's thumbnail image. [Supporter Only]"
           )
       )
   );
@@ -372,12 +313,12 @@ function getCommands() {
   command.addSubcommand((subcommand) =>
     subcommand
       .setName("update")
-      .setDescription("Update values for your Hunter 5th.")
+      .setDescription("Update values for your Hunter 5th character.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Name of your character.")
           .setRequired(true)
           .setMaxLength(50)
           .setAutocomplete(true)
@@ -386,10 +327,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("desperation")
-          .setDescription(
-            "Upates your Desperation by the value. " +
-              "Must be between -10 and 10. HtR 5th Corebook p125"
-          )
+          .setDescription("Change Desperation by value (-10 to 10).")
           .setMaxValue(10)
           .setMinValue(-10)
       )
@@ -397,10 +335,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("danger")
-          .setDescription(
-            "Updates your Danger by the value. " +
-              "Must be between -10 and 10. HtR 5th Corebook p125"
-          )
+          .setDescription("Change Danger by value (-10 to 10).")
           .setMaxValue(10)
           .setMinValue(-10)
       )
@@ -408,17 +343,14 @@ function getCommands() {
       .addBooleanOption((option) =>
         option
           .setName("despair")
-          .setDescription(
-            "If you are currently in despair. HtR 5th Corebook p128"
-          )
+          .setDescription("If you are currently in despair.")
       )
 
       .addIntegerOption((option) =>
         option
           .setName("willpower_superficial")
           .setDescription(
-            "Updates you current SW damage" +
-              " by the amount. Must be between -20 and 20. HtR 5th Corebook p123"
+            "Change Superficial Willpower Damage by value (-20 to 20)."
           )
           .setMaxValue(20)
           .setMinValue(-20)
@@ -428,8 +360,7 @@ function getCommands() {
         option
           .setName("health_superficial")
           .setDescription(
-            "Updates you current SH Damage" +
-              " by the amount. Must be between -30 and 30. HtR 5th Corebook p123"
+            "Change Superficial Health Damage by value (-30 to 30)."
           )
           .setMaxValue(30)
           .setMinValue(-30)
@@ -439,8 +370,7 @@ function getCommands() {
         option
           .setName("willpower_agg")
           .setDescription(
-            "Updates you current AW Damage" +
-              " by the amount. Must be between -20 and 20. HtR 5th Corebook p123"
+            "Change Aggravated Willpower Damage by value (-20 to 20)."
           )
           .setMaxValue(20)
           .setMinValue(-20)
@@ -450,8 +380,7 @@ function getCommands() {
         option
           .setName("health_agg")
           .setDescription(
-            "Updates you current AH Damage" +
-              " by the amount. Must be between -30 and 30. HtR 5th Corebook p123"
+            "Change Aggravated Health Damage by value (-30 to 30)."
           )
           .setMaxValue(30)
           .setMinValue(-30)
@@ -460,10 +389,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("exp")
-          .setDescription(
-            "Updates you Current Exp by the amount." +
-              "+ values will also increase your total. HtR 5th Corebook p82"
-          )
+          .setDescription("Change Experience by value.")
           .setMaxValue(2000)
           .setMinValue(-2000)
       )
@@ -471,10 +397,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("willpower")
-          .setDescription(
-            "Updates your Total Willpower by the amount. " +
-              "Must be between -20 and 20. HtR 5th Corebook p60"
-          )
+          .setDescription("Change Total Willpower by value (-20 to 20).")
           .setMaxValue(20)
           .setMinValue(-20)
       )
@@ -482,10 +405,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("health")
-          .setDescription(
-            "Updates your Total Health by the amount. " +
-              "Must be between -30 and 30. HtR 5th Corebook p123"
-          )
+          .setDescription("Change Total Health by value (-30 to 30).")
           .setMaxValue(30)
           .setMinValue(-30)
       )
@@ -494,17 +414,14 @@ function getCommands() {
         option
           .setName("player")
           .setDescription(
-            "The player the character belongs to. Used by STs" +
-              " to update another players Char [ST Only]"
+            "Storytellers must select the player this character belongs to."
           )
       )
 
       .addStringOption((option) =>
         option
           .setName("notes")
-          .setDescription(
-            "Any aditional information you would like to include."
-          )
+          .setDescription("Any additional information you want to include.")
           .setMaxLength(300)
       )
   );

@@ -29,9 +29,7 @@ function getCommand() {
     .addIntegerOption((option) => {
       option
         .setName("difficulty")
-        .setDescription(
-          "The Difficulty of the frenzy test. " + "p220 v5 Corebook"
-        )
+        .setDescription("Difficulty of the frenzy test.")
         .setMaxValue(50)
         .setMinValue(1)
         .setRequired(true);
@@ -41,7 +39,7 @@ function getCommand() {
     .addIntegerOption((option) => {
       option
         .setName("modifier")
-        .setDescription("Adds or removed additional dice.")
+        .setDescription("Adds or removes additional dice to the roll.")
         .setMaxValue(50)
         .setMinValue(1);
       return option;
@@ -51,8 +49,7 @@ function getCommand() {
       option
         .setName("name")
         .setDescription(
-          "Name of the character making the roll. " +
-            "Must be a sheet character."
+          "Name of the character making the roll (must be a sheet character)."
         )
         .setMaxLength(50)
         .setAutocomplete(true);
@@ -63,7 +60,7 @@ function getCommand() {
       option
         .setName("notes")
         .setDescription(
-          "Any extra information you would like to include about this roll."
+          "Any additional information you would like to include about this roll."
         )
         .setMaxLength(300);
       return option;

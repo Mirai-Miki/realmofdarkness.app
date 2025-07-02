@@ -150,24 +150,24 @@ function getCommand() {
   return (
     new SlashCommandBuilder()
       .setName("init")
-      .setDescription("Manage initiative tracking for combat")
+      .setDescription("Manage initiative tracking for combat.")
 
       ////////////////////// New Init Command ////////////////////////////////
       .addSubcommand((subcommand) =>
         subcommand
           .setName("new")
-          .setDescription("Creates a new Initiative tracker in this channel.")
+          .setDescription("Start a new initiative tracker in this channel.")
       )
 
       ///////////////////// Roll Init Command /////////////////////////////////
       .addSubcommand((subcommand) =>
         subcommand
           .setName("roll")
-          .setDescription("Rolls initiative for a specific character.")
+          .setDescription("Roll initiative for your character.")
           .addStringOption((option) =>
             option
               .setName("name")
-              .setDescription("The name of the character rolling.")
+              .setDescription("Name of the character rolling initiative.")
               .setMaxLength(50)
               .setRequired(true)
               .setAutocomplete(true)
@@ -175,9 +175,7 @@ function getCommand() {
           .addIntegerOption((option) =>
             option
               .setName("dex_wits")
-              .setDescription(
-                "Your Dexterity + Wits. Must be between 0 and 100."
-              )
+              .setDescription("Dexterity + Wits total (1-100).")
               .setMaxValue(100)
               .setMinValue(1)
               .setRequired(true)
@@ -185,20 +183,14 @@ function getCommand() {
           .addIntegerOption((option) =>
             option
               .setName("modifier")
-              .setDescription(
-                "Any bonus or penalties that apply. " +
-                  "Must be between -50 and 50."
-              )
+              .setDescription("Initiative bonus or penalty (-50 to 50).")
               .setMaxValue(50)
               .setMinValue(-50)
           )
           .addIntegerOption((option) =>
             option
               .setName("extra_actions")
-              .setDescription(
-                "Any additional actions you are allowed to take. " +
-                  "Must be between 1 and 5."
-              )
+              .setDescription("Number of extra actions (1-5).")
               .setMaxValue(5)
               .setMinValue(1)
           )
@@ -208,11 +200,11 @@ function getCommand() {
       .addSubcommand((subcommand) =>
         subcommand
           .setName("reroll")
-          .setDescription("Rerolls the last roll for specific character.")
+          .setDescription("Reroll initiative for your character.")
           .addStringOption((option) =>
             option
               .setName("name")
-              .setDescription("The name of the character rerolling.")
+              .setDescription("Name of the character rerolling initiative.")
               .setMaxLength(50)
               .setRequired(true)
               .setAutocomplete(true)
@@ -220,20 +212,14 @@ function getCommand() {
           .addIntegerOption((option) =>
             option
               .setName("modifier")
-              .setDescription(
-                "Any bonus or penalties that apply. " +
-                  "Must be between -50 and 50."
-              )
+              .setDescription("Initiative bonus or penalty (-50 to 50).")
               .setMaxValue(50)
               .setMinValue(-50)
           )
           .addIntegerOption((option) =>
             option
               .setName("extra_actions")
-              .setDescription(
-                "Any additional actions you are allowed to take. " +
-                  "Must be between 1 and 5."
-              )
+              .setDescription("Number of extra actions (1-5).")
               .setMaxValue(5)
               .setMinValue(1)
           )
@@ -243,14 +229,11 @@ function getCommand() {
       .addSubcommand((subcommand) =>
         subcommand
           .setName("declare")
-          .setDescription(
-            "Declares the action for a specific character. " +
-              "Can only be used on your turn."
-          )
+          .setDescription("Declare your action for this turn.")
           .addStringOption((option) =>
             option
               .setName("action")
-              .setDescription("The action you will take.")
+              .setDescription("Describe the action you will take this turn.")
               .setMaxLength(150)
               .setRequired(true)
           )
@@ -260,7 +243,9 @@ function getCommand() {
       .addSubcommand((subcommand) =>
         subcommand
           .setName("repost")
-          .setDescription("Reposts the current tracker to the channel.")
+          .setDescription(
+            "Repost the current initiative tracker to this channel."
+          )
       )
 
       ///////////////////// Join Init Command ////////////////////////////////
@@ -268,12 +253,12 @@ function getCommand() {
         subcommand
           .setName("join")
           .setDescription(
-            "Joins the current round with the same initiative value."
+            "Join the current round with the same initiative value."
           )
           .addStringOption((option) =>
             option
               .setName("name")
-              .setDescription("The name of the character joining.")
+              .setDescription("Name of the character joining the round.")
               .setMaxLength(50)
               .setRequired(true)
               .setAutocomplete(true)
@@ -281,10 +266,7 @@ function getCommand() {
           .addIntegerOption((option) =>
             option
               .setName("extra_actions")
-              .setDescription(
-                "Any additional actions you are allowed to take. " +
-                  "Must be between 1 and 5."
-              )
+              .setDescription("Number of extra actions (1-5).")
               .setMaxValue(5)
               .setMinValue(1)
           )

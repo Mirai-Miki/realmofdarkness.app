@@ -29,23 +29,20 @@ module.exports = {
 function getCommand() {
   const command = new SlashCommandBuilder()
     .setName("sheet")
-    .setDescription("Dice rolls for the vtm v5 Game.");
+    .setDescription("Dice rolls for the Vampire: the Masquerade V5 game.");
 
   ///////////////////////// V5 Sheet Roll Command //////////////////////
   command.addSubcommand((subcommand) =>
     subcommand
       .setName("roll")
       .setDescription(
-        oneLineTrim`
-      Makes a dice roll following the standard Vampire: 
-      the Masquerade v5 rules. page 117 Corebook
-    `
+        "Rolls dice using standard Vampire: the Masquerade V5 rules."
       )
 
       .addStringOption((option) => {
         option
           .setName("attribute")
-          .setDescription("Select the attribute for your pool.")
+          .setDescription("Select the first attribute for your pool.")
           .setChoices(
             { name: "Strength", value: "strength" },
             { name: "Dexterity", value: "dexterity" },
@@ -81,7 +78,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("skill_physical")
-          .setDescription("Select the Physical Skill for your pool.")
+          .setDescription("Select the physical skill for your pool.")
           .setChoices(
             { name: "Athletics", value: "athletics" },
             { name: "Brawl", value: "brawl" },
@@ -99,7 +96,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("skill_social")
-          .setDescription("Select the Social Skill for your pool.")
+          .setDescription("Select the social skill for your pool.")
           .setChoices(
             { name: "animal_ken", value: "animal_ken" },
             { name: "etiquette", value: "etiquette" },
@@ -117,7 +114,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("skill_mental")
-          .setDescription("Select the Mental Skill for your pool.")
+          .setDescription("Select the mental skill for your pool.")
           .setChoices(
             { name: "academics", value: "academics" },
             { name: "awareness", value: "awareness" },
@@ -135,7 +132,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("discipline")
-          .setDescription("Select the Discipline for your pool")
+          .setDescription("Select the discipline for your pool.")
           .setAutocomplete(true);
         return option;
       })
@@ -143,7 +140,7 @@ function getCommand() {
       .addIntegerOption((option) => {
         option
           .setName("modifier")
-          .setDescription("Adds or Removes dice in addition to your pool.")
+          .setDescription("Add or remove dice from your pool.")
           .setMaxValue(50)
           .setMinValue(-50);
         return option;
@@ -153,9 +150,7 @@ function getCommand() {
         option
           .setName("difficulty")
           .setDescription(
-            "The Difficulty is the number of dice " +
-              " 6+ needed. Must be between 1 and 50." +
-              " Defaults to 1. p119"
+            "Number of dice successes needed (1-50). Defaults to 1."
           )
           .setMaxValue(50)
           .setMinValue(1);
@@ -165,19 +160,14 @@ function getCommand() {
       .addBooleanOption((option) => {
         option
           .setName("blood_surge")
-          .setDescription(
-            "Select if you wish to Surge the blood. This also Rouses the blood. p218"
-          );
+          .setDescription("Add surge dice (also Rouses the blood).");
         return option;
       })
 
       .addStringOption((option) => {
         option
           .setName("speciality")
-          .setDescription(
-            "The speciality applied to the roll. " +
-              " This adds one dice to your pool. p159"
-          )
+          .setDescription("Speciality applied to the roll (adds 1 die).")
           .setMaxLength(100);
         return option;
       })
@@ -185,9 +175,7 @@ function getCommand() {
       .addStringOption((option) => {
         option
           .setName("rouse")
-          .setDescription(
-            "Select if you would also like to Rouse the blood. p211"
-          )
+          .setDescription("Rouse the blood.")
           .setChoices(
             { name: "No Reroll", value: "No Reroll" },
             { name: "Reroll", value: "Reroll" }
@@ -198,10 +186,7 @@ function getCommand() {
       .addBooleanOption((option) => {
         option
           .setName("hunger")
-          .setDescription(
-            "Select if you would like your hunger to be added. " +
-              "Default is True"
-          );
+          .setDescription("Add your hunger to the roll (Default is True).");
         return option;
       })
 
@@ -209,8 +194,7 @@ function getCommand() {
         option
           .setName("name")
           .setDescription(
-            "Name of the character making the roll. " +
-              "Must be a sheet character."
+            "Name of the character making the roll (must be a sheet character)."
           )
           .setMaxLength(50)
           .setAutocomplete(true);
@@ -221,7 +205,7 @@ function getCommand() {
         option
           .setName("notes")
           .setDescription(
-            "Any extra information you would like to include about this roll."
+            "Any additional information you want to include about this roll."
           )
           .setMaxLength(300);
         return option;

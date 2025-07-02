@@ -29,32 +29,32 @@ function getCommands() {
   return (
     new SlashCommandBuilder()
       .setName("character")
-      .setDescription("Character Commands")
+      .setDescription("Character commands.")
 
-      //////////////////////////// Character find Command ///////////////////////
+      ////////////////////////// Character find Command ///////////////////////
       .addSubcommand((subcommand) =>
         subcommand
           .setName("find")
-          .setDescription("Finds a tracked Character")
+          .setDescription("Find a tracked character.")
           .addUserOption((option) =>
             option
               .setName("player")
               .setDescription(
-                "The player the character belongs to. Used by" +
-                  " STs to find another players Char [ST Only]"
+                "Storytellers must select the player this character belongs to."
               )
           )
       )
-      ///////////////////// Character Delete Command ////////////////////////////
+      ///////////////////// Character Delete Command //////////////////////////
       .addSubcommand((subcommand) =>
         subcommand
           .setName("delete")
-          .setDescription("Choose which Character you wish to Delete.")
-
+          .setDescription("Delete a tracked character.")
           .addUserOption((option) =>
             option
               .setName("player")
-              .setDescription("The player the character belongs to. [ST Only]")
+              .setDescription(
+                "Storytellers must select the player this character belongs to."
+              )
           )
       )
       ///////////////////////// Character Defaults /////////////////////
@@ -62,25 +62,25 @@ function getCommands() {
         subcommand
           .setName("default")
           .setDescription(
-            "Sets a default character for this server to be " +
-              "used for dice rolls and character updates."
+            "Set a default character for dice rolls and updates on this server."
           )
-
           .addStringOption((option) =>
             option
               .setName("name")
-              .setDescription("Name of the character to default to.")
+              .setDescription("Name of the character to set as default.")
               .setMaxLength(50)
           )
-
           .addBooleanOption((option) =>
             option
-              .setName("auto_hunger")
-              .setDescription("If rolls made should automatically use hunger.")
+              .setName("use_char_hunger")
+              .setDescription(
+                "If enabled, rolls always use this character's hunger."
+              )
           )
-
           .addBooleanOption((option) =>
-            option.setName("disable").setDescription("Turns defaults off.")
+            option
+              .setName("disable")
+              .setDescription("Disable default character.")
           )
       )
   );

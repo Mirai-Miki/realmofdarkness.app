@@ -58,19 +58,19 @@ async function getArgs(interaction) {
 function getCommands() {
   const slashCommand = new SlashCommandBuilder()
     .setName("blood")
-    .setDescription("Commands for managing Vampire blood pools 20th");
+    .setDescription("Manage Vampire blood pools.");
 
   /////////////////////// use blood ////////////////////////////
 
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("use")
-      .setDescription("Uses blood to heal damage or activate disciplines")
+      .setDescription("Use blood to heal or activate disciplines.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Character name.")
           .setRequired(true)
           .setMaxLength(50)
           .setAutocomplete(true)
@@ -79,9 +79,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("amount")
-          .setDescription(
-            "Amount of blood points to use. Must be between 1 and 50."
-          )
+          .setDescription("Amount of blood points to use (1-50).")
           .setMinValue(1)
           .setMaxValue(50)
           .setRequired(true)
@@ -90,7 +88,7 @@ function getCommands() {
       .addStringOption((option) =>
         option
           .setName("action")
-          .setDescription("Action for which the blood points are spent.")
+          .setDescription("Action for which blood is spent.")
           .setRequired(true)
           .addChoices(
             { name: "Heal bashing", value: "bashing_damage" },
@@ -105,12 +103,12 @@ function getCommands() {
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("gain")
-      .setDescription("Gain blood points from a source")
+      .setDescription("Gain blood points from a source.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Character name.")
           .setRequired(true)
           .setMaxLength(50)
           .setAutocomplete(true)
@@ -119,9 +117,7 @@ function getCommands() {
       .addIntegerOption((option) =>
         option
           .setName("amount")
-          .setDescription(
-            "Amount of blood points to gain. Must be between 1 and 50."
-          )
+          .setDescription("Amount of blood points to gain (1-50).")
           .setMinValue(1)
           .setMaxValue(50)
           .setRequired(true)
@@ -132,12 +128,12 @@ function getCommands() {
   slashCommand.addSubcommand((subcommand) =>
     subcommand
       .setName("check")
-      .setDescription("Check the current blood points of your character")
+      .setDescription("Check your character's current blood points.")
 
       .addStringOption((option) =>
         option
           .setName("name")
-          .setDescription("The name of your Character")
+          .setDescription("Character name.")
           .setRequired(true)
           .setMaxLength(50)
           .setAutocomplete(true)

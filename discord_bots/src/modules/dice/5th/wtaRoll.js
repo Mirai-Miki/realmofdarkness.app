@@ -33,6 +33,7 @@ async function getArgs(interaction) {
   const args = {
     pool: interaction.options.getInteger("pool"),
     rage: interaction.options.getInteger("rage"),
+    autoRage: interaction.options.getBoolean("use_char_rage") ?? true,
     difficulty: interaction.options.getInteger("difficulty"),
     spec: interaction.options.getString("speciality"),
     rageCheck: interaction.options.getString("rage_check"),
@@ -43,7 +44,6 @@ async function getArgs(interaction) {
       interaction,
       false
     ),
-    autoRage: interaction.options.getBoolean("auto_rage") ?? true,
   };
 
   // Get character defaults if no character specified
