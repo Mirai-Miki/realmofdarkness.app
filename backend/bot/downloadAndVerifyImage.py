@@ -21,7 +21,7 @@ def download_and_verify_image(
     image_url,
 ) -> Tuple[Optional[InMemoryUploadedFile], FailureReason]:
     """
-    Downloads an image from the URL, verifies it using Pillow, and returns it.
+    Downloads an image from the Discord URL, verifies it using Pillow, and returns it.
 
     Args:
         image_url: The URL of the image to download.
@@ -43,6 +43,10 @@ def download_and_verify_image(
     }
 
     try:
+        # Validate the URL format is from Discord's CDN
+        if not image_url.startswith("https://cdn.discordapp.com/"):
+            return None, ImageError.INVALID_IMAGE
+
         # First make a HEAD request to check size before downloading
         head_response = requests.head(image_url, headers=headers, timeout=5)
         content_length = head_response.headers.get("Content-Length")
