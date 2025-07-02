@@ -57,20 +57,26 @@ function getCommand() {
           option
             .setName("desperation")
             .setDescription(
-              "The number of desperation dice to add to " +
-                "the pool. Must be between 0 to 5. Defaults to 0."
+              "The number of desperation dice to add to the pool. Must be between 0 to 5. Defaults to 0."
             )
             .setMaxValue(5)
             .setMinValue(0)
         )
 
+        .addBooleanOption((option) => {
+          option
+            .setName("use_char_desperation")
+            .setDescription(
+              "Add the Desperation dice value from your linked character (if available)."
+            );
+          return option;
+        })
+
         .addIntegerOption((option) =>
           option
             .setName("difficulty")
             .setDescription(
-              "The Difficulty is the number of dice " +
-                " 6+ needed. Must be between 1 and 50." +
-                " Defaults to 1."
+              "The Difficulty is the number of dice 6+ needed. Must be between 1 and 50. Defaults to 1."
             )
             .setMaxValue(50)
             .setMinValue(1)
@@ -80,8 +86,7 @@ function getCommand() {
           option
             .setName("speciality")
             .setDescription(
-              "The speciality applied to the roll. " +
-                " This adds one dice to your pool."
+              "The speciality applied to the roll. This adds one dice to your pool."
             )
             .setMaxLength(100)
         )
@@ -112,8 +117,7 @@ function getCommand() {
           option
             .setName("dice_set_01")
             .setDescription(
-              'A dice set is defined as "(x)d(y)"' +
-                " where (x) is the number of dice and (y) is the number of sides."
+              'A dice set is defined as "(x)d(y)" where (x) is the number of dice and (y) is the number of sides.'
             )
             .setRequired(true)
             .setMaxLength(9)
@@ -131,8 +135,7 @@ function getCommand() {
           option
             .setName("dice_set_02")
             .setDescription(
-              'A dice set is defined as "(x)d(y)"' +
-                " where (x) is the number of dice and (y) is the number of sides."
+              'A dice set is defined as "(x)d(y)" where (x) is the number of dice and (y) is the number of sides.'
             )
             .setMaxLength(9)
         )
@@ -141,8 +144,7 @@ function getCommand() {
           option
             .setName("dice_set_03")
             .setDescription(
-              'A dice set is defined as "(x)d(y)"' +
-                " where (x) is the number of dice and (y) is the number of sides."
+              'A dice set is defined as "(x)d(y)" where (x) is the number of dice and (y) is the number of sides.'
             )
             .setMaxLength(9)
         )
@@ -151,8 +153,7 @@ function getCommand() {
           option
             .setName("dice_set_04")
             .setDescription(
-              'A dice set is defined as "(x)d(y)"' +
-                " where (x) is the number of dice and (y) is the number of sides."
+              'A dice set is defined as "(x)d(y)" where (x) is the number of dice and (y) is the number of sides.'
             )
             .setMaxLength(9)
         )
@@ -161,8 +162,7 @@ function getCommand() {
           option
             .setName("dice_set_05")
             .setDescription(
-              'A dice set is defined as "(x)d(y)"' +
-                " where (x) is the number of dice and (y) is the number of sides."
+              'A dice set is defined as "(x)d(y)" where (x) is the number of dice and (y) is the number of sides.'
             )
             .setMaxLength(9)
         )
