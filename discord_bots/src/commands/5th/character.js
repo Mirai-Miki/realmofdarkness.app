@@ -62,7 +62,7 @@ function getCommands() {
         subcommand
           .setName("default")
           .setDescription(
-            "Set a default character for dice rolls and updates on this server. [Requires Mortal+ Supporter Tier]"
+            "Set a default character for dice rolls and updates on this server. [Supporter Required]"
           )
           .addStringOption((option) =>
             option
