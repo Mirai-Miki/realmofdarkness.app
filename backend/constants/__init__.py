@@ -3,6 +3,8 @@ Central location for application-wide constants used throughout the backend.
 Defines supporter tiers, limits for character sheets and trackers, and image error codes.
 """
 
+from .splats import Splats, Versions
+
 
 class Supporter:
     """
