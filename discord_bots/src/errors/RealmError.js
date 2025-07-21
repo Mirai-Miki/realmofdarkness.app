@@ -138,12 +138,84 @@ const ErrorInfo = {
     debug: false,
     cause: false,
   },
+  [ErrorCodes.RequiresMortal]: {
+    system: "Permission Error: Requires Mortal",
+    embedTitle: "Permission Error: Mortal Supporter Required.",
+    embedMessage: oneLineTrim`
+      This Command or an option in this command requires being a supporter
+      of at least Mortal or higher.
+      You can become a supporter over on my 
+      [Patreon](https://www.patreon.com/MiraiMiki)
+    `,
+    debug: false,
+    cause: false,
+  },
   [ErrorCodes.RequiresFledgling]: {
     system: "Permission Error: Requires Fledgling",
     embedTitle: "Permission Error: Fledgling Supporter Required.",
     embedMessage: oneLineTrim`
       This Command or an option in this command requires being a supporter 
       of at least Fledgling or higher. 
+      You can become a supporter over on my 
+      [Patreon](https://www.patreon.com/MiraiMiki)
+    `,
+    debug: false,
+    cause: false,
+  },
+  [ErrorCodes.RequiresNeonate]: {
+    system: "Permission Error: Requires Neonate",
+    embedTitle: "Permission Error: Neonate Supporter Required.",
+    embedMessage: oneLineTrim`
+      This Command or an option in this command requires being a supporter 
+      of at least Neonate or higher. 
+      You can become a supporter over on my 
+      [Patreon](https://www.patreon.com/MiraiMiki)
+    `,
+    debug: false,
+    cause: false,
+  },
+  [ErrorCodes.RequiresAncilla]: {
+    system: "Permission Error: Requires Ancilla",
+    embedTitle: "Permission Error: Ancilla Supporter Required.",
+    embedMessage: oneLineTrim`
+      This Command or an option in this command requires being a supporter 
+      of at least Ancilla or higher. 
+      You can become a supporter over on my 
+      [Patreon](https://www.patreon.com/MiraiMiki)
+    `,
+    debug: false,
+    cause: false,
+  },
+  [ErrorCodes.RequiresElder]: {
+    system: "Permission Error: Requires Elder",
+    embedTitle: "Permission Error: Elder Supporter Required.",
+    embedMessage: oneLineTrim`
+      This Command or an option in this command requires being a supporter 
+      of at least Elder or higher. 
+      You can become a supporter over on my 
+      [Patreon](https://www.patreon.com/MiraiMiki)
+    `,
+    debug: false,
+    cause: false,
+  },
+  [ErrorCodes.RequiresMethuselah]: {
+    system: "Permission Error: Requires Methuselah",
+    embedTitle: "Permission Error: Methuselah Supporter Required.",
+    embedMessage: oneLineTrim`
+      This Command or an option in this command requires being a supporter 
+      of at least Methuselah or higher. 
+      You can become a supporter over on my 
+      [Patreon](https://www.patreon.com/MiraiMiki)
+    `,
+    debug: false,
+    cause: false,
+  },
+  [ErrorCodes.RequiresAntediluvian]: {
+    system: "Permission Error: Requires Antediluvian",
+    embedTitle: "Permission Error: Antediluvian Supporter Required.",
+    embedMessage: oneLineTrim`
+      This Command or an option in this command requires being a supporter 
+      of at least Antediluvian or higher. 
       You can become a supporter over on my 
       [Patreon](https://www.patreon.com/MiraiMiki)
     `,

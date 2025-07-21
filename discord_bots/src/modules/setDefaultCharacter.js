@@ -2,11 +2,11 @@
 require(`${process.cwd()}/alias`);
 const { EmbedBuilder, MessageFlags } = require("discord.js");
 const { RealmError, ErrorCodes } = require("@errors");
+const verifySupporterStatus = require("@modules/verifySupporterStatus");
 const API = require("@api");
 
 module.exports = async function setDefaultCharacter(interaction) {
-  const level = await API.getSupporterLevel(interaction.user.id);
-  if (level === 0) throw new RealmError({ code: ErrorCodes.RequiresFledgling });
+  await verifySupporterStatus.mortal(interaction.user.id);
   interaction.arguments = await getArgs(interaction);
 
   if (!interaction.arguments.name && !interaction.arguments.disable) {

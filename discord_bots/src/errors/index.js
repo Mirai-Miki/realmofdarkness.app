@@ -48,11 +48,13 @@ module.exports.ErrorCodes = {
   NoDamage: 28,
 
   // Supporter Level Errors (100-199)
-  RequiresFledgling: 100,
-  RequiresNeonate: 101,
-  RequiresAncilla: 102,
-  RequiresElder: 103,
-  RequiresMethuselah: 104,
+  RequiresMortal: 100,
+  RequiresFledgling: 101,
+  RequiresNeonate: 102,
+  RequiresAncilla: 103,
+  RequiresElder: 104,
+  RequiresMethuselah: 105,
+  RequiresAntediluvian: 106,
 };
 
 /**

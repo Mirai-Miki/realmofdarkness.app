@@ -50,7 +50,7 @@ async function getArgs(interaction) {
   };
 
   if (args.color || args.thumbnail)
-    await verifySupporterStatus.fledgling(interaction.user.id);
+    await verifySupporterStatus.mortal(interaction.user.id);
   return args;
 }
 

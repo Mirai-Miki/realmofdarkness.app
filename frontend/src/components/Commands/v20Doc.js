@@ -51,7 +51,7 @@ const setHex = (
         <Typography sx={{ pt: 2 }}>
           Changes the main colour linked to this character.
         </Typography>
-        <Typography>[Fledgling Supporter or higher]</Typography>
+        <Typography>[Mortal Supporter or higher]</Typography>
       </Box>
     }
   >
@@ -72,7 +72,7 @@ const setImage = (
           displayed using rolls when the character is linked or when displaying
           the tracked Character.
         </Typography>
-        <Typography>[Fledgling Supporter or higher]</Typography>
+        <Typography>[Mortal Supporter or higher]</Typography>
       </Box>
     }
   >
@@ -1441,7 +1441,7 @@ const Tracker20thDoc = [
               functionality by using the `disable` option if you do not like it.
             </Typography>
             <Typography sx={{ pt: 2 }}>
-              Requires [Fledgling Supporter] status or greater to use.
+              Requires [Mortal Supporter] status or greater to use.
             </Typography>
           </Box>
         </ListItem>
