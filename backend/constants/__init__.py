@@ -68,7 +68,7 @@ class CharacterSheetLimit:
             return CharacterSheetLimit.FLEDGLING
         elif supporterLevel == Supporter.NEONATE:
             return CharacterSheetLimit.NEONATE
-        elif supporterLevel >= Supporter.ANCILLA:
+        elif supporterLevel == Supporter.ANCILLA:
             return CharacterSheetLimit.ANCILLA
         elif supporterLevel == Supporter.ELDER:
             return CharacterSheetLimit.ELDER

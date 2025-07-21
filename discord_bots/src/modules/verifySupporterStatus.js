@@ -4,6 +4,16 @@ const API = require("@api");
 const { Supporter } = require("@constants");
 const { RealmError, ErrorCodes } = require("@errors");
 
+const errorCodeMap = {
+  [Supporter.mortal]: ErrorCodes.RequiresMortal,
+  [Supporter.fledgling]: ErrorCodes.RequiresFledgling,
+  [Supporter.neonate]: ErrorCodes.RequiresNeonate,
+  [Supporter.ancilla]: ErrorCodes.RequiresAncilla,
+  [Supporter.elder]: ErrorCodes.RequiresElder,
+  [Supporter.methuselah]: ErrorCodes.RequiresMethuselah,
+  [Supporter.antediluvian]: ErrorCodes.RequiresAntediluvian,
+};
+
 /**
  * Verifies that a user meets the minimum supporter level requirement.
  * Throws an appropriate RealmError if the user's level is insufficient.
@@ -16,18 +26,7 @@ module.exports.requireLevel = async function (userId, requiredLevel) {
   const userLevel = await API.getSupporterLevel(userId);
   if (userLevel < requiredLevel) {
     // Map supporter levels to their corresponding error codes
-    const errorCodeMap = {
-      [Supporter.mortal]: ErrorCodes.RequiresMortal,
-      [Supporter.fledgling]: ErrorCodes.RequiresFledgling,
-      [Supporter.neonate]: ErrorCodes.RequiresNeonate,
-      [Supporter.ancilla]: ErrorCodes.RequiresAncilla,
-      [Supporter.elder]: ErrorCodes.RequiresElder,
-      [Supporter.methuselah]: ErrorCodes.RequiresMethuselah,
-      [Supporter.antediluvian]: ErrorCodes.RequiresAntediluvian,
-    };
-
-    const errorCode =
-      errorCodeMap[requiredLevel] || ErrorCodes.RequiresFledgling;
+    const errorCode = errorCodeMap[requiredLevel] || ErrorCodes.RequiresMortal;
     throw new RealmError({ code: errorCode });
   }
 };
