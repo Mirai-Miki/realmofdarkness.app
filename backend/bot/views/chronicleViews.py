@@ -11,10 +11,15 @@ from chronicle.serializers import (
     ChronicleDeserializer,
     StorytellerRoleDeserializer,
 )
+
+# TODO - update to new serializer import
+from gateway.serializers import serialize_member, serialize_user, serialize_chronicle
 from .get_post import get_post
 from haven.models import Character
 from haven.utility import get_serializer, get_derived_instance
 from gateway.constants import Group
+
+import logging
 
 channel_layer = get_channel_layer()
 
@@ -42,14 +47,40 @@ class MemberDeleteView(View):
                 character.st_lock = False
 
             character.save()
+            try:
+                # Notify the gateway about character update
+                async_to_sync(channel_layer.group_send)(
+                    Group.character_update(character.id),
+                    {
+                        "type": "character.update",
+                        "id": character.id,
+                        "tracker": get_serializer(character.splat)(character).data,
+                        "class": character.splat,
+                    },
+                )
+            except Exception as e:
+                # Log the error but continue with member cleanup
+                logger = logging.getLogger(__name__)
+                logger.error(
+                    f"Error updating character {character.id} during member deletion: {str(e)}"
+                )
+
+        try:
+            # Send member delete event before actually deleting
             async_to_sync(channel_layer.group_send)(
-                Group.character_update(character.id),
+                Group.member_delete(),
                 {
-                    "type": "character.update",
-                    "id": character.id,
-                    "tracker": get_serializer(character.splat).data,
+                    "type": "member.delete",
+                    "member": {
+                        "user": str(member.user.id),
+                        "chronicle": str(member.chronicle.id),
+                    },
                 },
             )
+        except Exception as e:
+            # Log the error but continue with member deletion
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error sending member delete event for {member.id}: {str(e)}")
 
         member.delete()
         return HttpResponse()
@@ -176,6 +207,7 @@ class SetGuildView(View):
     View to set or update a guild.
     """
 
+    # TODO - only send chronicle updates down the gateway if there are changes we actually care about
     def post(self, request):
         data = get_post(request)
         guild_data = data["guild"]
@@ -195,11 +227,13 @@ class SetGuildView(View):
         if chronicle_serializer.is_valid():
             chronicle = chronicle_serializer.save()
 
+            # Send chronicle update event
             async_to_sync(channel_layer.group_send)(
                 Group.chronicle_update(chronicle.id),
                 {
                     "type": "chronicle.update",
-                    "chronicle": ChronicleSerializer(chronicle).data,
+                    # TODO - overhaul to new serializers
+                    "chronicle": serialize_chronicle(chronicle),
                 },
             )
             return HttpResponse(status=200)
@@ -218,7 +252,25 @@ class DeleteGuildView(View):
         guild_id = data["guild_id"]
 
         try:
-            Chronicle.objects.get(pk=guild_id).delete()
+            chronicle = Chronicle.objects.get(pk=guild_id)
+
+            # Send member delete events for all members before deleting the chronicle
+            # This ensures the gateway cleans up subscriptions for all users
+            members = Member.objects.filter(chronicle=chronicle)
+            for member in members:
+                async_to_sync(channel_layer.group_send)(
+                    Group.member_delete(),
+                    {
+                        "type": "member.delete",
+                        "member": {
+                            "user": str(member.user.id),
+                            "chronicle": str(member.chronicle.id),
+                        },
+                    },
+                )
+
+            # Now delete the chronicle (this will CASCADE delete all members)
+            chronicle.delete()
         except Chronicle.DoesNotExist:
             pass  # No need to do anything
 

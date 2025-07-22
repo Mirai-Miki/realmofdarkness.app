@@ -13,6 +13,9 @@ export default class Client {
   }
 
   handleGatewayEvents(contextSetters) {
+    // Clear existing listeners
+    this.gatewayManager.removeAllListeners();
+
     for (const key of Object.keys(GatewayEvents)) {
       const event = GatewayEvents[key];
       this.gatewayManager.on(event.name, (...args) => event.execute(...args));

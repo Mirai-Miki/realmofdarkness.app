@@ -46,20 +46,38 @@ class Versions:
 
 
 class Group:
+    @staticmethod
     def character_update(id):
         return f"characterUpdate_{id}"
 
+    @staticmethod
     def member_update(id):
         return f"memberUpdate_{id}"
 
+    @staticmethod
     def user_update(id):
         return f"userUpdate_{id}"
 
+    @staticmethod
     def chronicle_update(id):
         return f"chronicleUpdate_{id}"
 
+    @staticmethod
     def character_new():
         return f"characterNew"
 
+    @staticmethod
     def character_delete():
         return f"characterDelete"
+
+    @staticmethod
+    def member_new():
+        return f"memberNew"
+
+    @staticmethod
+    def member_delete():
+        return f"memberDelete"
+
+    @staticmethod
+    def chronicle_new():
+        return f"chronicleNew"

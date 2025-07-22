@@ -89,11 +89,17 @@ def update_user(request):
         return HttpResponse()
 
     member_data = user_data["member"]
-    guild = Chronicle.objects.get(pk=member_data["guild_id"])
+
+    try:
+        guild = Chronicle.objects.get(pk=member_data["guild_id"])
+    except Chronicle.DoesNotExist:
+        # Chronicle doesn't exist yet, skip member creation
+        return HttpResponse(status=204)
 
     try:
         member = Member.objects.get(chronicle=guild, user=user)
         member_serializer = MemberDeserializer(member, data=member_data, partial=True)
+        is_new_member = False
     except Member.DoesNotExist:
         # Add the required fields to the data for new member creation
         member_data_complete = member_data.copy()
@@ -103,16 +109,32 @@ def update_user(request):
         member_data_complete["user"] = user.id  # Set user to the user ID
 
         member_serializer = MemberDeserializer(data=member_data_complete)
+        is_new_member = True
 
     if member_serializer.is_valid():
         member = member_serializer.save()
-        async_to_sync(channel_layer.group_send)(
-            Group.member_update(member.id),
-            {
-                "type": "member.update",
-                "member": serialize_member(member),
-            },
-        )
+
+        # Send member new event if this is a new member (for gateway subscription management)
+        # TODO - change to rest framework serializers
+        if is_new_member:
+            # Send member new event
+            async_to_sync(channel_layer.group_send)(
+                Group.member_new(),
+                {
+                    "type": "member.new",
+                    "member": serialize_member(member),
+                },
+            )
+        else:
+            # Send member update event
+            async_to_sync(channel_layer.group_send)(
+                Group.member_update(member.id),
+                {
+                    "type": "member.update",
+                    "member": serialize_member(member),
+                },
+            )
+
         return HttpResponse()
     else:
         return JsonResponse(member_serializer.errors, status=400)
