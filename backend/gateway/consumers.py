@@ -407,8 +407,9 @@ class GatewayConsumer(AsyncWebsocketConsumer):
             return characters_data
         except Exception as e:
             logger.error(f"Error getting chronicle characters data: {str(e)}")
-            return []  # Centralized subscription management methods
+            return []
 
+    # Centralized subscription management methods
     async def add_group_subscription(self, group_name):
         """Add subscription to a channel layer group"""
         await self.channel_layer.group_add(group_name, self.channel_name)
