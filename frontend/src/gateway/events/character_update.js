@@ -1,8 +1,8 @@
 export const character_update = {
   name: "UPDATE_CHARACTER",
-  async execute(data, contextSetters) {
-    if (data.sheet) contextSetters.setSheet(data.sheet);
-    contextSetters.setCharacters((prevCharacters) => {
+  async execute(data, clientState) {
+    if (data.sheet) clientState.setSheet(data.sheet);
+    clientState.setCharacters((prevCharacters) => {
       return { ...prevCharacters, [data.id]: data.character };
     });
   },

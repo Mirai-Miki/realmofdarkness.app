@@ -48,9 +48,9 @@ export default class GatewayManager extends EventEmitter {
     this.listenOnMessage();
   }
 
-  listenOnMessage(contextSetters = null) {
-    if (contextSetters) this.contextSetters = contextSetters;
-    else if (!this.contextSetters) return;
+  listenOnMessage(clientState = null) {
+    if (clientState) this.clientState = clientState;
+    else if (!this.clientState) return;
 
     this.ws.onmessage = (message) => {
       const json = message.data;
@@ -58,7 +58,7 @@ export default class GatewayManager extends EventEmitter {
 
       switch (gm.getOpcode()) {
         case GATEWAY_OPCODE.dispatch:
-          this.emit(gm.getEventName(), gm.getData(), this.contextSetters);
+          this.emit(gm.getEventName(), gm.getData(), this.clientState);
           break;
         case GATEWAY_OPCODE.welcome:
           // send Identify message

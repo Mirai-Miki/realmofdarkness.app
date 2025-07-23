@@ -17,6 +17,14 @@ export default function ClientProvider({ children }) {
 
   useEffect(() => {
     client.handleGatewayEvents({
+      // State values
+      user,
+      characters,
+      chronicles,
+      members,
+      connected,
+      sheet,
+      // Setters
       setUser: setUser,
       setCharacters: setCharacters,
       setChronicles: setChronicles,
@@ -24,7 +32,7 @@ export default function ClientProvider({ children }) {
       setConnection: setConnection,
       setSheet: setSheet,
     });
-  }, []); // only happens on site load
+  }, [user, characters, chronicles, members, connected, sheet]); // Re-run when state changes
 
   const clientContextValue = {
     client,

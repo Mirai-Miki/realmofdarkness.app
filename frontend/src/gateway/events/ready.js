@@ -1,9 +1,9 @@
 export const Ready = {
   name: "READY",
-  async execute(data, contextSetters) {
-    contextSetters.setUser(data.user);
-    contextSetters.setCharacters(data.characters);
-    contextSetters.setChronicles(data.chronicles);
-    contextSetters.setMembers(data.members);
+  async execute(data, clientState) {
+    clientState.setUser(data.user);
+    clientState.setCharacters(data.characters);
+    clientState.setChronicles(data.chronicles);
+    clientState.setMembers(data.members);
   },
 };

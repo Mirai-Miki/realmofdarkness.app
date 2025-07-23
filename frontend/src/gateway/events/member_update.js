@@ -1,7 +1,7 @@
 export const member_update = {
   name: "UPDATE_MEMBER",
-  async execute(data, contextSetters) {
-    contextSetters.setMembers((prevMembers) => {
+  async execute(data, clientState) {
+    clientState.setMembers((prevMembers) => {
       const members = { ...prevMembers };
 
       // Ensure the chronicle structure exists before trying to access it
