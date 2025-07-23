@@ -211,7 +211,9 @@ class DeleteCharacter(APIView):
                 {
                     "type": "character.update",
                     "id": character.id,
-                    "tracker": serialize_character(character),
+                    "tracker": V5TrackerSerializer(
+                        get_derived_instance(character)
+                    ).data,
                     "sheet": sheet,
                     "class": "vampire5th",
                 },

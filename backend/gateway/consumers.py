@@ -114,14 +114,20 @@ class GatewayConsumer(AsyncWebsocketConsumer):
         Check visibility permissions before sending data to client
         """
         try:
+            tracker = event.get("tracker", {})
+            chronicle_id = tracker.get("chronicle", None)
+            user_id = tracker.get("user", "")
+
+            is_current_user = user_id == str(self.user.id) if user_id else False
+            is_staff = (
+                await self.is_user_staff_in_chronicle(chronicle_id)
+                if chronicle_id
+                else False
+            )
+            is_visible = is_current_user or is_staff
             # Check if user has permission to see this character
-            chronicle = event.get("tracker", {}).get("chronicle", None)
-            is_visible = (int(chronicle) if chronicle else 0) in self.chronicles
-            if (
-                str(event.get("tracker", {}).get("user", "")) != str(self.user.id)
-                and not is_visible
-            ):
-                # If not visible, treat as a deletion
+            if not is_visible:
+                # If not visible then treat as a deletion (delete also unsubs)
                 return await self.character_delete(event)
 
             # Check if this is the currently selected character sheet
