@@ -234,47 +234,52 @@ class GatewayConsumer(AsyncWebsocketConsumer):
                 # Get and send all existing members in this chronicle
                 existing_members = await self.get_chronicle_members_data(chronicle_id)
                 for member_data_item in existing_members:
-                    # Subscribe to each member
-                    await self.add_group_subscription(
-                        Group.member_update(member_data_item["id"])
-                    )
-                    # Send member data to frontend
-                    await self.send(
-                        text_data=GatewayMessage().update_member(
-                            {
-                                "type": "member.update",
-                                "member": member_data_item,
-                            }
+                    member_group = Group.member_update(member_data_item["id"])
+                    # Only subscribe if not already subscribed
+                    if member_group not in self.subscriptions:
+                        await self.add_group_subscription(member_group)
+                        # Send member data to frontend only if newly subscribed
+                        await self.send(
+                            text_data=GatewayMessage().update_member(
+                                {
+                                    "type": "member.update",
+                                    "member": member_data_item,
+                                }
+                            )
                         )
-                    )
 
                 # Get and send all existing characters in this chronicle
                 existing_characters = await self.get_chronicle_characters_data(
                     chronicle_id
                 )
                 for character_data in existing_characters:
-                    # Subscribe to each character
-                    await self.add_character_subscription(character_data["id"])
-                    # Send character data to frontend
-                    await self.send(
-                        text_data=GatewayMessage().update_character(
-                            {
-                                "type": "character.update",
-                                "id": character_data["id"],
-                                "tracker": character_data["tracker"],
-                            },
-                            None,
+                    character_id = str(character_data["id"])
+                    # Only subscribe if not already subscribed
+                    if character_id not in self.subscribed_character_ids:
+                        await self.add_character_subscription(character_id)
+                        # Send character data to frontend only if newly subscribed
+                        await self.send(
+                            text_data=GatewayMessage().update_character(
+                                {
+                                    "type": "character.update",
+                                    "id": character_data["id"],
+                                    "tracker": character_data["tracker"],
+                                },
+                                None,
+                            )
                         )
-                    )
 
             # Subscribe to this specific member's updates (both for current user and staff)
-            await self.add_group_subscription(
-                Group.member_update(member_data.get("id"))
-            )
+            new_member_group = Group.member_update(member_data.get("id"))
+            new_member_already_subscribed = new_member_group in self.subscriptions
 
-            # Send member update to client (frontend handles new vs update automatically)
-            # This ensures both the joining user and existing staff see the new member
-            await self.send(text_data=GatewayMessage().update_member(event))
+            if not new_member_already_subscribed:
+                await self.add_group_subscription(new_member_group)
+
+            # Send member update to client
+            # Only send if we haven't already subscribed to this member (which means we already sent it above)
+            if not new_member_already_subscribed:
+                await self.send(text_data=GatewayMessage().update_member(event))
         except Exception as e:
             logger.error(f"Member new error: {str(e)}")
 

@@ -24,15 +24,24 @@ export const member_delete = {
         return chronicles;
       });
 
-      // Remove ALL characters from this chronicle from state
+      // Remove OTHER people's characters from this chronicle from state
+      // For our own characters, update them to have chronicle=null (matches backend behavior)
       contextSetters.setCharacters((prevCharacters) => {
         const characters = { ...prevCharacters };
 
-        // Remove all characters that belong to this chronicle
         Object.keys(characters).forEach((characterId) => {
           const character = characters[characterId];
           if (character && character.chronicle === chronicleId) {
-            delete characters[characterId];
+            if (character.user !== userId) {
+              // Remove other people's characters completely
+              delete characters[characterId];
+            } else {
+              // For our own characters, set chronicle to null (matches backend)
+              characters[characterId] = {
+                ...character,
+                chronicle: null,
+              };
+            }
           }
         });
 
