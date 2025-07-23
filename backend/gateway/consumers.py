@@ -114,10 +114,15 @@ class GatewayConsumer(AsyncWebsocketConsumer):
         Add character to subscriptions if user has permission to see it
         """
         try:
-            # Verify permission to see this character
+            character_id = str(event.get("id", ""))
+
+            # Check if we're already subscribed to this character
+            if character_id in self.subscribed_character_ids:
+                # Already subscribed, ignore this event to avoid duplicates
+                return
+
             if await self.verify_new_character(event.get("tracker", {})):
                 # Add subscription to this character
-                character_id = event.get("id")
                 await self.add_character_subscription(character_id)
                 # Send update to client
                 await self.send(

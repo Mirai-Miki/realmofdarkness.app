@@ -140,6 +140,9 @@ class CharacterUpdateV5(APIView):
                 "You do not have permission to edit this character", status=403
             )
 
+        # Store the original chronicle to detect changes
+        original_chronicle = character.chronicle
+
         serializer = Vampire5thDeserializer(
             character,
             data=request.data,
@@ -158,6 +161,8 @@ class CharacterUpdateV5(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         instance = serializer.save()
+
+        # Send the regular character update event
         async_to_sync(channel_layer.group_send)(
             Group.character_update(instance.id),
             {
@@ -168,6 +173,19 @@ class CharacterUpdateV5(APIView):
                 "class": "vampire5th",
             },
         )
+
+        # If chronicle changed, send a character.new event for staff to discover
+        if original_chronicle != instance.chronicle:
+            async_to_sync(channel_layer.group_send)(
+                Group.character_new(),
+                {
+                    "type": "character.new",
+                    "id": instance.id,
+                    "tracker": V5TrackerSerializer(instance).data,
+                    "sheet": Vampire5thSerializer(instance).data,
+                    "class": "vampire5th",
+                },
+            )
 
         return Response()
 
