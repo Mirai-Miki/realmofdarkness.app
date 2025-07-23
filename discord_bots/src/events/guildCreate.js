@@ -30,7 +30,8 @@ module.exports = {
 
           try {
             // Update user with create = false to only link existing users
-            await API.updateUser(member, false);
+            const CREATE_USER = false; // Indicates that only existing users should be linked
+            await API.updateUser(member, CREATE_USER);
           } catch (error) {
             console.error(
               `Failed to update member during GuildCreate ${member.user.username} (${member.user.id}):`,
