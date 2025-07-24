@@ -288,8 +288,108 @@ class GatewayConsumer(AsyncWebsocketConsumer):
             logger.error(f"Member new error: {str(e)}")
 
     async def member_update(self, event):
-        """Handle member update events from the channel layer"""
+        """
+        Handle member update events from the channel layer
+        Check for staff status changes and manage subscriptions accordingly
+        """
         try:
+            member_data = event.get("member", {})
+            user_id = str(member_data.get("user", ""))
+            chronicle_id = str(member_data.get("chronicle", ""))
+            staff_status_changed = event.get("staff_status_changed", False)
+
+            # Only process staff status changes for the current user
+            if staff_status_changed and user_id == str(self.user.id):
+                # Check if user is now staff
+                is_admin = member_data.get("admin", False)
+                is_storyteller = member_data.get("storyteller", False)
+                is_now_staff = is_admin or is_storyteller
+
+                if is_now_staff:
+                    # User became staff - subscribe to all members and characters in this chronicle
+
+                    # Get and send all existing members in this chronicle
+                    existing_members = await self.get_chronicle_members_data(
+                        chronicle_id
+                    )
+                    for member_data_item in existing_members:
+                        member_group = Group.member_update(member_data_item["id"])
+                        # Only subscribe if not already subscribed
+                        if member_group not in self.subscriptions:
+                            await self.add_group_subscription(member_group)
+                            # Send member data to frontend only if newly subscribed
+                            await self.send(
+                                text_data=GatewayMessage().update_member(
+                                    {
+                                        "type": "member.update",
+                                        "member": member_data_item,
+                                    }
+                                )
+                            )
+
+                    # Get and send all existing characters in this chronicle
+                    existing_characters = await self.get_chronicle_characters_data(
+                        chronicle_id
+                    )
+                    for character_data in existing_characters:
+                        character_id = str(character_data["id"])
+                        # Only subscribe if not already subscribed
+                        if character_id not in self.subscribed_character_ids:
+                            await self.add_character_subscription(character_id)
+                            # Send character data to frontend only if newly subscribed
+                            await self.send(
+                                text_data=GatewayMessage().update_character(
+                                    {
+                                        "type": "character.update",
+                                        "id": character_data["id"],
+                                        "tracker": character_data["tracker"],
+                                    },
+                                    None,
+                                )
+                            )
+                elif user_id == str(self.user.id):
+                    # Current user lost staff status - unsubscribe from characters they don't own
+                    # and members they shouldn't see
+
+                    # Get all character IDs in this chronicle and unsubscribe from characters they don't own
+                    character_ids = await self.get_chronicle_character_ids(chronicle_id)
+                    for character_id in character_ids:
+                        if str(character_id) in self.subscribed_character_ids:
+                            # Check if this character belongs to the current user
+                            character_obj = await self.get_character_by_id(character_id)
+                            if character_obj and str(character_obj.user_id) != str(
+                                self.user.id
+                            ):
+                                await self.remove_character_subscription(character_id)
+                                # Send character deletion to remove from frontend
+                                await self.send(
+                                    text_data=GatewayMessage().delete_character(
+                                        str(character_id)
+                                    )
+                                )
+
+                    # Get all member IDs in this chronicle and unsubscribe from non-self members
+                    member_ids = await self.get_chronicle_member_ids(chronicle_id)
+                    for member_id in member_ids:
+                        member_group = Group.member_update(member_id)
+                        if member_group in self.subscriptions:
+                            # Check if this member is the current user
+                            member_obj = await self.get_member_by_id(member_id)
+                            if member_obj and str(member_obj.user_id) != str(
+                                self.user.id
+                            ):
+                                await self.remove_group_subscription(member_group)
+                                # Send member deletion to remove from frontend
+                                await self.send(
+                                    text_data=GatewayMessage().delete_member(
+                                        {
+                                            "type": "member.delete",
+                                            "member": {"id": member_id},
+                                        }
+                                    )
+                                )
+
+            # Always send the member update to client
             await self.send(text_data=GatewayMessage().update_member(event))
         except Exception as e:
             logger.error(f"Member update error: {str(e)}")
@@ -346,6 +446,32 @@ class GatewayConsumer(AsyncWebsocketConsumer):
                 await self.send(text_data=GatewayMessage().delete_member(event))
         except Exception as e:
             logger.error(f"Member delete error: {str(e)}")
+
+    @database_sync_to_async
+    def get_member_by_id(self, member_id):
+        """
+        Get member object by ID
+        """
+        try:
+            return Member.objects.get(id=member_id)
+        except Member.DoesNotExist:
+            return None
+        except Exception as e:
+            logger.error(f"Error getting member by ID: {str(e)}")
+            return None
+
+    @database_sync_to_async
+    def get_character_by_id(self, character_id):
+        """
+        Get character object by ID
+        """
+        try:
+            return Character.objects.get(id=character_id)
+        except Character.DoesNotExist:
+            return None
+        except Exception as e:
+            logger.error(f"Error getting character by ID: {str(e)}")
+            return None
 
     @database_sync_to_async
     def get_chronicle_member_ids(self, chronicle_id):

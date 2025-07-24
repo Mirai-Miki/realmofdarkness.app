@@ -96,8 +96,20 @@ def update_user(request):
         # Chronicle doesn't exist yet, skip member creation
         return HttpResponse(status=204)
 
+    staff_status_changed = False
     try:
         member = Member.objects.get(chronicle=guild, user=user)
+        # Check if staff status is changing
+        old_admin = member.admin
+        old_storyteller = member.storyteller
+        new_admin = member_data.get("admin", old_admin)
+        new_storyteller = member_data.get("storyteller", old_storyteller)
+
+        # Determine if staff status changed
+        old_is_staff = old_admin or old_storyteller
+        new_is_staff = new_admin or new_storyteller
+        staff_status_changed = old_is_staff != new_is_staff
+
         member_serializer = MemberDeserializer(member, data=member_data, partial=True)
         is_new_member = False
     except Member.DoesNotExist:
@@ -126,12 +138,13 @@ def update_user(request):
                 },
             )
         else:
-            # Send member update event
+            # Send member update event with staff status change flag
             async_to_sync(channel_layer.group_send)(
                 Group.member_update(member.id),
                 {
                     "type": "member.update",
                     "member": serialize_member(member),
+                    "staff_status_changed": staff_status_changed,
                 },
             )
 

@@ -143,6 +143,7 @@ class SetStorytellerRoleView(View):
         data = get_post(request)
         guild_id = data["guild_id"]
         role_data = {"id": data["role_id"], "guild": guild_id}
+        role_serializer = None
 
         try:
             guild = Chronicle.objects.get(pk=guild_id)
@@ -151,21 +152,19 @@ class SetStorytellerRoleView(View):
 
         try:
             role = StorytellerRole.objects.get(pk=role_data["id"])
-            role_serializer = StorytellerRoleDeserializer(
-                role, data=role_data, partial=True
-            )
+            role.delete()  # If the role exists, delete (unset) it
         except StorytellerRole.DoesNotExist:
             role_serializer = StorytellerRoleDeserializer(data=role_data)
 
-        if role_serializer.is_valid():
+        if role_serializer and role_serializer.is_valid():
             role = role_serializer.save()
-
-            st_roles = StorytellerRole.objects.filter(guild=guild)
-            role_ids = [str(role.id) for role in st_roles]
-
-            return JsonResponse({"roleIds": role_ids})
-        else:
+        elif role_serializer:
             return JsonResponse(role_serializer.errors, status=400)
+
+        st_roles = StorytellerRole.objects.filter(guild=guild)
+        role_ids = [str(role.id) for role in st_roles]
+
+        return JsonResponse({"roleIds": role_ids})
 
 
 @method_decorator(csrf_exempt, name="dispatch")
