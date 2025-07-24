@@ -347,7 +347,7 @@ class GatewayConsumer(AsyncWebsocketConsumer):
                                     None,
                                 )
                             )
-                elif user_id == str(self.user.id):
+                else:
                     # Current user lost staff status - unsubscribe from characters they don't own
                     # and members they shouldn't see
 
