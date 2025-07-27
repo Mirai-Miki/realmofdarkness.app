@@ -151,7 +151,7 @@ module.exports = class AppUser {
       throw new Error(
         "User data must be loaded before fetching Character Count"
       );
-    this.characterCount = await API.getCharacterCount(this.userId);
+    this.characterCount = await API.getCharacterCount(this.id);
     return this.characterCount;
   }
 
