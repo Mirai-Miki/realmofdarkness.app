@@ -8,7 +8,7 @@ const { time, TimestampStyles } = require("discord.js");
  * @returns {number} Milliseconds
  */
 module.exports.hourToMilli = (hour) => {
-  return module.exports.minToMilli(hour * 60);
+  return this.minToMilli(hour * 60);
 };
 
 /**
