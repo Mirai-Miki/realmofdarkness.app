@@ -63,8 +63,6 @@ module.exports = class AppMember {
 
     // Lazy-loaded related data
     // undefined = not fetched, null = fetched but no data, object = fetched data
-    this.appUser = undefined;
-    this.chronicle = undefined;
     this.characters = undefined;
     this.characterCount = undefined;
 
@@ -205,35 +203,6 @@ module.exports = class AppMember {
    */
   isStaff() {
     return this.admin || this.storyteller;
-  }
-
-  /**
-   * Get display name (nickname if set, otherwise username from AppUser).
-   * @returns {Promise<String>} Display name
-   */
-  async getDisplayName() {
-    if (this.nickname) {
-      return this.nickname;
-    }
-
-    const appUser = await this.getAppUser();
-    return appUser ? appUser.username : `User ${this.user}`;
-  }
-
-  /**
-   * Check if AppUser data has been fetched for this member.
-   * @returns {Boolean} True if AppUser data is available
-   */
-  hasAppUser() {
-    return this.AppUser !== undefined;
-  }
-
-  /**
-   * Check if Chronicle data has been fetched for this member.
-   * @returns {Boolean} True if Chronicle data is available
-   */
-  hasChronicle() {
-    return this.ChronicleData !== undefined;
   }
 
   /**
