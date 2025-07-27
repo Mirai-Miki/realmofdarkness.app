@@ -134,6 +134,89 @@ const emojiDefinitions = {
   logo_red: ["<:logo_red:973530234345377802>", "◆ "],
   logo_teal: ["<:logo_teal:973530234370555904>", "◆ "],
   logo_gold: ["<:logo_gold:973530234487975966>", "◆ "],
+
+  // Supporter
+  supporter_mortal: ["🩸", "🩸 "],
+  supporter_fledgling: ["<:black_pawn~1:1387312189899276328>", "♟ "],
+  supporter_neonate: ["<:black_knight:1387312181439107192>", "♞ "],
+  supporter_ancilla: ["<:black_bishop~1:1387312187349008504>", "♝ "],
+  supporter_elder: ["<:black_rook:1387312179526766632>", "♜ "],
+  supporter_methuselah: ["<:black_queen:1387312183209099304>", "♛ "],
+  supporter_antediluvian: ["<:black_king:1387312185608503296>", "♚ "],
+
+  // Progress Bar Emojis
+  green_left_full: [
+    "<:green_left_full:1398957183093444658>",
+    "<:green_left_full:1398957183093444658>",
+  ],
+  green_middle_empty: [
+    "<:green_middle_empty:1398957171357650944>",
+    "<:green_middle_empty:1398957171357650944>",
+  ],
+  green_middle_full: [
+    "<:green_middle_full:1398957156899881040>",
+    "<:green_middle_full:1398957156899881040>",
+  ],
+  green_right_full: [
+    "<:green_right_full:1398957131389992960>",
+    "<:green_right_full:1398957131389992960>",
+  ],
+  green_right_empty: [
+    "<:green_right_empty:1398957112683659334>",
+    "<:green_right_empty:1398957112683659334>",
+  ],
+  green_left_empty: [
+    "<:green_left_empty:1398957095704985631>",
+    "<:green_left_empty:1398957095704985631>",
+  ],
+  yellow_left_empty: [
+    "<:yellow_left_empty:1398957081507139604>",
+    "<:yellow_left_empty:1398957081507139604>",
+  ],
+  yellow_right_empty: [
+    "<:yellow_right_empty:1398957067490037851>",
+    "<:yellow_right_empty:1398957067490037851>",
+  ],
+  yellow_right_full: [
+    "<:yellow_right_full:1398957050477805660>",
+    "<:yellow_right_full:1398957050477805660>",
+  ],
+  yellow_middle_full: [
+    "<:yellow_middle_full:1398957033327431781>",
+    "<:yellow_middle_full:1398957033327431781>",
+  ],
+  yellow_middle_empty: [
+    "<:yellow_middle_empty:1398957015929192478>",
+    "<:yellow_middle_empty:1398957015929192478>",
+  ],
+  yellow_left_full: [
+    "<:yellow_left_full:1398957000271990874>",
+    "<:yellow_left_full:1398957000271990874>",
+  ],
+  red_left_full: [
+    "<:red_left_full:1398956960933613653>",
+    "<:red_left_full:1398956960933613653>",
+  ],
+  red_middle_full: [
+    "<:red_middle_full:1398956933771431946>",
+    "<:red_middle_full:1398956933771431946>",
+  ],
+  red_right_full: [
+    "<:red_right_full:1398956912258711552>",
+    "<:red_right_full:1398956912258711552>",
+  ],
+  red_right_empty: [
+    "<:red_right_empty:1398956875936038923>",
+    "<:red_right_empty:1398956875936038923>",
+  ],
+  red_middle_empty: [
+    "<:red_middle_empty:1398956849193029703>",
+    "<:red_middle_empty:1398956849193029703>",
+  ],
+  red_left_empty: [
+    "<:red_left_empty:1398956822202945618>",
+    "<:red_left_empty:1398956822202945618>",
+  ],
 };
 
 // Convert to proper export structure

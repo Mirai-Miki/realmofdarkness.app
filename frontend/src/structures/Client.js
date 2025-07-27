@@ -37,7 +37,6 @@ export default class Client {
   }
 
   sheetSubscribe(id) {
-    console.log();
     this.gatewayManager.send(new GatewayMessage().sheetSubscribe(id));
   }
 }

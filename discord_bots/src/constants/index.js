@@ -7,19 +7,7 @@ module.exports.Splats = require("./Splats");
 // ComponentCID constants for Discord component custom IDs
 module.exports.ComponentCID = require("./ComponentCID");
 
-/**
- * Supporter tiers for Discord bot features.
- * Used to unlock features and set limits based on user support level.
- */
-module.exports.Supporter = {
-  mortal: 1,
-  fledgling: 2,
-  neonate: 3,
-  ancilla: 4,
-  elder: 5,
-  methuselah: 6,
-  antediluvian: 7,
-};
+module.exports.Supporter = require("./Supporter");
 
 /**
  * Initialization phases for Discord bot game sessions.

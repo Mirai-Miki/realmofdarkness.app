@@ -15,11 +15,11 @@ Including another URLconf
 """
 
 from django.urls import path
-from . import views
+from .views.authenticate import login_success, login, logout
 
 app_name = "discordauth"
 urlpatterns = [
-    path("login/success/", views.login_success),
-    path("login/", views.login),
-    path("logout/", views.logout),
+    path("login/success/", login_success),
+    path("login/", login),
+    path("logout/", logout),
 ]

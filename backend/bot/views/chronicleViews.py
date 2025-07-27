@@ -9,6 +9,7 @@ from chronicle.models import Chronicle, Member, StorytellerRole
 from chronicle.serializers import (
     ChronicleSerializer,
     ChronicleDeserializer,
+    MemberSerializer,
     StorytellerRoleDeserializer,
 )
 
@@ -375,3 +376,54 @@ class GetDefaultsView(View):
 
         # Multiple characters match criteria
         return HttpResponse(status=204)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class GetMemberView(View):
+    """
+    View to get a specific member by user ID and guild ID.
+    """
+
+    def post(self, request):
+        data = get_post(request)
+        guild_id = data.get("guild_id")
+        user_id = data.get("user_id")
+
+        if not guild_id or not user_id:
+            return JsonResponse(
+                {"error": "guild_id and user_id are required"}, status=400
+            )
+
+        try:
+            member = Member.objects.select_related("user", "chronicle").get(
+                chronicle=guild_id, user=user_id
+            )
+        except Member.DoesNotExist:
+            return HttpResponse(status=404)
+
+        # Use existing serializer
+        serializer = MemberSerializer(member)
+        return JsonResponse(serializer.data)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class GetChronicleView(View):
+    """
+    View to get a specific chronicle by ID.
+    """
+
+    def post(self, request):
+        data = get_post(request)
+        guild_id = data.get("guild_id")
+
+        if not guild_id:
+            return JsonResponse({"error": "guild_id is required"}, status=400)
+
+        try:
+            chronicle = Chronicle.objects.get(pk=guild_id)
+        except Chronicle.DoesNotExist:
+            return HttpResponse(status=404)
+
+        # Use existing serializer
+        serializer = ChronicleSerializer(chronicle)
+        return JsonResponse(serializer.data)

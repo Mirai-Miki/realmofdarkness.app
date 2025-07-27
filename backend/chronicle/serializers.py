@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from chronicle.models import Chronicle, Member, StorytellerRole
-from bot.models import Bot
+from discordauth.serializers import UserSerializer
 
 
 class ChronicleSerializer(serializers.ModelSerializer):
@@ -8,27 +8,26 @@ class ChronicleSerializer(serializers.ModelSerializer):
     Serializer for the Chronicle model.
     """
 
+    # Convert ID to string for API safety
+    id = serializers.CharField(read_only=True)
+    owner_id = serializers.CharField(read_only=True)
+
     class Meta:
         model = Chronicle
         fields = (
             "id",
             "name",
             "owner_id",
-            "bot",
-            "shard",
-            "is_guild",
-            "members",
             "icon_url",
             "tracker_channel",
             "created_at",
             "last_updated",
         )
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data["bot"] = [bot.id for bot in instance.bot.all()]
-        data["members"] = [member.id for member in instance.members.all()]
-        return data
+        read_only_fields = (
+            "id",
+            "created_at",
+            "last_updated",
+        )
 
 
 class ChronicleDeserializer(serializers.ModelSerializer):
@@ -60,6 +59,11 @@ class MemberSerializer(serializers.ModelSerializer):
     Serializer for the Member model.
     """
 
+    # Convert ID to string for API safety
+    id = serializers.CharField(read_only=True)
+    chronicle = ChronicleSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
     class Meta:
         model = Member
         fields = (
@@ -74,6 +78,11 @@ class MemberSerializer(serializers.ModelSerializer):
             "last_updated",
             "default_character",
             "default_auto_hunger",
+        )
+        read_only_fields = (
+            "id",
+            "created_at",
+            "last_updated",
         )
 
 

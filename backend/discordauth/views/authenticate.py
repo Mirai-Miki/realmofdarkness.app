@@ -1,6 +1,6 @@
 from django.shortcuts import redirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
-from .models import User
+from ..models import User
 from chronicle.models import Chronicle, Member
 import requests
 import hashlib

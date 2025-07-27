@@ -9,6 +9,10 @@ exports.getAdminsStorytellers = require("./getAdminsStorytellers");
 exports.getSheet = require("./getSheet");
 exports.getDisciplineNames = require("./getDisciplineNames");
 exports.getNamesList = require("./getNamesList");
+exports.getUser = require("./getUser");
+exports.getMember = require("./getMember");
+exports.getChronicle = require("./getChronicle");
+exports.getCharacterCount = require("./getCharacterCount");
 
 exports.updateGuild = require("./updateGuild");
 exports.updateBot = require("./updateBot");

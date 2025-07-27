@@ -2,13 +2,20 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponse
 from asgiref.sync import async_to_sync
+from .Authenticate import authenticate
 from channels.layers import get_channel_layer
 from django.core.cache import cache
 import hashlib
+from rest_framework import status
+from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views import View
 
 from .get_post import get_post
 from chronicle.models import Member, Chronicle
 from chronicle.serializers import MemberDeserializer
+from discordauth.serializers import UserSerializer
 from gateway.serializers import serialize_member, serialize_user
 from gateway.constants import Group
 from rest_framework.views import APIView
@@ -16,9 +23,36 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from typing import List, Dict
 from discordauth.models import User as CustomUser
+from .Authenticate import authenticate
 
 User: type[CustomUser] = get_user_model()
 channel_layer = get_channel_layer()
+
+
+class GetUserView(APIView):
+    """
+    API endpoint to get a specific user by ID.
+    Uses POST for authentication compatibility with existing bot API.
+    """
+
+    def post(self, request):
+        authenticate(request)
+
+        user_id = request.data.get("user_id")
+        if not user_id:
+            return Response(
+                {"error": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @csrf_exempt
@@ -175,6 +209,7 @@ def get_admins_storytellers(request):
     )
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class GetAllSupportersView(APIView):
     """
     API endpoint to get all supporter users and their levels.
