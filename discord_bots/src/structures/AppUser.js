@@ -76,8 +76,8 @@ module.exports = class AppUser {
    * @returns {Promise<AppUser>} Returns a promise that resolves to an AppUser instance
    */
   async fetch(discordUser) {
-    if (!discordUser && !userId) {
-      throw new Error("Discord user or userId must be provided");
+    if (!discordUser) {
+      throw new Error("Discord user must be provided");
     }
 
     if (discordUser instanceof User) {
