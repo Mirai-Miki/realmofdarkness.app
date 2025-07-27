@@ -17,7 +17,7 @@ module.exports = class Supporter {
    */
   static getName(level) {
     switch (level) {
-      case Supporter.mortal:
+      case this.mortal:
         return "Mortal";
       case this.fledgling:
         return "Fledgling";
