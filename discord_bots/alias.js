@@ -24,6 +24,7 @@ moduleAlias.addAliases({
   "@errors": path.join(srcDir, "errors"),
   "@api": path.join(srcDir, "realm_api"),
   "@constants": path.join(srcDir, "constants"),
+  "@utils": path.join(srcDir, "utils"),
 });
 
 // Debug output if needed

@@ -4,6 +4,7 @@ const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 const fs = require("fs");
 const path = require("path");
+const manageEmojis = require("./manageEmojis");
 
 /**
  * Deploys commands for a specific bot version
@@ -117,6 +118,14 @@ async function deployCommands({
       console.log(
         `Successfully ${deploymentType} ${response.length} ${version} commands ${scopeType}`
       );
+
+      // Manage emojis after successful command deployment
+      console.log("Managing application emojis...");
+      try {
+        await manageEmojis({ version });
+      } catch (error) {
+        console.error("Failed to manage emojis:", error.message);
+      }
     } else {
       console.log(
         `Successfully ${deploymentType} all ${version} commands ${scopeType}`
