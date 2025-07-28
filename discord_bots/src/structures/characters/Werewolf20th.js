@@ -60,19 +60,23 @@ module.exports = class Werewolf20th extends Character20th {
 
     embed.addFields({
       name: `Willpower [${this.willpower.current}/${this.willpower.total}]`,
-      value: this.willpower.getTracker({ emoji: Emoji.purple_dot_3 }),
+      value: this.willpower.getTracker({
+        emoji: Emoji.tracker_3_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Rage [${this.rage.current}/${this.rage.total}]`,
-      value: this.rage.getTracker({ emoji: Emoji.purple_dot_2 }),
+      value: this.rage.getTracker({ emoji: Emoji.tracker_2_filled.toString() }),
       inline: false,
     });
 
     embed.addFields({
       name: `Gnosis [${this.gnosis.current}/${this.gnosis.total}]`,
-      value: this.gnosis.getTracker({ emoji: Emoji.purple_dot_1 }),
+      value: this.gnosis.getTracker({
+        emoji: Emoji.tracker_1_filled.toString(),
+      }),
       inline: false,
     });
 

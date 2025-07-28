@@ -60,25 +60,33 @@ module.exports = class DemonTF extends Character20th {
 
     embed.addFields({
       name: `Willpower [${this.willpower.current}/${this.willpower.total}]`,
-      value: this.willpower.getTracker({ emoji: Emoji.purple_dot_3 }),
+      value: this.willpower.getTracker({
+        emoji: Emoji.tracker_3_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Faith [${this.faith.current}/${this.faith.total}]`,
-      value: this.faith.getTracker({ emoji: Emoji.red_dot }),
+      value: this.faith.getTracker({
+        emoji: Emoji.tracker_0_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Torment - Permanent: ${this.torment.primary}`,
-      value: this.torment.getPrimaryTracker({ emoji: Emoji.purple_dot_1 }),
+      value: this.torment.getPrimaryTracker({
+        emoji: Emoji.tracker_1_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Torment - Temporary: ${this.torment.secondary}`,
-      value: this.torment.getSecondaryTracker({ emoji: Emoji.purple_dot_2 }),
+      value: this.torment.getSecondaryTracker({
+        emoji: Emoji.tracker_2_filled.toString(),
+      }),
       inline: false,
     });
 

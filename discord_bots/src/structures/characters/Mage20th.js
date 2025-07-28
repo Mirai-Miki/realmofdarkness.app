@@ -70,13 +70,17 @@ module.exports = class Mage extends Character20th {
 
     embed.addFields({
       name: `Willpower [${this.willpower.current}/${this.willpower.total}]`,
-      value: this.willpower.getTracker({ emoji: Emoji.purple_dot_3 }),
+      value: this.willpower.getTracker({
+        emoji: Emoji.tracker_3_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Arete ${this.arete.current}`,
-      value: this.arete.getTracker({ emoji: Emoji.red_dot }),
+      value: this.arete.getTracker({
+        emoji: Emoji.tracker_0_filled.toString(),
+      }),
       inline: false,
     });
 

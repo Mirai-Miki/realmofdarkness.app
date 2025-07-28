@@ -29,11 +29,11 @@ function getContent(interaction) {
   const results = interaction.rollResults;
   let content = toDiceString(results.dice, interaction, true);
   if (results.roteDice.length) {
-    content += Emoji.red_period;
+    content += Emoji.misc_red_dot.toString();
     content += toDiceString(results.roteDice, interaction);
   }
   if (results.rerollDice.length) {
-    content += Emoji.black_period;
+    content += Emoji.misc_black_dot.toString();
     content += toDiceString(results.rerollDice, interaction);
   }
   if (content.length >= 2000) content = null;
@@ -44,26 +44,58 @@ function toDiceString(diceResults, interaction, chanceDice = false) {
   const args = interaction.arguments;
   const chance = interaction.rollResults.chance;
   const emotes = {
-    1: { fail: Emoji.red1, sux: Emoji.green1 },
-    2: { fail: Emoji.red2, sux: Emoji.green2 },
-    3: { fail: Emoji.red3, sux: Emoji.green3 },
-    4: { fail: Emoji.red4, sux: Emoji.green4 },
-    5: { fail: Emoji.red5, sux: Emoji.green5 },
-    6: { fail: Emoji.red6, sux: Emoji.green6 },
-    7: { fail: Emoji.red7, sux: Emoji.green7 },
-    8: { fail: Emoji.red8, sux: Emoji.green8 },
-    9: { fail: Emoji.red9, sux: Emoji.green9 },
-    10: { fail: Emoji.red10, sux: Emoji.green10 },
+    1: {
+      fail: Emoji.dice_20_0_fail_1.toString(),
+      sux: Emoji.dice_20_0_pass_1.toString(),
+    },
+    2: {
+      fail: Emoji.dice_20_0_fail_2.toString(),
+      sux: Emoji.dice_20_0_pass_2.toString(),
+    },
+    3: {
+      fail: Emoji.dice_20_0_fail_3.toString(),
+      sux: Emoji.dice_20_0_pass_3.toString(),
+    },
+    4: {
+      fail: Emoji.dice_20_0_fail_4.toString(),
+      sux: Emoji.dice_20_0_pass_4.toString(),
+    },
+    5: {
+      fail: Emoji.dice_20_0_fail_5.toString(),
+      sux: Emoji.dice_20_0_pass_5.toString(),
+    },
+    6: {
+      fail: Emoji.dice_20_0_fail_6.toString(),
+      sux: Emoji.dice_20_0_pass_6.toString(),
+    },
+    7: {
+      fail: Emoji.dice_20_0_fail_7.toString(),
+      sux: Emoji.dice_20_0_pass_7.toString(),
+    },
+    8: {
+      fail: Emoji.dice_20_0_fail_8.toString(),
+      sux: Emoji.dice_20_0_pass_8.toString(),
+    },
+    9: {
+      fail: Emoji.dice_20_0_fail_9.toString(),
+      sux: Emoji.dice_20_0_pass_9.toString(),
+    },
+    10: {
+      fail: Emoji.dice_20_0_fail_10.toString(),
+      sux: Emoji.dice_20_0_pass_10.toString(),
+    },
   };
 
   let mess = "";
   for (const dice of diceResults) {
     if (chance) {
-      if (dice == 10) mess += Emoji.black_crit;
-      else if (dice == 1 && chanceDice) mess += Emoji.botch;
+      if (dice == 10) mess += Emoji.dice_v5_0_p_crit.toString();
+      else if (dice == 1 && chanceDice)
+        mess += Emoji.dice_20_0_botch.toString();
       else mess += emotes[dice].fail;
     } else {
-      if (dice >= (args.reroll ?? 10)) mess += Emoji.black_crit;
+      if (dice >= (args.reroll ?? 10))
+        mess += Emoji.dice_v5_0_p_crit.toString();
       else if (dice >= (args.target ?? 8)) mess += emotes[dice].sux;
       else mess += emotes[dice].fail;
     }

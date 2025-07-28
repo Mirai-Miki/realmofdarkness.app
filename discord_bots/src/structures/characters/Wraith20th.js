@@ -57,19 +57,25 @@ module.exports = class Wraith20 extends Character20th {
 
     embed.addFields({
       name: `Willpower [${this.willpower.current}/${this.willpower.total}]`,
-      value: this.willpower.getTracker({ emoji: Emoji.purple_dot_3 }),
+      value: this.willpower.getTracker({
+        emoji: Emoji.tracker_3_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Corpus [${this.corpus.current}/${this.corpus.total}]`,
-      value: this.corpus.getTracker({ emoji: Emoji.red_dot }),
+      value: this.corpus.getTracker({
+        emoji: Emoji.tracker_0_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Pathos ${this.pathos.current}`,
-      value: this.pathos.getTracker({ emoji: Emoji.purple_dot_1 }),
+      value: this.pathos.getTracker({
+        emoji: Emoji.tracker_1_filled.toString(),
+      }),
       inline: false,
     });
 

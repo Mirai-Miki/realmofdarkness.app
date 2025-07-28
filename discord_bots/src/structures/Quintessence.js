@@ -55,11 +55,11 @@ module.exports = class Quintessence {
 
       if (qCount) {
         qCount--;
-        tracker += Emoji.purple_dot_2;
+        tracker += Emoji.tracker_2_filled.toString();
       } else if (eCount) {
         eCount--;
-        tracker += Emoji.blank_dot;
-      } else tracker += Emoji.yellow_dot;
+        tracker += Emoji.tracker_0_empty.toString();
+      } else tracker += Emoji.tracker_4_filled.toString();
     }
     return tracker;
   }

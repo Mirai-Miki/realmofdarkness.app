@@ -89,15 +89,15 @@ module.exports = class DamageTracker20th {
       if (i !== 0 && i % 2 === 0) tracker += "⠀";
 
       if (agg) {
-        tracker += Emoji.purpleBox;
+        tracker += Emoji.tracker_20th_0_agg.toString();
         agg--;
       } else if (lethal) {
-        tracker += Emoji.redBox;
+        tracker += Emoji.tracker_5th_0_agg.toString();
         lethal--;
       } else if (bashing) {
-        tracker += Emoji.yellowBox;
+        tracker += Emoji.tracker_5th_0_sup.toString();
         bashing--;
-      } else tracker += Emoji.greenBox; // Undamaged Box
+      } else tracker += Emoji.tracker_0_box_empty.toString(); // Undamaged Box
     }
     tracker += "⠀";
 

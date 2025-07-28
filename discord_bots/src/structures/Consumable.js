@@ -88,12 +88,12 @@ module.exports = class Consumable {
    * Returns a tracker string representing the progress of the consumable.
    * @param {Object} options - The options for the tracker.
    * @param {boolean} options.showEmoji - Whether to show emojis in the tracker. Default is true.
-   * @param {string} options.emoji - The emoji to use for the consumed items. Default is Emoji.red_dot.
+   * @param {string} options.emoji - The emoji to use for the consumed items. Default is Emoji.tracker_0_filled.toString().
    * @returns {string} The tracker string.
    */
   getTracker({
     showEmoji = true,
-    emoji = Emoji.red_dot,
+    emoji = Emoji.tracker_0_filled.toString(),
     inverted = false,
   } = {}) {
     let tracker = "";
@@ -109,16 +109,16 @@ module.exports = class Consumable {
     for (let i = 0; i < stop; i++) {
       if (inverted) {
         if (overflow > 0) {
-          tracker += Emoji.yellow_dot;
+          tracker += Emoji.tracker_4_filled.toString();
           overflow--;
         } else if (empty > 0) {
-          tracker += Emoji.blank_dot;
+          tracker += Emoji.tracker_0_empty.toString();
           empty--;
         } else tracker += emoji;
       } else {
-        if (i >= this.total) tracker += Emoji.yellow_dot;
+        if (i >= this.total) tracker += Emoji.tracker_4_filled.toString();
         else if (i < this.current) tracker += emoji;
-        else tracker += Emoji.blank_dot;
+        else tracker += Emoji.tracker_0_empty.toString();
       }
     }
     tracker += "⠀";

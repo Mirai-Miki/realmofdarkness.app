@@ -40,24 +40,24 @@ module.exports = class Supporter {
   /**
    * Get supporter tier emoji based on level
    * @param {number} level - Supporter tier level
-   * @returns {ApplicationEmoji | String} - Tier emoji or empty string
+   * @returns {String} - Tier emoji string or empty string
    */
   static getEmoji(level) {
     switch (level) {
       case this.mortal:
-        return Emoji.supporter_mortal;
+        return Emoji.supporter_mortal.toString();
       case this.fledgling:
-        return Emoji.supporter_fledgling;
+        return Emoji.supporter_fledgling.toString();
       case this.neonate:
-        return Emoji.supporter_neonate;
+        return Emoji.supporter_neonate.toString();
       case this.ancilla:
-        return Emoji.supporter_ancilla;
+        return Emoji.supporter_ancilla.toString();
       case this.elder:
-        return Emoji.supporter_elder;
+        return Emoji.supporter_elder.toString();
       case this.methuselah:
-        return Emoji.supporter_methuselah;
+        return Emoji.supporter_methuselah.toString();
       case this.antediluvian:
-        return Emoji.supporter_antediluvian;
+        return Emoji.supporter_antediluvian.toString();
       default:
         return "";
     }

@@ -103,37 +103,49 @@ module.exports = class Changeling extends Character20th {
 
     embed.addFields({
       name: `Willpower [${this.willpower.current}/${this.willpower.total}]`,
-      value: this.willpower.getTracker({ emoji: Emoji.purple_dot_3 }),
+      value: this.willpower.getTracker({
+        emoji: Emoji.tracker_3_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Glamour [${this.glamour.current}/${this.glamour.total}]`,
-      value: this.glamour.getTracker({ emoji: Emoji.purple_dot_1 }),
+      value: this.glamour.getTracker({
+        emoji: Emoji.tracker_1_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Imbalance ${this.nightmare.primary}`,
-      value: this.nightmare.getPrimaryTracker({ emoji: Emoji.purple_dot_2 }),
+      value: this.nightmare.getPrimaryTracker({
+        emoji: Emoji.tracker_2_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Nightmare ${this.nightmare.secondary}`,
-      value: this.nightmare.getSecondaryTracker({ emoji: Emoji.red_dot }),
+      value: this.nightmare.getSecondaryTracker({
+        emoji: Emoji.tracker_0_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Banality Permanent ${this.banality.primary}`,
-      value: this.banality.getPrimaryTracker({ emoji: Emoji.purple_dot_2 }),
+      value: this.banality.getPrimaryTracker({
+        emoji: Emoji.tracker_2_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Banality Temporary ${this.banality.secondary}`,
-      value: this.banality.getSecondaryTracker({ emoji: Emoji.yellow_dot }),
+      value: this.banality.getSecondaryTracker({
+        emoji: Emoji.tracker_4_filled.toString(),
+      }),
       inline: false,
     });
 

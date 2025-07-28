@@ -63,25 +63,33 @@ module.exports = class Ghoul20th extends Character20th {
 
     embed.addFields({
       name: `Willpower [${this.willpower.current}/${this.willpower.total}]`,
-      value: this.willpower.getTracker({ emoji: Emoji.purple_dot_3 }),
+      value: this.willpower.getTracker({
+        emoji: Emoji.tracker_3_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Vitae [${this.vitae.current}/5]`,
-      value: this.vitae.getTracker({ emoji: Emoji.red_dot }),
+      value: this.vitae.getTracker({
+        emoji: Emoji.tracker_0_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Blood [${this.blood.current}/10]`,
-      value: this.blood.getTracker({ emoji: Emoji.red_dot }),
+      value: this.blood.getTracker({
+        emoji: Emoji.tracker_0_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: `Humanity ${this.morality.pool.current}`,
-      value: this.morality.pool.getTracker({ emoji: Emoji.purple_dot_3 }),
+      value: this.morality.pool.getTracker({
+        emoji: Emoji.tracker_3_filled.toString(),
+      }),
       inline: false,
     });
 

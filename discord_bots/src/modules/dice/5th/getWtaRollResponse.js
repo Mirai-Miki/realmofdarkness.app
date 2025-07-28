@@ -129,21 +129,29 @@ module.exports.getEmbed = function (interaction) {
 };
 
 module.exports.getContent = function (interaction) {
+  const diceFail = Emoji.dice_w5_0_p_fail.toString();
+  const diceSuccess = Emoji.dice_w5_0_p_pass.toString();
+  const diceCrit = Emoji.dice_w5_0_p_crit.toString();
+  const diceBrutal = Emoji.dice_w5_0_s_brutal.toString();
+  const diceRageFail = Emoji.dice_w5_0_s_fail.toString();
+  const diceRageSuccess = Emoji.dice_w5_0_s_pass.toString();
+  const diceRageCrit = Emoji.dice_w5_0_s_crit.toString();
+
   let content = "";
   // Result Loop
   for (const dice of interaction.rollResults.blackDice) {
     // Adding each dice emoji to the start of the message
-    if (dice <= 5) content += Emoji.w5_fail;
-    else if (dice <= 9) content += Emoji.w5_success;
-    else content += Emoji.w5_crit;
+    if (dice <= 5) content += diceFail;
+    else if (dice <= 9) content += diceSuccess;
+    else content += diceCrit;
     content += " ";
   }
 
   for (const dice of interaction.rollResults.rageDice) {
-    if (dice <= 2) content += Emoji.brutal_result;
-    else if (dice <= 5) content += Emoji.rage_fail;
-    else if (dice <= 9) content += Emoji.rage_success;
-    else content += Emoji.rage_crit;
+    if (dice <= 2) content += diceBrutal;
+    else if (dice <= 5) content += diceRageFail;
+    else if (dice <= 9) content += diceRageSuccess;
+    else content += diceRageCrit;
     content += " ";
   }
   return content.length > 2000 ? null : content;

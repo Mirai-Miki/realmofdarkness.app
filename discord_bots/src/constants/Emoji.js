@@ -23,8 +23,7 @@ const EmojiProxy = new Proxy(
 );
 
 /**
- * Export the dynamic emoji proxy for backwards compatibility
- * The proxy provides dynamic access to emojis but is typed as EmojiObject for IntelliSense
+ * Emoji constants for Discord applications.
  * @type {import('../types/emojiTypes').EmojiObject}
  */
 // @ts-ignore - Proxy object cannot be statically typed but we provide the interface for IntelliSense

@@ -97,21 +97,29 @@ module.exports.getEmbed = function (interaction) {
 };
 
 module.exports.getContent = function (interaction) {
+  const diceFail = Emoji.dice_h5_0_p_fail.toString();
+  const dicePass = Emoji.dice_h5_0_p_pass.toString();
+  const diceCrit = Emoji.dice_h5_0_p_crit.toString();
+  const diceDesperationFail = Emoji.dice_h5_0_s_fail.toString();
+  const diceDesperationPass = Emoji.dice_h5_0_s_pass.toString();
+  const diceDesperationCrit = Emoji.dice_h5_0_s_crit.toString();
+  const diceDespair = Emoji.dice_h5_0_s_choice.toString();
+
   let content = "";
   // Result Loop
   for (const dice of interaction.rollResults.dice) {
     // Adding each dice emoji to the start of the message
-    if (dice <= 5) content += Emoji.hunter_fail;
-    else if (dice <= 9) content += Emoji.hunter_pass;
-    else content += Emoji.hunter_crit;
+    if (dice <= 5) content += diceFail;
+    else if (dice <= 9) content += dicePass;
+    else content += diceCrit;
     content += " ";
   }
 
   for (const dice of interaction.rollResults.desperationDice) {
-    if (dice == 1) content += Emoji.despair;
-    else if (dice <= 5) content += Emoji.desperation_fail;
-    else if (dice <= 9) content += Emoji.desperation_pass;
-    else content += Emoji.desperation_crit;
+    if (dice == 1) content += diceDespair;
+    else if (dice <= 5) content += diceDesperationFail;
+    else if (dice <= 9) content += diceDesperationPass;
+    else content += diceDesperationCrit;
   }
   return content.length > 2000 ? null : content;
 };

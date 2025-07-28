@@ -1,11 +1,5 @@
 "use strict";
 
-/**
- * Export the dynamic emoji proxy for backwards compatibility
- * The proxy provides dynamic access to emojis but is typed as EmojiObject for IntelliSense
- * @type {import('../types/emojiTypes').EmojiObject}
- */
-// @ts-ignore - Proxy object cannot be statically typed but we provide the interface for IntelliSense
 const { Emoji } = require("./Emoji");
 module.exports.Emoji = Emoji;
 // Splats constants for game archetypes2

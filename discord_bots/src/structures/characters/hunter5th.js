@@ -78,20 +78,24 @@ module.exports = class Hunter5th extends Character5th {
 
     embed.addFields({
       name: "Desperation",
-      value: this.desperation.getTracker({ emoji: Emoji.purple_dot_3 }),
+      value: this.desperation.getTracker({
+        emoji: Emoji.tracker_3_filled.toString(),
+      }),
       inline: false,
     });
 
     embed.addFields({
       name: "Danger",
-      value: this.danger.getTracker({ emoji: Emoji.red_dot }),
+      value: this.danger.getTracker({
+        emoji: Emoji.tracker_0_filled.toString(),
+      }),
       inline: false,
     });
 
     if (this.despair)
       embed.addFields({
         name: "Despair",
-        value: Emoji.hunter_pass,
+        value: Emoji.dice_h5_0_p_pass.toString(),
         inline: false,
       });
 

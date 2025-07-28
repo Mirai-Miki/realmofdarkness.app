@@ -122,13 +122,21 @@ module.exports.getEmbed = function (interaction) {
 };
 
 module.exports.getContent = function (interaction) {
+  const diceFail = Emoji.dice_v5_0_p_fail.toString();
+  const dicePass = Emoji.dice_v5_0_p_pass.toString();
+  const diceCrit = Emoji.dice_v5_0_p_crit.toString();
+  const diceHungerFail = Emoji.dice_v5_0_s_fail.toString();
+  const diceHungerPass = Emoji.dice_v5_0_s_pass.toString();
+  const diceHungerCrit = Emoji.dice_v5_0_s_crit.toString();
+  const diceBestial = Emoji.dice_v5_0_s_bestial.toString();
+
   let content = "";
   // Result Loop
   for (const dice of interaction.rollResults.blackDice) {
     // Adding each dice emoji to the start of the message
-    if (dice <= 5) content += Emoji.black_fail;
-    else if (dice <= 9) content += Emoji.black_pass;
-    else content += Emoji.black_crit;
+    if (dice <= 5) content += diceFail;
+    else if (dice <= 9) content += dicePass;
+    else content += diceCrit;
     content += " ";
   }
 
@@ -136,10 +144,10 @@ module.exports.getContent = function (interaction) {
     return content.length > 2000 ? null : content;
 
   for (const dice of interaction.rollResults.hungerDice) {
-    if (dice == 1) content += Emoji.bestial_fail;
-    else if (dice <= 5) content += Emoji.red_fail;
-    else if (dice <= 9) content += Emoji.red_pass;
-    else content += Emoji.red_crit;
+    if (dice == 1) content += diceBestial;
+    else if (dice <= 5) content += diceHungerFail;
+    else if (dice <= 9) content += diceHungerPass;
+    else content += diceHungerCrit;
     content += " ";
   }
   return content.length > 2000 ? null : content;

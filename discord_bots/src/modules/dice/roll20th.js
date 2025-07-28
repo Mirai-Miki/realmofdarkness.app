@@ -68,28 +68,55 @@ function extractDicePenalty(interaction) {
 }
 
 function getContent(interaction) {
+  const DiceSuxEmotes = {
+    1: Emoji.dice_20_0_pass_1.toString(),
+    2: Emoji.dice_20_0_pass_2.toString(),
+    3: Emoji.dice_20_0_pass_3.toString(),
+    4: Emoji.dice_20_0_pass_4.toString(),
+    5: Emoji.dice_20_0_pass_5.toString(),
+    6: Emoji.dice_20_0_pass_6.toString(),
+    7: Emoji.dice_20_0_pass_7.toString(),
+    8: Emoji.dice_20_0_pass_8.toString(),
+    9: Emoji.dice_20_0_pass_9.toString(),
+    10: Emoji.dice_20_0_pass_10.toString(),
+  };
+
+  const DiceFailEmotes = {
+    1: Emoji.dice_20_0_fail_1.toString(),
+    2: Emoji.dice_20_0_fail_2.toString(),
+    3: Emoji.dice_20_0_fail_3.toString(),
+    4: Emoji.dice_20_0_fail_4.toString(),
+    5: Emoji.dice_20_0_fail_5.toString(),
+    6: Emoji.dice_20_0_fail_6.toString(),
+    7: Emoji.dice_20_0_fail_7.toString(),
+    8: Emoji.dice_20_0_fail_8.toString(),
+    9: Emoji.dice_20_0_fail_9.toString(),
+    10: Emoji.dice_20_0_fail_10.toString(),
+  };
+
   const results = interaction.results;
   const args = interaction.arguments;
   const diff = args.difficulty ?? 1;
   let content = "";
 
   for (const dice of results.blackDice) {
-    if (dice === 10 && args.spec) content += Emoji.black_crit;
-    else if (dice === 10) content += Emoji.green10;
+    if (dice === 10 && args.spec) content += Emoji.dice_v5_0_p_crit.toString();
+    else if (dice === 10) content += Emoji.dice_20_0_pass_10.toString();
     else if (dice >= diff) content += DiceSuxEmotes[dice];
     else if (dice < diff && (dice != 1 || args.cancelOnes))
       content += DiceFailEmotes[dice];
-    else content += Emoji.botch;
+    else content += Emoji.dice_20_0_botch.toString();
     content += " ";
   }
 
-  if (content.length && args.nightmare) content += Emoji.butterfly;
+  if (content.length && args.nightmare)
+    content += Emoji.misc_butterfly.toString();
   for (const dice of results.nightmareDice) {
-    if (dice === 10) content += Emoji.nightmare;
+    if (dice === 10) content += Emoji.dice_20_0_nightmare.toString();
     else if (dice >= diff) content += DiceSuxEmotes[dice];
     else if (dice < diff && (dice != 1 || args.cancelOnes))
       content += DiceFailEmotes[dice];
-    else content += Emoji.botch;
+    else content += Emoji.dice_20_0_botch.toString();
     content += " ";
   }
   return content;
@@ -203,29 +230,3 @@ function getEmbed(interaction) {
   embed.setURL("https://realmofdarkness.app/");
   return embed;
 }
-
-const DiceSuxEmotes = {
-  1: Emoji.green1,
-  2: Emoji.green2,
-  3: Emoji.green3,
-  4: Emoji.green4,
-  5: Emoji.green5,
-  6: Emoji.green6,
-  7: Emoji.green7,
-  8: Emoji.green8,
-  9: Emoji.green9,
-  10: Emoji.green10,
-};
-
-const DiceFailEmotes = {
-  1: Emoji.red1,
-  2: Emoji.red2,
-  3: Emoji.red3,
-  4: Emoji.red4,
-  5: Emoji.red5,
-  6: Emoji.red6,
-  7: Emoji.red7,
-  8: Emoji.red8,
-  9: Emoji.red9,
-  10: Emoji.red10,
-};

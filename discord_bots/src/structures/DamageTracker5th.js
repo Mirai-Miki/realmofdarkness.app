@@ -218,12 +218,12 @@ module.exports = class DamageTracker5th {
       if (i == 5 || i == 10 || i == 15) tracker += "⠀";
 
       if (aggDamage > 0) {
-        tracker += Emoji.redBox;
+        tracker += Emoji.tracker_5th_0_agg.toString();
         aggDamage--;
       } else if (supDamage > 0) {
-        tracker += Emoji.yellowBox;
+        tracker += Emoji.tracker_5th_0_sup.toString();
         supDamage--;
-      } else tracker += Emoji.greenBox;
+      } else tracker += Emoji.tracker_0_box_empty.toString();
     }
 
     tracker += "⠀";

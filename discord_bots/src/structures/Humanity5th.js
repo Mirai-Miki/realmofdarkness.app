@@ -80,12 +80,12 @@ module.exports = class Humanity5th {
       if (i == 5) tracker += "⠀";
 
       if (total) {
-        tracker += Emoji.purple_dot_3;
+        tracker += Emoji.tracker_3_filled.toString();
         total--;
       } else if (undamaged) {
-        tracker += Emoji.black_period;
+        tracker += Emoji.misc_black_dot.toString();
         undamaged--;
-      } else tracker += Emoji.red_skull;
+      } else tracker += Emoji.tracker_5th_0_stain.toString();
     }
     tracker += "⠀";
     return tracker;

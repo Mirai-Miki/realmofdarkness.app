@@ -53,21 +53,30 @@ module.exports = class Counter {
     this.secondary = amount;
   }
 
-  getPrimaryTracker({ showEmoji = true, emoji = Emoji.purple_dot_2 } = {}) {
+  getPrimaryTracker({
+    showEmoji = true,
+    emoji = Emoji.tracker_2_filled.toString(),
+  } = {}) {
     return this.getTracker(this.primary, {
       showEmoji: showEmoji,
       emoji: emoji,
     });
   }
 
-  getSecondaryTracker({ showEmoji = true, emoji = Emoji.purple_dot_1 } = {}) {
+  getSecondaryTracker({
+    showEmoji = true,
+    emoji = Emoji.tracker_1_filled.toString(),
+  } = {}) {
     return this.getTracker(this.secondary, {
       showEmoji: showEmoji,
       emoji: emoji,
     });
   }
 
-  getTracker(value, { showEmoji = true, emoji = Emoji.purple_dot_1 } = {}) {
+  getTracker(
+    value,
+    { showEmoji = true, emoji = Emoji.tracker_1_filled.toString() } = {}
+  ) {
     if (value === undefined) throw new Error("value not defined");
 
     let tracker = "";
@@ -78,7 +87,7 @@ module.exports = class Counter {
 
     for (let i = 0; i < this.max; i++) {
       if (i < value) tracker += emoji;
-      else tracker += Emoji.blank_dot;
+      else tracker += Emoji.tracker_0_empty.toString();
     }
     tracker += "⠀";
     return tracker;
