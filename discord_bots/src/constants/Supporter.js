@@ -1,4 +1,5 @@
-const { Emoji } = require("@constants");
+const { ApplicationEmoji } = require("discord.js");
+const { Emoji } = require("./Emoji.js");
 
 module.exports = class Supporter {
   static free = 0;
@@ -39,7 +40,7 @@ module.exports = class Supporter {
   /**
    * Get supporter tier emoji based on level
    * @param {number} level - Supporter tier level
-   * @returns {string} - Tier emoji
+   * @returns {ApplicationEmoji | String} - Tier emoji or empty string
    */
   static getEmoji(level) {
     switch (level) {

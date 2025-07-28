@@ -19,8 +19,19 @@ async function manageEmojis({ version }) {
   const clientId = process.env[`CLIENT_ID_${upperVersion}`];
   const token = process.env[`TOKEN_${upperVersion}`];
 
+  // Entry banner
+  console.log("\n============================================================");
+  console.log(
+    `🌠  [EMOJI MANAGER] Starting for bot version: \x1b[1m${version.toUpperCase()}\x1b[0m\n`
+  );
+
   if (!clientId || !token) {
-    console.error(`Missing environment variables for ${version}`);
+    console.error(
+      `❌ [EMOJI MANAGER] Missing environment variables for ${version}`
+    );
+    console.log(
+      "============================================================\n"
+    );
     return;
   }
 
@@ -29,10 +40,8 @@ async function manageEmojis({ version }) {
     intents: [GatewayIntentBits.Guilds],
   });
 
-  console.log(`Starting emoji management for ${version} bot...`);
-
   client.once("ready", async () => {
-    console.log(`Logged in as ${client.user.tag}`);
+    console.log(`  - Logged in as \x1b[1m${client.user.tag}\x1b[0m`);
 
     try {
       // Get emojis folder path
@@ -82,7 +91,6 @@ async function manageEmojis({ version }) {
       // Add new emojis
       for (const emoji of emojisToAdd) {
         try {
-          console.log(`Adding emoji: ${emoji.name}`);
           const attachment = fs.readFileSync(emoji.path);
           await client.application.emojis.create({
             attachment: attachment,
@@ -100,7 +108,6 @@ async function manageEmojis({ version }) {
       // Remove old emojis
       for (const emoji of emojisToRemove.values()) {
         try {
-          console.log(`Removing emoji: ${emoji.name}`);
           await emoji.delete();
           console.log(`✅ Removed: ${emoji.name}`);
 
@@ -111,9 +118,17 @@ async function manageEmojis({ version }) {
         }
       }
 
-      console.log("Emoji management completed!");
+      console.log(
+        `\n🌠  [EMOJI MANAGER] Emoji management completed for bot version: \x1b[1m${version.toUpperCase()}\x1b[0m`
+      );
+      console.log(
+        "============================================================\n"
+      );
     } catch (error) {
-      console.error("Error managing emojis:", error);
+      console.error("❌ [EMOJI MANAGER] Error managing emojis:", error);
+      console.log(
+        "============================================================\n"
+      );
     } finally {
       client.destroy();
     }
@@ -130,13 +145,23 @@ if (require.main === module) {
   const version = args[0];
 
   if (!version) {
-    console.error("Please provide a bot version: 5th, 20th, or cod");
+    console.error(
+      "\n❌  [EMOJI MANAGER] Please provide a bot version: 5th, 20th, or cod"
+    );
+    console.error(
+      "============================================================\n"
+    );
     process.exit(1);
   }
 
   // Execute emoji management
   (async () => {
     await manageEmojis({ version });
+    // Add a clear exit banner for clarity
+    console.log("\n🏁  [EMOJI MANAGER] Script finished");
+    console.log(
+      "============================================================\n"
+    );
     process.exit(0);
   })();
 } else {

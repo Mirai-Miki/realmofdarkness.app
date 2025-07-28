@@ -19,7 +19,10 @@ const destDir = path.resolve(__dirname, "../dist");
  */
 async function buildProject() {
   try {
-    console.log("🏗️ Starting build process...");
+    console.log(
+      "\n============================================================"
+    );
+    console.log("🏗️  [BUILD] Starting Realm of Darkness Bot build process");
 
     // Step 1: Check for TypeScript files
     console.log("🔍 Checking for TypeScript files...");
@@ -119,10 +122,17 @@ async function buildProject() {
     console.log(
       `✅ Build complete! ${builtFiles.length} files in dist directory`
     );
+    console.log("\n🏁  [BUILD] Build script finished");
+    console.log(
+      "============================================================\n"
+    );
     return true;
   } catch (error) {
-    console.error(`❌ Build failed: ${error.message}`);
+    console.error(`❌ [BUILD] Build failed: ${error.message}`);
     if (error.stack) console.error(error.stack);
+    console.log(
+      "============================================================\n"
+    );
     process.exit(1);
   }
 }

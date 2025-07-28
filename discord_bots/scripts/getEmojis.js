@@ -21,9 +21,6 @@ import dotenv from "dotenv";
 // Load environment variables
 dotenv.config();
 
-// Load environment variables
-dotenv.config();
-
 // Get configuration from environment and command line arguments
 const token = process.env.EMOJI_SCRIPT_TOKEN;
 const args = process.argv.slice(2);

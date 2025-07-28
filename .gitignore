@@ -95,6 +95,7 @@ discord_bots/venv/
 discord_bots/.venv/
 discord_bots/__pycache__/
 discord_bots/database/
+discord_bots/src/types/emojiTypes.d.ts
 
 # React frontend
 frontend/node_modules/

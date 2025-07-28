@@ -1,4 +1,5 @@
 "use strict";
+const { Client } = require("discord.js");
 
 /**
  * Dynamic emoji manager for Discord applications
@@ -91,22 +92,6 @@ const emojiManager = new EmojiManager();
  */
 async function initializeEmojis(client) {
   await emojiManager.loadEmojis(client);
-
-  // Add convenience property to client
-  client.applicationEmojis = new Proxy(
-    {},
-    {
-      get(target, prop) {
-        return emojiManager.get(prop);
-      },
-      has(target, prop) {
-        return emojiManager.has(prop);
-      },
-      ownKeys(target) {
-        return emojiManager.getNames();
-      },
-    }
-  );
 }
 
 module.exports = {

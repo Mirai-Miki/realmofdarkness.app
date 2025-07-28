@@ -1,16 +1,5 @@
 {
-  "watch": [
-    "src/",
-    "commands/",
-    "components/",
-    "Constants/",
-    "events/",
-    "structures/",
-    "modules/",
-    "realmAPI/",
-    "Errors/",
-    "alias.js"
-  ],
+  "watch": ["src/", "alias.js"],
   "ignore": [
     "node_modules/",
     "dist/",
@@ -23,9 +12,7 @@
   "ext": "js,ts,json,env",
   "delay": "1000",
   "verbose": true,
-  "execMap": {
-    "ts": "node --require ts-node/register"
-  },
+  "exec": "node --require ./alias.js --require ts-node/register",
   "env": {
     "NODE_ENV": "development"
   }

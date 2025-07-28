@@ -1,26 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "rootDir": "./src",
-    "outDir": "./dist/",
-    "typeRoots": ["node_modules/@types", "./src/types"],
-    "strict": false,
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "experimentalDecorators": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true,
-    "removeComments": true,
-    "sourceMap": true, // Enable for better debugging
     "baseUrl": "./",
-    "allowJs": true, // Allow JS files alongside TS
-    "checkJs": true, // Type-check JS files for better error detection
+    "module": "commonjs",
+    "target": "ES2020",
+    "checkJs": true,
+    "allowJs": true,
+    "typeRoots": ["node_modules/@types", "./src/types"],
+    "moduleResolution": "node",
     "paths": {
-      // Configure path aliases
       "@src*": ["./src/*"],
       "@bots*": ["./src/bots/*"],
       "@commands*": ["./src/commands/*"],
@@ -36,5 +23,5 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "scripts", "*.js"]
+  "exclude": ["node_modules", "dist"]
 }

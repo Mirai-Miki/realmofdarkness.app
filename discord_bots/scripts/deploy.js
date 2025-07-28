@@ -8,12 +8,6 @@ const manageEmojis = require("./manageEmojis");
 
 /**
  * Deploys commands for a specific bot version
- * @param {Object} options - Deployment options
- * @param {string} options.version - Bot version (5th, 20th, cod)
- * @param {string} options.environment - Target environment (dev, prod)
- * @param {boolean} options.global - Whether to deploy globally
- * @param {boolean} options.add - Whether to add (true) or remove (false) commands
- * @returns {Promise<number>} - Number of commands processed
  */
 async function deployCommands({
   version,
@@ -21,54 +15,49 @@ async function deployCommands({
   global = false,
   add = true,
 }) {
-  // Normalize version string
   const normalizedVersion = version.toLowerCase();
   const upperVersion = normalizedVersion.toUpperCase();
 
-  // Get environment variables
+  console.log("\n============================================================");
+  console.log(
+    `🚀  [DEPLOY] Deploying commands for bot version: \x1b[1m${version.toUpperCase()}\x1b[0m\n`
+  );
+
   const clientId = process.env[`CLIENT_ID_${upperVersion}`];
   const token = process.env[`TOKEN_${upperVersion}`];
   const guildId = process.env.DEV_SERVER_ID;
 
   if (!clientId || !token) {
-    console.error(`Missing environment variables for ${version}`);
+    console.error(`❌ [DEPLOY] Missing environment variables for ${version}`);
     return 0;
   }
-
   if (!global && !guildId) {
     console.error(
-      "Missing DEV_SERVER_ID environment variable for guild deployment"
+      "❌ [DEPLOY] Missing DEV_SERVER_ID environment variable for guild deployment"
     );
     return 0;
   }
 
-  // Command path
   const commandPath = path.join(
     process.cwd(),
     "src",
     "commands",
     normalizedVersion
   );
-
   if (!fs.existsSync(commandPath)) {
-    console.error(`Command directory not found: ${commandPath}`);
+    console.error(`❌ [DEPLOY] Command directory not found: ${commandPath}`);
     return 0;
   }
 
-  // Read command files only if we're adding commands
   const commands = [];
-
   if (add) {
     const commandFiles = fs
       .readdirSync(commandPath)
       .filter((file) => file.endsWith(".js") || file.endsWith(".ts"));
-
     if (commandFiles.length === 0) {
       console.warn(`No command files found for ${version}`);
       return 0;
     }
-
-    // Load each command
     for (const file of commandFiles) {
       try {
         const command = require(path.join(commandPath, file));
@@ -82,7 +71,6 @@ async function deployCommands({
     }
   }
 
-  // Setup REST API client
   const rest = new REST({ version: "10" }).setToken(token);
 
   try {
@@ -90,70 +78,77 @@ async function deployCommands({
       ? Routes.applicationCommands(clientId)
       : Routes.applicationGuildCommands(clientId, guildId);
 
-    // CASE 1: Switching from global to guild in dev mode
-    // If deploying to guild only AND in dev mode, clear any global commands first
     if (!global && environment === "dev" && add) {
-      console.log("Clearing global commands to avoid duplicates...");
-      // Clear global commands for this app
+      console.log("\nClearing global commands to avoid duplicates...");
       await rest.put(Routes.applicationCommands(clientId), { body: [] });
     }
-
-    // CASE 2: Switching from guild to global in dev mode
-    // If clearing commands in dev server but deploying globally,
-    // clear guild commands first to avoid duplicates
     if (global && environment === "dev" && add) {
-      console.log("Clearing guild-specific commands to avoid duplicates...");
+      console.log("\nClearing guild-specific commands to avoid duplicates...");
       await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
         body: [],
       });
     }
 
     const response = await rest.put(targetRoute, { body: commands });
-
     const deploymentType = add ? "registered" : "removed";
     const scopeType = global ? "globally" : "for development server";
-
-    // Use different message format for command removal vs. addition
     if (add) {
       console.log(
-        `Successfully ${deploymentType} ${response.length} ${version} commands ${scopeType}`
+        `\n🚀 Successfully ${deploymentType} ${response.length} ${version} commands ${scopeType}`
       );
-
-      // Manage emojis after successful command deployment
-      console.log("Managing application emojis...");
-      try {
-        await manageEmojis({ version });
-      } catch (error) {
-        console.error("Failed to manage emojis:", error.message);
-      }
     } else {
       console.log(
-        `Successfully ${deploymentType} all ${version} commands ${scopeType}`
+        `\n🚀 Successfully ${deploymentType} all ${version} commands ${scopeType}`
       );
     }
+    console.log(
+      "============================================================\n"
+    );
 
-    return add ? response.length : 1; // Return 1 for successful clearing operations
+    return add ? response.length : 1;
   } catch (error) {
-    console.error(`Failed to deploy ${version} commands:`, error);
+    console.error(`❌ [DEPLOY] Failed to deploy ${version} commands:`, error);
     return 0;
   }
 }
 
-// Allow script to be run directly or imported
+/**
+ * Deploys emojis for a specific bot version
+ */
+async function deployEmojis({ version }) {
+  try {
+    await manageEmojis({ version });
+  } catch (error) {
+    console.error(
+      "❌ [EMOJI MANAGER] Failed to manage emojis:",
+      error && error.message ? error.message : error
+    );
+  }
+}
+
+/**
+ * Deploys both commands and emojis for a specific bot version
+ */
+async function deploy({
+  version,
+  environment = "dev",
+  global = false,
+  add = true,
+}) {
+  await deployCommands({ version, environment, global, add });
+  await deployEmojis({ version });
+}
+
+// CLI usage
 if (require.main === module) {
-  // Parse command line arguments
   const args = process.argv.slice(2);
   const version = args[0];
-  const mode = args[1] || "dev"; // dev, dev-global, prod, clear-dev, clear-global, clear-prod
-
+  const mode = args[1] || "dev";
   if (!version) {
     console.error("Please provide a bot version: 5th, 20th, or cod");
     process.exit(1);
   }
-
-  // Parse deployment options based on mode
   const options = { version };
-
   switch (mode) {
     case "dev":
       options.environment = "dev";
@@ -186,13 +181,9 @@ if (require.main === module) {
       );
       process.exit(1);
   }
-
-  // Execute deployment
   (async () => {
-    console.log(`Starting command deployment (${mode}) for ${version}...`);
-    await deployCommands(options);
-    console.log("Command deployment completed.");
+    await deploy(options);
   })();
 } else {
-  module.exports = deployCommands;
+  module.exports = deploy;
 }

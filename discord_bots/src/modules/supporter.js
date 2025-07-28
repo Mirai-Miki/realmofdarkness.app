@@ -4,7 +4,6 @@ const { EmbedBuilder, MessageFlags } = require("discord.js");
 const Supporter = require("@src/constants/Supporter");
 const AppMember = require("@structures/AppMember");
 const AppUser = require("@structures/AppUser");
-const API = require("@api");
 const { Emoji } = require("@constants");
 
 /**
@@ -18,7 +17,6 @@ function createProgressBar(current, max) {
   const barLength = 10;
   const percentage = max > 0 ? Math.min(current / max, 1) : 0;
   const filledBars = Math.floor(percentage * barLength);
-  const emptyBars = barLength - filledBars;
 
   // Choose color set
   let color = "green";
