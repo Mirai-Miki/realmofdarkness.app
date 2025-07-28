@@ -2,7 +2,7 @@
 
 const { Emoji } = require("./Emoji");
 module.exports.Emoji = Emoji;
-// Splats constants for game archetypes2
+// Splats constants for game archetypes
 module.exports.Splats = require("./Splats");
 // ComponentCID constants for Discord component custom IDs
 module.exports.ComponentCID = require("./ComponentCID");
