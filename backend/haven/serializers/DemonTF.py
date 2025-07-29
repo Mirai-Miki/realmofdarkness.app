@@ -15,8 +15,8 @@ class DtfTrackerSerializer(Tracker20thSerializer):
         fields = Tracker20thSerializer.Meta.fields + (
             "faith_total",
             "faith_current",
-            "torment_total",
-            "torment_current",
+            "torment_permanent",
+            "torment_temporary",
         )
 
     def to_representation(self, instance):
@@ -35,8 +35,8 @@ class DemonTFSerializer(Character20thSerializer):
         fields = Character20thSerializer.Meta.fields + (
             "faith_total",
             "faith_current",
-            "torment_total",
-            "torment_current",
+            "torment_permanent",
+            "torment_temporary",
         )
 
     def to_representation(self, instance):
@@ -69,10 +69,6 @@ class DemonTFDeserializer(Character20thDeserializer):
         if data.get("faith_current", 0) > data.get("faith_total", 0):
             raise serializers.ValidationError(
                 "Current Faith cannot be greater than Total Faith"
-            )
-        if data.get("torment_current", 0) > data.get("torment_total", 0):
-            raise serializers.ValidationError(
-                "Current Torment cannot be greater than Total Torment"
             )
 
         return data

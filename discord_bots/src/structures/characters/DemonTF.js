@@ -34,8 +34,8 @@ module.exports = class DemonTF extends Character20th {
     await super.deserilize(char);
     this.faith.setTotal(char.faith_total);
     this.faith.setCurrent(char.faith_current);
-    this.torment.setPrimary(char.torment_total);
-    this.torment.setSecondary(char.torment_current);
+    this.torment.setPrimary(char.torment_permanent);
+    this.torment.setSecondary(char.torment_temporary);
     return this;
   }
 
@@ -44,8 +44,8 @@ module.exports = class DemonTF extends Character20th {
     s.character["splat"] = this.splat.slug;
     s.character["faith_total"] = this.faith.total;
     s.character["faith_current"] = this.faith.current;
-    s.character["torment_total"] = this.torment.primary;
-    s.character["torment_current"] = this.torment.secondary;
+    s.character["torment_permanent"] = this.torment.primary;
+    s.character["torment_temporary"] = this.torment.secondary;
     return s;
   }
 

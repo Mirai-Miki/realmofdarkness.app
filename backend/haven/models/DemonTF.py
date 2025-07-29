@@ -10,9 +10,9 @@ class DemonTF(Character20th):
     faith_current = models.IntegerField(
         default=0, validators=[MinValueValidator(0), MaxValueValidator(10)]
     )
-    torment_total = models.IntegerField(
+    torment_permanent = models.IntegerField(
         default=0, validators=[MinValueValidator(0), MaxValueValidator(10)]
     )
-    torment_current = models.IntegerField(
+    torment_temporary = models.IntegerField(
         default=0, validators=[MinValueValidator(0), MaxValueValidator(10)]
     )

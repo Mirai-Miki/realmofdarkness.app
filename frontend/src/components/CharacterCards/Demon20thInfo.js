@@ -50,20 +50,22 @@ export default function Demon20thInfo(props) {
           }}
         />
         <Divider sx={{ my: 1 }} />
-        <Typography>Torment - Permenent: {character.torment_total}</Typography>
+        <Typography>
+          Torment - Permanent: {character.torment_permanent}
+        </Typography>
         <ResponsiveRating
           tracker={{
-            current: character.torment_total,
+            current: character.torment_permanent,
             total: 10,
           }}
         />
         <Divider sx={{ my: 1 }} />
         <Typography>
-          Torment - Temporary: {character.torment_current}
+          Torment - Temporary: {character.torment_temporary}
         </Typography>
         <ResponsiveRating
           tracker={{
-            current: character.torment_current,
+            current: character.torment_temporary,
             total: 10,
           }}
         />
