@@ -285,11 +285,7 @@ deploy_bots() {
     run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && npm run emoji:sync:all"
     print_color $GREEN "[BOTS]    ✅ Application emojis synced successfully."
 
-    print_color $BLUE "[BOTS] [6/7] 🧹 Flushing PM2 logs..."
-    run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 flush ${BOT_PREFIX}v5 && pm2 flush ${BOT_PREFIX}v20 && pm2 flush ${BOT_PREFIX}cod" 2>/dev/null || true
-    print_color $GREEN "[BOTS]    ✅ PM2 logs flushed."
-
-    print_color $BLUE "[BOTS] [7/7] 🔍 Managing PM2 processes..."
+    print_color $BLUE "[BOTS] [6/7] 🔍 Managing PM2 processes..."
 
     # Ensure all files in dist/shards are executable before starting PM2 processes
     if [ -d "$PROJECT_PATH/discord_bots/dist/shards" ]; then
@@ -310,25 +306,33 @@ deploy_bots() {
             "cod") SCRIPT_PATH="dist/shards/index-cod.js" ;;
         esac
 
-        # Check if process exists and get its status
+        # Always delete existing process to ensure fresh start with latest code
+        print_color $YELLOW "[BOTS]       Stopping and deleting $BOT_NAME process..."
+        run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 delete '$BOT_NAME'" 2>/dev/null || true
+
+        # Delete existing log file for fresh logs
+        print_color $YELLOW "[BOTS]       Clearing log file for $BOT_NAME..."
+        run_as_user "$BOT_USER" "rm -f /realm-of-darkness/logs/$BOT_NAME.log" 2>/dev/null || true
+
+        # Small delay to ensure process is fully cleaned up
+        sleep 1
+
+        # Start fresh process
+        print_color $YELLOW "[BOTS]       Starting fresh $BOT_NAME process..."
+        run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 start '$SCRIPT_PATH' $PM2_PARAMS --name '$BOT_NAME'"
+
+        # Verify the process started successfully
+        sleep 2
         if run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 list | grep -E '\b$BOT_NAME\b' | grep -q online"; then
-            # Process exists and is online - restart it
-            print_color $YELLOW "[BOTS]       Restarting $BOT_NAME process (currently online)..."
-            run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 restart '$BOT_NAME'"
-        elif run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 list | grep -E '\b$BOT_NAME\b'" > /dev/null 2>&1; then
-            # Process exists but is not online - start it
-            print_color $YELLOW "[BOTS]       Starting $BOT_NAME process (currently stopped)..."
-            run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 start '$BOT_NAME'"
+            print_color $GREEN "[BOTS]       ✅ $BOT_NAME started successfully"
         else
-            # Process doesn't exist - create it
-            print_color $YELLOW "[BOTS]       Creating $BOT_NAME process (new)..."
-            run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 start '$SCRIPT_PATH' $PM2_PARAMS --name '$BOT_NAME'"
+            print_color $RED "[BOTS]       ❌ $BOT_NAME failed to start"
         fi
     done
 
     print_color $GREEN "[BOTS]    ✅ PM2 processes managed successfully."
 
-    print_color $BLUE "[BOTS] [6/7] 🔄 Saving PM2 process list..."
+    print_color $BLUE "[BOTS] [6/6] 🔄 Saving PM2 process list..."
     run_as_user "$BOT_USER" "pm2 save"
     print_color $GREEN "[BOTS]    ✅ PM2 process list saved."
 
@@ -343,9 +347,13 @@ stop_services() {
     if [ "$COMPONENT" = "all" ] || [ "$COMPONENT" = "bots" ]; then
         print_color $BLUE "[STOP] Stopping Discord bots..."
         if [ "$ENVIRONMENT" = "preproduction" ]; then
-            run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 stop preprod-v5 preprod-v20 preprod-cod" 2>/dev/null || true
+            run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 delete preprod-v5 preprod-v20 preprod-cod" 2>/dev/null || true
+            # Clear log files for fresh start
+            run_as_user "$BOT_USER" "rm -f /realm-of-darkness/logs/preprod-v5.log /realm-of-darkness/logs/preprod-v20.log /realm-of-darkness/logs/preprod-cod.log" 2>/dev/null || true
         else
-            run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 stop v5 v20 cod" 2>/dev/null || true
+            run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 delete v5 v20 cod" 2>/dev/null || true
+            # Clear log files for fresh start
+            run_as_user "$BOT_USER" "rm -f /realm-of-darkness/logs/v5.log /realm-of-darkness/logs/v20.log /realm-of-darkness/logs/cod.log" 2>/dev/null || true
         fi
         print_color $GREEN "[STOP]       ✅ Discord bots stopped."
     fi
