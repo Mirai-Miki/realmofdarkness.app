@@ -24,7 +24,7 @@
     "emoji:sync:5th": "node scripts/syncAppEmojis.js 5th",
     "emoji:sync:20th": "node scripts/syncAppEmojis.js 20th",
     "emoji:sync:cod": "node scripts/syncAppEmojis.js cod",
-    "emoji:sync:all": "node scripts/syncAppEmojis.js 5th && node scripts/syncAppEmojis.js 20th && node scripts/syncAppEmojis.js cod",
+    "emoji:sync:all": "node scripts/syncAllEmojis.js",
     "generate-types": "node scripts/generateEmojiTypes.js",
     "test": "jest",
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
