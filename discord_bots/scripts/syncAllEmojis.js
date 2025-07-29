@@ -1,6 +1,6 @@
 "use strict";
 require("dotenv").config();
-const syncAppEmojis = require("./syncAppEmojis");
+const syncAppEmojis = require("./syncEmojis");
 
 /**
  * Syncs application emojis for all bot versions sequentially with proper delays
@@ -17,18 +17,18 @@ async function syncAllEmojis() {
     try {
       await syncAppEmojis(version);
 
-      // Add a longer delay between versions to ensure proper cleanup
+      // Add a delay between versions to be respectful to Discord's API
       if (i < versions.length - 1) {
-        console.log("⏳ Waiting 5 seconds before next sync...\n");
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        console.log("⏳ Waiting 3 seconds before next sync...\n");
+        await new Promise((resolve) => setTimeout(resolve, 3000));
       }
     } catch (error) {
       console.error(`❌ Failed to sync emojis for ${version}:`, error.message);
 
       // Continue with next version after a delay
       if (i < versions.length - 1) {
-        console.log("⏳ Waiting 5 seconds before trying next version...\n");
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        console.log("⏳ Waiting 3 seconds before trying next version...\n");
+        await new Promise((resolve) => setTimeout(resolve, 3000));
       }
     }
   }
