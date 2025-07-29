@@ -26,13 +26,13 @@ if (!clientId || !token) {
   process.exit(1);
 }
 
-// Create client (sharding will be handled by ShardingManager)
+// Create client
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
 
 client.once("ready", async () => {
-  // Only proceed if this is shard 0, destroy other shards
+  // Only proceed if this is shard 0, destroy other shards to save memory
   if (client.shard?.ids?.[0] !== 0) {
     client.destroy();
     process.exit(0);
@@ -46,6 +46,12 @@ client.once("ready", async () => {
 
     if (!fs.existsSync(emojisPath)) {
       console.error("❌ Emojis folder not found!");
+      if (process.send) {
+        process.send({
+          type: "EMOJI_SYNC_ERROR",
+          error: "Emojis folder not found",
+        });
+      }
       process.exit(1);
     }
 
@@ -127,7 +133,6 @@ client.once("ready", async () => {
         }
       }
     }
-
     // Summary
     const totalSuccess = addedCount + removedCount;
     const totalFailed = addFailedCount + removeFailedCount;
@@ -158,14 +163,38 @@ client.once("ready", async () => {
       process.send({ type: "EMOJI_SYNC_ERROR", error: error.message });
     }
   } finally {
+    // Give a moment for the message to be sent
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     client.destroy();
     process.exit(0);
   }
 });
 
-// Add error handling for sharding
+// Add error handling for sharding and process
 client.on("error", (error) => {
   console.error("Client error:", error.message);
+  if (process.send) {
+    process.send({ type: "EMOJI_SYNC_ERROR", error: error.message });
+  }
+});
+
+// Handle process errors gracefully
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  if (process.send) {
+    process.send({ type: "EMOJI_SYNC_ERROR", error: error.message });
+  }
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  if (process.send) {
+    const errorMessage =
+      reason instanceof Error ? reason.message : String(reason);
+    process.send({ type: "EMOJI_SYNC_ERROR", error: errorMessage });
+  }
+  process.exit(1);
 });
 
 // Login

@@ -33,34 +33,71 @@ async function syncAppEmojis(version) {
     path.join(__dirname, "..", "src", "bots", "syncEmojiBot.js"),
     {
       token: token,
-      totalShards: "auto",
+      totalShards: "auto", // Let Discord determine required shards
+      respawn: false, // Don't respawn shards
       // Pass the version as script arguments to each shard
       shardArgs: ["--version", version],
+      // Increase timeout for slower operations with multiple shards
+      timeout: 180000, // 3 minutes
     }
   );
 
   return new Promise((resolve, reject) => {
     let workCompleted = false;
+    const shards = new Map();
+
+    // Cleanup function to properly destroy all shards
+    const cleanup = async () => {
+      try {
+        // First, set respawn to false to prevent automatic restarts
+        manager.respawn = false;
+
+        // Kill all shards using proper Discord.js methods
+        for (const shard of manager.shards.values()) {
+          try {
+            shard.removeAllListeners();
+            shard.kill(); // This is synchronous according to docs
+          } catch (error) {
+            // Ignore individual shard kill errors
+          }
+        }
+
+        // Clear our local tracking
+        shards.clear();
+
+        // Remove all listeners from the manager
+        manager.removeAllListeners();
+      } catch (error) {
+        // silently handle cleanup errors
+      }
+    };
 
     manager.on("shardCreate", (shard) => {
+      shards.set(shard.id, shard);
+
       shard.on("error", (error) => {
         console.error(`❌ Error in shard ${shard.id}:`, error);
         if (!workCompleted) {
           workCompleted = true;
-          reject(error);
+          cleanup();
+          setTimeout(() => reject(error), 2000);
         }
       });
 
       shard.on("death", (child) => {
-        // Silently handle shard completion
+        // Remove from tracking when shard dies
+        shards.delete(shard.id);
       });
 
       shard.on("ready", () => {
-        // Silently handle shard ready
+        // Log shard ready event
       });
 
-      // Listen for completion message from shard 0
+      // Listen for completion message from shard 0 only
       shard.on("message", (message) => {
+        // Only process messages from shard 0
+        if (shard.id !== 0) return;
+
         if (message.type === "EMOJI_SYNC_COMPLETE" && !workCompleted) {
           workCompleted = true;
           console.log(
@@ -69,17 +106,37 @@ async function syncAppEmojis(version) {
           console.log(
             "============================================================\n"
           );
-          resolve();
+          cleanup();
+          // Add delay to ensure cleanup completes before resolving
+          setTimeout(() => resolve(), 2000);
         } else if (message.type === "EMOJI_SYNC_ERROR" && !workCompleted) {
           workCompleted = true;
           console.error("❌ Emoji sync failed:", message.error);
           console.log(
             "============================================================\n"
           );
-          reject(new Error(message.error));
+          cleanup();
+          // Add delay to ensure cleanup completes before rejecting
+          setTimeout(() => reject(new Error(message.error)), 2000);
         }
       });
     });
+
+    // Add timeout to prevent hanging
+    const timeout = setTimeout(
+      () => {
+        if (!workCompleted) {
+          workCompleted = true;
+          console.error("❌ Emoji sync timed out after 5 minutes");
+          console.log(
+            "============================================================\n"
+          );
+          cleanup();
+          setTimeout(() => reject(new Error("Emoji sync timed out")), 2000);
+        }
+      },
+      5 * 60 * 1000
+    ); // 5 minutes timeout
 
     // Spawn the shards
     manager
@@ -94,9 +151,23 @@ async function syncAppEmojis(version) {
         );
         if (!workCompleted) {
           workCompleted = true;
-          reject(error);
+          clearTimeout(timeout);
+          cleanup();
+          setTimeout(() => reject(error), 2000);
         }
       });
+
+    // Clear timeout when work completes
+    const originalResolve = resolve;
+    const originalReject = reject;
+    resolve = (...args) => {
+      clearTimeout(timeout);
+      originalResolve(...args);
+    };
+    reject = (...args) => {
+      clearTimeout(timeout);
+      originalReject(...args);
+    };
   });
 }
 
@@ -120,11 +191,13 @@ if (require.main === module) {
   (async () => {
     try {
       await syncAppEmojis(version);
-      // Add a small delay to prevent Discord API rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      // Add a longer delay between operations to prevent Discord API issues
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       process.exit(0);
     } catch (error) {
       console.error("❌ [EMOJI SYNC] Failed:", error.message);
+      // Wait a bit before exiting on error too
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       process.exit(1);
     }
   })();
