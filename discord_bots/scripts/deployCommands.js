@@ -4,10 +4,9 @@ const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 const fs = require("fs");
 const path = require("path");
-const manageEmojis = require("./manageEmojis");
 
 /**
- * Deploys commands for a specific bot version
+ * Deploys commands for a specific bot version (commands only, no emojis)
  */
 async function deployCommands({
   version,
@@ -112,33 +111,6 @@ async function deployCommands({
   }
 }
 
-/**
- * Deploys emojis for a specific bot version
- */
-async function deployEmojis({ version }) {
-  try {
-    await manageEmojis({ version });
-  } catch (error) {
-    console.error(
-      "❌ [EMOJI MANAGER] Failed to manage emojis:",
-      error && error.message ? error.message : error
-    );
-  }
-}
-
-/**
- * Deploys both commands and emojis for a specific bot version
- */
-async function deploy({
-  version,
-  environment = "dev",
-  global = false,
-  add = true,
-}) {
-  await deployCommands({ version, environment, global, add });
-  await deployEmojis({ version });
-}
-
 // CLI usage
 if (require.main === module) {
   const args = process.argv.slice(2);
@@ -182,8 +154,8 @@ if (require.main === module) {
       process.exit(1);
   }
   (async () => {
-    await deploy(options);
+    await deployCommands(options);
   })();
 } else {
-  module.exports = deploy;
+  module.exports = deployCommands;
 }

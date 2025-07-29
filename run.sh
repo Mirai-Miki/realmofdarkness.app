@@ -122,7 +122,7 @@ run_as_user() {
     local user=$1
     shift
     local cmd="$@"
-    
+
     if [ "$(whoami)" = "$user" ]; then
         eval "$cmd"
     else
@@ -133,20 +133,20 @@ run_as_user() {
 # Function to check pre-deployment requirements
 check_requirements() {
     print_color $BLUE "[CHECK] 🔍 Checking deployment requirements..."
-    
+
     # Check if required users exist
     if ! id "$WEB_USER" &>/dev/null; then
         print_color $RED "[CHECK] ❌ User '$WEB_USER' does not exist!"
         echo "        Create with: sudo useradd -m -s /bin/bash $WEB_USER"
         return 1
     fi
-    
+
     if ! id "$BOT_USER" &>/dev/null; then
         print_color $RED "[CHECK] ❌ User '$BOT_USER' does not exist!"
         echo "        Create with: sudo useradd -m -s /bin/bash $BOT_USER"
         return 1
     fi
-    
+
     # Check if .env files exist for components being deployed
     if [ "$COMPONENT" = "all" ] || [ "$COMPONENT" = "backend" ]; then
         if [ ! -f "$PROJECT_PATH/backend/.env" ]; then
@@ -154,14 +154,14 @@ check_requirements() {
             return 1
         fi
     fi
-    
+
     if [ "$COMPONENT" = "all" ] || [ "$COMPONENT" = "bots" ]; then
         if [ ! -f "$PROJECT_PATH/discord_bots/.env" ]; then
             print_color $RED "[CHECK] ❌ Discord bots .env file missing: $PROJECT_PATH/discord_bots/.env"
             return 1
         fi
     fi
-    
+
     # Check if required services are available
     if [ "$COMPONENT" = "all" ] || [ "$COMPONENT" = "backend" ]; then
         if ! sudo systemctl list-unit-files | grep -q "^$GUNICORN_SERVICE.service"; then
@@ -170,17 +170,17 @@ check_requirements() {
             return 1
         fi
     fi
-    
+
     print_color $GREEN "[CHECK] ✅ All requirements satisfied."
 }
 
 # Function to deploy backend
 deploy_backend() {
     print_color $GREEN "[BACKEND] 🐍 Starting Django backend deployment..."
-    
+
     print_color $BLUE "[BACKEND] [1/6] � Setting up Python virtual environment..."
     cd "$PROJECT_PATH/backend"
-    
+
     # Create virtual environment if it doesn't exist
     if [ ! -d "venv" ]; then
         print_color $YELLOW "[BACKEND]       → Creating virtual environment..."
@@ -193,27 +193,27 @@ deploy_backend() {
     else
         print_color $GREEN "[BACKEND]       ✅ Using existing virtual environment."
     fi
-    
+
     # Verify virtual environment
     VENV_PYTHON="venv/bin/python"
     if [ ! -f "$PROJECT_PATH/backend/$VENV_PYTHON" ]; then
         print_color $RED "[BACKEND]       ❌ Could not find Python in virtual environment!"
         return 1
     fi
-    
+
     print_color $BLUE "[BACKEND] [2/6] 📥 Updating Python dependencies..."
     run_as_user "$WEB_USER" "cd '$PROJECT_PATH/backend' && $VENV_PYTHON -m pip install --upgrade pip"
     run_as_user "$WEB_USER" "cd '$PROJECT_PATH/backend' && $VENV_PYTHON -m pip install -r requirements.txt"
     print_color $GREEN "[BACKEND]       ✅ Dependencies updated successfully."
-    
+
     print_color $BLUE "[BACKEND] [3/6] 🔄 Running Django migrations..."
     run_as_user "$WEB_USER" "cd '$PROJECT_PATH/backend' && $VENV_PYTHON manage.py migrate --no-input"
     print_color $GREEN "[BACKEND]       ✅ Migrations completed successfully."
-    
+
     print_color $BLUE "[BACKEND] [4/6] 🧹 Cleaning up cache..."
     run_as_user "$WEB_USER" "cd '$PROJECT_PATH/backend' && find . -name '*.pyc' -delete && find . -name '__pycache__' -type d -exec rm -rf {} + 2>/dev/null || true"
     print_color $GREEN "[BACKEND]       ✅ Cache cleaned successfully."
-    
+
     print_color $BLUE "[BACKEND] [5/6] 📋 Ensuring Redis is running..."
     if ! sudo systemctl is-active --quiet redis-server; then
         print_color $YELLOW "[BACKEND]       → Starting Redis..."
@@ -226,12 +226,12 @@ deploy_backend() {
         print_color $RED "[BACKEND]       ❌ Redis failed to start!"
         return 1
     fi
-    
+
     print_color $BLUE "[BACKEND] [6/6] 🔄 Reloading Gunicorn service..."
     sudo systemctl daemon-reload
     sudo systemctl enable "$GUNICORN_SERVICE"
     sudo systemctl restart "$GUNICORN_SERVICE"
-    
+
     # Wait a moment and check if service started successfully
     sleep 3
     if sudo systemctl is-active --quiet "$GUNICORN_SERVICE"; then
@@ -241,30 +241,30 @@ deploy_backend() {
         sudo systemctl status "$GUNICORN_SERVICE" --no-pager -l
         return 1
     fi
-    
+
     print_color $GREEN "[BACKEND] 🎉 Django backend deployment completed!"
 }
 
 # Function to deploy frontend
 deploy_frontend() {
     print_color $GREEN "[FRONTEND] ⚛️  Starting React frontend deployment..."
-    
+
     print_color $BLUE "[FRONTEND] [1/2] 📦 Installing Node.js dependencies..."
     cd "$PROJECT_PATH/frontend"
     run_as_user "$WEB_USER" "cd '$PROJECT_PATH/frontend' && npm install --silent"
     print_color $GREEN "[FRONTEND]        ✅ Dependencies installed successfully."
-    
+
     print_color $BLUE "[FRONTEND] [2/2] 🏗️ Building React application..."
     run_as_user "$WEB_USER" "cd '$PROJECT_PATH/frontend' && npm run build --silent"
     print_color $GREEN "[FRONTEND]        ✅ React build completed successfully."
-    
+
     print_color $GREEN "[FRONTEND] 🎉 React frontend deployment completed!"
 }
 
 # Function to deploy Discord bots
 deploy_bots() {
     print_color $GREEN "[BOTS] 🤖 Starting Discord bots deployment..."
-    
+
     print_color $BLUE "[BOTS] [1/7] 📦 Updating Node.js dependencies..."
     cd "$PROJECT_PATH/discord_bots"
     run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && npm install --silent"
@@ -278,20 +278,24 @@ deploy_bots() {
     print_color $GREEN "[BOTS]    ✅ Project built successfully."
 
     print_color $BLUE "[BOTS] [4/7] 🚀 Deploying Discord commands..."
-    run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && npm run deploy:all --silent > /dev/null 2>&1"
+    run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && npm run deploy:commands:all --silent > /dev/null 2>&1"
     print_color $GREEN "[BOTS]    ✅ Discord commands deployed successfully."
 
-    print_color $BLUE "[BOTS] [5/7] 🧹 Flushing PM2 logs..."
+    print_color $BLUE "[BOTS] [5/7] 😀 Syncing application emojis..."
+    run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && npm run emoji:sync:all"
+    print_color $GREEN "[BOTS]    ✅ Application emojis synced successfully."
+
+    print_color $BLUE "[BOTS] [6/7] 🧹 Flushing PM2 logs..."
     run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 flush ${BOT_PREFIX}v5 && pm2 flush ${BOT_PREFIX}v20 && pm2 flush ${BOT_PREFIX}cod" 2>/dev/null || true
     print_color $GREEN "[BOTS]    ✅ PM2 logs flushed."
 
-    print_color $BLUE "[BOTS] [6/7] 🔍 Managing PM2 processes..."
+    print_color $BLUE "[BOTS] [7/7] 🔍 Managing PM2 processes..."
 
     # Ensure all files in dist/shards are executable before starting PM2 processes
     if [ -d "$PROJECT_PATH/discord_bots/dist/shards" ]; then
         run_as_user "$BOT_USER" "chmod +x $PROJECT_PATH/discord_bots/dist/shards/*"
     fi
-    
+
     # Deploy each bot
     for bot_type in "v5" "v20" "cod"; do
         local BOT_NAME="${BOT_PREFIX}${bot_type}"
@@ -305,7 +309,7 @@ deploy_bots() {
             "v20") SCRIPT_PATH="dist/shards/index-20th.js" ;;
             "cod") SCRIPT_PATH="dist/shards/index-cod.js" ;;
         esac
-        
+
         # Check if process exists and get its status
         if run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 list | grep -E '\b$BOT_NAME\b' | grep -q online"; then
             # Process exists and is online - restart it
@@ -321,20 +325,20 @@ deploy_bots() {
             run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 start '$SCRIPT_PATH' $PM2_PARAMS --name '$BOT_NAME'"
         fi
     done
-    
+
     print_color $GREEN "[BOTS]    ✅ PM2 processes managed successfully."
-    
+
     print_color $BLUE "[BOTS] [6/7] 🔄 Saving PM2 process list..."
     run_as_user "$BOT_USER" "pm2 save"
     print_color $GREEN "[BOTS]    ✅ PM2 process list saved."
-    
+
     print_color $GREEN "[BOTS] 🎉 Discord bots deployment completed!"
 }
 
 # Function to stop services before deployment
 stop_services() {
     print_color $YELLOW "[STOP] 🛑 Stopping services for deployment..."
-    
+
     # Stop Discord bots
     if [ "$COMPONENT" = "all" ] || [ "$COMPONENT" = "bots" ]; then
         print_color $BLUE "[STOP] Stopping Discord bots..."
@@ -345,7 +349,7 @@ stop_services() {
         fi
         print_color $GREEN "[STOP]       ✅ Discord bots stopped."
     fi
-    
+
     # Stop web services
     if [ "$COMPONENT" = "all" ] || [ "$COMPONENT" = "backend" ]; then
         print_color $BLUE "[STOP] Stopping web services..."
@@ -365,13 +369,13 @@ update_code() {
 main() {
     # Check requirements before starting
     check_requirements
-    
+
     # Always update code before deployment
     update_code
-    
+
     # Stop relevant services
     stop_services
-    
+
     # Deploy components based on selection
     local DEPLOYMENT_SUCCESS=true
     case $COMPONENT in
@@ -390,24 +394,24 @@ main() {
             if ! deploy_bots; then DEPLOYMENT_SUCCESS=false; fi
             ;;
     esac
-    
+
     # Check deployment result
     if [ "$DEPLOYMENT_SUCCESS" = false ]; then
         print_color $RED "❌ Deployment failed! Some components may be in an inconsistent state."
         print_color $YELLOW "💡 Check the error messages above and fix issues before re-running."
         exit 1
     fi
-    
+
     # Final status
     echo
     print_color $CYAN "=========================================================="
     print_color $CYAN "=      ✅ Deployment completed successfully! ✅     ="
     print_color $CYAN "=========================================================="
     echo
-    
+
     # Show service status
     print_color $BLUE "📊 Service Status Check:"
-    
+
     if [ "$COMPONENT" = "all" ] || [ "$COMPONENT" = "backend" ]; then
         if sudo systemctl is-active --quiet "$GUNICORN_SERVICE"; then
             print_color $GREEN "   ✅ $GUNICORN_SERVICE (Django backend)"
@@ -415,13 +419,13 @@ main() {
             print_color $RED "   ❌ $GUNICORN_SERVICE (Django backend) - Not running!"
         fi
     fi
-    
+
     if sudo systemctl is-active --quiet nginx; then
         print_color $GREEN "   ✅ nginx (Web server)"
     else
         print_color $RED "   ❌ nginx (Web server) - Not running!"
     fi
-    
+
     if [ "$COMPONENT" = "all" ] || [ "$COMPONENT" = "bots" ]; then
         # Check PM2 processes
         local PM2_STATUS=$(run_as_user "$BOT_USER" "pm2 jlist" 2>/dev/null || echo "[]")
@@ -432,16 +436,16 @@ main() {
             print_color $RED "   ❌ Discord bots - No processes running!"
         fi
     fi
-    
+
     echo
-    
+
     # Environment-specific URLs
     if [ "$ENVIRONMENT" = "preproduction" ]; then
         print_color $YELLOW "🌐 Web Application: https://dev.realmofdarkness.app"
     else
         print_color $YELLOW "🌐 Web Application: https://realmofdarkness.app"
     fi
-    
+
     print_color $YELLOW "🐍 Python Backend:  ./backend/ (virtual env: backend/venv)"
     print_color $YELLOW "⚛️  React Frontend:  ./frontend/"
     print_color $YELLOW "🤖 Discord Bots:    ./discord_bots/"
