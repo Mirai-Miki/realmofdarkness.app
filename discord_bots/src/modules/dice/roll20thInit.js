@@ -1,7 +1,8 @@
 "use strict";
 require(`${process.cwd()}/alias`);
-const Roll = require("@src/modules/dice/roll");
+const Roll = require("@modules/dice/roll");
 const { EmbedBuilder } = require("discord.js");
+const getCharacter = require("@modules/getCharacter");
 const API = require("@api");
 
 module.exports = async function roll20thInit(interaction) {
@@ -19,7 +20,11 @@ function roll(args) {
 async function getArgs(interaction) {
   const args = {
     modifier: interaction.options.getInteger("dexterity_wits"),
-    character: interaction.options.getString("character"),
+    character: await getCharacter(
+      interaction.options.getString("character"),
+      interaction,
+      false
+    ),
     notes: interaction.options.getString("notes"),
   };
 
@@ -59,7 +64,7 @@ function getEmbed(interaction) {
   });
 
   if (args.character)
-    embed.addFields({ name: "Character", value: args.character });
+    embed.addFields({ name: "Character", value: args.character.name });
 
   if (args.notes)
     embed.addFields({

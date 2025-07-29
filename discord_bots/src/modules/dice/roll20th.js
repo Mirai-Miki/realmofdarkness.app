@@ -5,7 +5,7 @@ const { trimString } = require("@modules/misc");
 const { RealmError, ErrorCodes } = require("@errors");
 const RollResults20th = require("@structures/RollResults20th");
 const { Emoji } = require("@constants");
-const getCharacter = require("@src/modules/getCharacter");
+const getCharacter = require("@modules/getCharacter");
 const API = require("@api");
 
 module.exports = async function roll20th(interaction) {
