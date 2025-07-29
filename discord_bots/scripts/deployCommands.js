@@ -108,6 +108,9 @@ async function deployCommands({
   } catch (error) {
     console.error(`❌ [DEPLOY] Failed to deploy ${version} commands:`, error);
     return 0;
+  } finally {
+    // Add a small delay to prevent Discord API rate limiting
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 }
 

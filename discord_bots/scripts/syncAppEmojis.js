@@ -120,6 +120,8 @@ if (require.main === module) {
   (async () => {
     try {
       await syncAppEmojis(version);
+      // Add a small delay to prevent Discord API rate limiting
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       process.exit(0);
     } catch (error) {
       console.error("❌ [EMOJI SYNC] Failed:", error.message);
