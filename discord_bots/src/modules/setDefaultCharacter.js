@@ -46,8 +46,12 @@ async function getArgs(interaction) {
     auto_hunger: interaction.options.getBoolean("auto_hunger") ?? false,
     disable: interaction.options.getBoolean("disable") ?? false,
   };
-  const character = await getCharacter(args.autocomplete, interaction, true);
-  args.name = character.name; // getCharacter throws an error if not found, so we can assume it's valid
+  if (args.autocomplete) {
+    const character = await getCharacter(args.autocomplete, interaction, true);
+    args.name = character.name; // getCharacter throws an error if not found, so we can assume it's valid
+  } else {
+    args.name = null; // No character selected
+  }
   return args;
 }
 
