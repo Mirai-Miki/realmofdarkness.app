@@ -21,7 +21,6 @@
     "checkJs": false, // Don't type-check JS files to avoid compilation errors
     "paths": {
       // Configure path aliases
-      "@src*": ["./src/*"],
       "@commands*": ["./src/commands/*"],
       "@components*": ["./src/components/*"],
       "@structures*": ["./src/structures/*"],

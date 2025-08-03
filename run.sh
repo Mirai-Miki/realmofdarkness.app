@@ -293,17 +293,18 @@ deploy_bots() {
     fi
 
     # Deploy each bot
-    for bot_type in "v5" "v20" "cod"; do
+    for bot_type in "5th" "20th" "cod"; do
         local BOT_NAME="${BOT_PREFIX}${bot_type}"
         local SCRIPT_PATH=""
+        local SCRIPT_ARGS="${bot_type}"
 
         # PM2 process parameters
-        local PM2_PARAMS="--restart-delay 30000 --log /realm-of-darkness/logs/$BOT_NAME.log --time --max-memory-restart 1500M"
+        local PM2_PARAMS="--restart-delay 30000 --log /realm-of-darkness/logs/$BOT_NAME --time --max-memory-restart 1500M"
 
         case $bot_type in
-            "v5")  SCRIPT_PATH="dist/main/shardLauncher.js -- 5th" ;;
-            "v20") SCRIPT_PATH="dist/main/shardLauncher.js -- 20th" ;;
-            "cod") SCRIPT_PATH="dist/main/shardLauncher.js -- cod" ;;
+            "5th")  SCRIPT_PATH="dist/main/shardLauncher.js" ;;
+            "20th") SCRIPT_PATH="dist/main/shardLauncher.js" ;;
+            "cod") SCRIPT_PATH="dist/main/shardLauncher.js" ;;
         esac
 
         # Always delete existing process to ensure fresh start with latest code
@@ -312,14 +313,14 @@ deploy_bots() {
 
         # Delete existing log file for fresh logs
         print_color $YELLOW "[BOTS]       Clearing log file for $BOT_NAME..."
-        run_as_user "$BOT_USER" "rm -f /realm-of-darkness/logs/$BOT_NAME.log" 2>/dev/null || true
+        run_as_user "$BOT_USER" "rm -f /realm-of-darkness/logs/$BOT_NAME" 2>/dev/null || true
 
         # Small delay to ensure process is fully cleaned up
         sleep 1
 
         # Start fresh process
         print_color $YELLOW "[BOTS]       Starting fresh $BOT_NAME process..."
-        run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 start '$SCRIPT_PATH' $PM2_PARAMS --name '$BOT_NAME'"
+        run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 start '$SCRIPT_PATH' -- $SCRIPT_ARGS $PM2_PARAMS --name '$BOT_NAME'"
 
         # Verify the process started successfully
         sleep 2
@@ -459,7 +460,7 @@ main() {
     print_color $YELLOW "🤖 Discord Bots:    ./discord_bots/"
     echo
     print_color $CYAN "🔎 Monitor Discord bots: pm2 status"
-    print_color $CYAN "📋 View bot logs:        pm2 logs [${BOT_PREFIX}v5|${BOT_PREFIX}v20|${BOT_PREFIX}cod]"
+    print_color $CYAN "📋 View bot logs:        pm2 logs [${BOT_PREFIX}5th|${BOT_PREFIX}20th|${BOT_PREFIX}cod]"
     print_color $CYAN "🔧 Check backend logs:   sudo systemctl status $GUNICORN_SERVICE"
     print_color $CYAN "🌐 Check nginx status:   sudo systemctl status nginx"
     echo
