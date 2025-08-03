@@ -2,14 +2,13 @@
   "compilerOptions": {
     "baseUrl": "./",
     "module": "commonjs",
-    "target": "ES2020",
+    "target": "ESNext",
     "checkJs": true,
     "allowJs": true,
     "typeRoots": ["node_modules/@types", "./src/types"],
     "moduleResolution": "node",
     "paths": {
       "@src*": ["./src/*"],
-      "@bots*": ["./src/bots/*"],
       "@commands*": ["./src/commands/*"],
       "@components*": ["./src/components/*"],
       "@structures*": ["./src/structures/*"],
@@ -19,7 +18,7 @@
       "@api*": ["./src/realm_api/*", "./src/realm_api/index.js"],
       "@constants*": ["./src/constants/*", "./src/constants/index.js"],
       "@utils*": ["./src/utils/*"],
-      "@types*": ["./src/types/*"]
+      "@types*": ["./src/types/*", "./src/types/index.js"]
     }
   },
   "include": ["src/**/*"],

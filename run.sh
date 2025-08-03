@@ -287,9 +287,9 @@ deploy_bots() {
 
     print_color $BLUE "[BOTS] [6/7] 🔍 Managing PM2 processes..."
 
-    # Ensure all files in dist/shards are executable before starting PM2 processes
-    if [ -d "$PROJECT_PATH/discord_bots/dist/shards" ]; then
-        run_as_user "$BOT_USER" "chmod +x $PROJECT_PATH/discord_bots/dist/shards/*"
+    # Ensure all files in dist/main are executable before starting PM2 processes
+    if [ -d "$PROJECT_PATH/discord_bots/dist/main" ]; then
+        run_as_user "$BOT_USER" "chmod +x $PROJECT_PATH/discord_bots/dist/main/*"
     fi
 
     # Deploy each bot
@@ -301,9 +301,9 @@ deploy_bots() {
         local PM2_PARAMS="--restart-delay 30000 --log /realm-of-darkness/logs/$BOT_NAME.log --time --max-memory-restart 1500M"
 
         case $bot_type in
-            "v5")  SCRIPT_PATH="dist/shards/index-5th.js" ;;
-            "v20") SCRIPT_PATH="dist/shards/index-20th.js" ;;
-            "cod") SCRIPT_PATH="dist/shards/index-cod.js" ;;
+            "v5")  SCRIPT_PATH="dist/main/shardLauncher.js -- 5th" ;;
+            "v20") SCRIPT_PATH="dist/main/shardLauncher.js -- 20th" ;;
+            "cod") SCRIPT_PATH="dist/main/shardLauncher.js -- cod" ;;
         esac
 
         # Always delete existing process to ensure fresh start with latest code

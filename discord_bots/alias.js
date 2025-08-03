@@ -15,7 +15,6 @@ const srcDir = runningFromDist
 moduleAlias.addAliases({
   "@root": rootDir,
   "@src": srcDir,
-  "@bots": path.join(srcDir, "bots"),
   "@commands": path.join(srcDir, "commands"),
   "@components": path.join(srcDir, "components"),
   "@structures": path.join(srcDir, "structures"),
@@ -29,7 +28,7 @@ moduleAlias.addAliases({
 });
 
 // Debug output if needed
-if (process.env.DEBUG === "true") {
+if (process.env.NODE_ENV === "development") {
   console.log("Alias paths configured:");
   console.log("  Root dir:", rootDir);
   console.log("  Src dir:", srcDir);
