@@ -127,9 +127,9 @@ function getTemperament(args, dice) {
 function getResonance(args, dice) {
   if (args?.resonance) {
     return ResonanceInfo[args.resonance];
-  } else if (!dice && !args) {
+  } else if (dice == null) {
     throw new Error(
-      "No dice roll or arguments provided for resonance determination."
+      "We have no dice roll or arguments provided for resonance determination."
     );
   }
 
@@ -239,8 +239,7 @@ async function getEmbed(interaction) {
     " | [Patreon](https://www.patreon.com/MiraiMiki)";
 
   if (args.notes) {
-    embed.addFields({ name: "Notes", value: args.notes });
-    embed.data.fields[embed.data.fields.length - 1].value += `\n${links}`;
+    embed.addFields({ name: "Notes", value: args.notes + `\n\n${links}` });
   } else embed.addFields({ name: "⠀", value: links });
 
   return embed;
