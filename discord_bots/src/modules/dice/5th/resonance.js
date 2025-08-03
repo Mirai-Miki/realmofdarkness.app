@@ -8,8 +8,7 @@
 
 "use strict";
 require(`${process.cwd()}/alias`);
-const roll = require("@src/modules/dice/roll");
-const Roll = require("@src/modules/dice/roll");
+const Roll = require("@modules/dice/roll");
 const {
   EmbedBuilder,
   ChatInputCommandInteraction,
