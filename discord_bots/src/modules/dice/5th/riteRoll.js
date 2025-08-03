@@ -1,7 +1,6 @@
 "use strict";
 require(`${process.cwd()}/alias`);
 const { getEmbed, getContent, getComponents } = require("./getWtaRollResponse");
-const { trimString } = require("@modules/misc");
 const getCharacter = require("@src/modules/getCharacter");
 const Wta5thRollResults = require("@structures/Wta5thRollResults");
 const handleButtonPress = require("@modules/dice/5th/handleButtonPress");

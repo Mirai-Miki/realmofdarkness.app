@@ -2,7 +2,6 @@
 require(`${process.cwd()}/alias`);
 const Roll = require("@src/modules/dice/roll");
 const { EmbedBuilder } = require("discord.js");
-const { trimString } = require("@modules/misc");
 const getCharacter = require("@src/modules/getCharacter");
 const API = require("@api");
 const { getContent } = require("@modules/dice/5th/getVtmRollResponse");
