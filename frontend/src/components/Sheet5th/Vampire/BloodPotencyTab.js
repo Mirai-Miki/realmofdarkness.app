@@ -202,7 +202,7 @@ const bpChart = {
 
   7: {
     bloodPotency: 7,
-    bloodSurge: "Add 4 dice",
+    bloodSurge: "Add 5 dice",
     damageMended: "3 points of Superficial",
     powerBonus: "Add 3 dice",
     rouseCheck: "Level 4 and below",
