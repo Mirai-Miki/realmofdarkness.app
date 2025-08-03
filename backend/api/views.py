@@ -162,6 +162,14 @@ class CharacterUpdateV5(APIView):
 
         instance = serializer.save()
 
+        # If chronicle changed from one to another or from one to None, check default character updates
+        if original_chronicle != instance.chronicle:
+            # If the character was removed from a chronicle (either changed or set to None)
+            if original_chronicle:
+                Member.objects.filter(
+                    chronicle=original_chronicle, default_character=instance
+                ).update(default_character=None)
+
         # Send the regular character update event
         async_to_sync(channel_layer.group_send)(
             Group.character_update(instance.id),
@@ -217,6 +225,12 @@ class DeleteCharacter(APIView):
             )
             return Response(status=status.HTTP_200_OK)
         elif is_admin_or_st(character, user):
+            # Before disconnecting, check if this character is set as default for any members
+            if character.chronicle:
+                Member.objects.filter(
+                    chronicle=character.chronicle, default_character=character
+                ).update(default_character=None)
+
             character.member = None
             character.chronicle = None
             character.st_lock = False

@@ -14,7 +14,7 @@ from chronicle.serializers import (
 )
 
 # TODO - update to new serializer import
-from gateway.serializers import serialize_member, serialize_user, serialize_chronicle
+from gateway.serializers import serialize_chronicle
 from .get_post import get_post
 from haven.models import Character
 from haven.utility import get_serializer, get_derived_instance
@@ -335,16 +335,21 @@ class GetDefaultsView(View):
         # Case 1: Check if default character exists and matches filters
         if member.default_character:
             character = member.default_character
-            if character._meta.model == Character:
+            # Safety net: If character's chronicle does not match guild, unset default_character and do not return it
+            if character.chronicle_id != member.chronicle.id:
+                member.default_character = None
+                member.save()
+            elif character._meta.model == Character:
                 character = get_derived_instance(character)
-            # If splat filter is provided, check if default character's splat matches
-            if not splat_filter or character.splat in splat_filter:
-                character_serializer = get_serializer(character.splat)
-                defaults = {
-                    "character": character_serializer(character).data,
-                    "auto_hunger": member.default_auto_hunger,
-                }
-                return JsonResponse(defaults)
+
+                # If splat filter is provided, check if default character's splat matches
+                if not splat_filter or character.splat in splat_filter:
+                    character_serializer = get_serializer(character.splat)
+                    defaults = {
+                        "character": character_serializer(character).data,
+                        "auto_hunger": member.default_auto_hunger,
+                    }
+                    return JsonResponse(defaults)
 
         # Case 2: No default character or default doesn't match splat filter
         # Query directly with splat filter if provided

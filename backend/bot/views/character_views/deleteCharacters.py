@@ -7,6 +7,7 @@ from rest_framework.response import Response
 
 from ..Authenticate import authenticate
 from haven.models import Character
+from chronicle.models import Member
 from gateway.constants import Group
 from gateway.serializers import serialize_character
 
@@ -26,6 +27,12 @@ class DeleteCharacters(APIView):
             names.append(char.name)
 
             if disconnect:
+                # Before disconnecting, check if this character is set as default for any members
+                if char.chronicle:
+                    Member.objects.filter(
+                        chronicle=char.chronicle, default_character=char
+                    ).update(default_character=None)
+
                 char.chronicle = None
                 if char.st_lock:
                     char.st_lock = False
@@ -40,6 +47,12 @@ class DeleteCharacters(APIView):
                 )
 
             else:
+                # Before deleting, check if this character is set as default for any members
+                if char.chronicle:
+                    Member.objects.filter(
+                        chronicle=char.chronicle, default_character=char
+                    ).update(default_character=None)
+
                 if char.avatar:
                     char.avatar.delete()
                 char.delete()
