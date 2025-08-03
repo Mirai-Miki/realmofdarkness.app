@@ -92,7 +92,7 @@ function getCommand() {
             "Number of successes needed to succeed (1-50). Defaults to 1."
           )
           .setMaxValue(50)
-          .setMinValue(1);
+          .setMinValue(0);
         return option;
       })
 
