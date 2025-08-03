@@ -1,27 +1,56 @@
+/**
+ * @fileoverview Resonance rolling module for Vampire: The Masquerade 5th Edition
+ * Handles rolling and calculation of blood resonance and temperament for feeding
+ *
+ * @author Realm of Darkness Bot
+ * @version 1.0.0
+ */
+
 "use strict";
 require(`${process.cwd()}/alias`);
-const Roll = require("@src/modules/dice/roll");
-const { EmbedBuilder } = require("discord.js");
+const Roll = require("@modules/dice/roll");
+const {
+  EmbedBuilder,
+  ChatInputCommandInteraction,
+  GuildMember,
+} = require("discord.js");
 
-module.exports = function resonance(interaction) {
+/**
+ * Main resonance function that processes a Discord interaction for resonance rolling
+ * @param {ChatInputCommandInteraction} interaction - Discord interaction object
+ * @returns {Promise<import("discord.js").InteractionReplyOptions>} Object containing embeds array for Discord response
+ */
+module.exports = async function resonance(interaction) {
   interaction.args = getArgs(interaction);
   interaction.rollResults = getResults(interaction);
-  return { embeds: [getEmbed(interaction)] };
+  return { embeds: [await getEmbed(interaction)] };
 };
 
+/**
+ * Extracts and returns command arguments from Discord interaction
+ * @param {Object} interaction - Discord interaction object
+ * @param {Object} interaction.options - Command options from Discord
+ * @returns {{temperament: string|null, resonance: string|null, minTemp: string|null, exclude_empty: boolean, notes: string|null}} Parsed arguments object
+ */
 function getArgs(interaction) {
   return {
     temperament: interaction.options.getString("temperament"),
     resonance: interaction.options.getString("resonance"),
     minTemp: interaction.options.getString("min_temperament"),
+    exclude_empty: interaction.options.getBoolean("exclude_empty") || false,
     notes: interaction.options.getString("notes"),
   };
 }
 
+/**
+ * Calculates and returns the results of temperament and resonance rolls
+ * @param {ChatInputCommandInteraction} interaction - Discord interaction object with args property
+ * @returns {{temperamentDice: number[]|null, temperament: Object, resonanceDice: number[]|null, resonance: Object}} Roll results
+ */
 function getResults(interaction) {
   const args = interaction.args;
   const tdice = rollTemperament(args);
-  const rdice = args.resonance ? null : Roll.single(10);
+  const rdice = rollResonance(args);
   return {
     temperamentDice: tdice,
     temperament: getTemperament(args, tdice),
@@ -30,6 +59,13 @@ function getResults(interaction) {
   };
 }
 
+/**
+ * Rolls dice for temperament based on minimum temperament requirements
+ * @param {Object} args - Command arguments
+ * @param {string|null} args.temperament - Pre-specified temperament (if any)
+ * @param {string|null} args.minTemp - Minimum temperament requirement ("Fleeting" or "Intense")
+ * @returns {number[]|null} Array of dice rolls, null if temperament is pre-specified
+ */
 function rollTemperament(args) {
   if (args.temperament) return null;
 
@@ -44,6 +80,32 @@ function rollTemperament(args) {
   return dice;
 }
 
+/**
+ * Rolls dice for Resonance based random resonance tables
+ * @param {Object} args - Command arguments
+ * @param {string|null} args.resonance - Pre-specified resonance (if any)
+ * @param {boolean} args.exclude_empty - Whether to exclude empty resonance from roll table
+ * @returns {number[]|null} Array of dice rolls (1-10), null if resonance is pre-specified
+ */
+function rollResonance(args) {
+  if (args.resonance) return null;
+  if (args.exclude_empty) return [Roll.single(10)];
+
+  const dice = [];
+  const roll = Roll.single(10);
+  dice.push(roll);
+
+  if (roll >= 9) dice.push(Roll.single(10));
+  return dice;
+}
+
+/**
+ * Determines temperament type based on arguments or dice rolls
+ * @param {Object} args - Command arguments
+ * @param {string|null} args.temperament - Pre-specified temperament
+ * @param {number[]|null} dice - Temperament dice rolls
+ * @returns {Object} Temperament object with name and value properties
+ */
 function getTemperament(args, dice) {
   if (args.temperament) return TemperamentType[args.temperament];
 
@@ -54,28 +116,62 @@ function getTemperament(args, dice) {
   else return TemperamentType.Fleeting;
 }
 
+/**
+ * Determines resonance type based on arguments or dice roll
+ * @param {Object} args - Command arguments
+ * @param {string|null} args.resonance - Pre-specified resonance
+ * @param {boolean} args.exclude_empty - Whether to exclude empty resonance from roll table
+ * @param {number[]|null} dice - Resonance dice roll (1-10)
+ * @returns {Object} Resonance object with name, description, powers, and color properties
+ */
 function getResonance(args, dice) {
-  if (args.resonance) return ResonanceInfo[args.resonance];
+  if (args?.resonance) {
+    return ResonanceInfo[args.resonance];
+  } else if (dice == null) {
+    throw new Error(
+      "We have no dice roll or arguments provided for resonance determination."
+    );
+  }
 
-  if (dice <= 3) return ResonanceInfo.Phlegmatic;
-  else if (dice <= 6) return ResonanceInfo.Melancholy;
-  else if (dice <= 8) return ResonanceInfo.Choleric;
-  else return ResonanceInfo.Sanguine;
+  if (args.exclude_empty) {
+    // If empty resonance is not allowed
+    const roll = dice[0];
+    if (roll <= 3) return ResonanceInfo.Phlegmatic;
+    else if (roll <= 6) return ResonanceInfo.Melancholy;
+    else if (roll <= 8) return ResonanceInfo.Choleric;
+    else return ResonanceInfo.Sanguine;
+  }
+
+  const roll = dice.length === 2 ? dice[1] : dice[0];
+  if (roll <= 2) return ResonanceInfo.Phlegmatic;
+  else if (roll <= 4) return ResonanceInfo.Melancholy;
+  else if (roll <= 6) return ResonanceInfo.Choleric;
+  else if (roll <= 8) return ResonanceInfo.Sanguine;
+  else return ResonanceInfo.Empty;
 }
 
-function getEmbed(interaction) {
+/**
+ * Creates and returns a Discord embed with resonance roll results
+ * @param {ChatInputCommandInteraction} interaction - Discord interaction object
+ * @returns {Promise<EmbedBuilder>} Formatted Discord embed with roll results
+ */
+async function getEmbed(interaction) {
+  let apiMember = interaction.member;
+  let member = null;
+  if (!(apiMember instanceof GuildMember) && interaction.guild) {
+    member = await interaction.guild.members.fetch(interaction.user.id);
+  }
+
   const results = interaction.rollResults;
   const args = interaction.args;
   const embed = new EmbedBuilder();
 
   embed.setAuthor({
     name:
-      interaction.member?.displayName ??
+      member?.displayName ??
       interaction.user.displayName ??
       interaction.user.username,
-    iconURL:
-      interaction.member?.displayAvatarURL() ??
-      interaction.user.displayAvatarURL(),
+    iconURL: member?.displayAvatarURL() ?? interaction.user.displayAvatarURL(),
   });
 
   embed.setTitle("Resonance Roll");
@@ -143,13 +239,20 @@ function getEmbed(interaction) {
     " | [Patreon](https://www.patreon.com/MiraiMiki)";
 
   if (args.notes) {
-    embed.addFields({ name: "Notes", value: args.notes });
-    embed.data.fields.at(-1).value += `\n${links}`;
+    embed.addFields({ name: "Notes", value: args.notes + `\n\n${links}` });
   } else embed.addFields({ name: "⠀", value: links });
 
   return embed;
 }
 
+/**
+ * Temperament types with their associated names and power values
+ * @typedef {Object} TemperamentType
+ * @property {Object} Negligible - No temperament effect
+ * @property {Object} Fleeting - Minor temperament effect
+ * @property {Object} Intense - Moderate temperament effect
+ * @property {Object} Acute - Strong temperament effect
+ */
 const TemperamentType = {
   Negligible: { name: "Negligible", value: 0 },
   Fleeting: { name: "Fleeting", value: 1 },
@@ -157,6 +260,16 @@ const TemperamentType = {
   Acute: { name: "Acute", value: 3 },
 };
 
+/**
+ * Resonance information containing details for each resonance type
+ * @typedef {Object} ResonanceInfo
+ * @property {Object} Sanguine - Passionate, enthusiastic resonance
+ * @property {Object} Choleric - Angry, violent resonance
+ * @property {Object} Melancholy - Sad, intellectual resonance
+ * @property {Object} Phlegmatic - Calm, controlling resonance
+ * @property {Object} Animal - Animal blood resonance
+ * @property {Object} Empty - Emotionally detached resonance
+ */
 const ResonanceInfo = {
   Sanguine: {
     name: "Sanguine",
@@ -196,6 +309,16 @@ const ResonanceInfo = {
       Fleeting: "#009600",
       Intense: "#00c800",
       Acute: "#00ff00",
+    },
+  },
+  Animal: {
+    name: "Animal",
+    description: "Animal Blood, Werewolf Blood,\nChangeling Blood",
+    powers: "Animalism, Protean",
+    color: {
+      Fleeting: "#575000",
+      Intense: "#968a00",
+      Acute: "#ffea00",
     },
   },
   Empty: {
