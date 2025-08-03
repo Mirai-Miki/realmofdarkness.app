@@ -23,7 +23,7 @@ module.exports = {
       case "roll":
         return await v5Roll(interaction);
       case "resonance":
-        return resonance(interaction);
+        return await resonance(interaction);
       case "rouse":
         return await rouse(interaction);
       case "compulsion":
@@ -190,6 +190,7 @@ function getCommand() {
             { name: "Melancholy", value: "Melancholy" },
             { name: "Choleric", value: "Choleric" },
             { name: "Sanguine", value: "Sanguine" },
+            { name: "Animal", value: "Animal" },
             { name: "Empty", value: "Empty" }
           );
         return option;
@@ -217,6 +218,13 @@ function getCommand() {
             { name: "Fleeting", value: "Fleeting" },
             { name: "Intense", value: "Intense" }
           );
+        return option;
+      })
+
+      .addBooleanOption((option) => {
+        option
+          .setName("exclude_empty")
+          .setDescription("Exclude empty Resonance from roll table.");
         return option;
       })
 
