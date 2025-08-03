@@ -24,7 +24,7 @@ module.exports = async function canSendMessages({
       const discord_channel = await client.channels.fetch(channelId);
       if (discord_channel instanceof TextChannel) {
         channel = discord_channel;
-      }
+      } else return false;
     }
   } catch (error) {
     if (error.code === 10003)
@@ -32,7 +32,6 @@ module.exports = async function canSendMessages({
     else throw error;
   }
 
-  if (!channel.isTextBased()) return channel; // Not sending in a guild
   if (
     !channel
       .permissionsFor(channel.client.user.id)
