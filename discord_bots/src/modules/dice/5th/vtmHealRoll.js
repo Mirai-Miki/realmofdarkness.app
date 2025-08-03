@@ -1,6 +1,5 @@
 "use strict";
 require(`${process.cwd()}/alias`);
-const { trimString } = require("@modules/misc");
 const getCharacter = require("@src/modules/getCharacter");
 const Roll = require("@src/modules/dice/roll");
 const { EmbedBuilder, MessageFlags } = require("discord.js");

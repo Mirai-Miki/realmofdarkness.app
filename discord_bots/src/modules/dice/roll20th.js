@@ -122,7 +122,8 @@ function getContent(interaction) {
     else content += Emoji.dice_20_0_botch.toString();
     content += " ";
   }
-  return content;
+
+  return content.length > 2000 ? null : content;
 }
 
 async function updateWillpower(interaction) {

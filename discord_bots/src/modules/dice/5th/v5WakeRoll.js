@@ -6,7 +6,6 @@ const { EmbedBuilder, MessageFlags } = require("discord.js");
 const API = require("@api");
 const { RealmError, ErrorCodes } = require("@errors");
 const { Splats } = require("@constants");
-const { start } = require("repl");
 
 /**
  * Handles a vampire waking for the night with options for healing and Blush of Life
