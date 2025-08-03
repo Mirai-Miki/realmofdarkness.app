@@ -4,6 +4,9 @@ const {
   SlashCommandBuilder,
   EmbedBuilder,
   MessageFlags,
+  ChatInputCommandInteraction,
+  TextChannel,
+  AutocompleteInteraction,
 } = require("discord.js");
 const { RealmError, ErrorCodes } = require("@errors");
 const canSendMessage = require("@modules/canSendMessage");
@@ -32,7 +35,7 @@ module.exports = {
 
   /**
    * Execute the initiative command based on the subcommand
-   * @param {CommandInteraction} interaction - The Discord interaction object
+   * @param {ChatInputCommandInteraction} interaction - The Discord interaction object
    * @returns {Promise<Object>} Response to send to Discord
    */
   async execute(interaction) {
@@ -72,7 +75,8 @@ module.exports = {
         tracker = new InitiativeTracker({
           channelId: channel.id,
           guildId: interaction.guild.id,
-          startMemberId: interaction.member.id,
+          startMemberId: interaction.member.user.id,
+          json: null,
         });
         return await tracker.rollPhase(interaction);
 
@@ -125,8 +129,8 @@ module.exports = {
 
 /**
  * Validates the channel for the initiative tracker
- * @param {CommandInteraction} interaction - The Discord interaction object
- * @returns {TextChannel} The validated Discord channel
+ * @param {ChatInputCommandInteraction} interaction - The Discord interaction object
+ * @returns {Promise<TextChannel>} The validated Discord channel
  * @throws {RealmError} If channel is invalid or lacks permissions
  */
 async function getChannel(interaction) {
@@ -135,8 +139,11 @@ async function getChannel(interaction) {
     throw new RealmError({ code: ErrorCodes.GuildRequired });
 
   // Check if the bot can send messages in this channel
-  const channel = await canSendMessage({ channel: interaction.channel });
-  if (!channel)
+  const channel = await canSendMessage({
+    channelId: interaction.channelId,
+    client: interaction.client,
+  });
+  if (!channel || !(channel instanceof TextChannel))
     throw new RealmError({ code: ErrorCodes.InvalidChannelPermissions });
 
   return channel;
@@ -144,7 +151,7 @@ async function getChannel(interaction) {
 
 /**
  * Creates and configures the initiative command structure
- * @returns {SlashCommandBuilder} The configured command builder
+ * @returns {import("discord.js").SlashCommandSubcommandsOnlyBuilder} The configured command builder
  */
 function getCommand() {
   return (
