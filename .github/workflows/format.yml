@@ -1,0 +1,60 @@
+name: Format Check
+
+on:
+  pull_request:
+    paths:
+      - "discord_bots/**"
+      - "frontend/**"
+      - "backend/**"
+
+jobs:
+  discord_bots_format:
+    name: Discord Bots Format Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: discord_bots
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Prettier Check
+        run: npm run format:check
+
+  frontend_format:
+    name: Frontend Format Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Prettier Check
+        run: npm run format:check
+
+  backend_format:
+    name: Backend Format Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Run Black Check
+        run: black --check .
