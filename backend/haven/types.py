@@ -1,44 +1,32 @@
-"""
-Central location for application-wide constants used throughout the backend.
-Defines supporter tiers, limits for character sheets and trackers, and image error codes.
-"""
+from enum import Enum
+from typing import Literal
 
-from .splats import Splats, Versions
+from discordauth.supporter import Supporter
 
 
-class Supporter:
+class Splats(Enum):
     """
-    Enum-like class for supporter tiers.
-    Used to represent user support levels and unlock features accordingly.
+    Enumeration of all character splats (types) supported by the system.
+    Used throughout the application for type-safe character management.
     """
 
-    NONE = 0  # No support
-    MORTAL = 1  # Mortal tier
-    FLEDGLING = 2  # Fledgling tier
-    NEONATE = 3  # Neonate tier
-    ANCILLA = 4  # Ancilla tier
-    ELDER = 5  # Elder tier
-    METHUSELAH = 6  # Methuselah tier
-    ANTEDILUVIAN = 7  # Antediluvian tier
+    VAMPIRE_20TH = "vampire20th"
+    GHOUL_20TH = "ghoul20th"
+    HUMAN_20TH = "human20th"
+    WEREWOLF_20TH = "werewolf20th"
+    CHANGELING_20TH = "changeling20th"
+    MAGE_20TH = "mage20th"
+    WRAITH_20TH = "wraith20th"
+    DEMON_20TH = "demon20th"
+    VAMPIRE_5TH = "vampire5th"
+    HUMAN_5TH = "human5th"
+    GHOUL_5TH = "ghoul5th"
+    HUNTER_5TH = "hunter5th"
+    WEREWOLF_5TH = "werewolf5th"
 
-    @staticmethod
-    def convert_patreon_id(tier_id):
-        """
-        Convert a Patreon tier ID to a Supporter tier constant.
-        Returns the corresponding Supporter tier, or NONE if not matched.
-        """
-        if tier_id == "8618368":
-            return Supporter.FLEDGLING
-        elif tier_id == "8618737":
-            return Supporter.NEONATE
-        elif tier_id == "8618768":
-            return Supporter.ANCILLA
-        elif tier_id == "8618838":
-            return Supporter.ELDER
-        elif tier_id == "8618981":
-            return Supporter.METHUSELAH
-        else:
-            return Supporter.NONE
+
+# Type aliases for common serializer types
+SerializerType = Literal["tracker", "sheet", "deserializer"]
 
 
 class CharacterSheetLimit:
@@ -78,19 +66,6 @@ class CharacterSheetLimit:
             return CharacterSheetLimit.ANTEDILUVIAN
         else:
             return CharacterSheetLimit.BASE
-
-
-class ImageError:
-    """
-    Constants for image download errors.
-    Used to indicate the result of image download and validation operations.
-    """
-
-    NO_URL = "NO_URL"  # No URL provided
-    TOO_LARGE = "TOO_LARGE"  # Image file too large
-    DOWNLOAD_FAILED = "DOWNLOAD_FAILED"  # Download failed
-    INVALID_IMAGE = "INVALID_IMAGE"  # Image is not valid
-    SUCCESS = "SUCCESS"  # Image download and validation succeeded
 
 
 class TrackerLimit:

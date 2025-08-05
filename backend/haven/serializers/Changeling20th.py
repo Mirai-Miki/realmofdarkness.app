@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from haven.models import Changeling20th
-from constants import Splats
+from ..types import Splats
 from .Character20th import (
     Character20thSerializer,
     Character20thDeserializer,
@@ -9,7 +9,7 @@ from .Character20th import (
 
 
 ############################ Tracker Serializer ###############################
-class C20TrackerSerializer(Tracker20thSerializer):
+class Changeling20thTrackerSerializer(Tracker20thSerializer):
     class Meta(Tracker20thSerializer.Meta):
         model = Changeling20th
         fields = Tracker20thSerializer.Meta.fields + (
@@ -27,10 +27,6 @@ class C20TrackerSerializer(Tracker20thSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        # Add the additional fields to the serialized data
-        data["version"] = Splats.changeling20th.version
-
         return data
 
 
@@ -53,10 +49,6 @@ class Changeling20thSerializer(Character20thSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        # Add the additional fields to the serialized data
-        data["version"] = Splats.changeling20th.version
-
         return data
 
 
@@ -67,7 +59,7 @@ class Changeling20thDeserializer(Character20thDeserializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        validated_data["splat"] = Splats.changeling20th.slug
+        validated_data["splat"] = Splats.CHANGELING_20TH.value
         return super().create(validated_data)
 
     def validate(self, data):

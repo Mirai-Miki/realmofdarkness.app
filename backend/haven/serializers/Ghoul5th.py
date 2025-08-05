@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from haven.models import Ghoul5th
-from constants import Splats
+from ..types import Splats
 from .Character5th import (
     Character5thSerializer,
     Character5thDeserializer,
@@ -19,10 +19,6 @@ class Ghoul5thTrackerSerializer(Tracker5thSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        # Add the additional fields to the serialized data
-        data["version"] = Splats.ghoul5th.version
-
         return data
 
 
@@ -37,10 +33,6 @@ class Ghoul5thSerializer(Character5thSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        # Add the additional fields to the serialized data
-        data["version"] = Splats.ghoul5th.version
-
         return data
 
 
@@ -51,7 +43,7 @@ class Ghoul5thDeserializer(Character5thDeserializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        validated_data["splat"] = Splats.ghoul5th.slug
+        validated_data["splat"] = Splats.GHOUL_5TH.value
         return super().create(validated_data)
 
     def validate(self, data):

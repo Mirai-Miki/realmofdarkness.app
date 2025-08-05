@@ -1,4 +1,3 @@
-from .Splat import *
 from .Character import Character, SheetStatus
 from .Character5th import Character5th
 from .Vampire5th import Vampire5th

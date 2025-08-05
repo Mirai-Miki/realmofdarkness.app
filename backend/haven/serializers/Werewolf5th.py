@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from haven.models import Werewolf5th
-from constants import Splats
+from ..types import Splats
 from .Character5th import (
     Character5thSerializer,
     Character5thDeserializer,
@@ -23,15 +23,11 @@ class Werewolf5thSerializer(Character5thSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        # Add the additional fields to the serialized data
-        data["version"] = Splats.werewolf5th.version
-
         return data
 
 
 ############################ Tracker Serializer ###############################
-class W5TrackerSerializer(Tracker5thSerializer):
+class Werewolf5thTrackerSerializer(Tracker5thSerializer):
     class Meta(Tracker5thSerializer.Meta):
         model = Werewolf5th
         fields = Tracker5thSerializer.Meta.fields + (
@@ -43,17 +39,13 @@ class W5TrackerSerializer(Tracker5thSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        # Add the additional fields to the serialized data
-        data["version"] = Splats.werewolf5th.version
-
         return data
 
 
 ############################ Character Deserializer ###########################
 class Werewolf5thDeserializer(Character5thDeserializer):
     def create(self, validated_data):
-        validated_data["splat"] = Splats.werewolf5th.slug
+        validated_data["splat"] = Splats.WEREWOLF_5TH.value
         return super().create(validated_data)
 
     class Meta(Character5thDeserializer.Meta):

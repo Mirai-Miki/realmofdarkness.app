@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from haven.models import Vampire20th
-from constants import Splats
+from ..types import Splats
 from .Character20th import (
     Character20thSerializer,
     Character20thDeserializer,
@@ -9,7 +9,7 @@ from .Character20th import (
 
 
 ############################ Tracker Serializer ###############################
-class V20TrackerSerializer(Tracker20thSerializer):
+class Vampire20thTrackerSerializer(Tracker20thSerializer):
     class Meta(Tracker20thSerializer.Meta):
         model = Vampire20th
         fields = Tracker20thSerializer.Meta.fields + (
@@ -22,10 +22,6 @@ class V20TrackerSerializer(Tracker20thSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        # Add the additional fields to the serialized data
-        data["version"] = Splats.vampire20th.version
-
         return data
 
 
@@ -48,10 +44,6 @@ class Vampire20thSerializer(Character20thSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        # Add the additional fields to the serialized data
-        data["version"] = Splats.vampire20th.version
-
         return data
 
 
@@ -62,7 +54,7 @@ class Vampire20thDeserializer(Character20thDeserializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        validated_data["splat"] = Splats.vampire20th.slug
+        validated_data["splat"] = Splats.VAMPIRE_20TH.value
         return super().create(validated_data)
 
     def validate_morality_name(self, value):

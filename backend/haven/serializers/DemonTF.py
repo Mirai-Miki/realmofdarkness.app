@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from haven.models import DemonTF
-from constants import Splats
+from ..types import Splats
 from .Character20th import (
     Character20thSerializer,
     Character20thDeserializer,
@@ -9,7 +9,7 @@ from .Character20th import (
 
 
 ############################ Tracker Serializer ###############################
-class DtfTrackerSerializer(Tracker20thSerializer):
+class DemonTFTrackerSerializer(Tracker20thSerializer):
     class Meta(Tracker20thSerializer.Meta):
         model = DemonTF
         fields = Tracker20thSerializer.Meta.fields + (
@@ -21,10 +21,6 @@ class DtfTrackerSerializer(Tracker20thSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        # Add the additional fields to the serialized data
-        data["version"] = Splats.demon20th.version
-
         return data
 
 
@@ -41,10 +37,6 @@ class DemonTFSerializer(Character20thSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-
-        # Add the additional fields to the serialized data
-        data["version"] = Splats.demon20th.version
-
         return data
 
 
@@ -55,7 +47,7 @@ class DemonTFDeserializer(Character20thDeserializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        validated_data["splat"] = Splats.demon20th.slug
+        validated_data["splat"] = Splats.DEMON_20TH.value
         return super().create(validated_data)
 
     def validate_morality_name(self, value):

@@ -1,19 +1,5 @@
 from django.db import models
 from rod.settings import AUTH_USER_MODEL
-from . import Splat
-
-
-class Trackable(models.Model):
-    character = models.ForeignKey(
-        "haven.Character", on_delete=models.CASCADE, related_name="trackable"
-    )
-    slug = models.SlugField()
-    total = models.IntegerField(null=True)
-    current = models.IntegerField(default=1)
-
-    class Meta:
-        unique_together = ("character", "slug")
-        indexes = [models.Index(fields=["character", "slug"])]
 
 
 class SheetStatus(models.IntegerChoices):
@@ -47,15 +33,12 @@ class Character(models.Model):
     # Profile
     date_of_birth = models.CharField(blank=True, max_length=20)
     age = models.CharField(blank=True, max_length=20)
-    history = models.TextField(blank=True, max_length=6000)
     appearance_description = models.TextField(blank=True, max_length=1000)
 
     notes = models.TextField(blank=True, max_length=6000)
     notes2 = models.TextField(blank=True, max_length=6000)
 
-    # splat_old is used to store the old splat name for the character. It should be removed after all characters are updated.
-    splat_old = models.ForeignKey(Splat, on_delete=models.CASCADE, null=True)
-    splat = models.CharField(max_length=50, blank=True, null=True)
+    splat = models.CharField(max_length=50)
 
     # Story Teller Lock will stop the player from making non-tracker edits to their sheet.
     st_lock = models.BooleanField(default=False)
