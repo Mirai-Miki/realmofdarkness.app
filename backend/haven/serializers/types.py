@@ -7,31 +7,20 @@ to ensure type safety and proper validation throughout the application.
 
 from typing import TypedDict, List
 
+SpecializationList = List[str]
+
 
 class ExperienceSpend(TypedDict):
     """
     Type definition for individual experience point expenditures.
 
     Attributes:
-        description: Human-readable description of what the XP was spent on (max 80 chars)
+        description: Human-readable description of what the XP was spent on
         cost: Integer cost in experience points
     """
 
     description: str
     cost: int
-
-
-class ExperienceData(TypedDict):
-    """
-    Type definition for character experience point tracking.
-
-    Attributes:
-        current: Current unspent experience points
-        total: Total experience points ever earned
-    """
-
-    current: int
-    total: int
 
 
 # Type alias for list of experience spends
@@ -43,11 +32,11 @@ class AdvantageEntry(TypedDict):
     Type definition for Character5th advantage entries (merits, flaws, backgrounds, etc.).
 
     Attributes:
-        name: Name of the advantage (max 80 chars)
-        description: Description of the advantage (max 1000 chars)
-        notes: Additional notes (max 1000 chars)
+        name: Name of the advantage
+        description: Description of the advantage
+        notes: Additional notes
         rating: Dot rating (1-5 typically)
-        flaw: Whether this is a flaw (negative trait)
+        flaw: Whether this is a flaw
         modifier: Dice pool modifier value
     """
 
@@ -57,6 +46,19 @@ class AdvantageEntry(TypedDict):
     rating: int
     flaw: bool
     modifier: int
+
+
+AdvantageList = List[AdvantageEntry]
+
+
+class HavenDetails5th(TypedDict):
+    """
+    Type definition for 5th Edition Haven character data.
+    """
+
+    name: str
+    description: str
+    location: str
 
 
 class DamageTracker5th(TypedDict):
@@ -74,23 +76,17 @@ class DamageTracker5th(TypedDict):
     aggravated: int
 
 
-class DamageTracker20th(TypedDict):
+class HumanityTracker5th(TypedDict):
     """
-    Type definition for 20th Edition damage tracking.
+    Type definition for 5th Edition humanity tracking.
 
-    For Willpower:
-        current: Current willpower points
-        total: Total willpower points
-
-    For Health:
-        bashing: Bashing damage taken
-        lethal: Lethal damage taken
-        aggravated: Aggravated damage taken
-        total: Total health levels
+    Attributes:
+        current: Current humanity level
+        stains: Number of stains on humanity
     """
 
     current: int
-    total: int
+    stains: int
 
 
 class HealthTracker20th(TypedDict):
@@ -163,7 +159,7 @@ class SkillEntry5th(TypedDict):
     """
 
     value: int
-    spec: str  # Will be empty string if no specialization
+    spec: SpecializationList
 
 
 ATTRIBUTES_20TH = [
@@ -222,22 +218,67 @@ class AttributeEntry20th(TypedDict):
     """
 
     value: int
-    spec: str  # Will be empty string if no specialization
+    spec: SpecializationList
 
 
-class SkillEntry20th(TypedDict):
+class ConsumableTracker(TypedDict):
     """
-    Type definition for 20th Edition skill entries with specializations.
+    Generic type definition for consumable trackers.
+    """
+
+    current: int
+    total: int
+
+
+class MoralityTracker20th(TypedDict):
+    """
+    Type definition for 20th Edition morality tracking.
 
     Attributes:
-        value: Skill level (0-5)
-        spec: Specialization text (can be empty string)
+        name: Name of the morality
+        description: Description of the morality
+        current: Current morality value
     """
 
+    name: str
+    description: str
     value: int
-    spec: str  # Will be empty string if no specialization
 
 
-# Type aliases for common collections
-AdvantageList = List[AdvantageEntry]
-SkillSpecializationList = List[str]  # For JSON skill specialization fields
+class TormentTracker(TypedDict):
+    """
+    Type definition for Demon20th torment tracking.
+
+    Attributes:
+        permanent: Permanent Torment value
+        temporary: Temporary Torment value
+    """
+
+    permanent: int
+    temporary: int
+
+
+class ClanInfo(TypedDict):
+    """
+    Type definition for Vampire20th clan information.
+
+    Attributes:
+        name: Name of the clan
+        description: Description of the clan
+    """
+
+    name: str
+    description: str
+
+
+class QuintTracker(TypedDict):
+    """
+    Type definition for Mage20th specific trackers.
+
+    Attributes:
+        paradox: Current Paradox points (0-20)
+        quintessence: Current Quintessence points (0-20)
+    """
+
+    paradox: int
+    quintessence: int

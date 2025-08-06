@@ -7,7 +7,7 @@ fields and validation logic.
 """
 
 from re import A
-from typing import Dict, Any, List
+from typing import Dict, Any
 from rest_framework import serializers
 
 from .Character import (
@@ -22,6 +22,7 @@ from .types import (
     SkillEntry5th,
     AdvantageEntry,
     AdvantageList,
+    HavenDetails5th,
 )
 from haven.models import Character5th
 
@@ -48,13 +49,6 @@ class Character5thSerializer(CharacterSerializer):
             "tenets",
             "touchstones",
             "convictions",
-            "merits",
-            "flaws",
-            "backgrounds",
-            "haven",
-            "haven_name",
-            "haven_location",
-            "haven_description",
             "loresheets",
         )
 
@@ -70,22 +64,9 @@ class Character5thSerializer(CharacterSerializer):
             damage tracking, attributes, and skills
         """
         data = super().to_representation(instance)
-
-        # 5th Edition willpower tracking
-        willpower_data: DamageTracker5th = {
-            "superficial": instance.willpower_superficial,
-            "total": instance.willpower_total,
-            "aggravated": instance.willpower_aggravated,
-        }
-        data["willpower"] = willpower_data
-
-        # 5th Edition health tracking
-        health_data: DamageTracker5th = {
-            "superficial": instance.health_superficial,
-            "total": instance.health_total,
-            "aggravated": instance.health_aggravated,
-        }
-        data["health"] = health_data
+        data = _expand_common(instance, data)
+        data = _expand_advantages(instance, data)
+        data = _expand_haven_details(instance, data)
 
         attributes_data: dict[str, int] = {}
         for attr_name in ATTRIBUTES_5TH:
@@ -97,7 +78,7 @@ class Character5thSerializer(CharacterSerializer):
         for skill in SKILLS_5TH:
             skills_data[skill] = {
                 "value": getattr(instance, skill, 0),
-                "spec": getattr(instance, f"{skill}_spec", ""),
+                "spec": getattr(instance, f"{skill}_spec", []),
             }
         data["skills"] = skills_data
 
@@ -130,22 +111,7 @@ class Tracker5thSerializer(CharacterTrackerSerializer):
             Dictionary containing tracker data with 5th Edition damage tracking
         """
         data = super().to_representation(instance)
-
-        # 5th Edition willpower tracking
-        willpower_data: DamageTracker5th = {
-            "superficial": instance.willpower_superficial,
-            "total": instance.willpower_total,
-            "aggravated": instance.willpower_aggravated,
-        }
-        data["willpower"] = willpower_data
-
-        # 5th Edition health tracking
-        health_data: DamageTracker5th = {
-            "superficial": instance.health_superficial,
-            "total": instance.health_total,
-            "aggravated": instance.health_aggravated,
-        }
-        data["health"] = health_data
+        data = _expand_common(instance, data)
 
         return data
 
@@ -167,227 +133,498 @@ class Character5thDeserializer(CharacterDeserializer):
     class Meta(CharacterDeserializer.Meta):
         model = Character5th
 
-    def validate_willpower_total(self, value: int) -> int:
+    def validate_willpower(self, value: Any) -> DamageTracker5th:
         """
-        Validate willpower total range.
+        Validate willpower damage tracker structure.
 
         Args:
-            value: Willpower total value
+            value: Willpower damage tracker data
 
         Returns:
-            Validated willpower total
+            Validated DamageTracker5th instance
 
         Raises:
-            ValidationError: If value is outside range 1-20
+            ValidationError: If structure is invalid
         """
-        if value > 20 or value < 1:
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("Willpower must be a dictionary")
+
+        if (
+            "total" not in value
+            or "superficial" not in value
+            or "aggravated" not in value
+        ):
+            raise serializers.ValidationError(
+                "Willpower must contain total, superficial, and aggravated fields"
+            )
+
+        total = value.get("total", 0)
+        superficial = value.get("superficial", 0)
+        aggravated = value.get("aggravated", 0)
+
+        if (
+            not isinstance(total, int)
+            or not isinstance(superficial, int)
+            or not isinstance(aggravated, int)
+        ):
+            raise serializers.ValidationError("Willpower fields must be integers")
+
+        if total < 1 or total > 20:
             raise serializers.ValidationError(
                 "Willpower total must be between 1 and 20"
             )
-        return value
-
-    def validate_willpower_superficial(self, value: int) -> int:
-        """
-        Validate willpower superficial damage range.
-
-        Args:
-            value: Superficial willpower damage
-
-        Returns:
-            Validated superficial damage value
-
-        Raises:
-            ValidationError: If value is outside range 0-20
-        """
-        if value > 20 or value < 0:
+        if superficial < 0 or superficial > 20:
             raise serializers.ValidationError(
                 "Willpower superficial damage must be between 0 and 20"
             )
-        return value
-
-    def validate_willpower_aggravated(self, value: int) -> int:
-        """
-        Validate willpower aggravated damage range.
-
-        Args:
-            value: Aggravated willpower damage
-
-        Returns:
-            Validated aggravated damage value
-
-        Raises:
-            ValidationError: If value is outside range 0-20
-        """
-        if value > 20 or value < 0:
+        if aggravated < 0 or aggravated > 20:
             raise serializers.ValidationError(
                 "Willpower aggravated damage must be between 0 and 20"
             )
-        return value
+        if (superficial + aggravated) > total:
+            raise serializers.ValidationError(
+                "Willpower damage cannot exceed total willpower"
+            )
 
-    def validate_health_total(self, value: int) -> int:
+        return {
+            "total": total,
+            "superficial": superficial,
+            "aggravated": aggravated,
+        }
+
+    def validate_health(self, value: Any) -> DamageTracker5th:
         """
-        Validate health total range.
+        Validate health damage tracker structure.
 
         Args:
-            value: Health total value
+            value: Health damage tracker data
 
         Returns:
-            Validated health total
+            Validated DamageTracker5th instance
 
         Raises:
-            ValidationError: If value is outside range 1-20
+            ValidationError: If structure is invalid
         """
-        if value > 20 or value < 1:
+        if not isinstance(value, dict):
+            raise serializers.ValidationError("Health must be a dictionary")
+
+        if (
+            "total" not in value
+            or "superficial" not in value
+            or "aggravated" not in value
+        ):
+            raise serializers.ValidationError(
+                "Health must contain total, superficial, and aggravated fields"
+            )
+
+        total = value.get("total", 0)
+        superficial = value.get("superficial", 0)
+        aggravated = value.get("aggravated", 0)
+
+        if (
+            not isinstance(total, int)
+            or not isinstance(superficial, int)
+            or not isinstance(aggravated, int)
+        ):
+            raise serializers.ValidationError("Health fields must be integers")
+
+        if total < 1 or total > 20:
             raise serializers.ValidationError("Health total must be between 1 and 20")
-        return value
-
-    def validate_health_superficial(self, value: int) -> int:
-        """
-        Validate health superficial damage range.
-
-        Args:
-            value: Superficial health damage
-
-        Returns:
-            Validated superficial damage value
-
-        Raises:
-            ValidationError: If value is outside range 0-20
-        """
-        if value > 20 or value < 0:
+        if superficial < 0 or superficial > 20:
             raise serializers.ValidationError(
                 "Health superficial damage must be between 0 and 20"
             )
-        return value
-
-    def validate_health_aggravated(self, value: int) -> int:
-        """
-        Validate health aggravated damage range.
-
-        Args:
-            value: Aggravated health damage
-
-        Returns:
-            Validated aggravated damage value
-
-        Raises:
-            ValidationError: If value is outside range 0-20
-        """
-        if value > 20 or value < 0:
+        if aggravated < 0 or aggravated > 20:
             raise serializers.ValidationError(
                 "Health aggravated damage must be between 0 and 20"
             )
-        return value
+        if (superficial + aggravated) > total:
+            raise serializers.ValidationError(
+                "Health damage cannot exceed total health"
+            )
 
-    def validate_advantage_list(self, data: List[Dict[str, Any]]) -> AdvantageList:
+        return {
+            "total": total,
+            "superficial": superficial,
+            "aggravated": aggravated,
+        }
+
+    def validate_advantages(self, data: Any) -> Dict[str, AdvantageList]:
         """
-        Validate advantage list structure for merits, flaws, backgrounds, etc.
+        Validate advantage dictionary for merits, flaws, backgrounds, haven, loresheets.
 
         Args:
-            data: List of advantage dictionaries
+            data: Dictionary mapping allowed advantage names to lists of advantage entries.
 
         Returns:
-            Validated list of advantage entries
+            Dictionary of validated advantage lists, only including provided keys.
 
         Raises:
-            ValidationError: If advantage structure is invalid
+            ValidationError: If structure or keys are invalid.
         """
+        if not isinstance(data, dict):
+            raise serializers.ValidationError(
+                "Advantage data must be a dictionary of advantage lists."
+            )
+
+        allowed_advantages = {
+            "merits",
+            "flaws",
+            "backgrounds",
+            "haven",
+            "loresheets",
+        }
         allowed_keys = {"name", "description", "notes", "rating", "flaw", "modifier"}
-        validated_advantages: AdvantageList = []
 
-        for item in data:
-            if not isinstance(item, dict):
-                raise serializers.ValidationError("Each advantage must be a dictionary")
+        # Disallow any top-level keys not in allowed_advantages
+        unexpected_top_keys = set(data.keys()) - allowed_advantages
+        if unexpected_top_keys:
+            raise serializers.ValidationError(
+                f"Unexpected advantage categories: {', '.join(unexpected_top_keys)}"
+            )
 
-            # Check required fields
-            required_fields = [
-                "name",
-                "description",
-                "notes",
-                "rating",
-                "flaw",
-                "modifier",
-            ]
-            for field in required_fields:
-                if field not in item:
+        validated: Dict[str, AdvantageList] = {}
+        for adv_type, adv_list in data.items():
+            if adv_type not in allowed_advantages:
+                continue  # Should not happen due to check above
+            if not isinstance(adv_list, list):
+                raise serializers.ValidationError(
+                    f"Advantage list for '{adv_type}' must be a list."
+                )
+
+            validated_advantages: AdvantageList = []
+            for item in adv_list:
+                if not isinstance(item, dict):
                     raise serializers.ValidationError(
-                        f"Advantage missing required field: {field}"
+                        f"Each advantage in '{adv_type}' must be a dictionary."
                     )
 
-            # Check for unexpected keys
-            unexpected_keys = set(item.keys()) - allowed_keys
-            if unexpected_keys:
+                # Disallow any keys not in allowed_keys
+                unexpected_keys = set(item.keys()) - allowed_keys
+                if unexpected_keys:
+                    raise serializers.ValidationError(
+                        f"Unexpected keys in advantage entry for '{adv_type}': {', '.join(unexpected_keys)}"
+                    )
+
+                # Validate individual fields using get with default None
+                name = item.get("name", None)
+                description = item.get("description", None)
+                notes = item.get("notes", None)
+                rating = item.get("rating", None)
+                flaw = item.get("flaw", None)
+                modifier = item.get("modifier", None)
+
+                if not isinstance(name, str):
+                    raise serializers.ValidationError("Advantage name must be a string")
+                if len(name) > 100:
+                    raise serializers.ValidationError(
+                        "Advantage name too long (max 100 characters)"
+                    )
+
+                if not isinstance(description, str):
+                    raise serializers.ValidationError(
+                        "Advantage description must be a string"
+                    )
+                if len(description) > 2000:
+                    raise serializers.ValidationError(
+                        "Advantage description too long (max 2000 characters)"
+                    )
+
+                if not isinstance(notes, str):
+                    raise serializers.ValidationError(
+                        "Advantage notes must be a string"
+                    )
+                if len(notes) > 2000:
+                    raise serializers.ValidationError(
+                        "Advantage notes too long (max 2000 characters)"
+                    )
+
+                if not isinstance(rating, int):
+                    raise serializers.ValidationError(
+                        "Advantage rating must be an integer"
+                    )
+
+                if not isinstance(flaw, bool):
+                    raise serializers.ValidationError(
+                        "Advantage flaw must be a boolean"
+                    )
+
+                if not isinstance(modifier, int):
+                    raise serializers.ValidationError(
+                        "Advantage modifier must be an integer"
+                    )
+
+                advantage: AdvantageEntry = {
+                    "name": name,
+                    "description": description,
+                    "notes": notes,
+                    "rating": rating,
+                    "flaw": flaw,
+                    "modifier": modifier,
+                }
+                validated_advantages.append(advantage)
+
+            # Sort the advantage list alphabetically by name if included
+            validated[adv_type] = sorted(
+                validated_advantages, key=lambda x: x["name"].lower()
+            )
+
+        return validated
+
+    def validate_haven_details(self, data: Any) -> HavenDetails5th:
+        """
+        Validate haven details structure. Only update provided allowed fields, disallow unexpected keys, and validate type/length constraints.
+
+        Args:
+            data: Haven details dictionary
+
+        Returns:
+            Validated HavenDetails5th instance (with only provided fields)
+
+        Raises:
+            ValidationError: If structure or field constraints are invalid
+        """
+        if not isinstance(data, dict):
+            raise serializers.ValidationError("Haven details must be a dictionary")
+
+        allowed_fields = {"name", "description", "location"}
+        unexpected_keys = set(data.keys()) - allowed_fields
+        if unexpected_keys:
+            raise serializers.ValidationError(
+                f"Unexpected keys in haven details: {', '.join(unexpected_keys)}"
+            )
+
+        validated = {}
+        # Validate each field if present
+        name = data.get("name", None)
+        if name is not None:
+            if not isinstance(name, str):
+                raise serializers.ValidationError("Haven name must be a string")
+            if len(name) > 50:
                 raise serializers.ValidationError(
-                    f"Unexpected keys in advantage: {', '.join(unexpected_keys)}"
+                    "Haven name too long (max 50 characters)"
+                )
+            validated["name"] = name
+
+        description = data.get("description", None)
+        if description is not None:
+            if not isinstance(description, str):
+                raise serializers.ValidationError("Haven description must be a string")
+            if len(description) > 1000:
+                raise serializers.ValidationError(
+                    "Haven description too long (max 1000 characters)"
+                )
+            validated["description"] = description
+
+        location = data.get("location", None)
+        if location is not None:
+            if not isinstance(location, str):
+                raise serializers.ValidationError("Haven location must be a string")
+            if len(location) > 500:
+                raise serializers.ValidationError(
+                    "Haven location too long (max 500 characters)"
+                )
+            validated["location"] = location
+
+        return HavenDetails5th(**validated)
+
+    def validate_attributes(self, data: Any) -> Dict[str, int]:
+        """
+        Validate attributes structure and values.
+
+        Args:
+            data: Dictionary of attributes with integer values
+        Returns:
+            Dictionary of validated attributes
+        Raises:
+            ValidationError: If structure is invalid or values are out of range
+        """
+        if not isinstance(data, dict):
+            raise serializers.ValidationError("Attributes must be a dictionary")
+
+        # throw error if unexpected keys are present
+        unexpected_keys = set(data.keys()) - set(ATTRIBUTES_5TH)
+        if unexpected_keys:
+            raise serializers.ValidationError(
+                f"Unexpected keys in attributes: {', '.join(unexpected_keys)}"
+            )
+
+        validated: Dict[str, int] = {}
+        for attr, value in data.items():
+            if not isinstance(value, int):
+                raise serializers.ValidationError(
+                    f"Attribute '{attr}' must be an integer"
+                )
+            if value < 0 or value > 5:
+                raise serializers.ValidationError(
+                    f"Attribute '{attr}' must be between 0 and 5"
+                )
+            validated[attr] = value
+
+        return validated
+
+    def validate_skills(self, data: Any) -> Dict[str, SkillEntry5th]:
+        """
+        Validate skills structure and values.
+
+        Args:
+            data: Dictionary of skills with SkillEntry5th values
+        Returns:
+            Dictionary of validated skills
+        Raises:
+            ValidationError: If structure is invalid or values are out of range
+        """
+        if not isinstance(data, dict):
+            raise serializers.ValidationError("Skills must be a dictionary")
+
+        # throw error if unexpected keys are present
+        unexpected_keys = set(data.keys()) - set(SKILLS_5TH)
+        if unexpected_keys:
+            raise serializers.ValidationError(
+                f"Unexpected keys in skills: {', '.join(unexpected_keys)}"
+            )
+
+        validated: Dict[str, SkillEntry5th] = {}
+        for skill, entry in data.items():
+            if not isinstance(entry, dict):
+                raise serializers.ValidationError(
+                    f"Skill '{skill}' must be a dictionary"
+                )
+            value = entry.get("value", 0)
+            spec = entry.get("spec", [])
+            if not isinstance(value, int):
+                raise serializers.ValidationError(
+                    f"Skill '{skill}' value must be an integer"
+                )
+            if value < 0 or value > 5:
+                raise serializers.ValidationError(
+                    f"Skill '{skill}' must be between 0 and 5"
+                )
+            if not isinstance(spec, list):
+                raise serializers.ValidationError(
+                    f"Skill '{skill}' specialization must be a list"
                 )
 
-            # Validate individual fields
-            if not isinstance(item["name"], str):
-                raise serializers.ValidationError("Advantage name must be a string")
-            if len(item["name"]) > 80:
+            if len(spec) > 10:
                 raise serializers.ValidationError(
-                    "Advantage name too long (max 80 characters)"
+                    f"Skill '{skill}' can have a maximum of 10 specializations"
                 )
 
-            if not isinstance(item["description"], str):
-                raise serializers.ValidationError(
-                    "Advantage description must be a string"
-                )
-            if len(item["description"]) > 1000:
-                raise serializers.ValidationError(
-                    "Advantage description too long (max 1000 characters)"
-                )
+            for s in spec:
+                if not isinstance(s, str):
+                    raise serializers.ValidationError(
+                        f"Skill '{skill}' specialization must be a string"
+                    )
+                if len(s) == 0:
+                    raise serializers.ValidationError(
+                        f"Skill '{skill}' specialization cannot be empty"
+                    )
+                if len(s) > 50:
+                    raise serializers.ValidationError(
+                        f"Skill '{skill}' specialization too long (max 50 characters)"
+                    )
+            validated[skill] = {"value": value, "spec": spec}
 
-            if not isinstance(item["notes"], str):
-                raise serializers.ValidationError("Advantage notes must be a string")
-            if len(item["notes"]) > 1000:
-                raise serializers.ValidationError(
-                    "Advantage notes too long (max 1000 characters)"
-                )
+        return validated
 
-            if not isinstance(item["rating"], int):
-                raise serializers.ValidationError("Advantage rating must be an integer")
+    def validate_ambition(self, value: Any) -> str:
+        """
+        Validate ambition field.
 
-            if not isinstance(item["flaw"], bool):
-                raise serializers.ValidationError("Advantage flaw must be a boolean")
+        Args:
+            value: Ambition string
 
-            if not isinstance(item["modifier"], int):
-                raise serializers.ValidationError(
-                    "Advantage modifier must be an integer"
-                )
+        Returns:
+            Validated ambition string
 
-            # Create typed advantage entry
-            advantage: AdvantageEntry = {
-                "name": item["name"],
-                "description": item["description"],
-                "notes": item["notes"],
-                "rating": item["rating"],
-                "flaw": item["flaw"],
-                "modifier": item["modifier"],
-            }
-            validated_advantages.append(advantage)
+        Raises:
+            ValidationError: If ambition is not a string or too long
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Ambition must be a string")
+        if len(value) > 100:
+            raise serializers.ValidationError("Ambition too long (max 100 characters)")
+        return value
 
-        return validated_advantages
+    def validate_desire(self, value: Any) -> str:
+        """
+        Validate desire field.
 
-    def validate_merits(self, data: Any) -> AdvantageList:
-        """Validate merits list."""
-        return self.validate_advantage_list(data)
+        Args:
+            value: Desire string
 
-    def validate_flaws(self, data: Any) -> AdvantageList:
-        """Validate flaws list."""
-        return self.validate_advantage_list(data)
+        Returns:
+            Validated desire string
 
-    def validate_haven(self, data: Any) -> AdvantageList:
-        """Validate haven advantages list."""
-        return self.validate_advantage_list(data)
+        Raises:
+            ValidationError: If desire is not a string or too long
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Desire must be a string")
+        if len(value) > 100:
+            raise serializers.ValidationError("Desire too long (max 100 characters)")
+        return value
 
-    def validate_backgrounds(self, data: Any) -> AdvantageList:
-        """Validate backgrounds list."""
-        return self.validate_advantage_list(data)
+    def validate_tenets(self, value: Any) -> str:
+        """
+        Validate tenets field.
 
-    def validate_loresheets(self, data: Any) -> AdvantageList:
-        """Validate loresheets list."""
-        return self.validate_advantage_list(data)
+        Args:
+            value: Tenets string
+
+        Returns:
+            Validated tenets string
+
+        Raises:
+            ValidationError: If tenets is not a string or too long
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Tenets must be a string")
+        if len(value) > 1000:
+            raise serializers.ValidationError("Tenets too long (max 1000 characters)")
+        return value
+
+    def validate_touchstones(self, value: Any) -> str:
+        """
+        Validate touchstones field.
+
+        Args:
+            value: Touchstones string
+
+        Returns:
+            Validated touchstones string
+
+        Raises:
+            ValidationError: If touchstones is not a string or too long
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Touchstones must be a string")
+        if len(value) > 2000:
+            raise serializers.ValidationError(
+                "Touchstones too long (max 2000 characters)"
+            )
+        return value
+
+    def validate_convictions(self, value: Any) -> str:
+        """
+        Validate convictions field.
+
+        Args:
+            value: Convictions string
+
+        Returns:
+            Validated convictions string
+
+        Raises:
+            ValidationError: If convictions is not a string or too long
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Convictions must be a string")
+        if len(value) > 2000:
+            raise serializers.ValidationError(
+                "Convictions too long (max 2000 characters)"
+            )
+        return value
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -403,56 +640,133 @@ class Character5thDeserializer(CharacterDeserializer):
             ValidationError: If cross-field validation fails
         """
         data = super().validate(data)
-
-        # Validate attributes and skills range (0-5)
-        attributes: Dict[str, int] = data.get("attributes", {})
-        skills: Dict[str, SkillEntry5th] = data.get("skills", {})
-
-        for attribute, value in attributes.items():
-            if value and (value < 0 or value > 5):
-                raise serializers.ValidationError(
-                    f"{attribute} must be between 0 and 5"
-                )
-
-        for skill, entry in skills.items():
-            if entry.get("value", 0) < 0 or entry.get("value", 0) > 5:
-                raise serializers.ValidationError(f"{skill} must be between 0 and 5")
-
-        # Validate damage trackers
-        self._validate_damage_tracker(data, "willpower")
-        self._validate_damage_tracker(data, "health")
+        data = self._flatten_data(data)
 
         return data
 
-    def _validate_damage_tracker(self, data: Dict[str, Any], tracker_type: str) -> None:
+    def _flatten_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Validate damage tracker consistency.
+        Flatten the data dictionary to match the Character5th model fields.
 
         Args:
-            data: Validation data
-            tracker_type: Type of tracker ('willpower' or 'health')
+            data: Nested data dictionary
 
-        Raises:
-            ValidationError: If damage exceeds total
+        Returns:
+            Flattened dictionary with keys matching Character5th model fields
         """
-        if not self.instance:
-            return
 
-        # Get values from data or instance
-        total = data.get(f"{tracker_type}_total")
-        if total is None:
-            total = getattr(self.instance, f"{tracker_type}_total")
+        willpower: DamageTracker5th | None = data.pop("willpower", None)
+        if willpower and willpower.get("total", None):
+            data["willpower_total"] = willpower["total"]
+        if willpower and willpower.get("superficial", None):
+            data["willpower_superficial"] = willpower["superficial"]
+        if willpower and willpower.get("aggravated", None):
+            data["willpower_aggravated"] = willpower["aggravated"]
 
-        superficial = data.get(f"{tracker_type}_superficial")
-        if superficial is None:
-            superficial = getattr(self.instance, f"{tracker_type}_superficial")
+        health: DamageTracker5th | None = data.pop("health", None)
+        if health and health.get("total", None):
+            data["health_total"] = health["total"]
+        if health and health.get("superficial", None):
+            data["health_superficial"] = health["superficial"]
+        if health and health.get("aggravated", None):
+            data["health_aggravated"] = health["aggravated"]
 
-        aggravated = data.get(f"{tracker_type}_aggravated")
-        if aggravated is None:
-            aggravated = getattr(self.instance, f"{tracker_type}_aggravated")
+        attributes: Dict[str, int] = data.pop("attributes", {})
+        for attr, value in attributes.items():
+            data[attr] = value
 
-        # Validate that damage doesn't exceed total
-        if (superficial + aggravated) > total:
-            raise serializers.ValidationError(
-                f"{tracker_type.title()} damage cannot exceed total {tracker_type}"
-            )
+        skills: Dict[str, SkillEntry5th] = data.pop("skills", {})
+        for skill, entry in skills.items():
+            data[skill] = entry["value"]
+            if entry["spec"] is not None:
+                data[f"{skill}_spec"] = entry["spec"]
+
+        advantages: Dict[str, AdvantageList] = data.pop("advantages", {})
+        for adv_type, adv_list in advantages.items():
+            if adv_list is not None:
+                data[adv_type] = adv_list
+
+        haven_details: HavenDetails5th = data.pop("haven_details", {})
+        if haven_details and haven_details.get("name", None):
+            data["haven_name"] = haven_details["name"]
+        if haven_details and haven_details.get("description", None):
+            data["haven_description"] = haven_details["description"]
+        if haven_details and haven_details.get("location", None):
+            data["haven_location"] = haven_details["location"]
+
+        return data
+
+
+def _expand_common(instance: Character5th, data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Expand willpower and health fields into separate damage trackers.
+    Args:
+        instance: Character5th model instance
+        data: Existing serialized data dictionary
+    Returns:
+        Updated data dictionary with expanded damage trackers
+    """
+    willpower: DamageTracker5th = {
+        "total": instance.willpower_total,
+        "superficial": instance.willpower_superficial,
+        "aggravated": instance.willpower_aggravated,
+    }
+
+    health: DamageTracker5th = {
+        "total": instance.health_total,
+        "superficial": instance.health_superficial,
+        "aggravated": instance.health_aggravated,
+    }
+
+    # Add expanded damage trackers to data
+    data["willpower"] = willpower
+    data["health"] = health
+
+    return data
+
+
+def _expand_advantages(instance: Character5th, data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Expand advantages into structured lists.
+
+    Args:
+        instance: Character5th model instance
+        data: Existing serialized data dictionary
+
+    Returns:
+        Updated data dictionary with structured advantage lists
+    """
+    advantages: Dict[str, AdvantageList] = {
+        "merits": instance.merits,
+        "flaws": instance.flaws,
+        "haven": instance.haven,
+        "backgrounds": instance.backgrounds,
+        "loresheets": instance.loresheets,
+        "haven": instance.haven,
+    }
+    data["advantages"] = advantages
+
+    return data
+
+
+def _expand_haven_details(
+    instance: Character5th, data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Expand haven details into structured object.
+
+    Args:
+        instance: Character5th model instance
+        data: Existing serialized data dictionary
+
+    Returns:
+        Updated data dictionary with structured haven details
+    """
+    haven_details = {
+        "name": instance.haven_name,
+        "description": instance.haven_description,
+        "location": instance.haven_location,
+    }
+    data["haven_details"] = haven_details
+
+    return data

@@ -3,7 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from .Character20th import Character20th
 
 
-class DemonTF(Character20th):
+class Demon20th(Character20th):
     faith_total = models.IntegerField(
         default=1, validators=[MinValueValidator(0), MaxValueValidator(10)]
     )

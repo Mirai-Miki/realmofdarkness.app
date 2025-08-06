@@ -510,15 +510,6 @@ class CharacterManager:
             current_chronicle = new_chronicle
             current_member = new_member
 
-        # Chronicle self heal check
-        if (not current_chronicle and current_member) or (
-            not current_member and current_chronicle
-        ):
-            update_data["chronicle"] = None
-            update_data["member"] = None
-            current_chronicle = None
-            current_member = None
-
         # Owner or staff Checks
         if not is_owner and not cls._is_staff(
             str(requester.pk), str(getattr(character, "chronicle_id", None))

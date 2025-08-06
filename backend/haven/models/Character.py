@@ -34,6 +34,7 @@ class Character(models.Model):
     date_of_birth = models.CharField(blank=True, max_length=20)
     age = models.CharField(blank=True, max_length=20)
     appearance_description = models.TextField(blank=True, max_length=1000)
+    history = models.TextField(blank=True, max_length=10000)
 
     notes = models.TextField(blank=True, max_length=6000)
     notes2 = models.TextField(blank=True, max_length=6000)

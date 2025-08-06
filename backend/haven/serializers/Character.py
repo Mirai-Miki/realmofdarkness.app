@@ -9,13 +9,19 @@ The CharacterManager handles all permission checks, so these serializers
 focus purely on data serialization/deserialization and validation.
 """
 
+from encodings import undefined
 import re
 from typing import Dict, Any, cast
 from rest_framework import serializers
 from rest_framework import status
 
 from haven.models import Character, SheetStatus
-from haven.serializers.types import ExperienceData, ExperienceSpendList, ExperienceSpend
+from chronicle.models import Member
+from haven.serializers.types import (
+    ConsumableTracker,
+    ExperienceSpendList,
+    ExperienceSpend,
+)
 from discordauth.models import User
 
 
@@ -68,18 +74,12 @@ class CharacterTrackerSerializer(serializers.ModelSerializer):
             Dictionary containing serialized character data
         """
         data = super().to_representation(instance)
+        data = _expand_exp(instance, data)
 
         # Add computed fields
         data["created_at"] = instance.created_at.timestamp()
         data["last_updated"] = instance.last_updated.timestamp()
         data["avatar"] = instance.avatar.url if instance.avatar else None
-
-        # Experience data as structured object
-        exp_data: ExperienceData = {
-            "current": instance.exp_current,
-            "total": instance.exp_total,
-        }
-        data["exp"] = exp_data
 
         return data
 
@@ -140,18 +140,12 @@ class CharacterSerializer(serializers.ModelSerializer):
             Dictionary containing serialized character data
         """
         data = super().to_representation(instance)
+        data = _expand_exp(instance, data)
 
         # Add computed fields
         data["created_at"] = instance.created_at.timestamp()
         data["last_updated"] = instance.last_updated.timestamp()
         data["avatar"] = instance.avatar.url if instance.avatar else None
-
-        # Experience data as structured object
-        exp_data: ExperienceData = {
-            "current": instance.exp_current,
-            "total": instance.exp_total,
-        }
-        data["exp"] = exp_data
 
         return data
 
@@ -191,11 +185,14 @@ class CharacterDeserializer(serializers.ModelSerializer):
             Internal data dictionary ready for validation
         """
         # Remove fields that are handled externally or are read-only
-        data.pop("member", None)
+        data.pop("id", None)
+        data.pop("user_id", None)
+        data.pop("chronicle_id", None)
+        data.pop("member_id", None)
         data.pop("created_at", None)
         data.pop("last_updated", None)
         data.pop("avatar", None)  # Handled by ImageManager
-        data.pop("splat", None)  # Handled by CharacterManager
+        data.pop("splat", None)  # Handled by Create logic
 
         return super().to_internal_value(data)
 
@@ -236,7 +233,7 @@ class CharacterDeserializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
-    def validate_name(self, value: str) -> str:
+    def validate_name(self, value: Any) -> str:
         """
         Validate character name.
 
@@ -249,13 +246,20 @@ class CharacterDeserializer(serializers.ModelSerializer):
         Raises:
             ValidationError: If name is invalid or duplicate
         """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Name must be a string.")
+
         user_id = None
         if self.instance:
             # Update operation - get user from instance
-            user_id = str(self.instance.user.pk)
+            user_id = str(self.instance.user_id)
         elif "user" in self.context:
             # Create operation - get user from context
             user_id = str(self.context["user"].pk)
+        else:
+            raise serializers.ValidationError(
+                "User ID required for name validation", code=status.HTTP_400_BAD_REQUEST
+            )
 
         if len(value) > 50:
             raise serializers.ValidationError(
@@ -290,31 +294,7 @@ class CharacterDeserializer(serializers.ModelSerializer):
 
         return value
 
-    def validate_user(self, value: User | None) -> User | None:
-        """
-        Validate user assignment.
-
-        User can only be set during creation and cannot be changed afterward.
-
-        Args:
-            value: User instance
-
-        Returns:
-            Validated User instance
-
-        Raises:
-            ValidationError: If user is missing on creation or being changed
-        """
-        if not self.instance and not value:
-            raise serializers.ValidationError(
-                "User must be included with a new character"
-            )
-        elif self.instance and self.instance.user != value:
-            raise serializers.ValidationError("You cannot change a user after creation")
-
-        return value
-
-    def validate_status(self, value: int) -> int:
+    def validate_status(self, value: Any) -> int:
         """
         Validate character sheet status.
 
@@ -324,18 +304,25 @@ class CharacterDeserializer(serializers.ModelSerializer):
         Returns:
             Validated status value
         """
+        if not isinstance(value, int):
+            raise serializers.ValidationError(
+                "Status must be an integer.", code=status.HTTP_400_BAD_REQUEST
+            )
+
         if self.context.get("is_owner", False):
             raise serializers.ValidationError(
-                "You cannot change the status of a character.",
+                "You cannot change the sheet status of this character.",
                 code=status.HTTP_403_FORBIDDEN,
             )
 
         if value < SheetStatus.DRAFT or value > SheetStatus.ARCHIVE:
-            raise serializers.ValidationError("Invalid Sheet Status.")
+            raise serializers.ValidationError(
+                "Invalid Sheet Status value.", code=status.HTTP_400_BAD_REQUEST
+            )
 
         return value
 
-    def validate_theme(self, value: str) -> str:
+    def validate_theme(self, value: Any) -> str:
         """
         Validate theme color (hex color format).
 
@@ -345,6 +332,11 @@ class CharacterDeserializer(serializers.ModelSerializer):
         Returns:
             Validated theme color
         """
+        if not isinstance(value, str):
+            raise serializers.ValidationError(
+                "Theme color must be a string.", code=status.HTTP_400_BAD_REQUEST
+            )
+
         character = cast(Character | None, self.instance)
 
         if character:
@@ -361,74 +353,53 @@ class CharacterDeserializer(serializers.ModelSerializer):
 
         hex_color_pattern = re.compile(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
 
-        if not isinstance(value, str) or not hex_color_pattern.match(value):
+        if not hex_color_pattern.match(value):
             raise serializers.ValidationError(
                 "Invalid hex color value.", code=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
 
         return value
 
-    def validate_exp_current(self, value: int) -> int:
+    def validate_exp(self, data: Any) -> ConsumableTracker:
         """
-        Validate current experience points.
+        Validate experience points.
 
         Args:
-            value: Current experience value
+            data: Complete validated data dictionary
 
         Returns:
-            Validated current experience value
-        """
-        exp_total = None
-        if (
-            hasattr(self, "initial_data")
-            and self.initial_data
-            and isinstance(self.initial_data, dict)
-        ):
-            exp_total = self.initial_data.get("exp_total")
-        elif self.instance:
-            exp_total = self.instance.exp_total
+            Final validated data dictionary
 
-        if value < 0:
+        Raises:
+            ValidationError: If experience validation fails
+        """
+        if not isinstance(data, dict):
             raise serializers.ValidationError(
-                "Current experience cannot be less than 0"
+                "Experience must be a dictionary", code=status.HTTP_400_BAD_REQUEST
             )
 
-        if exp_total is not None and value > exp_total:
+        exp_current = data.get("current", 0)
+        exp_total = data.get("total", 0)
+
+        if not isinstance(exp_current, int) or not isinstance(exp_total, int):
             raise serializers.ValidationError(
-                "Current experience cannot be more than total experience"
+                "Experience values must be integers", code=status.HTTP_400_BAD_REQUEST
             )
 
-        return value
-
-    def validate_exp_total(self, value: int) -> int:
-        """
-        Validate total experience points.
-
-        Args:
-            value: Total experience value
-
-        Returns:
-            Validated total experience value
-        """
-        exp_current = None
-        if (
-            hasattr(self, "initial_data")
-            and self.initial_data
-            and isinstance(self.initial_data, dict)
-        ):
-            exp_current = self.initial_data.get("exp_current")
-        elif self.instance:
-            exp_current = self.instance.exp_current
-
-        if value < 0:
-            raise serializers.ValidationError("Total experience cannot be less than 0")
-
-        if exp_current is not None and value < exp_current:
+        if exp_current < 0 or exp_total < 0:
             raise serializers.ValidationError(
-                "Total experience cannot be less than current experience"
+                "Experience cannot be less than 0", code=status.HTTP_400_BAD_REQUEST
+            )
+        if exp_total > 5000 or exp_current > 5000:
+            raise serializers.ValidationError(
+                "Experience cannot be greater than 5000",
+            )
+        if exp_current > exp_total:
+            raise serializers.ValidationError(
+                "Current experience cannot be greater than total experience",
             )
 
-        return value
+        return {"current": exp_current, "total": exp_total}
 
     def validate_exp_spends(self, data: Any) -> ExperienceSpendList:
         """
@@ -441,7 +412,9 @@ class CharacterDeserializer(serializers.ModelSerializer):
             Validated experience spends list
         """
         if not isinstance(data, list):
-            raise serializers.ValidationError("Experience spends must be a list")
+            raise serializers.ValidationError(
+                "Experience spends must be a list", code=status.HTTP_400_BAD_REQUEST
+            )
 
         allowed_keys = {"description", "cost"}
         validated_spends: ExperienceSpendList = []
@@ -459,7 +432,7 @@ class CharacterDeserializer(serializers.ModelSerializer):
 
             if "cost" not in item:
                 raise serializers.ValidationError(
-                    "Experience spend missing 'cost' field"
+                    "Experience spend missing 'cost' field",
                 )
 
             # Check for unexpected keys
@@ -475,15 +448,20 @@ class CharacterDeserializer(serializers.ModelSerializer):
                     "Experience spend description must be a string"
                 )
 
-            if len(item["description"]) > 80:
+            if len(item["description"]) > 100:
                 raise serializers.ValidationError(
-                    "Experience spend description too long (max 80 characters)"
+                    "Experience spend description too long (max 100 characters)"
                 )
 
             # Validate cost
             if not isinstance(item["cost"], int):
                 raise serializers.ValidationError(
                     "Experience spend cost must be an integer"
+                )
+
+            if item["cost"] < 0 or item["cost"] > 500:
+                raise serializers.ValidationError(
+                    "Experience spend cost must be between 0 and 500"
                 )
 
             # Create typed spend entry
@@ -495,7 +473,7 @@ class CharacterDeserializer(serializers.ModelSerializer):
 
         return validated_spends
 
-    def validate_st_lock(self, value: bool) -> bool:
+    def validate_st_lock(self, value: Any) -> bool:
         """
         Validate storyteller lock status.
 
@@ -508,17 +486,158 @@ class CharacterDeserializer(serializers.ModelSerializer):
         Raises:
             ValidationError: If value is not a boolean
         """
+        if not isinstance(value, bool):
+            raise serializers.ValidationError("ST lock must be a boolean value")
+
         character = cast(Character | None, self.instance)
-        if (
-            character
-            and character.st_lock != value
-            and self.context.get("is_owner", False)
-        ):
-            # Only allow changing ST lock if the user is the owner
+
+        if not character:
+            # cannot change ST lock on a new character
+            raise serializers.ValidationError(
+                "You cannot set ST lock on a new character.",
+                code=status.HTTP_403_FORBIDDEN,
+            )
+
+        if character.st_lock != value and not self.context.get("is_owner", True):
+            # Only allow changing ST lock if the user is not the owner
             raise serializers.ValidationError(
                 "You cannot change the ST lock status of this character.",
                 code=status.HTTP_403_FORBIDDEN,
             )
+        return value
+
+    def validate_date_of_birth(self, value: Any) -> str:
+        """
+        Validate character date of birth.
+
+        Args:
+            value: Date of birth to validate
+
+        Returns:
+            Validated date of birth
+
+        Raises:
+            ValidationError: If date format is invalid
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Date of birth must be a string.")
+
+        if len(value) > 20:
+            raise serializers.ValidationError(
+                "Date of birth too long (max 20 characters)"
+            )
+
+        return value
+
+    def validate_age(self, value: Any) -> str:
+        """
+        Validate character age.
+
+        Args:
+            value: Age to validate
+
+        Returns:
+            Validated age
+
+        Raises:
+            ValidationError: If age format is invalid
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Age must be a string.")
+
+        if len(value) > 20:
+            raise serializers.ValidationError("Age too long (max 20 characters)")
+
+        return value
+
+    def validate_appearance_description(self, value: Any) -> str:
+        """
+        Validate character appearance description.
+
+        Args:
+            value: Appearance description to validate
+
+        Returns:
+            Validated appearance description
+
+        Raises:
+            ValidationError: If description is invalid
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError(
+                "Appearance description must be a string."
+            )
+
+        if len(value) > 1000:
+            raise serializers.ValidationError(
+                "Appearance description too long (max 1000 characters)"
+            )
+
+        return value
+
+    def validate_history(self, value: Any) -> str:
+        """
+        Validate character history.
+
+        Args:
+            value: History to validate
+
+        Returns:
+            Validated history
+
+        Raises:
+            ValidationError: If history is invalid
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("History must be a string.")
+
+        if len(value) > 10000:
+            raise serializers.ValidationError("History too long (max 10000 characters)")
+
+        return value
+
+    def validate_notes(self, value: Any) -> str:
+        """
+        Validate character notes.
+
+        Args:
+            value: Notes to validate
+
+        Returns:
+            Validated notes
+
+        Raises:
+            ValidationError: If notes are invalid
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Notes must be a string.")
+
+        if len(value) > 6000:
+            raise serializers.ValidationError("Notes too long (max 6000 characters)")
+
+        return value
+
+    def validate_notes2(self, value: Any) -> str:
+        """
+        Validate additional character notes.
+
+        Args:
+            value: Additional notes to validate
+
+        Returns:
+            Validated additional notes
+
+        Raises:
+            ValidationError: If additional notes are invalid
+        """
+        if not isinstance(value, str):
+            raise serializers.ValidationError("Additional notes must be a string.")
+
+        if len(value) > 6000:
+            raise serializers.ValidationError(
+                "Additional notes too long (max 6000 characters)"
+            )
+
         return value
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -545,5 +664,73 @@ class CharacterDeserializer(serializers.ModelSerializer):
                     'To edit please set the Status to "Active" or "Draft"',
                     code=status.HTTP_304_NOT_MODIFIED,
                 )
+        else:
+            if not data.get("user") or not isinstance(data["user"], User):
+                raise serializers.ValidationError(
+                    "User must be included with a new character"
+                )
+
+        # Validate chronicle and member relationship
+        if data.get("chronicle") or data.get("member"):
+            if not data.get("chronicle") or not data.get("member"):
+                raise serializers.ValidationError(
+                    "You must provide both a chronicle and member for this character"
+                )
+        elif self.instance and (self.instance.chronicle or self.instance.member):
+            if not self.instance.chronicle:
+                data["member"] = None
+            elif not self.instance.member:
+                # Attempt to heal
+                member = Member.objects.filter(
+                    chronicle=self.instance.chronicle,
+                    user=self.instance.user,
+                ).first()
+                if not member:
+                    data["chronicle"] = None
+                else:
+                    data["member"] = member
+
+        # Flatten nested fields
+        data = self._flatten_data(data)
 
         return data
+
+    def _flatten_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Flatten nested fields in the data dictionary.
+
+        Args:
+            data: Data dictionary to flatten
+        Returns:
+            Flattened data dictionary
+        """
+
+        # Flatten Experience fields
+        exp: ConsumableTracker = data.pop("exp", {})
+
+        if "current" in exp:
+            data["exp_current"] = exp["current"]
+        if "total" in exp:
+            data["exp_total"] = exp["total"]
+
+        return data
+
+
+def _expand_exp(instance: Character, data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Expand experience fields into a structured object.
+
+    Args:
+        instance: Character instance
+        data: Data dictionary to expand
+
+    Returns:
+        Expanded data dictionary with experience as a structured object
+    """
+    exp: ConsumableTracker = {
+        "current": getattr(instance, "exp_current", 0),
+        "total": getattr(instance, "exp_total", 0),
+    }
+    data["exp"] = exp
+
+    return data

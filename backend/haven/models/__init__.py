@@ -11,6 +11,6 @@ from .Werewolf20th import Werewolf20th
 from .Changeling20th import Changeling20th
 from .Mage20th import Mage20th
 from .Wraith20th import Wraith20th
-from .DemonTF import DemonTF
+from .Demon20th import Demon20th
 from .Ghoul20th import Ghoul20th
 from .Human20th import Human20th

@@ -24,7 +24,7 @@ class Character20th(Character):
         default=0, validators=[MinValueValidator(0), MaxValueValidator(15)]
     )
     health_total = models.IntegerField(
-        default=4, validators=[MinValueValidator(7), MaxValueValidator(15)]
+        default=7, validators=[MinValueValidator(7), MaxValueValidator(15)]
     )
 
     ################################# Attributes ###############################
