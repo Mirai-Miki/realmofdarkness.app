@@ -1,45 +1,61 @@
+"""
+Discord authentication models for Realm of Darkness.
+
+This module defines the User model and UserManager for Discord OAuth authentication.
+Users are identified by their Discord user ID rather than username/password.
+"""
+
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser
 from django.utils import timezone
 
 
-class UserManager(BaseUserManager):
-    def create_user(self, discord_user, is_registered=False):
-        user = self.model(
-            id=int(discord_user["id"]),  # Req
-            username=discord_user["username"],  # Req
-            discriminator=discord_user["discriminator"],
-            avatar_url=discord_user.get("avatarURL", ""),
-            email=discord_user.get("email", ""),
-            verified=discord_user.get("verified", False),
-            registered=is_registered,
-            admin=False,
-        )
-        user.set_unusable_password()
-        user.save(using=self._db)
-
-        return user
-
-
 class User(AbstractBaseUser):
+    """
+    Custom user model for Discord OAuth authentication.
+
+    This model represents users who authenticate through Discord OAuth2.
+    It stores Discord-specific information and platform-specific metadata.
+
+    Key features:
+    - Uses Discord user ID as primary key
+    - No password authentication (uses Discord OAuth)
+    - Stores Discord profile information
+    - Tracks platform-specific data (supporter tier, admin status)
+    """
+
     # Discord User Details
-    id = models.BigIntegerField(primary_key=True)
-    username = models.CharField(max_length=80)
-    avatar_url = models.URLField(blank=True)
-    email = models.EmailField(max_length=100, blank=True, null=True)
+    id = models.BigIntegerField(
+        primary_key=True, help_text="Discord user ID (snowflake)"
+    )
+    username = models.CharField(max_length=80, help_text="Discord username")
+    avatar_url = models.URLField(blank=True, help_text="URL to user's Discord avatar")
+    email = models.EmailField(
+        max_length=100,
+        blank=True,
+        null=True,
+    )
     verified = models.BooleanField()
     registered = models.BooleanField()
     admin = models.BooleanField(default=False)
     supporter = models.IntegerField(default=0)
 
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     last_saved = models.DateTimeField(auto_now=True)
     last_active = models.DateTimeField(default=timezone.now)
 
-    objects = UserManager()
+    # Authentication fields
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS: list[str] = []
 
-    USERNAME_FIELD = "id, username"
-    REQUIRED_FIELDS = []
+    class Meta:
+        """Meta configuration for User model."""
 
-    def __str__(self):
+        verbose_name = "User"
+        verbose_name_plural = "Users"
+        db_table = "discordauth_user"
+
+    def __str__(self) -> str:
+        """Return string representation of the user."""
         return f"{self.username}"

@@ -6,7 +6,7 @@ and callback processing. It ensures type safety, secure authentication, and
 proper user data synchronization using serializers.
 """
 
-from typing import Dict, Any, Optional, Set, List
+from typing import Dict, Any, Optional, Set, List, cast
 from urllib.parse import quote
 import hashlib
 import os
@@ -404,8 +404,7 @@ def login_success(request: HttpRequest) -> HttpResponse:
             )
 
             if serializer.is_valid():
-                serializer.save()
-                user = authenticated_user  # Use the original user instance
+                user = cast(User, serializer.save())
             else:
                 logger.error(
                     f"Failed to update user {discord_user['id']}: {serializer.errors}"
@@ -417,9 +416,7 @@ def login_success(request: HttpRequest) -> HttpResponse:
             serializer = UserSerializer(data=user_data)
 
             if serializer.is_valid():
-                serializer.save()
-                # Get the created user from the database
-                user = User.objects.get(id=user_data["id"])
+                user = cast(User, serializer.save())
                 logger.info(f"New user registered: {user.id}")
             else:
                 logger.error(
