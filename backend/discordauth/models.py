@@ -25,7 +25,6 @@ class User(AbstractBaseUser):
     # Discord User Details
     id = models.BigIntegerField(primary_key=True)
     username = models.CharField(max_length=80)
-    discriminator = models.CharField(max_length=50, default="0")
     avatar_url = models.URLField(blank=True)
     email = models.EmailField(max_length=100, blank=True, null=True)
     verified = models.BooleanField()
@@ -39,8 +38,8 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
-    USERNAME_FIELD = "id"
+    USERNAME_FIELD = "id, username"
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return f"{self.username}#{self.discriminator}"
+        return f"{self.username}"

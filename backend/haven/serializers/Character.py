@@ -9,8 +9,6 @@ The CharacterManager handles all permission checks, so these serializers
 focus purely on data serialization/deserialization and validation.
 """
 
-from encodings import undefined
-import re
 from typing import Dict, Any, cast
 from rest_framework import serializers
 from rest_framework import status
@@ -165,12 +163,84 @@ class CharacterDeserializer(serializers.ModelSerializer):
         - user: User instance for the character owner (creation only)
         - chronicle: Chronicle instance if character belongs to one
         - member: Member instance if character belongs to a chronicle
-        - is_update: Boolean indicating if this is an update operation
     """
+
+    # Use DRF built-in validators for basic type and length checking
+    date_of_birth = serializers.CharField(
+        max_length=20,
+        required=False,
+        allow_blank=True,
+        help_text="Character's date of birth (max 20 characters, string)",
+    )
+    age = serializers.CharField(
+        max_length=20,
+        required=False,
+        allow_blank=True,
+        help_text="Character's age (max 20 characters, string)",
+    )
+    appearance_description = serializers.CharField(
+        max_length=1000,
+        required=False,
+        allow_blank=True,
+        help_text="Description of character's appearance (max 1000 characters, string)",
+    )
+    notes = serializers.CharField(
+        max_length=6000,
+        required=False,
+        allow_blank=True,
+        help_text="Character notes (max 6000 characters, string)",
+    )
+    notes2 = serializers.CharField(
+        max_length=6000,
+        required=False,
+        allow_blank=True,
+        help_text="Additional character notes (max 6000 characters, string)",
+    )
+    history = serializers.CharField(
+        max_length=10000,
+        required=False,
+        allow_blank=True,
+        help_text="Character history (max 10000 characters, string)",
+    )
+    theme = serializers.RegexField(
+        regex=r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+        max_length=7,
+        required=False,
+        allow_blank=True,
+        error_message="Invalid hex color value.",
+        help_text="Theme color in hex format (e.g. #AABBCC, supporter only)",
+    )
+    name = serializers.CharField(
+        max_length=50,
+        required=True,
+        allow_blank=False,
+        help_text="Character name (max 50 characters, cannot start with ~, must be unique per user)",
+    )
+    status = serializers.IntegerField(
+        required=True,
+        help_text="Character sheet status",
+    )
+    is_sheet = serializers.BooleanField(
+        required=False,
+        help_text="True if this is a full character sheet, False for tracker/placeholder.",
+    )
+    st_lock = serializers.BooleanField(
+        required=False,
+        help_text="Storyteller lock status (boolean, controls edit permissions)",
+    )
 
     class Meta:
         model = Character
         fields = "__all__"
+        read_only_fields = (
+            "id",
+            "user_id",
+            "chronicle_id",
+            "member_id",
+            "created_at",
+            "last_updated",
+            "avatar",
+        )
 
     def to_internal_value(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -184,14 +254,7 @@ class CharacterDeserializer(serializers.ModelSerializer):
         Returns:
             Internal data dictionary ready for validation
         """
-        # Remove fields that are handled externally or are read-only
-        data.pop("id", None)
-        data.pop("user_id", None)
-        data.pop("chronicle_id", None)
-        data.pop("member_id", None)
-        data.pop("created_at", None)
-        data.pop("last_updated", None)
-        data.pop("avatar", None)  # Handled by ImageManager
+        # Remove fields that is handled internally
         data.pop("splat", None)  # Handled by Create logic
 
         return super().to_internal_value(data)
@@ -233,7 +296,7 @@ class CharacterDeserializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
-    def validate_name(self, value: Any) -> str:
+    def validate_name(self, value: str) -> str:
         """
         Validate character name.
 
@@ -246,9 +309,6 @@ class CharacterDeserializer(serializers.ModelSerializer):
         Raises:
             ValidationError: If name is invalid or duplicate
         """
-        if not isinstance(value, str):
-            raise serializers.ValidationError("Name must be a string.")
-
         user_id = None
         if self.instance:
             # Update operation - get user from instance
@@ -259,12 +319,6 @@ class CharacterDeserializer(serializers.ModelSerializer):
         else:
             raise serializers.ValidationError(
                 "User ID required for name validation", code=status.HTTP_400_BAD_REQUEST
-            )
-
-        if len(value) > 50:
-            raise serializers.ValidationError(
-                "Name cannot be longer than 50 characters.",
-                code=status.HTTP_409_CONFLICT,
             )
 
         # Character names cannot start with ~ (reserved for system use)
@@ -294,7 +348,7 @@ class CharacterDeserializer(serializers.ModelSerializer):
 
         return value
 
-    def validate_status(self, value: Any) -> int:
+    def validate_status(self, value: int) -> int:
         """
         Validate character sheet status.
 
@@ -304,11 +358,6 @@ class CharacterDeserializer(serializers.ModelSerializer):
         Returns:
             Validated status value
         """
-        if not isinstance(value, int):
-            raise serializers.ValidationError(
-                "Status must be an integer.", code=status.HTTP_400_BAD_REQUEST
-            )
-
         if self.context.get("is_owner", False):
             raise serializers.ValidationError(
                 "You cannot change the sheet status of this character.",
@@ -322,21 +371,19 @@ class CharacterDeserializer(serializers.ModelSerializer):
 
         return value
 
-    def validate_theme(self, value: Any) -> str:
+    def validate_theme(self, value: str) -> str:
         """
-        Validate theme color (hex color format).
+        Validate theme color supporter permissions.
 
         Args:
-            value: Theme color to validate
+            value: Theme color to validate (already validated for hex format by field)
 
         Returns:
             Validated theme color
-        """
-        if not isinstance(value, str):
-            raise serializers.ValidationError(
-                "Theme color must be a string.", code=status.HTTP_400_BAD_REQUEST
-            )
 
+        Raises:
+            ValidationError: If user is not a supporter
+        """
         character = cast(Character | None, self.instance)
 
         if character:
@@ -344,18 +391,11 @@ class CharacterDeserializer(serializers.ModelSerializer):
         else:
             user = cast(User | None, self.context.get("user", None))
 
-        if not user or user.supporter:
+        if not user or not user.supporter:
             # Non-supporters cannot set theme color
             raise serializers.ValidationError(
                 "You must be a supporter to set a theme color.",
                 code=status.HTTP_403_FORBIDDEN,
-            )
-
-        hex_color_pattern = re.compile(r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")
-
-        if not hex_color_pattern.match(value):
-            raise serializers.ValidationError(
-                "Invalid hex color value.", code=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
 
         return value
@@ -473,7 +513,7 @@ class CharacterDeserializer(serializers.ModelSerializer):
 
         return validated_spends
 
-    def validate_st_lock(self, value: Any) -> bool:
+    def validate_st_lock(self, value: bool) -> bool:
         """
         Validate storyteller lock status.
 
@@ -486,9 +526,6 @@ class CharacterDeserializer(serializers.ModelSerializer):
         Raises:
             ValidationError: If value is not a boolean
         """
-        if not isinstance(value, bool):
-            raise serializers.ValidationError("ST lock must be a boolean value")
-
         character = cast(Character | None, self.instance)
 
         if not character:
@@ -504,140 +541,6 @@ class CharacterDeserializer(serializers.ModelSerializer):
                 "You cannot change the ST lock status of this character.",
                 code=status.HTTP_403_FORBIDDEN,
             )
-        return value
-
-    def validate_date_of_birth(self, value: Any) -> str:
-        """
-        Validate character date of birth.
-
-        Args:
-            value: Date of birth to validate
-
-        Returns:
-            Validated date of birth
-
-        Raises:
-            ValidationError: If date format is invalid
-        """
-        if not isinstance(value, str):
-            raise serializers.ValidationError("Date of birth must be a string.")
-
-        if len(value) > 20:
-            raise serializers.ValidationError(
-                "Date of birth too long (max 20 characters)"
-            )
-
-        return value
-
-    def validate_age(self, value: Any) -> str:
-        """
-        Validate character age.
-
-        Args:
-            value: Age to validate
-
-        Returns:
-            Validated age
-
-        Raises:
-            ValidationError: If age format is invalid
-        """
-        if not isinstance(value, str):
-            raise serializers.ValidationError("Age must be a string.")
-
-        if len(value) > 20:
-            raise serializers.ValidationError("Age too long (max 20 characters)")
-
-        return value
-
-    def validate_appearance_description(self, value: Any) -> str:
-        """
-        Validate character appearance description.
-
-        Args:
-            value: Appearance description to validate
-
-        Returns:
-            Validated appearance description
-
-        Raises:
-            ValidationError: If description is invalid
-        """
-        if not isinstance(value, str):
-            raise serializers.ValidationError(
-                "Appearance description must be a string."
-            )
-
-        if len(value) > 1000:
-            raise serializers.ValidationError(
-                "Appearance description too long (max 1000 characters)"
-            )
-
-        return value
-
-    def validate_history(self, value: Any) -> str:
-        """
-        Validate character history.
-
-        Args:
-            value: History to validate
-
-        Returns:
-            Validated history
-
-        Raises:
-            ValidationError: If history is invalid
-        """
-        if not isinstance(value, str):
-            raise serializers.ValidationError("History must be a string.")
-
-        if len(value) > 10000:
-            raise serializers.ValidationError("History too long (max 10000 characters)")
-
-        return value
-
-    def validate_notes(self, value: Any) -> str:
-        """
-        Validate character notes.
-
-        Args:
-            value: Notes to validate
-
-        Returns:
-            Validated notes
-
-        Raises:
-            ValidationError: If notes are invalid
-        """
-        if not isinstance(value, str):
-            raise serializers.ValidationError("Notes must be a string.")
-
-        if len(value) > 6000:
-            raise serializers.ValidationError("Notes too long (max 6000 characters)")
-
-        return value
-
-    def validate_notes2(self, value: Any) -> str:
-        """
-        Validate additional character notes.
-
-        Args:
-            value: Additional notes to validate
-
-        Returns:
-            Validated additional notes
-
-        Raises:
-            ValidationError: If additional notes are invalid
-        """
-        if not isinstance(value, str):
-            raise serializers.ValidationError("Additional notes must be a string.")
-
-        if len(value) > 6000:
-            raise serializers.ValidationError(
-                "Additional notes too long (max 6000 characters)"
-            )
-
         return value
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:

@@ -337,10 +337,14 @@ class CharacterManager:
             Various image-related exceptions from ImageManager
         """
         # Validate required fields
-        if not requester or "splat" not in character_data:
-            raise ValidationError(
-                "Missing required fields: user and splat are required"
-            )
+        if not requester:
+            raise ValidationError("Missing required field: user is required")
+        
+        if "splat" not in character_data:
+            raise ValidationError("Missing required field: splat is required")
+            
+        if "name" not in character_data or not character_data["name"].strip():
+            raise ValidationError("Missing required field: name is required")
 
         chronicle: Chronicle | None = None
         member: Member | None = None
