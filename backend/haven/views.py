@@ -17,7 +17,6 @@ from typing import Any, Dict, Optional, cast
 
 from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework.exceptions import APIException
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -25,11 +24,12 @@ from rest_framework.views import APIView
 
 from .character_manager import CharacterManager
 from .errors import CharacterManagerException
+from rod.throttling import get_throttles
 
 from discordauth.models import User as UserModel
 
 User = cast(UserModel, get_user_model())
-logger = logging.getLogger("DEBUG")
+logger = logging.getLogger(__name__)
 
 
 class CharacterView(APIView):
@@ -41,6 +41,9 @@ class CharacterView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+
+    def get_throttles(self):
+        return get_throttles(self.request.user)  # type: ignore[return-value]
 
     def handle_exception(self, exc: Exception) -> Response:
         """

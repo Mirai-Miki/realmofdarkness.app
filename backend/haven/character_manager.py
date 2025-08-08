@@ -45,7 +45,7 @@ from .serializers.serializer_registry import SerializerRegistry
 from .image_manager import ImageManager
 
 User = cast(UserModel, get_user_model())
-logger = logging.getLogger("DEBUG")
+logger = logging.getLogger(__name__)
 
 
 class CharacterEventDispatcher:
@@ -339,10 +339,10 @@ class CharacterManager:
         # Validate required fields
         if not requester:
             raise ValidationError("Missing required field: user is required")
-        
+
         if "splat" not in character_data:
             raise ValidationError("Missing required field: splat is required")
-            
+
         if "name" not in character_data or not character_data["name"].strip():
             raise ValidationError("Missing required field: name is required")
 

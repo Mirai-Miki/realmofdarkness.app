@@ -22,7 +22,6 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
     path("auth/", include("discordauth.urls")),
     path("bot/", include("bot.urls")),
-    path("api/", include("api.urls")),
     path("api/", include("haven.urls")),
     path("patreon/", include("patreon.urls")),
     path("", include("main.urls")),

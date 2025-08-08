@@ -29,7 +29,7 @@ from .errors import (
     CharacterManagerException,
 )
 
-logger = logging.getLogger("DEBUG")
+logger = logging.getLogger(__name__)
 
 
 class ImageManager:

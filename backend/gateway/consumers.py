@@ -11,8 +11,7 @@ from django.db.models import Q
 from chronicle.models import Chronicle
 from haven.utility import get_derived_instance, get_tracker_serializer
 
-logger = logging.getLogger("DEBUG")
-log = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class GatewayConsumer(AsyncWebsocketConsumer):

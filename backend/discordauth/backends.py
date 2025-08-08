@@ -18,7 +18,7 @@ from django.contrib.auth.backends import BaseBackend
 from django.http import HttpRequest
 from .models import User
 
-logger = logging.getLogger("DEBUG")
+logger = logging.getLogger(__name__)
 
 
 class DiscordAuthBackend(BaseBackend):

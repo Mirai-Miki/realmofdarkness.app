@@ -33,6 +33,10 @@ PATREON_WEBHOOK_SECRET = os.getenv("PATREON_WEBHOOK_SECRET", "")
 # Discord constants
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
 DISCORD_DEBUG_CHANNEL = os.getenv("DISCORD_DEBUG_CHANNEL", "")
+# Toggle to enable/disable sending logs to Discord (e.g., set to 'false' to disable)
+DISCORD_LOGGING_ENABLED = os.getenv(
+    "DISCORD_LOGGING_ENABLED", "true"
+).strip().lower() in {"1", "true", "yes", "on"}
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("ENV", "development") == "development"
@@ -83,7 +87,6 @@ COMMON_APPS = [
     "haven.apps.HavenConfig",
     "chronicle.apps.ChronicleConfig",
     "bot.apps.BotConfig",
-    "api.apps.ApiConfig",
     "patreon.apps.PatreonConfig",
     "channels",
     "rest_framework",
@@ -268,56 +271,90 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Logging configuration based on environment
-if not DEBUG:
-    # Production logging settings
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "handlers": {
-            "root": {
-                "class": "logging.FileHandler",
-                "filename": BASE_DIR / "root.log",
-            },
-            "django": {
-                "class": "logging.FileHandler",
-                "filename": BASE_DIR / "django.log",
-            },
-            "debug": {
-                "class": "logging.FileHandler",
-                "filename": BASE_DIR / "debug.log",
-                "mode": "a",  # Append mode
-                "encoding": "utf-8",
-            },
-            "console": {"class": "logging.StreamHandler"},
+# Logging configuration with Discord handler and fallbacks
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "%(levelname)s | %(name)s | %(message)s",
         },
-        "root": {
-            "handlers": ["root"],
+        "verbose": {
+            "format": "%(asctime)s | %(levelname)s | %(name)s | %(pathname)s:%(lineno)d | %(message)s",
+        },
+    },
+    "filters": {
+        # Allow our app loggers, and ERROR+ from any other logger
+        "discord_allow": {"()": "rod.logging_handlers.get_discord_allow_filter"},
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+            "formatter": "simple",
+        },
+        "file_root": {
+            "class": "logging.FileHandler",
             "level": "WARNING",
+            "filename": str(BASE_DIR / "root.log"),
+            "encoding": "utf-8",
+            "formatter": "verbose",
         },
-        "loggers": {
-            "": {  # empty name for root logger
-                "handlers": ["root"],
-                "level": "WARNING",
-                "propagate": True,
-            },
-            "django.server": {  # Exclude django.server logger
-                "handlers": [],
-                "propagate": False,
-            },
-            "django": {
-                "handlers": ["django"],
-                "level": "WARNING",
-                "propagate": False,
-            },
-            "django.security.DisallowedHost": {
-                "handlers": [],
-                "propagate": False,
-            },
-            "DEBUG": {
-                "handlers": ["debug"],
-                "level": "DEBUG",
-                "propagate": False,
-            },
+        "file_django": {
+            "class": "logging.FileHandler",
+            "level": "WARNING",
+            "filename": str(BASE_DIR / "django.log"),
+            "encoding": "utf-8",
+            "formatter": "verbose",
         },
-    }
+        "file_debug": {
+            "class": "logging.FileHandler",
+            "level": "DEBUG",
+            "filename": str(BASE_DIR / "debug.log"),
+            "encoding": "utf-8",
+            "formatter": "simple",
+        },
+        "discord": {
+            # Use callable style so we can read settings at runtime
+            "()": "rod.logging_handlers.get_discord_embed_handler",
+            "level": "INFO",  # INFO+ to Discord by default
+            "filters": ["discord_allow"],
+        },
+    },
+    "root": {
+        # DEBUG: console + discord (optional), no files
+        # PROD: file + discord (optional), no console
+        "handlers": (
+            (["console"] if DEBUG else [])
+            + (["discord"] if DISCORD_LOGGING_ENABLED else [])
+            + ([] if DEBUG else ["file_root"])
+        ),
+        "level": "DEBUG" if DEBUG else "WARNING",
+    },
+    "loggers": {
+        "django": {
+            # Avoid spamming Discord with framework noise; filter limits to ERROR unless it's our app
+            "handlers": (
+                ([] if DEBUG else ["file_django"])
+                + (["console"] if DEBUG else [])
+                + (["discord"] if DISCORD_LOGGING_ENABLED else [])
+            ),
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": (["console"] if DEBUG else []),
+            "propagate": False,
+        },
+        # Legacy custom logger name preserved
+        "DEBUG": {
+            "handlers": (
+                ([] if DEBUG else ["file_debug"])
+                + (["console"] if DEBUG else [])
+                + (["discord"] if DISCORD_LOGGING_ENABLED else [])
+            ),
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
+}
