@@ -102,7 +102,7 @@ class PatreonWebhookView(APIView):
 
             # Send a message to Discord
             discord_token = settings.DISCORD_BOT_TOKEN
-            channel_id = settings.DISCORD_DEBUG_CHANNEL
+            channel_id = settings.DISCORD_PATREON_TEST_CHANNEL
             url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
             headers = {
                 "Authorization": f"Bot {discord_token}",

@@ -1,81 +1,69 @@
 from django.urls import path
-from . import views
 from .views.character_views import (
-    GetCharacter,
-    GetDisciplineNames,
-    GetNames,
-    DeleteCharacters,
-    NewCharacter,
-    SaveCharacter,
-    GetSheet,
-    GetCharacterCountView,
+    BotCharacterView,
+    BotCharacterNamesView,
+    BotDisciplineNamesView,
+    BotCharacterCountView,
 )
-from .views.chronicleViews import (
-    MemberDeleteView,
-    SetTrackerChannelView,
-    GetTrackerChannelView,
-    SetStorytellerRoleView,
-    GetStorytellerRolesView,
-    DeleteStorytellerRoleView,
-    SetGuildView,
-    DeleteGuildView,
-    SetDefaultsView,
-    GetDefaultsView,
-    GetMemberView,
-    GetChronicleView,
+from .views.chronicle_views import (
+    ChronicleView,
+    TrackerChannelView,
+    StorytellerRoleView,
 )
-from .views.botViews import update_bot
-from .views.userViews import (
-    GetUserView,
-    get_supporter_level,
-    set_supporter_level,
-    update_user,
-    get_admins_storytellers,
-)
-from .views.initiativeViews import init_set, init_get, init_delete
-from .views.statsViews import StatsAPIView, CommandUsedAPIView
+from .views.bot_views import BotView
+from .views.user_views import UserView
+from .views.initiative_views import InitiativeView
+from .views.supporters import SupportersView
+from .views.stats_views import StatsAPIView, CommandUsedAPIView
+from .views.member_views import MemberView, DefaultCharacterView
 
 app_name = "bot"
 urlpatterns = [
     # Character
-    path("character/get", GetCharacter.as_view()),
-    path("character/get/discipline/names", GetDisciplineNames.as_view()),
-    path("character/get/names", GetNames.as_view()),
-    path("character/count", GetCharacterCountView.as_view()),
-    path("character/delete", DeleteCharacters.as_view()),
-    path("character/new", NewCharacter.as_view()),
-    path("character/save", SaveCharacter.as_view()),
-    # Sheet API
-    path("sheet/get", views.GetSheet.as_view()),
+    path("character/get/<str:character_id>", BotCharacterView.as_view()),
+    path("character/delete/<str:character_id>", BotCharacterView.as_view()),
+    path("character/new", BotCharacterView.as_view()),
+    path("character/save", BotCharacterView.as_view()),
+    path("character/get/discipline/names", BotDisciplineNamesView.as_view()),
+    path("character/get/names", BotCharacterNamesView.as_view()),
+    path("character/count", BotCharacterCountView.as_view()),
     # Chronicle
-    path("chronicle/set", SetGuildView.as_view()),
-    path("chronicle/delete", DeleteGuildView.as_view()),
-    path("chronicle/channel/set", SetTrackerChannelView.as_view()),
-    path("chronicle/channel/get", GetTrackerChannelView.as_view()),
-    path("chronicle/storyteller/roles/set", SetStorytellerRoleView.as_view()),
-    path("chronicle/storyteller/roles/get", GetStorytellerRolesView.as_view()),
-    path("chronicle/storyteller/roles/delete", DeleteStorytellerRoleView.as_view()),
-    path("chronicle/member/delete", MemberDeleteView.as_view()),
-    path("chronicle/member/get", GetMemberView.as_view()),
-    # Alternative endpoint for AppMember
-    path("member/get", GetMemberView.as_view()),
-    path("chronicle/member/defaults/set", SetDefaultsView.as_view()),
-    path("chronicle/member/defaults/get", GetDefaultsView.as_view()),
-    path("chronicle/get", GetChronicleView.as_view()),
-    path("chronicle/storytellers/get", get_admins_storytellers),
+    path("chronicle/get/<str:chronicle_id>", ChronicleView.as_view()),
+    path("chronicle/delete/<str:chronicle_id>", ChronicleView.as_view()),
+    path("chronicle/set", ChronicleView.as_view()),
+    # Chronicle Tracker Channel
+    path(
+        "chronicle/tracker_channel/get/<str:chronicle_id>", TrackerChannelView.as_view()
+    ),
+    path("chronicle/tracker_channel/set", TrackerChannelView.as_view()),
+    # Chronicle Storyteller Roles
+    path(
+        "chronicle/storyteller_roles/get/<str:chronicle_id>",
+        StorytellerRoleView.as_view(),
+    ),
+    path(
+        "chronicle/storyteller_roles/delete/<str:chronicle_id>",
+        StorytellerRoleView.as_view(),
+    ),
+    path("chronicle/storyteller_roles/set", StorytellerRoleView.as_view()),
+    # Member management
+    path("member/get", MemberView.as_view()),  # GET
+    path("member/set", MemberView.as_view()),  # POST for create/update
+    path("member/delete", MemberView.as_view()),  # DELETE
+    path("member/defaults/set", DefaultCharacterView.as_view()),  # POST
+    path("member/defaults/get", DefaultCharacterView.as_view()),  # GET
     # User
-    path("user/supporter/get", get_supporter_level),
-    path("user/supporter/set", set_supporter_level),
-    path("user/update", update_user),
-    path("user/supporter/get_all", views.GetAllSupportersView.as_view()),
-    path("user/get", GetUserView.as_view()),
+    path("user/get/<str:user_id>", UserView.as_view()),  # GET with user_id in path
+    path("user/set", UserView.as_view()),  # POST for create/update (user data only)
+    # Supporters
+    path("supporters", SupportersView.as_view()),  # GET all supporters
     # Initiative Tracker
-    path("initiative/set", init_set),
-    path("initiative/get", init_get),
-    path("initiative/delete", init_delete),
+    path("initiative/set", InitiativeView.as_view()),
+    path("initiative/get", InitiativeView.as_view()),
+    path("initiative/delete", InitiativeView.as_view()),
     # Stats
-    path("stats/get", StatsAPIView.as_view()),
-    path("stats/command/update", CommandUsedAPIView.as_view()),
+    path("stats/get", StatsAPIView.as_view()),  # GET with optional ?days=
+    path("stats/command/update", CommandUsedAPIView.as_view()),  # POST JSON
     # Bot Info
-    path("data/set", update_bot),
+    path("data/set", BotView.as_view()),
 ]

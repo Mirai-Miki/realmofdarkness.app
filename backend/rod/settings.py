@@ -33,6 +33,7 @@ PATREON_WEBHOOK_SECRET = os.getenv("PATREON_WEBHOOK_SECRET", "")
 # Discord constants
 DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
 DISCORD_DEBUG_CHANNEL = os.getenv("DISCORD_DEBUG_CHANNEL", "")
+DISCORD_PATREON_TEST_CHANNEL = os.getenv("DISCORD_PATREON_TEST_CHANNEL", "")
 # Toggle to enable/disable sending logs to Discord (e.g., set to 'false' to disable)
 DISCORD_LOGGING_ENABLED = os.getenv(
     "DISCORD_LOGGING_ENABLED", "true"

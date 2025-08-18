@@ -35,8 +35,8 @@ class User(AbstractBaseUser):
         blank=True,
         null=True,
     )
-    verified = models.BooleanField()
-    registered = models.BooleanField()
+    verified = models.BooleanField()  # if the user is verified on Discord
+    registered = models.BooleanField()  # Whether the user has ever logged in
     admin = models.BooleanField(default=False)
     supporter = models.IntegerField(default=0)
 

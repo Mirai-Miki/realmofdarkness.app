@@ -10,9 +10,8 @@ returning result codes. This allows for proper transaction rollbacks and
 cleaner error handling throughout the application.
 """
 
+from typing import Optional, Union, List, Dict, Any, Iterable, cast, TYPE_CHECKING
 import logging
-
-from typing import Optional, Union, List, Dict, Any, Iterable, cast
 from django.db.models import QuerySet
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -21,11 +20,10 @@ from rest_framework.utils.serializer_helpers import ReturnDict, ReturnList
 from rest_framework.serializers import ModelSerializer
 from rest_framework import status
 
-from backend.chronicle.models import Member
+from chronicle.models import Member
 
 from .models import Character
 from chronicle.models import Chronicle
-from discordauth.models import User as UserModel
 from discordauth.supporter import Supporter
 from .types import (
     Splats,
@@ -44,7 +42,10 @@ from .errors import (
 from .serializers.serializer_registry import SerializerRegistry
 from .image_manager import ImageManager
 
-User = cast(UserModel, get_user_model())
+if TYPE_CHECKING:
+    from discordauth.models import User as UserModel
+
+User = cast("UserModel", get_user_model())
 logger = logging.getLogger(__name__)
 
 
@@ -116,7 +117,7 @@ class CharacterManager:
         character_id: Union[str, List[str]],
         requester_id: str,
         splat_filter: Optional[List[Splats]] = None,
-        is_sheet: Optional[bool] = None,
+        sheet_only: Optional[bool] = None,
         chronicle_id: Optional[str] = None,
         serializer_type: SerializerType = "sheet",
     ) -> List[Dict[str, Any]]:
@@ -127,7 +128,7 @@ class CharacterManager:
             character_id: Single character ID or list of IDs
             requester_id: ID of the user making the request
             splat_filter: Optional list of splats to filter by
-            is_sheet: Optional filter for sheet status
+            sheet_only: Optional filter for sheet status
             chronicle_id: Optional chronicle ID filter
             serializer_type: Type of serializer to use ('tracker', 'sheet', 'deserializer')
 
@@ -151,8 +152,8 @@ class CharacterManager:
             splat_values = [splat.value for splat in splat_filter]
             queryset = queryset.filter(splat__in=splat_values)
 
-        if is_sheet is not None:
-            queryset = queryset.filter(is_sheet=is_sheet)
+        if sheet_only is not None:
+            queryset = queryset.filter(is_sheet=sheet_only)
 
         if chronicle_id:
             queryset = queryset.filter(chronicle_id=chronicle_id)
@@ -177,7 +178,7 @@ class CharacterManager:
         user_id: str,
         requester_id: str,
         splat_filter: Optional[List[Splats]] = None,
-        is_sheet: Optional[bool] = None,
+        sheet_only: Optional[bool] = None,
         chronicle_id: Optional[str] = None,
         serializer_type: SerializerType = "sheet",
     ) -> Optional[Dict[str, Any]]:
@@ -189,7 +190,7 @@ class CharacterManager:
             user_id: User ID
             requester_id: ID of the user making the request
             splat_filter: Optional list of splats to filter by
-            is_sheet: Optional filter for sheet status
+            sheet_only: Optional filter for sheet status
             chronicle_id: Optional chronicle ID filter
             serializer_type: Type of serializer to use
 
@@ -204,8 +205,8 @@ class CharacterManager:
             splat_values = [splat.value for splat in splat_filter]
             queryset = queryset.filter(splat__in=splat_values)
 
-        if is_sheet is not None:
-            queryset = queryset.filter(is_sheet=is_sheet)
+        if sheet_only is not None:
+            queryset = queryset.filter(is_sheet=sheet_only)
 
         if chronicle_id:
             queryset = queryset.filter(chronicle_id=chronicle_id)
@@ -230,7 +231,7 @@ class CharacterManager:
         user_id: str,
         requester_id: str,
         splat_filter: Optional[List[Splats]] = None,
-        is_sheet: Optional[bool] = None,
+        sheet_only: Optional[bool] = None,
         chronicle_id: Optional[str] = None,
         serializer_type: SerializerType = "sheet",
     ) -> List[Dict[str, Any]]:
@@ -241,7 +242,7 @@ class CharacterManager:
             user_id: User ID
             requester_id: ID of the user making the request
             splat_filter: Optional list of splats to filter by
-            is_sheet: Optional filter for sheet status
+            sheet_only: Optional filter for sheet status
             chronicle_id: Optional chronicle ID filter
             serializer_type: Type of serializer to use
 
@@ -256,8 +257,8 @@ class CharacterManager:
             splat_values = [splat.value for splat in splat_filter]
             queryset = queryset.filter(splat__in=splat_values)
 
-        if is_sheet is not None:
-            queryset = queryset.filter(is_sheet=is_sheet)
+        if sheet_only is not None:
+            queryset = queryset.filter(is_sheet=sheet_only)
 
         if chronicle_id:
             queryset = queryset.filter(chronicle_id=chronicle_id)
@@ -275,7 +276,7 @@ class CharacterManager:
         chronicle_id: str,
         requester_id: str,
         splat_filter: Optional[List[Splats]] = None,
-        is_sheet: Optional[bool] = None,
+        sheet_only: Optional[bool] = None,
         serializer_type: SerializerType = "sheet",
     ) -> List[Dict[str, Any]]:
         """
@@ -286,7 +287,7 @@ class CharacterManager:
             chronicle_id: Chronicle ID
             requester_id: ID of the user making the request
             splat_filter: Optional list of splats to filter by
-            is_sheet: Optional filter for sheet status
+            sheet_only: Optional filter for sheet status
             serializer_type: Type of serializer to use
 
         Returns:
@@ -300,8 +301,8 @@ class CharacterManager:
             splat_values = [splat.value for splat in splat_filter]
             queryset = queryset.filter(splat__in=splat_values)
 
-        if is_sheet is not None:
-            queryset = queryset.filter(is_sheet=is_sheet)
+        if sheet_only is not None:
+            queryset = queryset.filter(is_sheet=sheet_only)
 
         # Check if any characters were found
         if not queryset.exists():
@@ -313,7 +314,7 @@ class CharacterManager:
     @transaction.atomic
     def create_character(
         cls,
-        requester: UserModel,
+        requester: "UserModel",
         character_data: Dict[str, Any],
     ) -> Dict[str, Any]:
         """
@@ -440,7 +441,7 @@ class CharacterManager:
         cls,
         character_id: str,
         update_data: Dict[str, Any],
-        requester: UserModel,
+        requester: "UserModel",
     ) -> Dict[str, Any]:
         """
         Update an existing character by ID with new data.
@@ -472,7 +473,7 @@ class CharacterManager:
             raise CharacterNotFoundError(character_id)
 
         # Permission Checks
-        user = cast(UserModel, character.user)
+        user = cast("UserModel", character.user)
         is_owner = user == requester
         current_chronicle = cast(Chronicle | None, character.chronicle)
         current_member = cast(Member | None, character.member)
@@ -708,10 +709,10 @@ class CharacterManager:
         user_id: Optional[str] = None,
         chronicle_id: Optional[str] = None,
         splat_filter: Optional[List[Splats]] = None,
-        is_sheet: Optional[bool] = None,
+        sheet_only: Optional[bool] = None,
     ) -> List[Dict[str, Any]]:
         """
-        List characters filtered by user, chronicle, splat, and is_sheet.
+        List characters filtered by user, chronicle, splat, and sheet_only.
 
         Returns a list of dicts with:
             name: str
@@ -722,6 +723,16 @@ class CharacterManager:
         """
         queryset = Character.objects.all()
 
+        # Validate and apply filters
+        if user_id is not None and not isinstance(user_id, str):
+            raise ValidationError("user_id must be a string")
+        if chronicle_id is not None and not isinstance(chronicle_id, str):
+            raise ValidationError("chronicle_id must be a string")
+        if splat_filter is not None:
+            # Ensure all are Splats
+            if not all(isinstance(s, Splats) for s in splat_filter):
+                raise ValidationError("splat_filter must be a list of Splats values")
+
         if user_id:
             queryset = queryset.filter(user_id=user_id)
 
@@ -729,13 +740,12 @@ class CharacterManager:
             queryset = queryset.filter(chronicle_id=chronicle_id)
 
         if splat_filter:
-            splat_values = [splat.value for splat in splat_filter]
-            queryset = queryset.filter(splat__in=splat_values)
+            queryset = queryset.filter(splat__in=[s.value for s in splat_filter])
 
-        if is_sheet is not None:
-            queryset = queryset.filter(is_sheet=is_sheet)
+        if sheet_only is not None:
+            queryset = queryset.filter(is_sheet=sheet_only)
 
-        characters = queryset.select_related("user", "chronicle", "member")
+        characters = queryset.select_related("user", "chronicle", "member").all()
         result: List[Dict[str, Any]] = []
 
         for character in characters:
@@ -770,17 +780,23 @@ class CharacterManager:
         # Import here to avoid circular imports
         from .models import Vampire5th
 
-        filter_args: Dict[str, Any] = {"user_id": user_id}
+        if not user_id:
+            raise ValidationError("user_id is required for getting disciplines")
+        if chronicle_id is not None and not isinstance(chronicle_id, str):
+            raise ValidationError("chronicle_id must be a string")
+
+        filter_args: Dict[str, Any] = {"user_id": user_id, "is_sheet": True}
         if chronicle_id:
             filter_args["chronicle_id"] = chronicle_id
 
         disciplines_sets = Vampire5th.objects.filter(**filter_args).values(
             "disciplines"
         )
-        names = set()
+        names: set[str] = set()
         for discipline_set in disciplines_sets:
-            for discipline in discipline_set:
-                names.add(discipline)
+            data = discipline_set.get("disciplines")
+            if isinstance(data, dict):
+                names.update([str(k) for k in data.keys()])
 
         return sorted(list(names))
 
@@ -800,6 +816,11 @@ class CharacterManager:
         """
         from django.db import models
 
+        if not user_id:
+            raise ValidationError("user_id is required for character counts")
+        if chronicle_id is not None and not isinstance(chronicle_id, str):
+            raise ValidationError("chronicle_id must be a string")
+
         # Get global character counts
         global_counts = Character.objects.filter(user_id=user_id)
         global_grouped = global_counts.values("is_sheet").annotate(
@@ -807,10 +828,10 @@ class CharacterManager:
         )
 
         global_map = {g["is_sheet"]: g["count"] for g in global_grouped}
-        global_sheets = global_map.get(True, 0)
-        global_trackers = global_map.get(False, 0)
+        global_sheets = int(global_map.get(True, 0))
+        global_trackers = int(global_map.get(False, 0))
 
-        result = {
+        result: Dict[str, Dict[str, int]] = {
             "global": {
                 "sheets": global_sheets,
                 "trackers": global_trackers,
@@ -838,6 +859,103 @@ class CharacterManager:
             }
 
         return result
+
+    @classmethod
+    @transaction.atomic
+    def disconnect_member_characters(cls, user_id: str, chronicle_id: str) -> int:
+        """Disconnect all characters for a user within a specific chronicle.
+
+        Clears member defaults pointing at affected characters, unsets character
+        chronicle and member references, unlocks sheets (st_lock=False), and
+        dispatches character updated events for each.
+
+        Args:
+            user_id: The user whose characters to disconnect.
+            chronicle_id: The chronicle from which to disconnect characters.
+
+        Returns:
+            The number of characters processed.
+        """
+        processed = 0
+        characters = (
+            Character.objects.select_related("member", "user", "chronicle")
+            .filter(user_id=user_id, chronicle_id=chronicle_id)
+            .all()
+        )
+        for character in characters:
+            # Clear default_character references for this character
+            if character.chronicle:
+                Member.objects.filter(
+                    chronicle=character.chronicle, default_character=character
+                ).update(default_character=None)
+
+            # Disconnect from chronicle and member, unlock sheet
+            character.chronicle = None
+            character.member = None
+            if hasattr(character, "st_lock"):
+                character.st_lock = False
+            character.save()
+
+            # Dispatch updated event with current sheet/tracker data
+            try:
+                splat = Splats(character.splat)
+                tracker_class = SerializerRegistry.get_serializer(splat, "tracker")
+                sheet_class = SerializerRegistry.get_serializer(splat, "sheet")
+                tracker_data = tracker_class(character).data
+                sheet_data = sheet_class(character).data
+                CharacterEventDispatcher.dispatch_character_updated(
+                    str(character.pk), tracker_data, sheet_data
+                )
+            except Exception as e:  # pragma: no cover - defensive
+                logger.error(
+                    "disconnect_member_characters event dispatch error: %s",
+                    e,
+                    exc_info=True,
+                )
+            processed += 1
+
+        return processed
+
+    @classmethod
+    def set_member_defaults(
+        cls, user_id: str, chronicle_id: str, character_id: Optional[str]
+    ) -> None:
+        """Set or clear a member's default character and auto-hunger flag.
+
+        Args:
+            user_id: Discord user ID for the member
+            chronicle_id: Chronicle (guild) ID
+            character_id: Character ID to set as default, or None to clear
+            auto_hunger: Whether to enable auto hunger tracking on default
+
+        Raises:
+            ValidationError: If parameters are invalid or member not found
+            CharacterNotFoundError: If a provided character_id is invalid or doesn't belong to member/chronicle
+        """
+        if not user_id or not chronicle_id:
+            raise ValidationError("user_id and chronicle_id are required")
+
+        try:
+            member = Member.objects.select_related("chronicle", "user").get(
+                user_id=user_id, chronicle_id=chronicle_id
+            )
+        except Member.DoesNotExist:
+            raise ValidationError("Member not found for given user and chronicle")
+
+        if character_id is None:
+            member.default_character = None
+            member.save(update_fields=["default_character"])
+            return
+
+        # Validate character ownership and chronicle
+        try:
+            character = Character.objects.get(id=character_id)
+        except Character.DoesNotExist:
+            raise CharacterNotFoundError(character_id, log=True)
+
+        member.default_character = character
+        member.save(update_fields=["default_character"])
+        return
 
     @classmethod
     def _serialize_characters(
@@ -962,7 +1080,7 @@ class CharacterManager:
 
     @classmethod
     def _is_at_character_limit(
-        cls, user: UserModel | str, is_sheet: bool = False
+        cls, user: "UserModel | str", is_sheet: bool = False
     ) -> bool:
         """
         Check if a user has reached their character creation limit.

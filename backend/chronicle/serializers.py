@@ -2,7 +2,8 @@
 Serializers for the chronicle app.
 """
 
-from typing import cast
+from os import read
+from typing import Any, Dict, cast
 from django.contrib.auth import get_user_model
 from requests import get
 from rest_framework import serializers
@@ -50,11 +51,29 @@ class ChronicleSerializer(serializers.ModelSerializer):
             "created_at",
             "last_updated",
         )
-        read_only_fields = ("id", "created_at", "last_updated")
+        read_only_fields = ("created_at", "last_updated")
 
-    def update(self, instance, validated_data):
-        validated_data.pop("id", None)  # Ensure ID is not updated
-        return instance
+    def create(self, validated_data: Dict[str, Any]) -> Chronicle:
+        """Create a Chronicle ensuring the primary key is set from input."""
+        # Coerce types appropriately
+        validated_data["id"] = int(validated_data["id"])
+        if "owner_id" in validated_data:
+            try:
+                validated_data["owner_id"] = int(validated_data["owner_id"])
+            except (TypeError, ValueError):
+                validated_data["owner_id"] = 0
+        return super().create(validated_data)
+
+    def update(self, instance: Chronicle, validated_data: Dict[str, Any]) -> Chronicle:
+        """Update mutable Chronicle fields; prevent changing the primary key."""
+        validated_data.pop("id", None)
+        # Coerce owner_id to int if present
+        if "owner_id" in validated_data:
+            try:
+                validated_data["owner_id"] = int(validated_data["owner_id"])
+            except (TypeError, ValueError):
+                validated_data.pop("owner_id", None)
+        return super().update(instance, validated_data)
 
 
 class MemberSerializer(serializers.ModelSerializer):
@@ -102,9 +121,6 @@ class MemberSerializer(serializers.ModelSerializer):
         allow_null=True,
         help_text="Member's default character.",
     )
-    default_auto_hunger = serializers.BooleanField(
-        default=False, help_text="Default setting for auto-hunger."
-    )
 
     class Meta:
         model = Member
@@ -119,7 +135,6 @@ class MemberSerializer(serializers.ModelSerializer):
             "created_at",
             "last_updated",
             "default_character",
-            "default_auto_hunger",
         )
         read_only_fields = ("id", "created_at", "last_updated")
 
@@ -147,7 +162,7 @@ class MemberSerializer(serializers.ModelSerializer):
         # Remove fields that should not be updated
         validated_data.pop("chronicle", None)
         validated_data.pop("user", None)
-        return instance
+        return super().update(instance, validated_data)
 
 
 class StorytellerRoleSerializer(serializers.ModelSerializer):
@@ -158,11 +173,17 @@ class StorytellerRoleSerializer(serializers.ModelSerializer):
     """
 
     id = serializers.CharField(help_text="The ID of the storyteller role.")
-    guild = serializers.PrimaryKeyRelatedField(
-        queryset=Chronicle.objects.all(),
-        help_text="The guild associated with this role.",
-    )
 
     class Meta:
         model = StorytellerRole
-        fields = ("id", "guild")
+        fields = ("id", "guild_id")
+
+    def create(self, validated_data: Dict[str, Any]) -> StorytellerRole:
+        validated_data["id"] = int(validated_data["id"])
+        return super().create(validated_data)
+
+    def to_representation(self, instance: StorytellerRole) -> Dict[str, Any]:
+        data = super().to_representation(instance)
+        data["id"] = str(instance.id)
+        data["guild_id"] = str(getattr(instance, "guild_id", ""))
+        return data

@@ -128,8 +128,8 @@ class DiscordOAuthClient:
                 raise ValueError("Invalid token response: missing access_token")
 
             return token_data
-        except requests.RequestException as e:
-            logger.error(f"Failed to get access token: {e}")
+        except requests.RequestException:
+            logger.exception(f"[Auth get_access_token] Failed to get access token")
             raise
 
     def get_user(self, access_token: str) -> DiscordUser:
@@ -161,8 +161,8 @@ class DiscordOAuthClient:
                     raise ValueError(f"Invalid user response: missing {field}")
 
             return user_data
-        except requests.RequestException as e:
-            logger.error(f"Failed to get user data: {e}")
+        except requests.RequestException:
+            logger.exception(f"[Auth get_user] Failed to get user data")
             raise
 
     def get_guilds(self, access_token: str) -> List[DiscordGuild]:
@@ -190,8 +190,8 @@ class DiscordOAuthClient:
                 raise ValueError("Invalid guilds response: expected list")
 
             return guilds_data
-        except requests.RequestException as e:
-            logger.error(f"Failed to get guilds data: {e}")
+        except requests.RequestException:
+            logger.exception(f"[Auth get_guilds] Failed to get guilds data")
             raise
 
 
@@ -276,7 +276,6 @@ def _update_user_guilds(user: User, guilds: List[DiscordGuild]) -> None:
             try:
                 chronicle = Chronicle.objects.get(id=guild_id)
             except Chronicle.DoesNotExist:
-                logger.debug(f"Guild {guild_id} is not a registered Chronicle")
                 continue
 
             # Check if user has admin permissions (MANAGE_GUILD permission)
@@ -293,20 +292,15 @@ def _update_user_guilds(user: User, guilds: List[DiscordGuild]) -> None:
                 member.admin = is_admin
                 member.save()
 
-        except (ValueError, TypeError) as e:
-            logger.warning(f"Invalid guild data: {e}")
+        except (ValueError, TypeError):
+            logger.exception("[Auth _update_user_guilds] Invalid guild data")
             continue
 
     # Remove stale member relations
     existing_members = Member.objects.filter(user=user)
-    stale_count = 0
     for member in existing_members:
         if member.chronicle.id not in current_guild_ids:
             member.delete()
-            stale_count += 1
-
-    if stale_count > 0:
-        logger.info(f"Removed {stale_count} stale guild memberships for user {user.id}")
 
 
 def login(request: HttpRequest) -> HttpResponse:
@@ -324,8 +318,8 @@ def login(request: HttpRequest) -> HttpResponse:
         oauth_url = f"{LOGIN_URL}&state={client_state}"
 
         return redirect(oauth_url)
-    except Exception as e:
-        logger.error(f"Error initiating OAuth login: {e}")
+    except Exception:
+        logger.exception("[Auth login] Error initiating OAuth login")
         return HttpResponseBadRequest("Failed to initiate OAuth login")
 
 
@@ -342,8 +336,8 @@ def logout(request: HttpRequest) -> HttpResponse:
     try:
         if request.user.is_authenticated:
             auth_logout(request)
-    except Exception as e:
-        logger.error(f"Error during logout: {e}")
+    except Exception:
+        logger.exception("[Auth logout] Error during logout")
 
     return redirect(FINAL_REDIRECT)
 
@@ -369,7 +363,7 @@ def login_success(request: HttpRequest) -> HttpResponse:
 
         if not client_state or client_state != server_state:
             logger.warning(
-                f"Invalid OAuth state detected from IP {request.META.get('REMOTE_ADDR', 'unknown')}"
+                f"[Auth login_success] Invalid OAuth state detected from IP {request.META.get('REMOTE_ADDR', 'unknown')}"
             )
             return HttpResponseForbidden(
                 "Invalid authentication state. Please try logging in again."
@@ -378,7 +372,9 @@ def login_success(request: HttpRequest) -> HttpResponse:
         # Get authorization code
         code = request.GET.get("code")
         if not code:
-            logger.warning("OAuth callback received without authorization code")
+            logger.warning(
+                "[Auth login_success] OAuth callback received without authorization code"
+            )
             return HttpResponseBadRequest("No authorization code received")
 
         # Initialize OAuth client and fetch data
@@ -417,7 +413,6 @@ def login_success(request: HttpRequest) -> HttpResponse:
 
             if serializer.is_valid():
                 user = cast(User, serializer.save())
-                logger.info(f"New user registered: {user.id}")
             else:
                 logger.error(
                     f"Failed to create user {discord_user['id']}: {serializer.errors}"
@@ -432,12 +427,12 @@ def login_success(request: HttpRequest) -> HttpResponse:
 
         return redirect(FINAL_REDIRECT)
 
-    except requests.RequestException as e:
-        logger.error(f"Discord API error during authentication: {e}")
+    except requests.RequestException:
+        logger.exception("[Auth login_success] Discord API error during authentication")
         return HttpResponseBadRequest("Discord service unavailable")
-    except serializers.ValidationError as e:
-        logger.error(f"User data validation error: {e}")
+    except serializers.ValidationError:
+        logger.error("[Auth login_success] User data validation error")
         return HttpResponseBadRequest("Invalid user data")
-    except Exception as e:
-        logger.error(f"Unexpected error during authentication: {e}")
+    except Exception:
+        logger.exception("[Auth login_success] Unexpected error during authentication")
         return HttpResponseBadRequest("Authentication failed")
