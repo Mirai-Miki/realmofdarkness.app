@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "module": "nodenext",
+    "allowJs": true,
+    "checkJs": false,
+    "experimentalDecorators": true,
+    "typeRoots": ["node_modules/@types", "./src/types"],
+    "paths": {
+      "@commands*": ["./src/commands/*"],
+      "@components*": ["./src/components/*"],
+      "@structures*": ["./src/structures/*"],
+      "@events*": ["./src/events/*"],
+      "@modules*": ["./src/modules/*"],
+      "@errors*": ["./src/errors/*", "./src/errors/index.js"],
+      "@api*": ["./src/realm_api/*", "./src/realm_api/index.js"],
+      "@constants*": ["./src/constants/*", "./src/constants/index.js"],
+      "@utils*": ["./src/utils/*"],
+      "@types*": ["./src/types/*", "./src/types/index.js"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "scripts"],
+  "references": [
+    { "path": "../../packages/types" },
+    { "path": "../../packages/domain" },
+    { "path": "../../packages/events" }
+  ]
+}

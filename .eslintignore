@@ -1,0 +1,15 @@
+node_modules
+dist
+build
+coverage
+.turbo
+.idea
+.vscode
+**/*.d.ts
+**/generated/**
+.venv
+*.log
+**/*.lock
+**/migrations/**
+**/schema.sql
+.env

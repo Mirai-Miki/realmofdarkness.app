@@ -1,9 +1,18 @@
-# Ignore package.json to preserve custom formatting
-package.json
-
-# Common files to ignore
 node_modules
-.env
 dist
 build
 coverage
+.turbo
+.idea
+.vscode
+*.log
+**/*.lock
+**/generated/**
+**/migrations/**
+**/*.d.ts
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+schema.sql# Ignore package.json to preserve custom formatting
+package.json
+.env

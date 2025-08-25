@@ -1,0 +1,49 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["ESNext", "DOM"],
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "useUnknownInCatchVariables": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "composite": true,
+    "incremental": true,
+    "removeComments": true,
+    "baseUrl": ".",
+    "paths": {
+      "@realm/domain": ["packages/domain/src/index.ts"],
+      "@realm/db": ["packages/db/src/index.ts"],
+      "@realm/events": ["packages/events/src/index.ts"],
+      "@realm/gateway": ["packages/gateway/src/index.ts"],
+      "@realm/auth": ["packages/auth/src/index.ts"],
+      "@realm/types": ["packages/types/src/index.ts"]
+    }
+  },
+  "files": [],
+  "references": [
+    { "path": "packages/types" },
+    { "path": "packages/domain" },
+    { "path": "packages/db" },
+    { "path": "packages/events" },
+    { "path": "packages/gateway" },
+    { "path": "packages/auth" },
+    { "path": "apps/api" },
+    { "path": "apps/bot" },
+    { "path": "apps/frontend" },
+    { "path": "apps/web" }
+  ]
+}
