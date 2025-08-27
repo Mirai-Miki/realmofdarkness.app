@@ -1,20 +1,20 @@
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import importPlugin from 'eslint-plugin-import';
-import unusedImports from 'eslint-plugin-unused-imports';
-import globals from 'globals';
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+import importPlugin from "eslint-plugin-import";
+import unusedImports from "eslint-plugin-unused-imports";
+import globals from "globals";
 
 export default tseslint.config(
   {
     ignores: [
-      'node_modules/**',
-      'dist/**',
-      'build/**',
-      'coverage/**',
-      'eslint.config.mjs',
-      'frontend/**',          // legacy CRA app (ignored)
-      'backend-legacy/**',    // legacy Django backend
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      "eslint.config.mjs",
+      "frontend/**", // legacy CRA app (ignored)
+      "backend-legacy/**", // legacy Django backend
     ],
   },
   eslint.configs.recommended,
@@ -26,9 +26,9 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: import.meta.dirname
+        tsconfigRootDir: import.meta.dirname,
       },
-      sourceType: 'module',
+      sourceType: "module",
       globals: {
         ...globals.node,
         ...globals.jest,
@@ -36,16 +36,16 @@ export default tseslint.config(
     },
     plugins: {
       import: importPlugin,
-      'unused-imports': unusedImports,
+      "unused-imports": unusedImports,
     },
     rules: {
-      'no-console': 'warn',
+      "no-console": "warn",
       // TS specific adjustments
-      '@typescript-eslint/no-unused-vars': 'warn',
-      '@typescript-eslint/consistent-type-imports': 'error',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/consistent-type-imports": "error",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-floating-promises": "warn",
+      "@typescript-eslint/no-unsafe-argument": "warn",
     },
-  },
+  }
 );

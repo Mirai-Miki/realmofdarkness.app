@@ -9,7 +9,7 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "clean": "git clean -fdX .",
-    "migrate": "pnpm --filter @realm/db exec drizzle-kit migrate",
+    "migrate": "pnpm --filter database exec drizzle-kit migrate",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\""
   },

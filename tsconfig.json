@@ -25,25 +25,18 @@
     "removeComments": true,
     "baseUrl": ".",
     "paths": {
-      "@realm/domain": ["packages/domain/src/index.ts"],
-      "@realm/db": ["packages/db/src/index.ts"],
-      "@realm/events": ["packages/events/src/index.ts"],
-      "@realm/gateway": ["packages/gateway/src/index.ts"],
-      "@realm/auth": ["packages/auth/src/index.ts"],
-      "@realm/types": ["packages/types/src/index.ts"]
+      "shared": ["shared/src/index.ts"],
+      "shared/*": ["shared/src/*"],
+      "database": ["database/src/index.ts"],
+      "database/*": ["database/src/*"]
     }
   },
   "files": [],
   "references": [
-    { "path": "packages/types" },
-    { "path": "packages/domain" },
-    { "path": "packages/db" },
-    { "path": "packages/events" },
-    { "path": "packages/gateway" },
-    { "path": "packages/auth" },
-    { "path": "apps/api" },
-    { "path": "apps/bot" },
-    { "path": "apps/frontend" },
-    { "path": "apps/web" }
+    { "path": "shared" },
+    { "path": "database" },
+    { "path": "api" },
+    { "path": "bot" },
+    { "path": "web" }
   ]
 }

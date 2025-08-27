@@ -1,5 +1,7 @@
 packages:
-  - "apps/*"
-  - "packages/*"
-  - "infra"
+  - "web"
+  - "bot"
+  - "api"
+  - "shared"
+  - "database"
   - "scripts"
