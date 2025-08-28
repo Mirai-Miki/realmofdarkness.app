@@ -1,3 +1,4 @@
+import type { CharacterJsonbData } from "../types/index.js";
 import type { InferSelectModel } from "drizzle-orm";
 
 import {
@@ -14,19 +15,9 @@ import {
 import { relations } from "drizzle-orm";
 import { users } from "./users.js";
 import { guilds } from "./guilds.js";
+import { members } from "./members.js";
 import { snowflake } from "../schema_types.js";
-import { SheetStatus, Splats } from "@realm/types";
-
-/**
- * Character sheet status enumeration
- */
-export const sheetStatus = pgEnum("sheet_status", [
-  SheetStatus.Draft,
-  SheetStatus.Review,
-  SheetStatus.Active,
-  SheetStatus.Dead,
-  SheetStatus.Archive,
-]);
+import { Splats } from "shared/types/index.js";
 
 /**
  * Character Splat types Enum
@@ -57,7 +48,7 @@ export const characters = pgTable(
   "characters",
   {
     id: serial().primaryKey(),
-    name: varchar({ length: 50 }).notNull().unique(),
+    name: varchar({ length: 50 }).notNull(),
 
     userId: snowflake()
       .notNull()
@@ -69,8 +60,7 @@ export const characters = pgTable(
 
     splat: characterSplats().notNull().default(Splats.Vampire5th),
     isSheet: boolean().notNull().default(false),
-    status: sheetStatus().notNull().default(SheetStatus.Draft),
-    data: jsonb().notNull().default("{}"),
+    data: jsonb().$type<CharacterJsonbData>().notNull(),
 
     createdAt: timestamp().defaultNow().notNull(),
     lastUpdated: timestamp().defaultNow().notNull(),
@@ -79,6 +69,7 @@ export const characters = pgTable(
     unique().on(table.name, table.userId),
     uniqueIndex("characters_name_user_idx").on(table.name, table.userId),
     uniqueIndex("characters_guild_idx").on(table.guildId),
+    uniqueIndex("characters_user_guild_idx").on(table.userId, table.guildId),
   ]
 );
 
@@ -93,7 +84,12 @@ export const charactersRelations = relations(characters, ({ one }) => ({
     fields: [characters.guildId],
     references: [guilds.id],
   }),
+  // Inferred relation: member is the user-guild relationship
+  // Only exists when character has a guild
+  member: one(members, {
+    fields: [characters.userId, characters.guildId],
+    references: [members.userId, members.guildId],
+  }),
 }));
 
-// Type exports
 export type CharacterDb = InferSelectModel<typeof characters>;

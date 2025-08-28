@@ -18,12 +18,11 @@ async function bootstrap(): Promise<void> {
     bufferLogs: true,
   });
   const port = Number(process.env.PORT || 3000);
-  await app.listen({ port, host: "0.0.0.0" });
+  await app.listen(port, "0.0.0.0");
   // eslint-disable-next-line no-console
   console.log(`[api] listening on :${port}`);
 }
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
 bootstrap().catch((err: unknown) => {
   // eslint-disable-next-line no-console
   console.error("Bootstrap failed", err);

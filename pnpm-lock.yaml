@@ -170,9 +170,22 @@ importers:
 
   shared:
     dependencies:
+      '@discordjs/builders':
+        specifier: ^1.11.3
+        version: 1.11.3
+      '@discordjs/rest':
+        specifier: ^2.6.0
+        version: 2.6.0
+      dotenv:
+        specifier: ^17.2.1
+        version: 17.2.1
       zod:
-        specifier: ^4.1.3
-        version: 4.1.3
+        specifier: ^4.1.4
+        version: 4.1.4
+    devDependencies:
+      discord-api-types:
+        specifier: ^0.38.21
+        version: 0.38.21
 
   web: {}
 
@@ -4355,8 +4368,8 @@ packages:
     resolution: {integrity: sha512-U/PBtDf35ff0D8X8D0jfdzHYEPFxAI7jJlxZXwCSez5M3190m+QobIfh+sWDWSHMCWWJN2AWamkegn6vr6YBTw==}
     engines: {node: '>=18'}
 
-  zod@4.1.3:
-    resolution: {integrity: sha512-1neef4bMce1hNTrxvHVKxWjKfGDn0oAli3Wy1Uwb7TRO1+wEwoZUZNP1NXIEESybOBiFnBOhI6a4m6tCLE8dog==}
+  zod@4.1.4:
+    resolution: {integrity: sha512-2YqJuWkU6IIK9qcE4k1lLLhyZ6zFw7XVRdQGpV97jEIZwTrscUw+DY31Xczd8nwaoksyJUIxCojZXwckJovWxA==}
 
 snapshots:
 
@@ -9028,4 +9041,4 @@ snapshots:
 
   yoctocolors-cjs@2.1.3: {}
 
-  zod@4.1.3: {}
+  zod@4.1.4: {}

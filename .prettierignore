@@ -9,10 +9,9 @@ coverage
 **/*.lock
 **/generated/**
 **/migrations/**
-**/*.d.ts
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
-schema.sql# Ignore package.json to preserve custom formatting
+schema.sql
 package.json
 .env

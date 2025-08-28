@@ -39,7 +39,7 @@ export default tseslint.config(
       "unused-imports": unusedImports,
     },
     rules: {
-      "no-console": "warn",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
       // TS specific adjustments
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/consistent-type-imports": "error",

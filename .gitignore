@@ -49,62 +49,12 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
- 
+
 # Translations
 *.mo
 *.pot
 
-# Django backend
-backend/db.sqlite3
-backend/db.sqlite3-journal
-backend/*.sqlite3
-backend/.env
-backend/config.py
-backend/dump.rdb
-backend/local_settings.py
-backend/*.log
-backend/venv/
-backend/.venv/
-backend/env/
-backend/env.bak/
-backend/venv.bak/
-backend/__pycache__/
-backend/*/migrations copy/*
-backend/patreon_test.txt
-backend/media/
-backend/rod/management/
-backend/haven/management/
-
-# Backend-specific logs and runtime files
-backend/gunicorn-error.out
-backend/gunicorn.pid
-backend/supervisor*.log
-backend/.restart_needed
-
-# Discord bots (Node.js & Python)
-discord_bots/node_modules/
-discord_bots/.env
-discord_bots/.env.*.local
-discord_bots/dist/
-discord_bots/build/
-discord_bots/coverage/
-discord_bots/npm-debug.log*
-discord_bots/yarn-debug.log*
-discord_bots/yarn-error.log*
-discord_bots/venv/
-discord_bots/.venv/
-discord_bots/__pycache__/
-discord_bots/database/
-discord_bots/src/types/emojiTypes.d.ts
-
-# React frontend
-frontend/node_modules/
-frontend/build/
-frontend/coverage/
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
+db.sqlite3
 
 # General environments and node
 .env
@@ -118,6 +68,9 @@ build/
 dist/
 coverage/
 *dump.rdb
+logs/
+.turbo/
+*tsbuildinfo
 
 # Miscellaneous
 .preproduction
@@ -125,7 +78,7 @@ coverage/
 *.out
 .VSCodeCounter
 
-.vscode
+.vscode/
 
 # Temporary and backup files
 *.save

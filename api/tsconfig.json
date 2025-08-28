@@ -15,5 +15,7 @@
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true
   },
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "dist"],
   "references": [{ "path": "../shared" }, { "path": "../database" }]
 }

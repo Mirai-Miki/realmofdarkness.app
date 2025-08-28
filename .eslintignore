@@ -5,7 +5,6 @@ coverage
 .turbo
 .idea
 .vscode
-**/*.d.ts
 **/generated/**
 .venv
 *.log
