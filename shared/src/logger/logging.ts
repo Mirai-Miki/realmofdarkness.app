@@ -201,7 +201,7 @@ export class Logging {
    * @param message - The warning message
    * @param options - Additional logging options
    */
-  public warning(message: string, options: LogOptions = {}): void {
+  public warn(message: string, options: LogOptions = {}): void {
     this.log(LogLevel.Warning, message, options);
   }
 

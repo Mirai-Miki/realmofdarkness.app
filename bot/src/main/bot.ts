@@ -6,17 +6,117 @@
  * - World of Darkness 5th Edition (V5)
  * - World of Darkness 20th Anniversary Edition (V20)
  */
+import type { BotType, BotCommand, BotComponent, BotEvent } from "types";
+
 import "shared/utils/source-maps";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
-import { RealmError } from "shared/errors";
+import { Logging } from "shared/logger";
 import { Client, GatewayIntentBits, Collection, Partials } from "discord.js";
-
-import type { BotType, BotCommand, BotComponent, BotEvent } from "@types";
+import {
+  BotCommandSchema,
+  BotComponentSchema,
+  BotEventSchema,
+} from "validations";
 
 // Load environment variables
 dotenv.config();
+
+const logger = Logging.getLogger();
+const location = {
+  location: "main/bot.ts",
+};
+
+/**
+ * Type-safe dynamic import helper for bot commands using Zod validation
+ */
+async function loadCommand(filePath: string): Promise<BotCommand | null> {
+  try {
+    const module = (await import(filePath)) as { default?: unknown } & Record<
+      string,
+      unknown
+    >;
+    const command = module.default ?? module;
+
+    const result = BotCommandSchema.safeParse(command);
+    if (result.success) {
+      return result.data as BotCommand;
+    } else {
+      logger.warn(
+        `Invalid command structure in ${filePath}: ${result.error.message}`,
+        location
+      );
+      return null;
+    }
+  } catch (error) {
+    logger.error(`Failed to load command from ${filePath}`, {
+      error: error instanceof Error ? error : new Error(String(error)),
+      ...location,
+    });
+    return null;
+  }
+}
+
+/**
+ * Type-safe dynamic import helper for bot components using Zod validation
+ */
+async function loadComponent(filePath: string): Promise<BotComponent | null> {
+  try {
+    const module = (await import(filePath)) as { default?: unknown } & Record<
+      string,
+      unknown
+    >;
+    const component = module.default ?? module;
+
+    const result = BotComponentSchema.safeParse(component);
+    if (result.success) {
+      return result.data as BotComponent;
+    } else {
+      logger.warn(
+        `Invalid component structure in ${filePath}: ${result.error.message}`,
+        location
+      );
+      return null;
+    }
+  } catch (error) {
+    logger.error(`Failed to load component from ${filePath}`, {
+      error: error instanceof Error ? error : new Error(String(error)),
+      ...location,
+    });
+    return null;
+  }
+}
+
+/**
+ * Type-safe dynamic import helper for bot events using Zod validation
+ */
+async function loadEvent(filePath: string): Promise<BotEvent | null> {
+  try {
+    const module = (await import(filePath)) as { default?: unknown } & Record<
+      string,
+      unknown
+    >;
+    const event = module.default ?? module;
+
+    const result = BotEventSchema.safeParse(event);
+    if (result.success) {
+      return result.data as BotEvent;
+    } else {
+      logger.warn(
+        `Invalid event structure in ${filePath}: ${result.error.message}`,
+        location
+      );
+      return null;
+    }
+  } catch (error) {
+    logger.error(`Failed to load event from ${filePath}`, {
+      error: error instanceof Error ? error : new Error(String(error)),
+      ...location,
+    });
+    return null;
+  }
+}
 
 // Determine bot type from environment variable or command line argument
 const getBotType = (): BotType => {
@@ -40,7 +140,7 @@ const getBotType = (): BotType => {
 const BOT_CONFIG = {
   cod: {
     token: process.env.TOKEN_COD!,
-    name: "Chronicles of Darkness",
+    name: "Chronicles of Darkness Bot",
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages],
     commandsPath: "commands/cod",
     componentsPath: "components/cod",
@@ -48,7 +148,7 @@ const BOT_CONFIG = {
   },
   "5th": {
     token: process.env.TOKEN_5TH!,
-    name: "5th Edition",
+    name: "5th Edition Bot",
     intents: [
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMembers,
@@ -60,7 +160,7 @@ const BOT_CONFIG = {
   },
   "20th": {
     token: process.env.TOKEN_20TH!,
-    name: "20th Anniversary Edition",
+    name: "20th Anniversary Edition Bot",
     intents: [
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMembers,
@@ -79,6 +179,7 @@ const srcDir = runningFromDist ? "dist" : "src";
 // Get bot type and configuration
 const botType = getBotType();
 const config = BOT_CONFIG[botType];
+logger.setAppName(config.name);
 
 // Initialize Discord client with bot-specific configuration
 const client = new Client({
@@ -96,19 +197,18 @@ if (fs.existsSync(commandsPath)) {
     .filter((file) => file.endsWith(".js") || file.endsWith(".ts"));
 
   for (const file of commandFiles) {
-    try {
-      const command = require(`@${config.commandsPath}/${file}`);
-      if (command.data && command.data.name) {
-        client.commands.set(command.data.name, command);
-      } else {
-        console.warn(`Command ${file} is missing required properties`);
-      }
-    } catch (error) {
-      console.error(`Failed to load command ${file}:`, error);
+    const filePath = path.join(commandsPath, file);
+    const command = await loadCommand(filePath);
+
+    if (command) {
+      client.commands.set(command.data.name, command);
+      logger.debug(`Loaded command: ${command.data.name}`, location);
+    } else {
+      logger.warn(`Failed to load command from file: ${file}`, location);
     }
   }
 } else {
-  console.error(`Commands directory not found: ${commandsPath}`);
+  logger.error(`Commands directory not found: ${commandsPath}`, location);
   process.exit(1);
 }
 
@@ -128,19 +228,18 @@ if (config.hasComponents) {
       .filter((file) => file.endsWith(".js") || file.endsWith(".ts"));
 
     for (const file of componentFiles) {
-      try {
-        const component = require(`@${config.componentsPath}/${file}`);
-        if (component.name) {
-          client.components.set(component.name, component);
-        } else {
-          console.warn(`Component ${file} is missing a name property`);
-        }
-      } catch (error) {
-        console.error(`Failed to load component ${file}:`, error);
+      const filePath = path.join(componentsPath, file);
+      const component = await loadComponent(filePath);
+
+      if (component) {
+        client.components.set(component.name, component);
+        logger.debug(`Loaded component: ${component.name}`, location);
+      } else {
+        logger.warn(`Failed to load component from file: ${file}`, location);
       }
     }
   } else {
-    console.warn(`Components directory not found: ${componentsPath}`);
+    logger.warn(`Components directory not found: ${componentsPath}`, location);
   }
 }
 
@@ -153,48 +252,44 @@ if (fs.existsSync(eventsPath)) {
     .filter((file) => file.endsWith(".js") || file.endsWith(".ts"));
 
   for (const file of eventFiles) {
-    try {
-      const event: BotEvent = require(`@events/${file}`);
-      if (event.name) {
-        // Type assertion for the Event
-        event as BotEvent<typeof event.name>;
-        if (event.once) {
-          client.once(
-            event.name,
-            async (...args: Parameters<typeof event.execute>) => {
-              try {
-                await event.execute(...args);
-              } catch (error) {
-                await handleErrorDebug(error, client);
-              }
-            }
-          );
-        } else {
-          client.on(
-            event.name,
-            async (...args: Parameters<typeof event.execute>) => {
-              try {
-                await event.execute(...args);
-              } catch (error) {
-                await handleErrorDebug(error, client);
-              }
-            }
-          );
-        }
+    const filePath = path.join(eventsPath, file);
+    const event = await loadEvent(filePath);
+
+    if (event) {
+      if (event.once) {
+        client.once(event.name, (...args: Parameters<typeof event.execute>) => {
+          try {
+            // Execute the event handler
+            void event.execute(...args);
+          } catch (error) {
+            if (error instanceof Error)
+              logger.error(`Event ${event.name} execution failed`, { error });
+          }
+        });
       } else {
-        console.warn(`Event ${file} is missing a name property`);
+        client.on(event.name, (...args: Parameters<typeof event.execute>) => {
+          try {
+            // Execute the event handler
+            void event.execute(...args);
+          } catch (error) {
+            if (error instanceof Error)
+              logger.error(`Event ${event.name} execution failed`, { error });
+          }
+        });
       }
-    } catch (error) {
-      console.error(`Failed to load event ${file}:`, error);
+      logger.debug(`Loaded event: ${event.name}`, location);
+    } else {
+      logger.warn(`Failed to load event from file: ${file}`, location);
     }
   }
 } else {
-  console.error(`Events directory not found: ${eventsPath}`);
+  logger.error(`Events directory not found: ${eventsPath}`);
   process.exit(1);
 }
 
 // Log in to Discord using bot-specific token
 client.login(config.token).catch((error) => {
-  console.error(`Failed to log in ${config.name} to Discord:`, error);
+  if (error instanceof Error)
+    logger.error(`Failed to log in ${config.name} to Discord:`, { error });
   process.exit(1);
 });
