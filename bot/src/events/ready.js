@@ -1,10 +1,10 @@
 "use strict";
 require(`${process.cwd()}/alias`);
 const { Events } = require("discord.js");
-const setActivity = require("@modules/setActivity");
+const setActivity = require("@utilsset-activity");
 const updateAllGuilds = require("@modules/updateAllGuilds");
 const API = require("@api");
-const { initializeEmojis } = require("@utils/emojiManager");
+const { initializeEmojis } = require("@utilsemoji-manager");
 
 module.exports = {
   name: Events.ClientReady,

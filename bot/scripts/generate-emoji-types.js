@@ -10,7 +10,7 @@ const path = require("path");
 function generateEmojiTypes() {
   const emojisDir = path.join(__dirname, "..", "emojis");
   const typesDir = path.join(__dirname, "..", "src", "types");
-  const outputFile = path.join(typesDir, "emojiTypes.d.ts");
+  const outputFile = path.join(typesDir, "emoji-types.d.ts");
 
   // Supported image formats
   const supportedExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp"];
@@ -43,12 +43,12 @@ function generateEmojiTypes() {
 // Generated from emoji files in the emojis/ directory
 // Run 'npm run generate-emoji-types' to regenerate
 
-import { ApplicationEmoji } from 'discord.js';
+import type { ApplicationEmoji } from 'discord.js';
 
 /**
  * Union type of all available emoji names
  */
-export type EmojiName = 
+export type EmojiName =
 ${emojiNames.map((name) => `  | "${name}"`).join("\n")};
 
 /**

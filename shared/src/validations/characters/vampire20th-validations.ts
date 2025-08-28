@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Core20thDataSchema } from "./character20th_validations";
+import { Core20thDataSchema } from "./character20th-validations";
 
 // Vampire20th specific schemas
 export const Vampire20thDataSchema = Core20thDataSchema.extend({

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Core5thDataSchema } from "./character5th_validations";
+import { Core5thDataSchema } from "./character5th-validations";
 
 // Hunter5th specific schemas
 export const Hunter5thDataSchema = Core5thDataSchema.extend({

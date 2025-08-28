@@ -3,7 +3,7 @@ import { z } from "zod";
 import {
   Core5thDataSchema,
   Humanity5thSchema,
-} from "./character5th_validations";
+} from "./character5th-validations";
 
 // Ghoul5th specific schemas
 export const Ghoul5thDataSchema = Core5thDataSchema.extend({

@@ -55,6 +55,7 @@ coverage.xml
 *.pot
 
 db.sqlite3
+emoji-types.d.ts
 
 # General environments and node
 .env

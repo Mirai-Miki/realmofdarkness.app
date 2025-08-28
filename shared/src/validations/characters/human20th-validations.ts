@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Core20thDataSchema } from "./character20th_validations";
+import { Core20thDataSchema } from "./character20th-validations";
 // Human20th specific schemas
 export const Human20thDataSchema = Core20thDataSchema.extend({
   morality_name: z.string().min(1).max(50).default("Humanity"),

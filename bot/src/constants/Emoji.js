@@ -7,14 +7,14 @@ const EmojiProxy = new Proxy(
       // Try to get from client's application emojis first
       if (typeof prop === "string") {
         // Look for a client instance in the global scope or module cache
-        const { emojiManager } = require("../utils/emojiManager");
+        const { emojiManager } = require("../utils/emoji-manager");
         return emojiManager.get(prop);
       }
       return undefined;
     },
     has(target, prop) {
       if (typeof prop === "string") {
-        const { emojiManager } = require("../utils/emojiManager");
+        const { emojiManager } = require("../utils/emoji-manager");
         return emojiManager.has(prop);
       }
       return false;
@@ -24,10 +24,10 @@ const EmojiProxy = new Proxy(
 
 /**
  * Emoji constants for Discord applications.
- * @type {import('../types/emojiTypes').EmojiObject}
+ * @type {import('../types/emoji-types').EmojiObject}
  */
 // @ts-ignore - Proxy object cannot be statically typed but we provide the interface for IntelliSense
 const EmojiProxyTyped =
-  /** @type {import('../types/emojiTypes').EmojiObject} */ (EmojiProxy);
+  /** @type {import('../types/emoji-types').EmojiObject} */ (EmojiProxy);
 
 module.exports.Emoji = EmojiProxyTyped;

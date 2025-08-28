@@ -1,7 +1,7 @@
 "use strict";
 require(`${process.cwd()}/alias`);
 const { Events } = require("discord.js");
-const setActivity = require("@modules/setActivity");
+const setActivity = require("@utilsset-activity");
 const API = require("@api");
 
 module.exports = {

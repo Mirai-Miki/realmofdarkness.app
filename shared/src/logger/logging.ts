@@ -3,8 +3,8 @@ import type { LoggerConfig, LogEntry, LogOptions, LogField } from "../types";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import { RealmError, ClientError } from "errors";
-import { DiscordLogger } from "./discord_logger";
-import { FileLogger } from "./file_logger";
+import { DiscordLogger } from "./discord-logger";
+import { FileLogger } from "./file-logger";
 import { LogLevel, Environment } from "types";
 
 /**

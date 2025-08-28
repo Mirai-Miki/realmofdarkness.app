@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Core20thDataSchema } from "./character20th_validations";
+import { Core20thDataSchema } from "./character20th-validations";
 // Changeling20th specific schemas
 export const Changeling20thDataSchema = Core20thDataSchema.extend({
   court: z.string().max(50).nullable(),

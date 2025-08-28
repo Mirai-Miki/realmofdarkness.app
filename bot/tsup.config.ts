@@ -10,7 +10,7 @@ export default defineConfig({
   // Entry points - main bot launchers
   entry: {
     bot: "src/main/bot.ts",
-    shardLauncher: "src/main/shardLauncher.ts",
+    shardLauncher: "src/main/shard-launcher.ts",
   },
 
   // Output configuration

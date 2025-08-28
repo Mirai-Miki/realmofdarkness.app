@@ -12,6 +12,7 @@ export default tseslint.config(
       "dist/**",
       "build/**",
       "**/test/**",
+      "**/scripts/**"
       "**/coverage/**",
       "eslint.config.mjs",
       "**/jest.config.js",

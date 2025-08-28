@@ -1,13 +1,15 @@
-"use strict";
-require(`${process.cwd()}/alias`);
-const { Events } = require("discord.js");
-const setActivity = require("@modules/setActivity");
-const API = require("@api");
+import type { Guild } from "discord.js";
+
+import { Logging } from "shared/logger";
+import { setActivity } from "utils";
+import { Events } from "discord.js";
+
+const logger = Logging.getLogger();
 
 module.exports = {
   name: Events.GuildCreate,
   once: false,
-  async execute(guild) {
+  async execute(guild: Guild) {
     await setActivity(guild.client);
     await API.updateGuild(guild);
 
@@ -51,9 +53,9 @@ module.exports = {
       // Clear the members cache to free up memory for large guilds
       guild.members.cache.clear();
     } catch (error) {
-      console.error(
+      logger.error(
         `Error updating members for guildCreate ${guild.name} (${guild.id}):`,
-        error
+        { error: error instanceof Error ? error : new Error(String(error)) }
       );
     }
   },

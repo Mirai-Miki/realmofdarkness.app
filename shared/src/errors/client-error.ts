@@ -1,4 +1,4 @@
-import { RealmError } from "./realm_error";
+import { RealmError } from "./realm-error";
 import { HttpStatus } from "types";
 
 /**

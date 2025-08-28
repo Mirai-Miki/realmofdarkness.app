@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CoreDataSchema } from "./base_validations";
+import { CoreDataSchema } from "./base-validations";
 import { SnowflakeSchema } from "../misc";
 
 export const Attribute5thSchema = z.object({

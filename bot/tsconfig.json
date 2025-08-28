@@ -22,6 +22,7 @@
       "api/*": ["src/realm_api/*"],
       "constants": ["src/constants/index.js"],
       "constants/*": ["src/constants/*"],
+      "utils": ["src/utils/index.ts"],
       "utils/*": ["src/utils/*"],
       "types": ["src/types/index.js"],
       "types/*": ["src/types/*"],

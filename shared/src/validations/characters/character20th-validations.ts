@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CoreDataSchema } from "./base_validations";
+import { CoreDataSchema } from "./base-validations";
 
 // Attribute/Skill validation schemas for 20th Anniversary (0-10 range)
 export const Attribute20thSchema = z.object({

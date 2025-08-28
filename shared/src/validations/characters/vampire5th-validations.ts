@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   Core5thDataSchema,
   Humanity5thSchema,
-} from "./character5th_validations";
+} from "./character5th-validations";
 import { SnowflakeSchema } from "../misc";
 
 // Discipline and Power schemas for complex nested updates
