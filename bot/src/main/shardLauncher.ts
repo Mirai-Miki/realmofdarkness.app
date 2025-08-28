@@ -6,6 +6,7 @@
  * - World of Darkness 5th Edition (5th)
  * - World of Darkness 20th Anniversary Edition (20th)
  */
+import "shared/utils/source-maps";
 import * as path from "path";
 import { ShardingManager } from "discord.js";
 import * as dotenv from "dotenv";

@@ -11,8 +11,10 @@ export default tseslint.config(
       "node_modules/**",
       "dist/**",
       "build/**",
-      "coverage/**",
+      "**/test/**",
+      "**/coverage/**",
       "eslint.config.mjs",
+      "**/jest.config.js",
       "frontend/**", // legacy CRA app (ignored)
       "backend-legacy/**", // legacy Django backend
     ],

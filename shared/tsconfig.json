@@ -1,8 +1,9 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "src",
+    "rootDir": "./",
     "outDir": "dist"
   },
-  "include": ["src", "logger_test.js"]
+  "include": ["src", "test"],
+  "exclude": ["dist", "node_modules"]
 }

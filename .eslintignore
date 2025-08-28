@@ -1,6 +1,8 @@
 node_modules
 dist
 build
+**/test/
+**/jest.config.js
 coverage
 .turbo
 .idea

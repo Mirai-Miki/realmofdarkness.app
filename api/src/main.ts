@@ -1,3 +1,4 @@
+import "shared/utils/source-maps";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module.js";
 
@@ -6,6 +7,5 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error("Error starting server:", err);
 });

@@ -3,3 +3,4 @@
  */
 
 export * from "./snowflake.js";
+export * from "./source-maps.js";

@@ -6,6 +6,7 @@
  * - World of Darkness 5th Edition (V5)
  * - World of Darkness 20th Anniversary Edition (V20)
  */
+import "shared/utils/source-maps";
 require(`${process.cwd()}/alias`);
 import * as fs from "fs";
 import * as path from "path";

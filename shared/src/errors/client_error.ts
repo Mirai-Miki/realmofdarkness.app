@@ -1,5 +1,5 @@
 import { RealmError } from "./realm_error.js";
-import { HttpStatus } from "shared/types/http_status.js";
+import { HttpStatus } from "../types/http_status.js";
 
 /**
  * Client error class for user-facing errors that should not be logged.
