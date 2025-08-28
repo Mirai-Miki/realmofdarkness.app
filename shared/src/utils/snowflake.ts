@@ -261,29 +261,6 @@ export class SnowflakeGenerator {
   }
 
   /**
-   * Creates a Zod schema for validating snowflake IDs
-   *
-   * @returns Zod schema that validates snowflake format
-   *
-   * @example
-   * ```typescript
-   * import { z } from 'zod';
-   *
-   * const schema = z.object({
-   *   id: SnowflakeGenerator.zodSchema(),
-   *   userId: SnowflakeGenerator.zodSchema(),
-   * });
-   * ```
-   */
-  public static zodSchema() {
-    // Dynamic import to avoid circular dependencies if zod isn't available
-    const z = require("zod");
-    return z.string().refine(SnowflakeGenerator.isValid, {
-      message: "Invalid snowflake ID format",
-    });
-  }
-
-  /**
    * Gets information about this generator instance
    */
   public getInfo(): { workerId: number; processId: number; epoch: number } {

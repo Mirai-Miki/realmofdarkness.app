@@ -1,6 +1,7 @@
+import type { LogEntry } from "types";
+
 import { promises as fs } from "fs";
 import { dirname } from "path";
-import type { LogEntry } from "../types/logger.js";
 
 /**
  * File-based logger implementation that writes log entries to a file.

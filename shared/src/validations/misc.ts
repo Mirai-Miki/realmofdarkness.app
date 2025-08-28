@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SnowflakeGenerator } from "../utils/snowflake.js";
+import { SnowflakeGenerator } from "utils";
 
 // Shared validation schemas
 export const HexColorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);

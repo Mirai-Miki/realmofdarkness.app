@@ -1,7 +1,8 @@
+import type { LogLevel, LogEntry } from "types";
+
 import { EmbedBuilder } from "@discordjs/builders";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v10";
-import type { LogEntry, LogLevel } from "../types/logger.js";
 
 /**
  * Maps log levels to Discord embed colors.

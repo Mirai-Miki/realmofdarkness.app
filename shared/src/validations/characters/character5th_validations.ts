@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { CoreDataSchema } from "./base_validations.js";
-import { SnowflakeSchema } from "../index.js";
+import { CoreDataSchema } from "./base_validations";
+import { SnowflakeSchema } from "../misc";
 
 export const Attribute5thSchema = z.object({
   value: z.int().min(1).max(5),

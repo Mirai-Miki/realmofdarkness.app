@@ -1,16 +1,11 @@
-import type {
-  LoggerConfig,
-  LogEntry,
-  LogOptions,
-  LogField,
-} from "../types/logger.js";
+import type { LoggerConfig, LogEntry, LogOptions, LogField } from "../types";
 
 import * as dotenv from "dotenv";
 import * as path from "path";
-import { RealmError, ClientError } from "../errors/index.js";
-import { DiscordLogger } from "./discord_logger.js";
-import { FileLogger } from "./file_logger.js";
-import { LogLevel, Environment } from "../types/logger.js";
+import { RealmError, ClientError } from "errors";
+import { DiscordLogger } from "./discord_logger";
+import { FileLogger } from "./file_logger";
+import { LogLevel, Environment } from "types";
 
 /**
  * Log level priority mapping for filtering.

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Core5thDataSchema } from "./character5th_validations.js";
+import { Core5thDataSchema } from "./character5th_validations";
 
 // Werewolf5th specific schemas
 export const Werewolf5thDataSchema = Core5thDataSchema.extend({

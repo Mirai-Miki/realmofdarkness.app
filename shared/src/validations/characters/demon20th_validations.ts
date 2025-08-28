@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Core20thDataSchema } from "./character20th_validations.js";
+import { Core20thDataSchema } from "./character20th_validations";
 
 // Demon20th specific schemas
 export const Demon20thDataSchema = Core20thDataSchema.extend({

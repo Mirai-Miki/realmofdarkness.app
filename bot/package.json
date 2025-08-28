@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "start": "./scripts/run.sh",
-    "build": "node scripts/build.js",
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "dev": "tsup --watch",
     "dev:5th": "npm run format && npm run generate-types && node scripts/deployCommands.js 5th dev && npm run emoji:sync:5th && nodemon src/main/shardLauncher.ts 5th",
     "dev:20th": "npm run format && npm run generate-types && node scripts/deployCommands.js 20th dev && npm run emoji:sync:20th && nodemon src/main/shardLauncher.ts 20th",
     "dev:cod": "npm run format && npm run generate-types && node scripts/deployCommands.js cod dev && npm run emoji:sync:cod && nodemon src/main/shardLauncher.ts cod",

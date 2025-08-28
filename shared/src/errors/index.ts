@@ -3,5 +3,5 @@
  * Provides custom error types with enhanced metadata for logging.
  */
 
-export * from "./realm_error.js";
-export * from "./client_error.js";
+export * from "./realm_error";
+export * from "./client_error";

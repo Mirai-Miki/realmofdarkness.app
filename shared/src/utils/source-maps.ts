@@ -12,8 +12,8 @@
  * ```
  */
 
-import "source-map-support/register.js";
-import { Logging } from "../logger/index.js";
+import "source-map-support/register";
+import { Logging } from "logger";
 
 // Auto-initialize enhanced error handling when this module is imported
 handleUncaughtErrors();

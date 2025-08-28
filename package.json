@@ -14,7 +14,8 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\""
   },
   "dependencies": {
-    "source-map-support": "^0.5.21"
+    "source-map-support": "^0.5.21",
+    "tsup": "^8.5.0"
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.10",
@@ -22,7 +23,6 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.7.0",
     "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.5.0",
     "@types/node": "^24.3.0",
     "eslint": "^9.18.0",
     "typescript-eslint": "^8.40.0",

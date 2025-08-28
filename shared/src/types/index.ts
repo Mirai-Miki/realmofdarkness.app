@@ -1,7 +1,7 @@
-export * from "./supporter.js";
-export * from "./character.js";
-export * from "./logger.js";
-export * from "./http_status.js";
+export * from "./supporter";
+export * from "./character";
+export * from "./logger";
+export * from "./http_status";
 
 /**
  * Type alias for snowflake IDs to improve type safety

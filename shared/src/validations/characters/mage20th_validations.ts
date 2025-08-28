@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Core20thDataSchema } from "./character20th_validations.js";
+import { Core20thDataSchema } from "./character20th_validations";
 // Mage20th specific schemas
 export const Mage20thDataSchema = Core20thDataSchema.extend({
   tradition: z.string().max(50).nullable(),

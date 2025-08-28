@@ -7,11 +7,10 @@
  * - World of Darkness 20th Anniversary Edition (V20)
  */
 import "shared/utils/source-maps";
-require(`${process.cwd()}/alias`);
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
-import { handleErrorDebug } from "@errors";
+import { RealmError } from "shared/errors";
 import { Client, GatewayIntentBits, Collection, Partials } from "discord.js";
 
 import type { BotType, BotCommand, BotComponent, BotEvent } from "@types";

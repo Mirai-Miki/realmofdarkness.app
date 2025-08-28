@@ -1,4 +1,4 @@
-import { HttpStatus } from "shared/types/http_status.js";
+import { HttpStatus } from "types";
 
 /**
  * Check if a status code is informational (1xx)

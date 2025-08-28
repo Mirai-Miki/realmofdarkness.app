@@ -2,8 +2,8 @@ import { z } from "zod";
 import {
   Core5thDataSchema,
   Humanity5thSchema,
-} from "./character5th_validations.js";
-import { SnowflakeSchema } from "../index.js";
+} from "./character5th_validations";
+import { SnowflakeSchema } from "../misc";
 
 // Discipline and Power schemas for complex nested updates
 export const DisciplinePowerSchema = z.object({

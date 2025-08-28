@@ -4,8 +4,8 @@
  */
 
 import { z } from "zod";
-import { Splats, SheetStatus } from "../../types/index.js";
-import { DiscordUrlSchema, HexColorSchema, SnowflakeSchema } from "../misc.js";
+import { Splats, SheetStatus } from "types";
+import { DiscordUrlSchema, HexColorSchema, SnowflakeSchema } from "../misc";
 
 export const NameSchema = z
   .string()
