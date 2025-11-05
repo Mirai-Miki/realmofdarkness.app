@@ -17,33 +17,46 @@ The Realm of Darkness combines a modern web application with Discord bots to cre
 - **🔐 Discord OAuth**: Seamless login and server synchronization
 - **📱 Responsive Design**: Works on desktop, tablet, and mobile devices
 
+## ⚠️ Major Refactor In Progress
+
+**Current Branch:** `refactor/project-overhaul`
+
+This project is undergoing a major refactor to modernize the tech stack:
+- **From:** Django/MariaDB/JavaScript → **To:** TypeScript/NestJS/PostgreSQL/Drizzle ORM
+- **Goal:** Unify codebase under TypeScript for better type safety and code sharing
+- **Status:** ~35% complete - See [REFACTOR_STATUS.md](./REFACTOR_STATUS.md)
+
+### 📖 Refactor Documentation
+
+- **[QUICKSTART.md](./QUICKSTART.md)** - Start here for developers
+- **[REFACTOR_STATUS.md](./REFACTOR_STATUS.md)** - Current progress and blockers
+- **[REFACTOR_PLAN.md](./REFACTOR_PLAN.md)** - Complete architectural plan
+- **[PHASE_1_CHECKLIST.md](./PHASE_1_CHECKLIST.md)** - Current phase tasks
+
+---
+
 ## 🏗️ Project Structure
 
-This monorepo contains three main components:
+### Current Structure (Refactored)
 
 ```
 realm-of-darkness/
-├── backend/           # Django REST API backend
-│   ├── rod/          # Core Django project settings
-│   ├── api/          # RESTful API endpoints
-│   ├── haven/        # Character sheet models and logic
-│   ├── chronicle/    # Chronicle/campaign management
-│   ├── discordauth/  # Discord OAuth integration
-│   ├── gateway/      # WebSocket services
-│   └── scripts/      # Development and deployment scripts
-├── frontend/         # React SPA frontend
-│   ├── src/
-│   │   ├── components/  # UI components
-│   │   ├── routes/      # Page routing
-│   │   └── gateway/     # WebSocket client
-│   └── public/
-├── discord_bots/     # Discord bot suite
-│   ├── src/
-│   │   ├── commands/    # Slash commands
-│   │   ├── events/      # Discord event handlers
-│   │   └── modules/     # Dice rolling and utilities
-│   └── scripts/
-└── dev.bat/.sh       # Full-stack development scripts
+├── shared/              ✅ Types, errors, logger, validation (TypeScript)
+├── database/            ✅ Drizzle ORM schemas (PostgreSQL)
+├── api/                 ⚠️  NestJS REST & WebSocket API (5% complete)
+├── bot/                 ⚠️  Discord.js bot (needs TS migration)
+├── web/                 ⏳ React SPA frontend (not started)
+├── domain/              ❌ Rich character models (Phase 1 - in progress)
+└── repositories/        ❌ Data access layer (Phase 2 - planned)
+```
+
+### Legacy Structure (Preserved for Reference)
+
+```
+realm-of-darkness/
+├── backend-legacy/      # Django REST API (frozen, will be removed)
+├── frontend/            # React SPA (frozen, will be replaced)
+└── discord_bots/        # Discord bots (frozen, being rewritten in TS)
 ```
 
 ## 🚀 Quick Start
