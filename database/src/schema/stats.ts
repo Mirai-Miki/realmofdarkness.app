@@ -1,13 +1,12 @@
-import type { InferSelectModel } from "drizzle-orm";
 import {
   pgTable,
-  bigint,
   varchar,
   integer,
   timestamp,
   unique,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.js";
+import { snowflake } from "../schema_types";
 
 /**
  * CommandStats table - tracks usage statistics for bot commands
@@ -19,14 +18,14 @@ export const commandStats = pgTable(
   "command_stats",
   {
     /** Auto-generated primary key */
-    id: bigint({ mode: "bigint" }).primaryKey().generatedByDefaultAsIdentity(),
+    id: snowflake().primaryKey(),
 
     /** Foreign key to User who used the command */
-    userId: bigint({ mode: "bigint" })
+    userId: snowflake()
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
 
-    botId: bigint({ mode: "bigint" }).notNull(),
+    botId: snowflake().notNull(),
 
     /** Name of the command that was used */
     command: varchar({ length: 100 }).notNull(),
@@ -42,5 +41,3 @@ export const commandStats = pgTable(
     unique().on(table.userId, table.command, table.botId),
   ]
 );
-
-export type CommandStatDb = InferSelectModel<typeof commandStats>;

@@ -92,8 +92,8 @@ export interface LogOptions {
   location?: string;
 
   /** Additional fields to include in the log */
-  fields?: Record<string, string> | LogField[];
+  fields?: Record<string, string>;
 
   /** An error object to extract information from */
-  error?: Error;
+  error?: Error | unknown;
 }

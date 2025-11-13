@@ -1,14 +1,12 @@
-import type { InferSelectModel } from "drizzle-orm";
-
 import {
   pgTable,
   pgEnum,
-  bigint,
   varchar,
   timestamp,
   boolean,
 } from "drizzle-orm/pg-core";
-import { SupporterName } from "@realm/types";
+import { SupporterName } from "shared";
+import { snowflake } from "../schema_types";
 
 export const supporterLevel = pgEnum("supporter_level", [
   SupporterName.Base,
@@ -22,7 +20,7 @@ export const supporterLevel = pgEnum("supporter_level", [
 ]);
 
 export const users = pgTable("users", {
-  id: bigint({ mode: "bigint" }).primaryKey(), // Discord Snowflake
+  id: snowflake().primaryKey(), // Discord Snowflake
   username: varchar({ length: 40 }).notNull().unique(),
   displayName: varchar({ length: 40 }).notNull().default(""),
   email: varchar({ length: 100 }),
@@ -37,5 +35,3 @@ export const users = pgTable("users", {
   // when the user last logged in or used the bot
   lastActive: timestamp().defaultNow().notNull(),
 });
-
-export type UserDb = InferSelectModel<typeof users>;

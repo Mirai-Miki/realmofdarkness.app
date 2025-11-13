@@ -142,8 +142,8 @@ const BOT_CONFIG = {
     token: process.env.TOKEN_COD!,
     name: "Chronicles of Darkness Bot",
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages],
-    commandsPath: "commands/cod",
-    componentsPath: "components/cod",
+    commandsPath: "interactions/commands/cod",
+    componentsPath: "interactions/components/cod",
     hasComponents: false,
   },
   "5th": {

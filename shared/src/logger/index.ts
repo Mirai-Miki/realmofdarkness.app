@@ -3,4 +3,4 @@
  * Provides comprehensive logging functionality with Discord integration and file backup.
  */
 
-export { Logging } from "./logging";
+export { logger } from "./logger";

@@ -1,11 +1,12 @@
-import type { LoggerConfig, LogEntry, LogOptions, LogField } from "../types";
+import type { LoggerConfig, LogEntry, LogOptions } from "../types";
 
 import * as dotenv from "dotenv";
 import * as path from "path";
-import { RealmError, ClientError } from "errors";
+import { RealmError } from "errors";
 import { DiscordLogger } from "./discord-logger";
 import { FileLogger } from "./file-logger";
-import { LogLevel, Environment } from "types";
+import { LogLevel, Environment } from "types/logger";
+import { HTTPError } from "discord.js";
 
 /**
  * Log level priority mapping for filtering.
@@ -22,9 +23,7 @@ const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
  * Singleton logger class for the Realm of Darkness application.
  * Provides async logging with Discord integration and file backup.
  */
-export class Logging {
-  private static instance: Logging | null = null;
-
+class Logger {
   private appName: string = "unknown-app";
   private environment: Environment = Environment.Development;
   private discordLogger?: DiscordLogger;
@@ -36,22 +35,10 @@ export class Logging {
   /**
    * Private constructor to enforce singleton pattern.
    */
-  private constructor() {
+  public constructor() {
     // Load environment variables
     dotenv.config();
     this.initializeFromEnv();
-  }
-
-  /**
-   * Gets the singleton instance of Logger.
-   *
-   * @returns The Logger singleton instance
-   */
-  public static getLogger(): Logging {
-    if (!Logging.instance) {
-      Logging.instance = new Logging();
-    }
-    return Logging.instance;
   }
 
   /**
@@ -236,34 +223,31 @@ export class Logging {
    * @returns Promise that resolves when logging is complete
    */
   public exception(
-    error: RealmError | ClientError | Error,
-    additionalOptions: LogOptions = {}
+    message: string,
+    error: RealmError | Error | unknown,
+    additionalOptions: Omit<LogOptions, "error"> = {}
   ): void {
-    // Don't log ClientErrors as they are user-facing errors, not system issues
-    if (error instanceof ClientError) {
+    let options: LogOptions;
+    if (error instanceof RealmError && !error.log) {
       return;
-    }
-    if (error instanceof RealmError) {
-      const options: LogOptions = {
+    } else if (error instanceof RealmError) {
+      options = {
         location: error.location || additionalOptions.location,
         fields: {
           ...error.fields,
-          ...this.normalizeFields(additionalOptions.fields),
+          ...additionalOptions.fields,
         },
         error: error,
       };
-
-      this.log(LogLevel.Error, error.message, options);
     } else {
-      // Handle generic Error objects
-      const options: LogOptions = {
+      // Handle error or unknown error types
+      options = {
         location: additionalOptions.location,
-        fields: this.normalizeFields(additionalOptions.fields),
+        fields: additionalOptions.fields,
         error: error,
       };
-
-      this.log(LogLevel.Error, error.message, options);
     }
+    this.log(LogLevel.Error, message, options);
   }
 
   /**
@@ -274,25 +258,40 @@ export class Logging {
    * @param options - Additional logging options
    * @returns Promise that resolves when logging is complete
    */
-  public log(level: LogLevel, message: string, options: LogOptions = {}): void {
+  private log(
+    level: LogLevel,
+    message: string,
+    options: LogOptions = {}
+  ): void {
     // Check if this log level should be processed
     if (LOG_LEVEL_PRIORITY[level] < this.minLevelPriority) {
       return;
     }
+    // Need to be extra safe here since an error here could remain uncaught
+    try {
+      if (this.shouldIgnore(options.error)) return;
+      const logEntry = this.createLogEntry(level, message, options);
 
-    const logEntry = this.createLogEntry(level, message, options);
+      // Log to console if enabled
+      if (this.enableConsoleLogging) {
+        this.logToConsole(logEntry);
+      }
 
-    // Log to console if enabled
-    if (this.enableConsoleLogging) {
-      this.logToConsole(logEntry);
-    }
-
-    // Attempt async logging (don't await to avoid blocking)
-    this.logAsync(logEntry).catch((error) => {
-      // If async logging fails completely, fall back to console error
+      // Attempt async logging (don't await to avoid blocking)
+      this.logAsync(logEntry).catch((error) => {
+        // If async logging fails completely, fall back to console error
+        console.error("Failed to log message:", error);
+        console.error("Original log entry:", logEntry);
+      });
+    } catch (error) {
       console.error("Failed to log message:", error);
-      console.error("Original log entry:", logEntry);
-    });
+    }
+  }
+
+  private shouldIgnore(error: unknown) {
+    // Ignore errors I cannot control
+    if (error instanceof HTTPError) return true;
+    return false;
   }
 
   /**
@@ -349,41 +348,28 @@ export class Logging {
 
     // Add stack trace if an error is provided
     if (options.error) {
-      logEntry.stackTrace = options.error.stack;
+      let errorToLog: Error;
+
+      if (options.error instanceof RealmError && options.error.cause) {
+        errorToLog = options.error.cause;
+        const fields = options.fields ?? {};
+        fields["Raised by RealmError"] = `RealmError: ${options.error.message}`;
+        options.fields = fields;
+      } else if (options.error instanceof Error) {
+        errorToLog = options.error;
+      } else {
+        errorToLog = new Error(String(options.error));
+      }
+
+      logEntry.stackTrace = errorToLog.stack;
     }
 
     // Add additional fields
     if (options.fields) {
-      logEntry.fields = this.normalizeFields(options.fields);
+      logEntry.fields = options.fields;
     }
 
     return logEntry;
-  }
-
-  /**
-   * Normalizes fields to a consistent Record<string, string> format.
-   *
-   * @param fields - The fields to normalize
-   * @returns Normalized fields as a Record<string, string>
-   */
-  private normalizeFields(
-    fields?: Record<string, string> | LogField[]
-  ): Record<string, string> {
-    if (!fields) {
-      return {};
-    }
-
-    if (Array.isArray(fields)) {
-      return fields.reduce(
-        (acc, field) => {
-          acc[field.name] = field.value;
-          return acc;
-        },
-        {} as Record<string, string>
-      );
-    }
-
-    return fields;
   }
 
   /**
@@ -480,3 +466,32 @@ export class Logging {
     }
   }
 }
+
+/**
+ * Singleton logger instance.
+ *
+ * This ensures all imports within the same application (process) get the same logger instance,
+ * allowing you to set the app name once and have it persist across all imports.
+ *
+ * Different applications (bot vs API vs frontend) run in separate memory spaces,
+ * so each gets its own singleton instance.
+ *
+ * @example
+ * ```typescript
+ * // In bot/src/main.ts
+ * import { logger } from "shared/logger";
+ * logger.setAppName("bot");
+ *
+ * // In bot/src/commands/dice.ts
+ * import { logger } from "shared/logger"; // Same instance!
+ * console.log(logger.getAppName()); // "bot"
+ * ```
+ */
+let _logger: Logger | null = null;
+
+export const logger = (() => {
+  if (!_logger) {
+    _logger = new Logger();
+  }
+  return _logger;
+})();

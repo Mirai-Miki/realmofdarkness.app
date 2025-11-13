@@ -1,17 +1,16 @@
 import type { Guild } from "discord.js";
 
-import { Logging } from "shared/logger";
-import { setActivity } from "utils";
+import { logger } from "shared";
+import { setActivity } from "utilities";
 import { Events } from "discord.js";
-
-const logger = Logging.getLogger();
+import { AppGuild } from "entities";
 
 module.exports = {
   name: Events.GuildCreate,
   once: false,
   async execute(guild: Guild) {
     await setActivity(guild.client);
-    await API.updateGuild(guild);
+    const appGuild = await AppGuild.from(guild);
 
     // Update all existing guild members to create member relations
     try {

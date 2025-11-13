@@ -85,12 +85,21 @@ export class DiscordLogger {
       )
       .setTimestamp(logEntry.timestamp);
 
-    // Add the main message as a field
-    embed.addFields({
-      name: "Message",
-      value: this.truncateText(logEntry.message, 1024),
-      inline: false,
-    });
+    // Set description based on whether we have a stack trace
+    if (logEntry.stackTrace) {
+      // If we have a stack trace, use it as description and add message as a field
+      embed.setDescription(
+        `\`\`\`js\n${this.truncateText(logEntry.stackTrace, 4096)}\n\`\`\``
+      );
+      embed.addFields({
+        name: "Message",
+        value: this.truncateText(logEntry.message, 1024),
+        inline: false,
+      });
+    } else {
+      // If no stack trace, use message as description
+      embed.setDescription(this.truncateText(logEntry.message, 4096));
+    }
 
     // Add location if provided
     if (logEntry.location) {
@@ -99,13 +108,6 @@ export class DiscordLogger {
         value: this.truncateText(logEntry.location, 1024),
         inline: false,
       });
-    }
-
-    // Add stack trace to description if available (descriptions allow more content)
-    if (logEntry.stackTrace) {
-      embed.setDescription(
-        `\`\`\`js\n${this.truncateText(logEntry.stackTrace, 4096)}\n\`\`\``
-      );
     }
 
     // Add additional fields (up to Discord's limit of 25 fields)

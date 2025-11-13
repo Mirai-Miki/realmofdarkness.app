@@ -4,9 +4,6 @@
  * that can be used by our custom logger system.
  */
 export class RealmError extends Error {
-  /** Error code for programmatic handling */
-  public readonly code?: string;
-
   /** Whether the error should be logged */
   public readonly log: boolean;
 
@@ -27,7 +24,6 @@ export class RealmError extends Error {
    *
    * @param message - The error message
    * @param options - Additional error options
-   * @param options.code - The error code for programmatic handling
    * @param options.level - The severity level of the error (default: 'error')
    * @param options.location - The location where the error occurred
    * @param options.fields - Additional key-value pairs to include in logs
@@ -36,22 +32,24 @@ export class RealmError extends Error {
   constructor(
     message: string,
     options: {
-      code?: string;
       location?: string;
       log?: boolean;
       fields?: Record<string, string>;
-      cause?: Error;
+      cause?: Error | unknown;
     } = {}
   ) {
     super(message);
 
     this.name = "RealmError";
-    this.code = options.code;
     this.log = options.log ?? true;
     this.location = options.location;
     this.fields = options.fields ?? {};
     this.timestamp = new Date();
-    this.cause = options.cause;
+    if (options.cause instanceof Error) {
+      this.cause = options.cause;
+    } else {
+      this.cause = new Error(String(options.cause));
+    }
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
     if (Error.captureStackTrace) {
@@ -68,7 +66,6 @@ export class RealmError extends Error {
     return {
       name: this.name,
       message: this.message,
-      code: this.code,
       location: this.location,
       fields: this.fields,
       timestamp: this.timestamp.toISOString(),

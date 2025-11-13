@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      drizzle-orm:
+        specifier: ^0.44.4
+        version: 0.44.4(@types/pg@8.15.5)(pg@8.16.3)
+      pg:
+        specifier: ^8.16.3
+        version: 8.16.3
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -24,6 +30,9 @@ importers:
       '@types/node':
         specifier: ^24.3.0
         version: 24.3.0
+      '@types/pg':
+        specifier: ^8.15.5
+        version: 8.15.5
       '@types/source-map-support':
         specifier: ^0.5.10
         version: 0.5.10
@@ -33,6 +42,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.40.0
         version: 8.40.0(eslint@9.34.0(jiti@1.21.7))(typescript@5.9.2)
+      drizzle-kit:
+        specifier: ^0.31.4
+        version: 0.31.4
       eslint:
         specifier: ^9.18.0
         version: 9.34.0(jiti@1.21.7)
@@ -164,19 +176,6 @@ importers:
       dotenv:
         specifier: ^17.2.1
         version: 17.2.1
-      drizzle-orm:
-        specifier: ^0.44.4
-        version: 0.44.4(@types/pg@8.15.5)(pg@8.16.3)
-      pg:
-        specifier: ^8.16.3
-        version: 8.16.3
-    devDependencies:
-      '@types/pg':
-        specifier: ^8.15.5
-        version: 8.15.5
-      drizzle-kit:
-        specifier: ^0.31.4
-        version: 0.31.4
 
   shared:
     dependencies:
@@ -186,6 +185,9 @@ importers:
       '@discordjs/rest':
         specifier: ^2.6.0
         version: 2.6.0
+      discord.js:
+        specifier: ^14.0.0
+        version: 14.22.1
       dotenv:
         specifier: ^17.2.1
         version: 17.2.1

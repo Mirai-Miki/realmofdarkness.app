@@ -37,9 +37,6 @@
     "lint": "eslint . --ext .js,.ts"
   },
   "dependencies": {
-    "@discordjs/builders": "^1.11.3",
-    "@discordjs/rest": "^2.6.0",
-    "discord-api-types": "^0.38.21",
     "discord.js": "^14.22.1",
     "dotenv": "^17.2.1",
     "zod": "^4.1.4"

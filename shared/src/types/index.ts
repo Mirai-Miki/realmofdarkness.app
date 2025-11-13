@@ -6,7 +6,7 @@ export * from "./http-status";
 /**
  * Type alias for snowflake IDs to improve type safety
  */
-export type SnowflakeId = string;
+export type Snowflake = string;
 
 export const enum Environment {
   Development = "development",

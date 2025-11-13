@@ -1,5 +1,5 @@
-import type { InferSelectModel } from "drizzle-orm";
-import { pgTable, bigint, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
+import { snowflake } from "../schema_types";
 
 /**
  * Guild table - represents a Discord Guild/Server that uses the bot
@@ -11,10 +11,10 @@ import { pgTable, bigint, varchar, timestamp } from "drizzle-orm/pg-core";
  */
 export const guilds = pgTable("guilds", {
   /** Discord Guild Snowflake ID */
-  id: bigint({ mode: "bigint" }).primaryKey(),
+  id: snowflake().primaryKey(),
   name: varchar({ length: 200 }).notNull(),
   iconUrl: varchar({ length: 500 }).notNull().default(""),
-  trackerChannel: varchar({ length: 20 }).notNull().default(""),
+  trackerChannel: snowflake().notNull().default(""),
 
   createdAt: timestamp().defaultNow().notNull(),
   lastUpdated: timestamp().defaultNow().notNull(),
@@ -28,14 +28,10 @@ export const guilds = pgTable("guilds", {
  */
 export const storytellerRoles = pgTable("storyteller_roles", {
   /** Discord Role Snowflake ID */
-  id: bigint({ mode: "bigint" }).primaryKey(),
+  id: snowflake().primaryKey(),
 
   /** Foreign key to the Guild this role belongs to */
-  guildId: bigint({ mode: "bigint" })
+  guildId: snowflake()
     .notNull()
     .references(() => guilds.id, { onDelete: "cascade" }),
 });
-
-// Type exports for use in other parts of the application
-export type GuildDb = InferSelectModel<typeof guilds>;
-export type StorytellerRoleDb = InferSelectModel<typeof storytellerRoles>;

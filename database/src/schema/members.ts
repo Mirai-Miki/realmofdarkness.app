@@ -1,15 +1,14 @@
-import type { InferSelectModel } from "drizzle-orm";
-
 import {
   pgTable,
-  bigint,
   varchar,
   boolean,
   timestamp,
   primaryKey,
 } from "drizzle-orm/pg-core";
+import type { InferSelectModel } from "drizzle-orm";
 import { users } from "./users.js";
 import { guilds } from "./guilds.js";
+import { snowflake } from "../schema_types";
 
 /**
  * Member table - represents a user's membership in a specific guild
@@ -21,12 +20,12 @@ export const members = pgTable(
   "members",
   {
     /** Foreign key to Guild */
-    guildId: bigint({ mode: "bigint" })
+    guildId: snowflake()
       .notNull()
       .references(() => guilds.id, { onDelete: "cascade" }),
 
     /** Foreign key to User */
-    userId: bigint({ mode: "bigint" })
+    userId: snowflake()
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
 
@@ -37,7 +36,7 @@ export const members = pgTable(
     avatarUrl: varchar({ length: 500 }).notNull().default(""),
 
     /** Foreign key to the member's default character in this guild */
-    defaultCharacterId: bigint({ mode: "bigint" }), // Will reference characters table when available
+    defaultCharacterId: snowflake(), // Will reference characters table when available
 
     createdAt: timestamp().defaultNow().notNull(),
     lastUpdated: timestamp().defaultNow().notNull(),
@@ -45,4 +44,5 @@ export const members = pgTable(
   (table) => [primaryKey({ columns: [table.guildId, table.userId] })]
 );
 
+// Type exports for use in other parts of the application
 export type MemberDb = InferSelectModel<typeof members>;

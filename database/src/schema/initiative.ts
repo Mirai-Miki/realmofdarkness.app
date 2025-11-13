@@ -1,7 +1,6 @@
-import type { InferSelectModel } from "drizzle-orm";
-
-import { pgTable, bigint, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { guilds } from "./guilds.js";
+import { snowflake } from "../schema_types";
 
 /**
  * InitiativeTracker table - stores initiative tracking data for V20 sessions
@@ -11,10 +10,10 @@ import { guilds } from "./guilds.js";
  */
 export const initiativeTrackers = pgTable("initiative_trackers", {
   /** Discord Channel Snowflake ID where the tracker is active */
-  id: bigint({ mode: "bigint" }).primaryKey(),
+  id: snowflake().primaryKey(),
 
   /** Foreign key to the Guild this tracker belongs to */
-  guildId: bigint({ mode: "bigint" })
+  guildId: snowflake()
     .notNull()
     .references(() => guilds.id, { onDelete: "cascade" }),
 
@@ -24,6 +23,3 @@ export const initiativeTrackers = pgTable("initiative_trackers", {
   /** When the tracker was last updated */
   lastUpdated: timestamp().defaultNow().notNull(),
 });
-
-// Type exports for use in other parts of the application
-export type InitiativeTrackerDb = InferSelectModel<typeof initiativeTrackers>;
