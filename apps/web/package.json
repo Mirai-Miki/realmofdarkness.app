@@ -9,6 +9,8 @@
     "lint": "eslint src --ext .ts,.tsx"
   },
   "dependencies": {
+    "shared": "workspace:*",
+    "database": "workspace:*"
   },
   "devDependencies": {
   }

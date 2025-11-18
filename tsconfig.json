@@ -25,18 +25,18 @@
     "removeComments": true,
     "baseUrl": ".",
     "paths": {
-      "shared": ["shared/src/index.ts"],
-      "shared/*": ["shared/src/*"],
-      "database": ["database/src/index.ts"],
-      "database/*": ["database/src/*"]
+      "shared": ["packages/shared/src/index.ts"],
+      "shared/*": ["packages/shared/src/*"],
+      "database": ["packages/database/src/index.ts"],
+      "database/*": ["packages/database/src/*"]
     }
   },
   "files": [],
   "references": [
-    { "path": "shared" },
-    { "path": "database" },
-    { "path": "api" },
-    { "path": "bot" },
-    { "path": "web" }
+    { "path": "packages/shared" },
+    { "path": "packages/database" },
+    { "path": "apps/api" },
+    { "path": "apps/bot" },
+    { "path": "apps/web" }
   ]
 }

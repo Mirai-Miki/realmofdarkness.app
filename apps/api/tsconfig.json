@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "resolvePackageJsonExports": true,
     "esModuleInterop": true,
@@ -17,5 +17,8 @@
   },
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../shared" }, { "path": "../database" }]
+  "references": [
+    { "path": "../../packages/shared" },
+    { "path": "../../packages/database" }
+  ]
 }

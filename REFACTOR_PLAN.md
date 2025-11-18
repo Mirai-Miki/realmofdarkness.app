@@ -1,7 +1,7 @@
 # Realm of Darkness - Refactor Implementation Plan
 
-**Branch:** `refactor/project-overhaul`  
-**Date:** November 1, 2025  
+**Branch:** `refactor/project-overhaul`
+**Date:** November 1, 2025
 **Status:** In Progress
 
 ---
@@ -23,12 +23,14 @@ This document outlines the comprehensive refactoring plan to migrate Realm of Da
 ### ✅ Completed Work
 
 #### 1. **Monorepo Infrastructure**
+
 - ✅ pnpm workspace configured with 6 packages: `api`, `bot`, `database`, `shared`, `web`, `scripts`
 - ✅ Turborepo setup for build orchestration
 - ✅ Root-level TypeScript configuration with project references
 - ✅ ESLint and Prettier configured for code quality
 
 #### 2. **Shared Package** (`shared/`)
+
 - ✅ Unified error handling system (`RealmError`, `ClientError`)
 - ✅ Singleton logger with Discord integration
 - ✅ Base type definitions (`Splats`, `SheetStatus`, `SupporterLevel`)
@@ -39,6 +41,7 @@ This document outlines the comprehensive refactoring plan to migrate Realm of Da
 - ✅ HTTP status code enums
 
 #### 3. **Database Package** (`database/`)
+
 - ✅ Drizzle ORM setup with PostgreSQL
 - ✅ Core schema definitions:
   - ✅ `users` table with supporter levels
@@ -50,17 +53,20 @@ This document outlines the comprehensive refactoring plan to migrate Realm of Da
 - ✅ Drizzle Kit configured for migrations
 
 #### 4. **API Package** (`api/`)
+
 - ✅ NestJS with Fastify platform configured
 - ✅ Basic app structure (module, controller, service)
 - ✅ Character module scaffolded (empty service/module)
 - ✅ TypeScript compilation setup
 
 #### 5. **Bot Package** (`bot/`)
+
 - ✅ Package structure converted to TypeScript
 - ✅ Existing JavaScript structures present (characters, realm_api)
 - ⚠️ **NOT YET MIGRATED**: Still uses JavaScript files
 
 #### 6. **Legacy Backend** (`backend-legacy/`)
+
 - ✅ Preserved for reference during migration
 - ✅ Contains Django models showing full character inheritance hierarchy
 
@@ -69,33 +75,41 @@ This document outlines the comprehensive refactoring plan to migrate Realm of Da
 ## ⚠️ Known Gaps & Issues
 
 ### 1. **Character Data Types Not Yet Defined**
+
 The `database/src/types/index.ts` file has placeholder types:
+
 ```typescript
 type Vampire5thData = Record<string, unknown>;
 type Hunter5thData = Record<string, unknown>;
 // ... etc
 ```
+
 **Impact:** Cannot properly type-check character data in JSONB fields yet.
 
 ### 2. **No Domain/Service Layer**
+
 - No rich domain models (only database types and Zod schemas)
 - No repository pattern implemented
 - No service layer for business logic
 
 ### 3. **Bot Package Not Migrated**
+
 - Still uses JavaScript with `require()` statements
 - `realm_api/` folder contains legacy API client code
 - Character structures are JavaScript classes
 
 ### 4. **No Migration Tooling**
+
 - No data migration scripts from Django/MariaDB to Drizzle/PostgreSQL
 - No validation/integrity checking tools
 
 ### 5. **Web Package Empty**
+
 - Only has a minimal Vite setup
 - No React components or routes
 
 ### 6. **No Integration Tests**
+
 - No end-to-end tests
 - No integration tests between packages
 
@@ -152,6 +166,7 @@ type Hunter5thData = Record<string, unknown>;
 ### Package Breakdown
 
 #### **`shared/` - Cross-Cutting Concerns**
+
 - **Purpose:** Code used by ALL other packages
 - **Contents:**
   - Error handling (`RealmError`, `ClientError`)
@@ -163,6 +178,7 @@ type Hunter5thData = Record<string, unknown>;
 - **Exports:** Types, schemas, utilities, logger, errors
 
 #### **`events/` - NEW PACKAGE - Redis Event System**
+
 - **Purpose:** Real-time inter-process communication via Redis pub/sub
 - **Contents:**
   - Redis client wrapper (`RedisEventClient`)
@@ -179,6 +195,7 @@ type Hunter5thData = Record<string, unknown>;
   - Multi-shard coordination
 
 #### **`database/` - Persistence Layer**
+
 - **Purpose:** Database schema and direct DB access
 - **Contents:**
   - Drizzle schema definitions
@@ -189,6 +206,7 @@ type Hunter5thData = Record<string, unknown>;
 - **Exports:** `db` instance, schema types, table definitions
 
 #### **`domain/` - NEW PACKAGE - Business Logic**
+
 - **Purpose:** Rich domain models and business rules (framework-agnostic)
 - **Contents:**
   - **Character classes** (Vampire5th, Hunter5th, etc.) - rich models with behavior
@@ -206,6 +224,7 @@ type Hunter5thData = Record<string, unknown>;
   - `Character.spendExperience()` - XP spending rules
 
 #### **`repositories/` - NEW PACKAGE - Data Access**
+
 - **Purpose:** Bridge between domain and database
 - **Contents:**
   - Repository implementations (`CharacterRepository`, `UserRepository`)
@@ -216,6 +235,7 @@ type Hunter5thData = Record<string, unknown>;
 - **Exports:** Repository classes
 
 #### **`api/` - HTTP/WebSocket API**
+
 - **Purpose:** NestJS REST and WebSocket gateway for web frontend
 - **Contents:**
   - Controllers (HTTP handlers)
@@ -227,6 +247,7 @@ type Hunter5thData = Record<string, unknown>;
 - **Exports:** None (entry point)
 
 #### **`bot/` - Discord Bot**
+
 - **Purpose:** Discord.js bot for slash commands and events
 - **Contents:**
   - Command handlers
@@ -238,6 +259,7 @@ type Hunter5thData = Record<string, unknown>;
 - **Exports:** None (entry point)
 
 #### **`web/` - React Frontend**
+
 - **Purpose:** User-facing web application
 - **Contents:**
   - React components
@@ -249,6 +271,7 @@ type Hunter5thData = Record<string, unknown>;
 - **Exports:** None (entry point)
 
 #### **`migration/` - NEW PACKAGE - Data Migration**
+
 - **Purpose:** One-time migration from Django to Drizzle
 - **Contents:**
   - Legacy data export scripts
@@ -268,6 +291,7 @@ type Hunter5thData = Record<string, unknown>;
 **Goal:** Establish the domain layer, event system, and complete type definitions.
 
 #### 1.1 Create `domain/` Package
+
 ```bash
 # Directory structure
 domain/
@@ -314,6 +338,7 @@ domain/
 ```
 
 **Tasks:**
+
 - [ ] Create `domain/` package with proper `package.json` and `tsconfig.json`
 - [ ] Port character model hierarchy from Django models to TypeScript classes
   - [ ] Base `Character` class with common properties
@@ -326,6 +351,7 @@ domain/
 - [ ] Add unit tests for domain logic
 
 #### 1.1b Create `events/` Package
+
 ```bash
 # Directory structure
 events/
@@ -352,6 +378,7 @@ events/
 ```
 
 **Tasks:**
+
 - [ ] Create `events/` package structure
 - [ ] Implement `RedisEventClient` with type-safe pub/sub
 - [ ] Define all event contracts (character, gateway, Discord, system)
@@ -361,7 +388,9 @@ events/
 - [ ] Document event flow patterns
 
 #### 1.2 Complete Character Data Types in `shared/`
+
 **Tasks:**
+
 - [ ] Create proper TypeScript types for each splat's JSONB data:
   ```typescript
   // shared/src/types/character-data/vampire5th.ts
@@ -381,13 +410,16 @@ events/
 - [ ] Add type tests to verify schema ↔ type alignment
 
 #### 1.3 Update `database/` Package
+
 **Tasks:**
+
 - [ ] Review and refine existing schema definitions
 - [ ] Add any missing tables (audit logs, etc.)
 - [ ] Create initial migration files
 - [ ] Document schema design decisions
 
 **Deliverables:**
+
 - ✅ `domain/` package with all character models
 - ✅ `events/` package with Redis pub/sub system
 - ✅ Complete TypeScript types for all character data
@@ -403,6 +435,7 @@ events/
 **Goal:** Implement data access layer bridging domain and database.
 
 #### 2.1 Create `repositories/` Package
+
 ```bash
 repositories/
 ├── package.json
@@ -423,6 +456,7 @@ repositories/
 ```
 
 **Tasks:**
+
 - [ ] Create repository package structure
 - [ ] Implement `BaseRepository` with common CRUD operations
 - [ ] Implement `CharacterRepository`:
@@ -439,12 +473,15 @@ repositories/
 - [ ] Add integration tests with test database
 
 **Key Design Decision:**
+
 ```typescript
 // CharacterMapper handles polymorphic deserialization
 class CharacterMapper {
   static toDomain(db: CharacterDb): Character {
-    const baseData = { /* map common fields */ };
-    
+    const baseData = {
+      /* map common fields */
+    };
+
     switch (db.splat) {
       case Splats.Vampire5th:
         const v5Data = db.data as Vampire5thData;
@@ -455,8 +492,10 @@ class CharacterMapper {
       // ... etc
     }
   }
-  
-  static fromDomain(char: Character): Omit<CharacterDb, 'id' | 'createdAt' | 'lastUpdated'> {
+
+  static fromDomain(
+    char: Character
+  ): Omit<CharacterDb, "id" | "createdAt" | "lastUpdated"> {
     return {
       name: char.name,
       userId: char.userId,
@@ -470,6 +509,7 @@ class CharacterMapper {
 ```
 
 **Deliverables:**
+
 - ✅ `repositories/` package with all repository implementations
 - ✅ Data mappers for DB ↔ Domain conversion
 - ✅ Integration tests with test database
@@ -481,7 +521,9 @@ class CharacterMapper {
 **Goal:** Build NestJS API using domain/repository layers.
 
 #### 3.1 Character Module
+
 **Tasks:**
+
 - [ ] Implement `CharacterController`:
   - `GET /characters` - List user's characters
   - `GET /characters/:id` - Get character by ID
@@ -497,31 +539,40 @@ class CharacterMapper {
 - [ ] Add authorization checks (user owns character, ST access, etc.)
 
 #### 3.2 User Module
+
 **Tasks:**
+
 - [ ] Implement `UserController` and `UserService`
 - [ ] Discord OAuth integration
 - [ ] JWT/session management
 
 #### 3.3 Guild Module
+
 **Tasks:**
+
 - [ ] Implement `GuildController` and `GuildService`
 - [ ] Guild-specific character queries
 - [ ] Storyteller role management
 
 #### 3.4 WebSocket Gateway
+
 **Tasks:**
+
 - [ ] Implement WebSocket gateway for real-time updates
 - [ ] Character update events
 - [ ] Initiative tracker sync
 - [ ] Presence tracking
 
 #### 3.5 Error Handling & Logging
+
 **Tasks:**
+
 - [ ] Global exception filter using `ClientError` for 4xx responses
 - [ ] Log all errors with `RealmLogger` from `shared`
 - [ ] Request logging middleware
 
 **Deliverables:**
+
 - ✅ Complete NestJS API with character, user, and guild endpoints
 - ✅ WebSocket gateway for real-time features
 - ✅ Authentication and authorization
@@ -534,7 +585,9 @@ class CharacterMapper {
 **Goal:** Convert bot to TypeScript and use domain/repository layers directly.
 
 #### 4.1 Bot Structure Refactor
+
 **Tasks:**
+
 - [ ] Migrate all JavaScript files to TypeScript:
   - [ ] `src/structures/characters/*.js` → **Delete and use domain models**
   - [ ] `src/commands/` - Type all command handlers
@@ -548,33 +601,39 @@ class CharacterMapper {
 - [ ] **Publish character update events when bot modifies characters**
 
 #### 4.2 Command Handlers
+
 **Tasks:**
+
 - [ ] Refactor command handlers to use typed domain models
 - [ ] Add Zod validation for command inputs
 - [ ] Use `RealmLogger` for logging
 - [ ] Use `ClientError` for user-facing errors
 
 **Example:**
+
 ```typescript
 // Before (JavaScript with API calls)
 const char = await getCharacter({ client, name, user, guild });
 
 // After (TypeScript with repository)
-import { CharacterRepository } from 'repositories';
+import { CharacterRepository } from "repositories";
 const charRepo = new CharacterRepository(db);
 const char = await charRepo.findByUser(BigInt(user.id), name);
 if (!char) {
-  throw ClientError.notFound('Character not found');
+  throw ClientError.notFound("Character not found");
 }
 ```
 
 #### 4.3 Testing
+
 **Tasks:**
+
 - [ ] Add unit tests for command logic
 - [ ] Add integration tests with test database
 - [ ] Mock Discord client for testing
 
 **Deliverables:**
+
 - ✅ Fully TypeScript bot package
 - ✅ Direct database access via repositories
 - ✅ No dependency on HTTP API
@@ -587,6 +646,7 @@ if (!char) {
 **Goal:** Build tools to migrate data from Django/MariaDB to Drizzle/PostgreSQL.
 
 #### 5.1 Create `migration/` Package
+
 ```bash
 migration/
 ├── package.json
@@ -617,7 +677,9 @@ migration/
 ```
 
 #### 5.2 Export Phase
+
 **Tasks:**
+
 - [ ] Create script to export Django data to NDJSON:
   ```bash
   python manage.py dumpdata --natural-foreign --natural-primary \
@@ -627,7 +689,9 @@ migration/
 - [ ] Generate checksums for validation
 
 #### 5.3 Transform & Validate Phase
+
 **Tasks:**
+
 - [ ] Create transformer classes:
   - Map Django model fields → Domain model fields
   - Handle renamed fields (e.g., `chronicle` → `guild`)
@@ -636,21 +700,27 @@ migration/
 - [ ] Log rejected records for manual review
 
 #### 5.4 Load Phase
+
 **Tasks:**
+
 - [ ] Implement batch loader (1000 records per transaction)
 - [ ] Load in correct order (users → guilds → members → characters)
 - [ ] Handle foreign key relationships
 - [ ] Rollback on error
 
 #### 5.5 Integrity Checks
+
 **Tasks:**
+
 - [ ] Row count validation
 - [ ] Foreign key integrity checks
 - [ ] Data hash comparison
 - [ ] Query spot checks (compare old vs new DB results)
 
 #### 5.6 Dry Run & Reporting
+
 **Tasks:**
+
 - [ ] Implement dry-run mode (validation only, no writes)
 - [ ] Generate report:
   - Total records processed
@@ -660,6 +730,7 @@ migration/
 - [ ] Fix transformers until zero rejections
 
 **CLI Usage:**
+
 ```bash
 # Dry run
 pnpm migration dry-run --source=./data --target=postgresql://...
@@ -672,6 +743,7 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 ```
 
 **Deliverables:**
+
 - ✅ `migration/` package with complete tooling
 - ✅ Successful dry-run with zero rejections
 - ✅ Migration scripts ready for production cutover
@@ -683,14 +755,18 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 **Goal:** Rebuild React frontend to use new API.
 
 #### 6.1 Project Setup
+
 **Tasks:**
+
 - [ ] Set up React 19 with Vite
 - [ ] Configure routing (React Router)
 - [ ] Set up Material-UI or new design system
 - [ ] Configure WebSocket client
 
 #### 6.2 Core Features
+
 **Tasks:**
+
 - [ ] Authentication flow (Discord OAuth)
 - [ ] Character list page
 - [ ] Character sheet pages (by splat)
@@ -698,12 +774,15 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 - [ ] Real-time updates via WebSocket
 
 #### 6.3 Validation
+
 **Tasks:**
+
 - [ ] Use Zod schemas from `shared` for client-side validation
 - [ ] Form validation
 - [ ] Type-safe API client
 
 **Deliverables:**
+
 - ✅ Functional React frontend
 - ✅ Feature parity with legacy frontend
 - ✅ Real-time WebSocket integration
@@ -715,32 +794,41 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 **Goal:** Comprehensive testing across all packages.
 
 #### 7.1 Unit Tests
+
 **Tasks:**
+
 - [ ] Domain models (business logic)
 - [ ] Validators (Zod schemas)
 - [ ] Utilities
 - [ ] Target: 80%+ coverage
 
 #### 7.2 Integration Tests
+
 **Tasks:**
+
 - [ ] Repository tests with test database
 - [ ] API endpoint tests
 - [ ] Bot command tests
 - [ ] Target: All critical paths covered
 
 #### 7.3 End-to-End Tests
+
 **Tasks:**
+
 - [ ] Full user flows (signup → create character → use bot → update sheet)
 - [ ] Cross-package integration
 - [ ] WebSocket synchronization
 
 #### 7.4 Load Testing
+
 **Tasks:**
+
 - [ ] API endpoint performance
 - [ ] Database query performance
 - [ ] Concurrent user simulation
 
 **Deliverables:**
+
 - ✅ Comprehensive test suite
 - ✅ Performance benchmarks
 - ✅ Test coverage reports
@@ -752,6 +840,7 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 **Goal:** Switch from legacy to new stack.
 
 #### 8.1 Pre-Cutover Checklist
+
 - [ ] All tests passing
 - [ ] Migration dry-run successful
 - [ ] Environment variables configured
@@ -759,6 +848,7 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 - [ ] Rollback plan documented
 
 #### 8.2 Cutover Steps
+
 1. [ ] Announce maintenance window
 2. [ ] Set legacy backend to read-only mode
 3. [ ] Run final data export
@@ -771,12 +861,14 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 10. [ ] Announce service restoration
 
 #### 8.3 Post-Cutover
+
 - [ ] Monitor for 48 hours
 - [ ] Fix any critical issues
 - [ ] Gather user feedback
 - [ ] Document lessons learned
 
 **Deliverables:**
+
 - ✅ Successful production deployment
 - ✅ Zero data loss
 - ✅ Minimal downtime
@@ -788,14 +880,18 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 **Goal:** Polish and document the new system.
 
 #### 9.1 Code Cleanup
+
 **Tasks:**
+
 - [ ] Remove `backend-legacy/` directory
 - [ ] Remove unused dependencies
 - [ ] Update all README files
 - [ ] Add inline documentation (JSDoc)
 
 #### 9.2 Documentation
+
 **Tasks:**
+
 - [ ] Architecture overview
 - [ ] Package responsibilities
 - [ ] Development workflow guide
@@ -804,13 +900,16 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 - [ ] Troubleshooting guide
 
 #### 9.3 Developer Experience
+
 **Tasks:**
+
 - [ ] Improve dev scripts
 - [ ] Add pre-commit hooks
 - [ ] CI/CD pipeline
 - [ ] Dependabot configuration
 
 **Deliverables:**
+
 - ✅ Clean, well-documented codebase
 - ✅ Developer onboarding guide
 - ✅ Automated workflows
@@ -820,27 +919,33 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 ## Technical Decisions & Best Practices
 
 ### 1. **Single-Table Inheritance for Characters**
+
 **Decision:** Use JSONB column for splat-specific data instead of separate tables.
 
 **Rationale:**
+
 - Simpler schema (no joins across 13 tables)
 - Easier migrations
 - Flexible schema evolution
 - PostgreSQL JSONB is performant and indexable
 
 **Trade-offs:**
+
 - Loss of strict DB-level validation for splat-specific fields
 - Rely on Zod schemas and domain models for validation
 
 ### 2. **Domain Models vs. ORMs**
+
 **Decision:** Rich domain models separate from database types.
 
 **Rationale:**
+
 - Business logic stays in domain layer (portable, testable)
 - Database types are pure data structures
 - Repositories handle mapping between layers
 
 **Pattern:**
+
 ```typescript
 // Database layer (simple type)
 interface CharacterDb {
@@ -851,19 +956,29 @@ interface CharacterDb {
 
 // Domain layer (rich model)
 class Vampire5th extends Character5th {
-  constructor(data) { /* ... */ }
-  
+  constructor(data) {
+    /* ... */
+  }
+
   // Domain methods
-  feedHunger(amount: number): void { /* business logic */ }
-  spendBloodPotency(cost: number): void { /* business logic */ }
-  validate(): ValidationResult { /* validation logic */ }
+  feedHunger(amount: number): void {
+    /* business logic */
+  }
+  spendBloodPotency(cost: number): void {
+    /* business logic */
+  }
+  validate(): ValidationResult {
+    /* validation logic */
+  }
 }
 ```
 
 ### 3. **Validation Strategy**
+
 **Decision:** Zod at boundaries, TypeScript types internally.
 
 **Where to validate:**
+
 - ✅ API request bodies (before domain layer)
 - ✅ WebSocket messages
 - ✅ Bot command inputs
@@ -871,28 +986,32 @@ class Vampire5th extends Character5th {
 - ❌ Internal function calls (trust types)
 
 ### 4. **Error Handling**
+
 **Decision:** Two-tier error system.
 
 **Usage:**
+
 ```typescript
 // System errors (logged)
-throw new RealmError('Database connection failed', {
-  location: 'CharacterRepository.findById',
+throw new RealmError("Database connection failed", {
+  location: "CharacterRepository.findById",
   fields: { characterId: id.toString() },
   cause: originalError,
 });
 
 // User errors (not logged)
-throw ClientError.notFound('Character not found', {
-  errorCode: 'CHARACTER_NOT_FOUND',
+throw ClientError.notFound("Character not found", {
+  errorCode: "CHARACTER_NOT_FOUND",
   fields: { name, userId },
 });
 ```
 
 ### 5. **Logging Strategy**
+
 **Decision:** Structured logging with singleton logger.
 
 **Best practices:**
+
 - Set app name at startup: `logger.setAppName('api')`
 - Include location for all logs: `logger.info('msg', { location: 'Class.method' })`
 - Add contextual fields: `{ fields: { userId, characterId } }`
@@ -900,26 +1019,31 @@ throw ClientError.notFound('Character not found', {
 - Don't log `ClientError` (user mistakes)
 
 ### 6. **Testing Strategy**
+
 **Layers:**
+
 - **Unit tests**: Domain models, utilities (no external dependencies)
 - **Integration tests**: Repositories, services (test database)
 - **E2E tests**: Full user flows (test database + mock Discord)
 
 **Tools:**
+
 - Jest for all testing
 - Supertest for API tests
 - Test database with Docker
 
 ### 7. **Database Connection Management**
+
 **Decision:** Singleton DB connection exported from `database/`.
 
 **Usage:**
+
 ```typescript
 // In database package
 export const db = drizzle({ connection: process.env.DATABASE_URL });
 
 // In other packages
-import { db } from 'database';
+import { db } from "database";
 const users = await db.select().from(usersTable);
 ```
 
@@ -929,20 +1053,21 @@ const users = await db.select().from(usersTable);
 
 ## Risk Mitigation
 
-| Risk | Impact | Mitigation |
-|------|--------|-----------|
-| **Data loss during migration** | Critical | Multiple backups, dry-run validation, checksums |
-| **Downtime during cutover** | High | Maintenance window, fast rollback plan, monitoring |
-| **Type mismatches at runtime** | Medium | Zod validation at boundaries, comprehensive tests |
-| **Performance regression** | Medium | Load testing, query optimization, caching strategy |
-| **Bot-database coupling issues** | Medium | Repository abstraction, integration tests |
-| **Character data schema drift** | Low | Type-safe mappers, schema version tracking |
+| Risk                             | Impact   | Mitigation                                         |
+| -------------------------------- | -------- | -------------------------------------------------- |
+| **Data loss during migration**   | Critical | Multiple backups, dry-run validation, checksums    |
+| **Downtime during cutover**      | High     | Maintenance window, fast rollback plan, monitoring |
+| **Type mismatches at runtime**   | Medium   | Zod validation at boundaries, comprehensive tests  |
+| **Performance regression**       | Medium   | Load testing, query optimization, caching strategy |
+| **Bot-database coupling issues** | Medium   | Repository abstraction, integration tests          |
+| **Character data schema drift**  | Low      | Type-safe mappers, schema version tracking         |
 
 ---
 
 ## Success Metrics
 
 ### Technical Metrics
+
 - ✅ 100% TypeScript (no JavaScript files)
 - ✅ 80%+ test coverage
 - ✅ Zero data loss during migration
@@ -951,12 +1076,14 @@ const users = await db.select().from(usersTable);
 - ✅ Zero untyped `any` in production code
 
 ### Operational Metrics
+
 - ✅ Deployment time < 30 minutes
 - ✅ Rollback time < 5 minutes
 - ✅ Zero critical bugs in first week
 - ✅ < 2 hours downtime during cutover
 
 ### User Experience Metrics
+
 - ✅ Feature parity with legacy system
 - ✅ No user-facing breaking changes
 - ✅ Improved error messages
@@ -966,24 +1093,25 @@ const users = await db.select().from(usersTable);
 
 ## Timeline Summary
 
-| Phase | Duration | Description |
-|-------|----------|-------------|
-| **Phase 1** | 2-3 weeks | Foundation & Domain Models |
-| **Phase 2** | 1-2 weeks | Repository Layer |
-| **Phase 3** | 2-3 weeks | API Implementation |
-| **Phase 4** | 3-4 weeks | Bot Migration |
-| **Phase 5** | 2-3 weeks | Migration Tooling |
-| **Phase 6** | 3-4 weeks | Web Frontend |
-| **Phase 7** | 2 weeks | Testing & QA |
-| **Phase 8** | 1 week | Cutover & Deployment |
-| **Phase 9** | 1 week | Cleanup & Documentation |
-| **TOTAL** | **17-24 weeks** | **~4-6 months** |
+| Phase       | Duration        | Description                |
+| ----------- | --------------- | -------------------------- |
+| **Phase 1** | 2-3 weeks       | Foundation & Domain Models |
+| **Phase 2** | 1-2 weeks       | Repository Layer           |
+| **Phase 3** | 2-3 weeks       | API Implementation         |
+| **Phase 4** | 3-4 weeks       | Bot Migration              |
+| **Phase 5** | 2-3 weeks       | Migration Tooling          |
+| **Phase 6** | 3-4 weeks       | Web Frontend               |
+| **Phase 7** | 2 weeks         | Testing & QA               |
+| **Phase 8** | 1 week          | Cutover & Deployment       |
+| **Phase 9** | 1 week          | Cleanup & Documentation    |
+| **TOTAL**   | **17-24 weeks** | **~4-6 months**            |
 
 ---
 
 ## Immediate Next Steps
 
 ### Week 1-2: Domain Foundation
+
 1. [ ] Create `domain/` package structure
 2. [ ] Port `Character` base class from Django
 3. [ ] Port `Character5th` intermediate class
@@ -991,12 +1119,14 @@ const users = await db.select().from(usersTable);
 5. [ ] Add unit tests for Vampire5th
 
 ### Week 3: Character Data Types
+
 1. [ ] Define `Vampire5thData` interface in `shared/`
 2. [ ] Update `database/src/types/index.ts`
 3. [ ] Verify Zod schema matches type
 4. [ ] Test serialization/deserialization
 
 ### Week 4: Repository Pattern
+
 1. [ ] Create `repositories/` package
 2. [ ] Implement `BaseRepository`
 3. [ ] Implement `CharacterMapper`
@@ -1009,7 +1139,7 @@ const users = await db.select().from(usersTable);
 
 1. **ID Strategy**: Continue with bigint (Discord snowflakes) or move to UUIDs?
    - **Recommendation**: Keep bigint for users/guilds (Discord IDs), use serial for characters
-   
+
 2. **Soft Deletes**: Implement globally or per-entity?
    - **Recommendation**: Add `deletedAt` to users/guilds, hard delete characters
 
@@ -1127,6 +1257,7 @@ This refactor is a significant undertaking that will modernize the entire Realm 
 The estimated timeline of 4-6 months is realistic given the scope, and can be parallelized in some areas (e.g., API and bot development can happen simultaneously after Phase 2).
 
 **Success depends on:**
+
 - Strict adherence to type safety (no `any` types)
 - Comprehensive testing at each phase
 - Careful data migration with validation

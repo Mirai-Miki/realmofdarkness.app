@@ -1,7 +1,3 @@
 packages:
-  - "web"
-  - "bot"
-  - "api"
-  - "shared"
-  - "database"
-  - "scripts"
+  - "apps/*"
+  - "packages/*"

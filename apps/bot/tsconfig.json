@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "dist",
@@ -7,10 +7,10 @@
     "typeRoots": ["node_modules/@types", "./src/types"],
     "baseUrl": "./",
     "paths": {
-      "shared": ["../shared/src/index.ts"],
-      "shared/*": ["../shared/src/*"],
-      "database": ["../database/src/index.ts"],
-      "database/*": ["../database/src/*"],
+      "shared": ["../../packages/shared/src/index.ts"],
+      "shared/*": ["../../packages/shared/src/*"],
+      "database": ["../../packages/database/src/index.ts"],
+      "database/*": ["../../packages/database/src/*"],
       "entities": ["src/entities/index.ts"],
       "entities/*": ["src/entities/*"],
       "services": ["src/services/index.ts"],
@@ -24,5 +24,8 @@
   },
   "include": ["src", "tsup.config.ts", "test"],
   "exclude": ["node_modules", "dist", "scripts"],
-  "references": [{ "path": "../shared" }, { "path": "../database" }]
+  "references": [
+    { "path": "../../packages/shared" },
+    { "path": "../../packages/database" }
+  ]
 }

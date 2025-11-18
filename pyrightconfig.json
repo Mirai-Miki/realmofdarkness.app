@@ -1,16 +1,22 @@
 {
   "include": [
-    "backend/api",
-    "backend/bot",
-    "backend/chronicle",
-    "backend/discordauth",
-    "backend/gateway",
-    "backend/haven",
-    "backend/main",
-    "backend/patreon",
-    "backend/rod"
+    "backend-legacy/api",
+    "backend-legacy/bot",
+    "backend-legacy/chronicle",
+    "backend-legacy/discordauth",
+    "backend-legacy/gateway",
+    "backend-legacy/haven",
+    "backend-legacy/main",
+    "backend-legacy/patreon",
+    "backend-legacy/rod"
   ],
-  "exclude": ["**/node_modules", "**/__pycache__", "**/migrations", "frontend"],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/migrations",
+    "apps/frontend",
+    "apps/web"
+  ],
   "reportMissingImports": true,
   "reportMissingTypeStubs": false,
   "pythonVersion": "3.12",

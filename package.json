@@ -10,6 +10,8 @@
     "test": "turbo run test",
     "clean": "git clean -fdX .",
     "migrate": "pnpm --filter database exec drizzle-kit migrate",
+    "db:generate": "pnpm --filter database run generate",
+    "db:studio": "pnpm --filter database run studio",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\""
   },
