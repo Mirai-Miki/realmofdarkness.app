@@ -218,13 +218,13 @@ class Logger {
    * Logs a RealmError with all its metadata.
    * ClientErrors are not logged as they represent user errors, not system issues.
    *
-   * @param error - The error to log (RealmError or ClientError)
+   * @param error - The error to log
    * @param additionalOptions - Additional logging options to merge
    * @returns Promise that resolves when logging is complete
    */
   public exception(
     message: string,
-    error: RealmError | Error | unknown,
+    error: unknown,
     additionalOptions: Omit<LogOptions, "error"> = {}
   ): void {
     let options: LogOptions;
@@ -232,7 +232,6 @@ class Logger {
       return;
     } else if (error instanceof RealmError) {
       options = {
-        location: error.location || additionalOptions.location,
         fields: {
           ...error.fields,
           ...additionalOptions.fields,
@@ -242,11 +241,11 @@ class Logger {
     } else {
       // Handle error or unknown error types
       options = {
-        location: additionalOptions.location,
         fields: additionalOptions.fields,
         error: error,
       };
     }
+
     this.log(LogLevel.Error, message, options);
   }
 
@@ -342,8 +341,9 @@ class Logger {
     };
 
     // Add location if provided
-    if (options.location) {
-      logEntry.location = options.location;
+    const callerLocation = this.getCallerLocation();
+    if (callerLocation) {
+      logEntry.location = callerLocation;
     }
 
     // Add stack trace if an error is provided
@@ -358,7 +358,11 @@ class Logger {
       } else if (options.error instanceof Error) {
         errorToLog = options.error;
       } else {
-        errorToLog = new Error(String(options.error));
+        try {
+          errorToLog = new Error(JSON.stringify(options.error));
+        } catch {
+          errorToLog = new Error(String(options.error as any));
+        }
       }
 
       logEntry.stackTrace = errorToLog.stack;
@@ -465,6 +469,49 @@ class Logger {
         return console.log;
     }
   }
+  /**
+   * Gets the location of the caller (file and line number).
+   *
+   * @returns The caller's location or undefined if not found
+   */
+  private getCallerLocation(): string | undefined {
+    const error = new Error();
+    const stack = error.stack?.split("\n");
+
+    if (!stack) return undefined;
+
+    // Find the first line that isn't part of the logger
+    // Stack trace usually looks like:
+    // Error
+    //     at Logger.getCallerLocation (logger.ts:x:y)
+    //     at Logger.createLogEntry (logger.ts:x:y)
+    //     at Logger.log (logger.ts:x:y)
+    //     at Logger.info (logger.ts:x:y)
+    //     at Object.<anonymous> (caller.ts:x:y)
+    for (const line of stack) {
+      if (
+        !line.includes("Logger.") &&
+        !line.includes("new Error") &&
+        !line.includes("node_modules") &&
+        line.includes(path.sep)
+      ) {
+        // Extract file path and line number
+        // Format is usually "    at FunctionName (filepath:line:column)" or "    at filepath:line:column"
+        const match =
+          line.match(/\((.+):(\d+):\d+\)/) || line.match(/at (.+):(\d+):\d+/);
+        if (match) {
+          const filePath = match[1];
+          const lineNum = match[2];
+
+          // Make path relative to project root for cleaner logs
+          const relativePath = path.relative(process.cwd(), filePath);
+          return `${relativePath}:${lineNum}`;
+        }
+      }
+    }
+
+    return undefined;
+  }
 }
 
 /**
@@ -493,5 +540,5 @@ export const logger = (() => {
   if (!_logger) {
     _logger = new Logger();
   }
-  return _logger!;
+  return _logger;
 })();

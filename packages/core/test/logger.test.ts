@@ -5,10 +5,10 @@
 
 import { logger } from "../src/logger/index.js";
 import { Environment } from "../src/types/logger.js";
+import { RealmError } from "../src/errors/realm-error.js";
+import { ClientError } from "../src/errors/client-error.js";
 
 describe("Logging", () => {
-
-
   beforeEach(() => {
     // Reset configuration for each test
     logger.configure({
@@ -165,6 +165,199 @@ describe("Logging", () => {
       logger.error("Error occurred", { error: testError });
 
       expect(consoleSpy).toHaveBeenCalled();
+      consoleSpy.mockRestore();
+    });
+
+    /**
+     * Test auto-location functionality.
+     */
+    it("should automatically add location to log entry", () => {
+      const consoleSpy = jest.spyOn(console, "info").mockImplementation();
+
+      logger.configure({
+        enableConsoleLogging: true,
+      });
+
+      logger.info("Test auto-location");
+
+      // Verify that one of the calls contains "Location:"
+      const calls = consoleSpy.mock.calls.flat();
+      const hasLocation = calls.some(
+        (arg) => typeof arg === "string" && arg.includes("Location:")
+      );
+
+      expect(hasLocation).toBe(true);
+
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe("Error Types Handling", () => {
+    /**
+     * Test RealmError handling.
+     */
+    it("should handle RealmError correctly", () => {
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+
+      logger.configure({
+        enableConsoleLogging: true,
+      });
+
+      // Test logged RealmError
+      const loggedError = new RealmError("Logged error", {
+        log: true,
+        fields: { customField: "value" },
+      });
+      logger.exception("RealmError occurred", loggedError);
+
+      expect(consoleSpy).toHaveBeenCalled();
+      const calls = consoleSpy.mock.calls.flat();
+      const hasFields = calls.some(
+        (arg) =>
+          typeof arg === "object" &&
+          arg !== null &&
+          (arg as any).customField === "value"
+      );
+      expect(hasFields).toBe(true);
+
+      consoleSpy.mockClear();
+
+      // Test unlogged RealmError
+      const unloggedError = new RealmError("Unlogged error", {
+        log: false,
+      });
+      logger.exception("Should not log", unloggedError);
+
+      expect(consoleSpy).not.toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
+    });
+
+    /**
+     * Test ClientError handling.
+     */
+    it("should handle ClientError correctly (default no log)", () => {
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+
+      logger.configure({
+        enableConsoleLogging: true,
+      });
+
+      // ClientError defaults to log: false
+      const clientError = new ClientError("User error");
+      logger.exception("Client error occurred", clientError);
+
+      expect(consoleSpy).not.toHaveBeenCalled();
+
+      consoleSpy.mockClear();
+
+      // ClientError with log: true
+      const loggedClientError = new ClientError("Important user error", {
+        log: true,
+      });
+      logger.exception("Important client error", loggedClientError);
+
+      expect(consoleSpy).toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
+    });
+
+    /**
+     * Test RealmError with cause (Error object).
+     */
+    it("should handle RealmError with Error cause and preserve stack trace", () => {
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+
+      logger.configure({
+        enableConsoleLogging: true,
+      });
+
+      const originalError = new Error("Original failure");
+      const realmError = new RealmError("Wrapper error", {
+        cause: originalError,
+      });
+
+      logger.exception("Error chain", realmError);
+
+      expect(consoleSpy).toHaveBeenCalled();
+      const calls = consoleSpy.mock.calls.flat();
+
+      // Check if stack trace from original error is present
+      const hasOriginalStack = calls.some(
+        (arg) =>
+          typeof arg === "string" &&
+          arg.includes("Original failure") &&
+          arg.includes("at ")
+      );
+      expect(hasOriginalStack).toBe(true);
+
+      // Check if RealmError message is preserved in fields
+      const hasWrapperMessage = calls.some(
+        (arg) =>
+          typeof arg === "object" &&
+          arg !== null &&
+          (arg as any)["Raised by RealmError"] === "RealmError: Wrapper error"
+      );
+      expect(hasWrapperMessage).toBe(true);
+
+      consoleSpy.mockRestore();
+    });
+
+    /**
+     * Test RealmError with unknown cause (arbitrary type).
+     */
+    it("should handle RealmError with unknown cause", () => {
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+
+      logger.configure({
+        enableConsoleLogging: true,
+      });
+
+      const realmError = new RealmError("Wrapper error", {
+        cause: { code: 500, details: "Something went wrong" }, // Arbitrary object
+      });
+
+      logger.exception("Unknown cause error", realmError);
+
+      expect(consoleSpy).toHaveBeenCalled();
+      const calls = consoleSpy.mock.calls.flat();
+
+      // The cause should be converted to an Error and its stack trace logged
+      // The message of the converted error should be the string representation of the object
+      const hasObjectString = calls.some(
+        (arg) => typeof arg === "string" && arg.includes("[object Object]")
+      );
+      expect(hasObjectString).toBe(true);
+
+      consoleSpy.mockRestore();
+    });
+
+    /**
+     * Test RealmError without cause (should use its own stack trace).
+     */
+    it("should use RealmError stack trace when no cause is provided", () => {
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+
+      logger.configure({
+        enableConsoleLogging: true,
+      });
+
+      const realmError = new RealmError("Standalone error");
+
+      logger.exception("Standalone", realmError);
+
+      expect(consoleSpy).toHaveBeenCalled();
+      const calls = consoleSpy.mock.calls.flat();
+
+      // Should contain stack trace pointing to where RealmError was created
+      const hasStack = calls.some(
+        (arg) =>
+          typeof arg === "string" &&
+          arg.includes("RealmError") &&
+          arg.includes("at ")
+      );
+      expect(hasStack).toBe(true);
+
       consoleSpy.mockRestore();
     });
   });

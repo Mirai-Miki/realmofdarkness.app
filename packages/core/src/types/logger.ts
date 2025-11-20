@@ -88,12 +88,9 @@ export interface LogField {
  * Options for creating a log entry.
  */
 export interface LogOptions {
-  /** The location where the log originated */
-  location?: string;
-
   /** Additional fields to include in the log */
   fields?: Record<string, string>;
 
   /** An error object to extract information from */
-  error?: Error | unknown;
+  error?: unknown;
 }

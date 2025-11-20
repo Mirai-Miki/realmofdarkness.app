@@ -12,7 +12,7 @@ import "@realm/core/utils/source-maps";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
-import { logger } from "@realm/core/logger";
+import { logger, RealmError } from "@realm/core";
 import { Client, GatewayIntentBits, Collection, Partials } from "discord.js";
 import {
   BotCommandSchema,
@@ -22,11 +22,6 @@ import {
 
 // Load environment variables
 dotenv.config();
-
-// const logger = Logging.getLogger(); // Removed: logger is imported directly
-const location = {
-  location: "main/bot.ts",
-};
 
 /**
  * Type-safe dynamic import helper for bot commands using Zod validation
@@ -44,15 +39,13 @@ async function loadCommand(filePath: string): Promise<BotCommand | null> {
       return result.data as BotCommand;
     } else {
       logger.warn(
-        `Invalid command structure in ${filePath}: ${result.error.message}`,
-        location
+        `Invalid command structure in ${filePath}: ${result.error.message}`
       );
       return null;
     }
   } catch (error) {
     logger.error(`Failed to load command from ${filePath}`, {
-      error: error instanceof Error ? error : new Error(String(error)),
-      ...location,
+      error,
     });
     return null;
   }
@@ -74,16 +67,12 @@ async function loadComponent(filePath: string): Promise<BotComponent | null> {
       return result.data as BotComponent;
     } else {
       logger.warn(
-        `Invalid component structure in ${filePath}: ${result.error.message}`,
-        location
+        `Invalid component structure in ${filePath}: ${result.error.message}`
       );
       return null;
     }
   } catch (error) {
-    logger.error(`Failed to load component from ${filePath}`, {
-      error: error instanceof Error ? error : new Error(String(error)),
-      ...location,
-    });
+    logger.exception(`Failed to load component from ${filePath}`, error);
     return null;
   }
 }
@@ -104,16 +93,12 @@ async function loadEvent(filePath: string): Promise<BotEvent | null> {
       return result.data as BotEvent;
     } else {
       logger.warn(
-        `Invalid event structure in ${filePath}: ${result.error.message}`,
-        location
+        `Invalid event structure in ${filePath}: ${result.error.message}`
       );
       return null;
     }
   } catch (error) {
-    logger.error(`Failed to load event from ${filePath}`, {
-      error: error instanceof Error ? error : new Error(String(error)),
-      ...location,
-    });
+    logger.exception(`Failed to load event from ${filePath}`, error);
     return null;
   }
 }
@@ -131,7 +116,7 @@ const getBotType = (): BotType => {
     return args[0] as BotType;
   }
 
-  throw new Error(
+  throw new RealmError(
     "Bot type must be specified via BOT_TYPE environment variable or command line argument"
   );
 };
@@ -202,13 +187,13 @@ if (fs.existsSync(commandsPath)) {
 
     if (command) {
       client.commands.set(command.data.name, command);
-      logger.debug(`Loaded command: ${command.data.name}`, location);
+      logger.debug(`Loaded command: ${command.data.name}`);
     } else {
-      logger.warn(`Failed to load command from file: ${file}`, location);
+      logger.warn(`Failed to load command from file: ${file}`);
     }
   }
 } else {
-  logger.error(`Commands directory not found: ${commandsPath}`, location);
+  logger.error(`Commands directory not found: ${commandsPath}`);
   process.exit(1);
 }
 
@@ -233,13 +218,13 @@ if (config.hasComponents) {
 
       if (component) {
         client.components.set(component.name, component);
-        logger.debug(`Loaded component: ${component.name}`, location);
+        logger.debug(`Loaded component: ${component.name}`);
       } else {
-        logger.warn(`Failed to load component from file: ${file}`, location);
+        logger.warn(`Failed to load component from file: ${file}`);
       }
     }
   } else {
-    logger.warn(`Components directory not found: ${componentsPath}`, location);
+    logger.warn(`Components directory not found: ${componentsPath}`);
   }
 }
 
@@ -277,9 +262,9 @@ if (fs.existsSync(eventsPath)) {
           }
         });
       }
-      logger.debug(`Loaded event: ${event.name}`, location);
+      logger.debug(`Loaded event: ${event.name}`);
     } else {
-      logger.warn(`Failed to load event from file: ${file}`, location);
+      logger.warn(`Failed to load event from file: ${file}`);
     }
   }
 } else {

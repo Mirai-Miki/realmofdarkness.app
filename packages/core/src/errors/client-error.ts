@@ -16,17 +16,14 @@ export class ClientError extends RealmError {
    * @param message - The error message
    * @param options - Additional error options
    * @param options.statusCode - HTTP status code (default: 400)
-   * @param options.errorCode - Error code for programmatic handling
    * @param options.fields - Additional key-value pairs to include in response
    */
   constructor(
     message: string,
     options: {
-      code?: string;
-      location?: string;
       log?: boolean;
       fields?: Record<string, string>;
-      cause?: Error;
+      cause?: unknown;
       statusCode?: number;
     } = {}
   ) {
