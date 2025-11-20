@@ -8,7 +8,7 @@
     "build:types": "tsc -b",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "clean": "git clean -fdX .",
+    "clean": "git clean -fdX -e .env -e .env.* .",
     "migrate": "pnpm --filter database exec drizzle-kit migrate",
     "db:generate": "pnpm --filter database run generate",
     "db:studio": "pnpm --filter database run studio",

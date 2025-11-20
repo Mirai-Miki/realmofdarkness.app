@@ -1,12 +1,41 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "ENABLE_CONSOLE_LOGGING",
+    "ENABLE_DISCORD_LOGGING",
+    "LOGGER_TOKEN",
+    "LOGGER_CHANNEL_ID",
+    "LOG_FILE_PATH"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "!dist/**/*.map"]
+      "outputs": ["dist/**", "!dist/**/*.map"],
+      "env": ["NODE_ENV"]
     },
-    "lint": { "outputs": [] },
-    "test": { "dependsOn": ["build"], "outputs": ["coverage/**"] },
-    "dev": { "cache": false, "persistent": true }
+    "lint": { 
+      "outputs": [],
+      "env": ["NODE_ENV"]
+    },
+    "test": { 
+      "dependsOn": ["build"], 
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "DATABASE_URL"]
+    },
+    "dev": { 
+      "cache": false, 
+      "persistent": true,
+      "env": [
+        "NODE_ENV",
+        "DATABASE_URL",
+        "ENABLE_CONSOLE_LOGGING",
+        "ENABLE_DISCORD_LOGGING",
+        "LOGGER_TOKEN",
+        "LOGGER_CHANNEL_ID",
+        "LOG_FILE_PATH"
+      ]
+    }
   }
 }
