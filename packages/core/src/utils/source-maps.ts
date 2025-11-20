@@ -25,7 +25,6 @@ handleUncaughtErrors();
 export function handleUncaughtErrors(): void {
   // Source map support is already registered via the import above
   // This function can be extended for additional error handling configuration
-  // const logger = Logging.getLogger();
 
   // Handle unhandled promise rejections in all environments
   process.on("unhandledRejection", (reason: unknown) => {

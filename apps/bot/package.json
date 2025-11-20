@@ -39,13 +39,13 @@
   "dependencies": {
     "@realm/core": "workspace:*",
     "@realm/database": "workspace:*",
-    "discord.js": "^14.22.1",
-    "dotenv": "^17.2.1",
-    "zod": "^4.1.4"
+    "discord.js": "^14.25.0",
+    "dotenv": "^17.2.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "fs-extra": "^11.3.1",
-    "glob": "^11.0.3",
-    "nodemon": "^3.1.10"
+    "fs-extra": "^11.3.2",
+    "glob": "^11.1.0",
+    "nodemon": "^3.1.11"
   }
 }

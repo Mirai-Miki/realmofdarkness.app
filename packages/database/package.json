@@ -23,6 +23,6 @@
     "studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "dotenv": "^17.2.1"
+    "dotenv": "^17.2.3"
   }
 }

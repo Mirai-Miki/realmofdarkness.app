@@ -53,7 +53,7 @@ class Logger {
     if (this.fileLogger) {
       const backupPath =
         process.env.LOG_FILE_PATH ||
-        path.join(process.cwd(), "..", "logs", `${appName}.log`);
+        path.join(process.cwd(), "../../", "logs", `${appName}.log`);
       this.fileLogger = new FileLogger(backupPath);
     }
   }
@@ -147,7 +147,7 @@ class Logger {
     const backupLogPath =
       config?.backupLogPath ||
       process.env.LOG_FILE_PATH ||
-      path.join(process.cwd(), "..", "logs", `${this.appName}.log`);
+      path.join(process.cwd(), "../..", "logs", `${this.appName}.log`);
 
     // Initialize Discord logger if enabled and configured
     if (this.enableDiscordLogging && discordToken && discordChannelId) {
