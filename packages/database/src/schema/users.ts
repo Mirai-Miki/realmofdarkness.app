@@ -5,7 +5,7 @@ import {
   timestamp,
   boolean,
 } from "drizzle-orm/pg-core";
-import { SupporterName } from "shared";
+import { SupporterName } from "@realm/core";
 import { snowflake } from "../schema_types";
 
 export const supporterLevel = pgEnum("supporter_level", [

@@ -1,6 +1,6 @@
 import type { Guild } from "discord.js";
 
-import { logger } from "shared";
+import { logger } from "@realm/core/logger";
 import { setActivity } from "utilities";
 import { Events } from "discord.js";
 import { AppGuild } from "entities";
@@ -10,7 +10,7 @@ module.exports = {
   once: false,
   async execute(guild: Guild) {
     await setActivity(guild.client);
-    const appGuild = await AppGuild.from(guild);
+    await AppGuild.from(guild);
 
     // Update all existing guild members to create member relations
     try {
@@ -31,8 +31,8 @@ module.exports = {
 
           try {
             // Update user with create = false to only link existing users
-            const CREATE_USER = false; // Indicates that only existing users should be linked
-            await API.updateUser(member, CREATE_USER);
+            // const CREATE_USER = false; // Indicates that only existing users should be linked
+            // await API.updateUser(member, CREATE_USER);
           } catch (error) {
             console.error(
               `Failed to update member during GuildCreate ${member.user.username} (${member.user.id}):`,

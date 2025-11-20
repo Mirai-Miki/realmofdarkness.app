@@ -1,7 +1,7 @@
 import type { Client } from "discord.js";
 import { ActivityType } from "discord.js";
-import { RealmError } from "shared/errors";
-import { logger } from "shared";
+import { RealmError } from "@realm/core/errors";
+import { logger } from "@realm/core/logger";
 
 /**
  * Sets the bot's activity status showing the number of guilds it's connected to

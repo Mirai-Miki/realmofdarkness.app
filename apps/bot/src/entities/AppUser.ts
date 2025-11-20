@@ -1,11 +1,11 @@
-import type { UserDb } from "database";
+import type { UserDb } from "@realm/database";
 import { User } from "discord.js";
-import { RealmError } from "shared";
-import { logger } from "shared/logger";
-import { db } from "database";
-import { users } from "database/schema/users";
+import { RealmError } from "@realm/core";
+import { logger } from "@realm/core/logger";
+import { db } from "@realm/database";
+import { users } from "@realm/database/schema/users";
 import { eq } from "drizzle-orm";
-import { SupporterName } from "shared";
+import { SupporterName } from "@realm/core";
 
 const location = "bot/src/entities/user.ts";
 

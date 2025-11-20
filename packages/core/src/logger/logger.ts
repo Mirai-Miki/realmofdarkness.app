@@ -35,7 +35,7 @@ class Logger {
   /**
    * Private constructor to enforce singleton pattern.
    */
-  public constructor() {
+  constructor() {
     // Load environment variables
     dotenv.config();
     this.initializeFromEnv();
@@ -493,5 +493,5 @@ export const logger = (() => {
   if (!_logger) {
     _logger = new Logger();
   }
-  return _logger;
+  return _logger!;
 })();

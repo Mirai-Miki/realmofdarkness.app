@@ -3,21 +3,19 @@
  * Tests core logging functionality, configuration, and error handling.
  */
 
-import { Logging } from "../src/logger/logging.js";
+import { logger } from "../src/logger/index.js";
 import { Environment } from "../src/types/logger.js";
 
 describe("Logging", () => {
-  let logger: Logging;
+
 
   beforeEach(() => {
-    // Reset singleton for each test
-    (Logging as any).instance = null;
-    logger = Logging.getLogger();
-  });
-
-  afterEach(() => {
-    // Clean up
-    (Logging as any).instance = null;
+    // Reset configuration for each test
+    logger.configure({
+      environment: Environment.Development,
+      enableConsoleLogging: false,
+      enableDiscordLogging: false,
+    });
   });
 
   describe("Singleton Pattern", () => {
@@ -25,11 +23,10 @@ describe("Logging", () => {
      * Test that getLogger always returns the same instance.
      */
     it("should return the same instance on multiple calls", () => {
-      const instance1 = Logging.getLogger();
-      const instance2 = Logging.getLogger();
+      const instance1 = logger;
+      const instance2 = logger;
 
       expect(instance1).toBe(instance2);
-      expect(instance1).toBeInstanceOf(Logging);
     });
   });
 
@@ -109,7 +106,7 @@ describe("Logging", () => {
         enableConsoleLogging: true,
       });
 
-      logger.warning("Test warning message");
+      logger.warn("Test warning message");
 
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();

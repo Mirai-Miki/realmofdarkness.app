@@ -19,7 +19,7 @@ export default defineConfig({
   target: "node18", // Match your Node.js runtime
 
   // TypeScript configuration
-  dts: true, // Generate .d.ts files
+  dts: false, // Generate .d.ts files
   splitting: true, // Enable code splitting for better optimization
   sourcemap: true, // Generate source maps for debugging
 
@@ -38,8 +38,8 @@ export default defineConfig({
     "discord-api-types",
 
     // Keep shared packages external since they'll be resolved at runtime
-    "shared",
-    "database",
+    "@realm/core",
+    "@realm/database",
 
     // Node.js built-ins
     "fs",

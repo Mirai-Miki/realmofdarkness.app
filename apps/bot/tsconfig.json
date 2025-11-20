@@ -7,8 +7,8 @@
     "typeRoots": ["node_modules/@types", "./src/types"],
     "baseUrl": "./",
     "paths": {
-      "shared": ["../../packages/shared/src/index.ts"],
-      "shared/*": ["../../packages/shared/src/*"],
+      "@realm/core": ["../../packages/core/src/index.ts"],
+      "@realm/core/*": ["../../packages/core/src/*"],
       "database": ["../../packages/database/src/index.ts"],
       "database/*": ["../../packages/database/src/*"],
       "entities": ["src/entities/index.ts"],
@@ -25,7 +25,7 @@
   "include": ["src", "tsup.config.ts", "test"],
   "exclude": ["node_modules", "dist", "scripts"],
   "references": [
-    { "path": "../../packages/shared" },
+    { "path": "../../packages/core" },
     { "path": "../../packages/database" }
   ]
 }

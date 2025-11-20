@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { logger } from "shared/logger";
+import { logger } from "@realm/core/logger";
 
 // Schema imports
 import * as users from "./schema/users.js";

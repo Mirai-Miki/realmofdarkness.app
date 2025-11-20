@@ -1,7 +1,7 @@
 import { List, ListItem, ListSubheader } from "@mui/material";
 import { Typography } from "@mui/material";
 import Divider from "@mui/material/Divider";
-import { Box } from "@mui/system";
+import { Box } from "@mui/material";
 import ListItemDialog from "../ListItemDialog";
 import AccordionTitle from "./AccordionTitle";
 

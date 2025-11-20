@@ -4,7 +4,7 @@ import ExpandCircleDownIcon from "@mui/icons-material/ExpandCircleDown";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { slugify } from "../../utility";
 import { useSheetContext } from "../../routes/Character/Vampire5thSheet";
-import { styled } from "@mui/system";
+import { styled } from "@mui/material/styles";
 import SpecDialogue from "./SpecDialogue";
 import { useState } from "react";
 

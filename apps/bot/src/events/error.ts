@@ -1,4 +1,4 @@
-import { logger } from "shared/logger";
+import { logger } from "@realm/core/logger";
 
 module.exports = {
   name: "error",

@@ -13,7 +13,7 @@
  */
 
 import "source-map-support/register";
-import { Logging } from "logger";
+import { logger } from "../logger";
 
 // Auto-initialize enhanced error handling when this module is imported
 handleUncaughtErrors();
@@ -25,38 +25,26 @@ handleUncaughtErrors();
 export function handleUncaughtErrors(): void {
   // Source map support is already registered via the import above
   // This function can be extended for additional error handling configuration
-  const logger = Logging.getLogger();
+  // const logger = Logging.getLogger();
 
   // Handle unhandled promise rejections in all environments
   process.on("unhandledRejection", (reason: unknown) => {
     logger.fatal("Unhandled Promise Rejection", {
-      fields: [
-        { name: "Reason", value: String(reason), inline: false },
-        {
-          name: "Environment",
-          value: process.env.NODE_ENV || "unknown",
-          inline: true,
-        },
-      ],
+      fields: {
+        Reason: String(reason),
+        Environment: process.env.NODE_ENV || "unknown",
+      },
     });
   });
 
   // Handle uncaught exceptions in all environments
   process.on("uncaughtException", (error: Error) => {
     logger.fatal("Uncaught Exception", {
-      fields: [
-        { name: "Error", value: error.message, inline: false },
-        {
-          name: "Stack",
-          value: error.stack || "No stack trace",
-          inline: false,
-        },
-        {
-          name: "Environment",
-          value: process.env.NODE_ENV || "unknown",
-          inline: true,
-        },
-      ],
+      fields: {
+        Error: error.message,
+        Stack: error.stack || "No stack trace",
+        Environment: process.env.NODE_ENV || "unknown",
+      },
     });
   });
 }

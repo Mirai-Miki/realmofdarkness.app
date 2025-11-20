@@ -2,7 +2,7 @@ import type { User, PartialUser } from "discord.js";
 import type { BotEvent } from "types";
 import { Events } from "discord.js";
 import { AppUser } from "entities";
-import { logger } from "shared/logger";
+import { logger } from "@realm/core/logger";
 
 /**
  * Handles Discord UserUpdate events

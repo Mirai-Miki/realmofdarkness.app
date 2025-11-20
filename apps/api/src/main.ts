@@ -1,4 +1,4 @@
-import "shared/utils/source-maps";
+import "@realm/core/utils/source-maps";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module.js";
 

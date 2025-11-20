@@ -8,11 +8,11 @@
  */
 import type { BotType, BotCommand, BotComponent, BotEvent } from "types";
 
-import "shared/utils/source-maps";
+import "@realm/core/utils/source-maps";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
-import { Logging } from "shared/logger";
+import { logger } from "@realm/core/logger";
 import { Client, GatewayIntentBits, Collection, Partials } from "discord.js";
 import {
   BotCommandSchema,
@@ -23,7 +23,7 @@ import {
 // Load environment variables
 dotenv.config();
 
-const logger = Logging.getLogger();
+// const logger = Logging.getLogger(); // Removed: logger is imported directly
 const location = {
   location: "main/bot.ts",
 };

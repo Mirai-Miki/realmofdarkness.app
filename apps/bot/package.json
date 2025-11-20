@@ -37,8 +37,8 @@
     "lint": "eslint . --ext .js,.ts"
   },
   "dependencies": {
-    "shared": "workspace:*",
-    "database": "workspace:*",
+    "@realm/core": "workspace:*",
+    "@realm/database": "workspace:*",
     "discord.js": "^14.22.1",
     "dotenv": "^17.2.1",
     "zod": "^4.1.4"

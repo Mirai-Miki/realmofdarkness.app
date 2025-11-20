@@ -12,6 +12,9 @@ export default {
   // Module file extensions Jest should recognize
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
 
+  // Directories to search for modules
+  moduleDirectories: ["node_modules", "src"],
+
   // Transform TypeScript files using ts-jest
   transform: {
     "^.+\\.tsx?$": [

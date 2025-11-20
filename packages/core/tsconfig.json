@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "dist",
+    "baseUrl": "./src",
+    "paths": {
+      "types": ["./types"],
+      "types/*": ["./types/*"],
+      "errors": ["./errors"],
+      "errors/*": ["./errors/*"],
+      "logger": ["./logger"],
+      "logger/*": ["./logger/*"],
+      "utils": ["./utils"],
+      "utils/*": ["./utils/*"],
+      "validations": ["./validations"],
+      "validations/*": ["./validations/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
+}

@@ -1,10 +1,10 @@
-import type { GuildDb } from "database";
+import type { GuildDb } from "@realm/database";
 import type { Guild } from "discord.js";
 
-import { RealmError } from "shared";
-import { logger } from "shared/logger";
-import { db } from "database";
-import { guilds } from "database/schema/guilds";
+import { RealmError } from "@realm/core";
+import { logger } from "@realm/core/logger";
+import { db } from "@realm/database";
+import { guilds } from "@realm/database/schema/guilds";
 import { eq } from "drizzle-orm";
 
 const location = "bot/src/entities/AppGuild.ts";
@@ -63,7 +63,7 @@ export class AppGuild {
    * console.log(appGuild.trackerChannel); // Safe to access
    * ```
    */
-  static async fetch(guild: Guild): Promise<AppGuild> {
+  static async from(guild: Guild): Promise<AppGuild> {
     try {
       // Try to load existing guild data
       const [existingGuild] = await db
@@ -94,7 +94,7 @@ export class AppGuild {
           .returning();
 
         guildData = createdGuild;
-        this.pushGuildCreateEvent();
+        // this.pushGuildCreateEvent();
 
         logger.info(
           `Created new guild ${guild.name} (${guild.id}) in database`
@@ -130,7 +130,7 @@ export class AppGuild {
       logger.info(`Deleted guild ${guild.name} (${guild.id}) from database`);
 
       // Now we need to push a guild delete event
-      this.pushGuildDeleteEvent();
+      // this.pushGuildDeleteEvent();
 
       return true;
     } catch (error) {
@@ -186,7 +186,7 @@ export class AppGuild {
       this._hasChanges = false;
 
       // We need to push the guild update event
-      this.pushGuildUpdateEvent();
+      // this.pushGuildUpdateEvent();
 
       logger.debug(
         `Saved changes for guild ${this.djs.name} (${this.djs.id})`,

@@ -1,13 +1,13 @@
 import type { GuildMember } from "discord.js";
-import type { MemberDb } from "database/schema/members";
+import type { MemberDb } from "@realm/database/schema/members";
 
-import { RealmError } from "shared";
-import { members } from "database/schema/members";
-import { logger } from "shared/logger";
+import { RealmError } from "@realm/core";
+import { members } from "@realm/database/schema/members";
+import { logger } from "@realm/core/logger";
 import { eq, and } from "drizzle-orm";
-import { db } from "database";
-import { AppGuild } from "./AppGuild.js";
-import { AppUser } from "./AppUser.js";
+import { db } from "@realm/database";
+// import { AppGuild } from "./AppGuild.js";
+// import { AppUser } from "./AppUser.js";
 
 const location = "bot/src/entities/AppMember.ts";
 
@@ -35,10 +35,8 @@ export class AppMember {
   public readonly djs: GuildMember;
 
   /** Reference to the AppGuild this member belongs to */
-  public readonly guild: AppGuild;
-
-  /** Reference to the AppUser for this member */
-  public readonly user: AppUser;
+  // public readonly guild: AppGuild;
+  // public readonly user: AppUser;
 
   /** Database data - loaded  */
   private _dbData: MemberDb;
@@ -71,7 +69,7 @@ export class AppMember {
    * console.log(appMember.isAdmin); // Safe to access
    * ```
    */
-  static async fetch(member: GuildMember): Promise<AppMember> {
+  static async from(member: GuildMember): Promise<AppMember> {
     try {
       // Try to load existing member data
       const [existingMember] = await db
@@ -114,7 +112,7 @@ export class AppMember {
 
         memberData = createdMember;
 
-        this.pushMemberCreateEvent();
+        // this.pushMemberCreateEvent();
 
         logger.info(
           `Created new member ${member.user.username} in guild ${member.guild.name} in database`,
@@ -160,7 +158,7 @@ export class AppMember {
           )
         );
 
-      this.pushMemberDeleteEvent();
+      // this.pushMemberDeleteEvent();
       logger.info(
         `Deleted member ${member.user.username} from guild ${member.guild.name} in database`
       );
@@ -227,7 +225,7 @@ export class AppMember {
       this._dbData = updatedMember;
       this._hasChanges = false;
 
-      this.pushMemberUpdateEvent();
+      // this.pushMemberUpdateEvent();
 
       logger.debug(
         `Saved changes for member ${this.djs.user.username} in guild ${this.djs.guild.name}`,
