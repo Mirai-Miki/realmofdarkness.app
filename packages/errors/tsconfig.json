@@ -9,6 +9,5 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test"],
-  "references": [{ "path": "../errors" }]
+  "exclude": ["node_modules", "dist", "test"]
 }

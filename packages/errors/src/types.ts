@@ -1,4 +1,8 @@
 /**
+ * Type definitions for errors package
+ */
+
+/**
  * HTTP Status Codes enum
  * Provides strongly typed constants for HTTP status codes to avoid magic numbers
  */

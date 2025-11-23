@@ -1,4 +1,4 @@
-import { HttpStatus } from "types";
+import { HttpStatus } from "@realm/errors";
 
 /**
  * Check if a status code is informational (1xx)

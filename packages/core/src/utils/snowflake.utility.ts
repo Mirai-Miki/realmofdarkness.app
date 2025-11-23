@@ -17,6 +17,8 @@
  * with Discord snowflakes to approximately the year 2070.
  */
 
+import { RealmError } from "@realm/errors";
+
 /**
  * Snowflake component bit lengths
  */
@@ -227,7 +229,9 @@ export class SnowflakeGenerator {
         sequence,
       };
     } catch (error) {
-      throw new Error(`Invalid snowflake format: ${snowflake}. ${error}`);
+      throw new RealmError(`Invalid snowflake format: ${snowflake}.`, {
+        cause: error,
+      });
     }
   }
 

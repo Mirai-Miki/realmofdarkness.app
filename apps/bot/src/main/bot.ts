@@ -12,7 +12,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
 import { logger } from "@realm/logger";
-import { RealmError } from "@realm/logger/errors";
+import { RealmError } from "@realm/errors";
 import { Client, GatewayIntentBits, Collection, Partials } from "discord.js";
 import {
   BotCommandSchema,

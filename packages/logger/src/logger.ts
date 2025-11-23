@@ -6,11 +6,10 @@ import "source-map-support/register";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import { HTTPError } from "discord.js";
-import { RealmError } from "./errors";
-import { Environment } from "./types";
+import { RealmError } from "@realm/errors";
 import { DiscordLogger } from "./discord-logger";
 import { FileLogger } from "./file-logger";
-import { LogLevel } from "./logger.types";
+import { LogLevel, Environment } from "./logger.types";
 
 /**
  * Log level priority mapping for filtering.

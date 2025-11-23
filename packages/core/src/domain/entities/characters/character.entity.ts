@@ -1,7 +1,6 @@
-import type { Splats } from "../../../types/character.types.js";
-import type { Snowflake } from "../../../types/index.js";
+import type { Splats, Snowflake } from "types";
 import { SheetStatus } from "types";
-import { RealmError } from "@realm/logger/errors";
+import { RealmError } from "@realm/errors";
 
 /**
  * Base Character entity representing all common character data across all game systems.

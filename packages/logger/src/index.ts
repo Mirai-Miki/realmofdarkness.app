@@ -26,5 +26,4 @@
 export { logger } from "./logger";
 export type { LoggerConfig, LogEntry, LogOptions } from "./logger.types";
 export { LogLevel } from "./logger.types";
-export { Environment, HttpStatus } from "./types";
-export { RealmError, ClientError } from "./errors";
+export { Environment } from "./types";

@@ -18,8 +18,8 @@
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
-    { "path": "../../packages/core" },
+    { "path": "../../packages/errors" },
     { "path": "../../packages/logger" },
-    { "path": "../../packages/database" }
+    { "path": "../../packages/core" }
   ]
 }

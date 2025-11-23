@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      source-map-support:
-        specifier: ^0.5.21
-        version: 0.5.21
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@1.21.7)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -24,21 +21,12 @@ importers:
       '@types/node':
         specifier: ^24.10.1
         version: 24.10.1
-      '@types/pg':
-        specifier: ^8.15.6
-        version: 8.15.6
-      '@types/source-map-support':
-        specifier: ^0.5.10
-        version: 0.5.10
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.47.0
         version: 8.47.0(@typescript-eslint/parser@8.47.0(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3)
       '@typescript-eslint/parser':
         specifier: ^8.47.0
         version: 8.47.0(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3)
-      drizzle-kit:
-        specifier: ^0.31.7
-        version: 0.31.7
       eslint:
         specifier: ^9.39.1
         version: 9.39.1(jiti@1.21.7)
@@ -145,6 +133,9 @@ importers:
       '@realm/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@realm/errors':
+        specifier: workspace:*
+        version: link:../../packages/errors
       '@realm/logger':
         specifier: workspace:*
         version: link:../../packages/logger
@@ -216,16 +207,15 @@ importers:
 
   packages/core:
     dependencies:
+      '@realm/errors':
+        specifier: workspace:*
+        version: link:../errors
       '@realm/logger':
         specifier: workspace:*
         version: link:../logger
       zod:
         specifier: ^4.1.12
         version: 4.1.12
-    devDependencies:
-      discord-api-types:
-        specifier: ^0.38.34
-        version: 0.38.34
 
   packages/database:
     dependencies:
@@ -241,6 +231,15 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.16.3
+    devDependencies:
+      '@types/pg':
+        specifier: ^8.15.6
+        version: 8.15.6
+      drizzle-kit:
+        specifier: ^0.31.7
+        version: 0.31.7
+
+  packages/errors: {}
 
   packages/logger:
     dependencies:
@@ -250,6 +249,9 @@ importers:
       '@discordjs/rest':
         specifier: ^2.6.0
         version: 2.6.0
+      '@realm/errors':
+        specifier: workspace:*
+        version: link:../errors
       discord.js:
         specifier: ^14.25.0
         version: 14.25.0
@@ -269,9 +271,21 @@ importers:
       discord-api-types:
         specifier: ^0.38.34
         version: 0.38.34
-      typescript:
-        specifier: ^5.8.0
-        version: 5.9.3
+
+  packages/repositories:
+    dependencies:
+      '@realm/core':
+        specifier: workspace:*
+        version: link:../core
+      '@realm/database':
+        specifier: workspace:*
+        version: link:../database
+      '@realm/errors':
+        specifier: workspace:*
+        version: link:../errors
+      '@realm/logger':
+        specifier: workspace:*
+        version: link:../logger
 
 packages:
 

@@ -1,4 +1,18 @@
-import type { Environment } from "./types";
+/**
+ * Type definitions for the Realm of Darkness logger package
+ * This file contains type definitions for logging functionality.
+ * @packageDocumentation
+ */
+
+/**
+ * Environment enumeration for the Realm of Darkness application.
+ * Defines the different environments in which the application can run.
+ */
+export const enum Environment {
+  Development = "development",
+  Preproduction = "preproduction",
+  Production = "production",
+}
 
 /**
  * Log level enumeration for the Realm of Darkness logger.

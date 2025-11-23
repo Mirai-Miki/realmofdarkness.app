@@ -1,9 +1,16 @@
 {
-  "name": "@realm/core",
+  "name": "@realm/repositories",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
     "lint": "eslint src --ext .ts",
@@ -13,8 +20,9 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@realm/core": "workspace:*",
+    "@realm/database": "workspace:*",
     "@realm/errors": "workspace:*",
-    "@realm/logger": "workspace:*",
-    "zod": "^4.1.12"
+    "@realm/logger": "workspace:*"
   }
 }

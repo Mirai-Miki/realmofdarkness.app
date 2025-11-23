@@ -1,3 +1,5 @@
+import { HttpStatus } from "./types.js";
+
 /**
  * Custom error class for the Realm of Darkness application.
  * Extends the native Error class to include additional context and metadata
@@ -75,8 +77,6 @@ export class RealmError extends Error {
     };
   }
 }
-
-import { HttpStatus } from "./types";
 
 /**
  * Client error class for user-facing errors that should not be logged.

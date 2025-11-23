@@ -5,5 +5,9 @@
     "outDir": "dist"
   },
   "include": ["src"],
-  "references": [{ "path": "../core" }]
+  "references": [
+    { "path": "../core" },
+    { "path": "../errors" },
+    { "path": "../logger" }
+  ]
 }

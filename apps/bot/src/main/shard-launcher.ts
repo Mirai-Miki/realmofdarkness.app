@@ -81,7 +81,7 @@ manager.on("shardCreate", (shard) => {
   logger.info(`Launched ${config.name} shard ${shard.id}`);
 
   shard.on("error", (error) => {
-    logger.error(`Error in ${config.name} shard ${shard.id}:`, error);
+    logger.exception(`Error in ${config.name} shard ${shard.id}:`, error);
   });
 
   shard.on("ready", () => {

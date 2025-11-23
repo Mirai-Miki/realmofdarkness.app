@@ -1,4 +1,4 @@
-import { RealmError } from "@realm/logger/errors";
+import { RealmError } from "@realm/errors";
 
 /**
  * Value Object representing a damage tracker for 20th edition characters.
