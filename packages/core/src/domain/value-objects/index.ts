@@ -8,3 +8,5 @@
 export { DamageTracker5th } from "./character/damage-tracker-5th.vo.js";
 export { DamageTracker20th } from "./character/damage-tracker-20th.vo.js";
 export { WillpowerTracker20th } from "./character/willpower-tracker-20th.vo.js";
+export { Experience } from "./character/experience.vo.js";
+export { Skill } from "./character/skill.vo.js";

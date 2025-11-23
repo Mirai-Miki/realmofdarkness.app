@@ -4,9 +4,11 @@ import { SnowflakeGenerator } from "utils";
 // Shared validation schemas
 export const HexColorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
 
-export const SnowflakeSchema = z.string().refine(SnowflakeGenerator.isValid, {
-  message: "Invalid snowflake ID format",
-});
+export const SnowflakeSchema = z
+  .string()
+  .refine((val) => SnowflakeGenerator.isValid(val), {
+    message: "Invalid snowflake ID format",
+  });
 
 export const DiscordSnowflakeSchema = z.string().regex(/^\d{17,20}$/);
 

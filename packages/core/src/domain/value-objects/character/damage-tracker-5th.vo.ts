@@ -24,7 +24,7 @@ export class DamageTracker5th {
    * @param total - Total number of boxes (1-15)
    * @param superficial - Superficial damage (0 to total)
    * @param aggravated - Aggravated damage (0 to total)
-   * @throws {ClientError} If values are invalid
+   * @throws {RealmError} If values are invalid
    */
   constructor(
     public readonly total: number,
@@ -37,7 +37,7 @@ export class DamageTracker5th {
   /**
    * Validates tracker values.
    *
-   * @throws {ClientError} If values are invalid
+   * @throws {RealmError} If values are invalid
    * @private
    */
   private validate(): void {
@@ -81,7 +81,7 @@ export class DamageTracker5th {
    *
    * @returns True if no boxes remaining
    */
-  public get isFull(): boolean {
+  public get isImpaired(): boolean {
     return this.current === 0;
   }
 
@@ -90,7 +90,7 @@ export class DamageTracker5th {
    *
    * @returns True if no damage taken
    */
-  public get isEmpty(): boolean {
+  public get isUndamaged(): boolean {
     return this.superficial === 0 && this.aggravated === 0;
   }
 

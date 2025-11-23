@@ -25,7 +25,7 @@ export class DamageTracker20th {
    * @param bashing - Bashing damage (0 to total)
    * @param lethal - Lethal damage (0 to total)
    * @param aggravated - Aggravated damage (0 to total)
-   * @throws {ClientError} If values are invalid
+   * @throws {RealmError} If values are invalid
    */
   constructor(
     public readonly total: number,
@@ -39,7 +39,7 @@ export class DamageTracker20th {
   /**
    * Validates tracker values.
    *
-   * @throws {ClientError} If values are invalid
+   * @throws {RealmError} If values are invalid
    * @private
    */
   private validate(): void {

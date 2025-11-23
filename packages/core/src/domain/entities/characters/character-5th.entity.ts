@@ -1,6 +1,7 @@
 import { Character } from "./character.entity.js";
 import type { Splats, SheetStatus, Snowflake } from "types";
-import { DamageTracker5th } from "../../value-objects/index.js";
+import type { Experience } from "../../value-objects/index.js";
+import { DamageTracker5th, Skill } from "../../value-objects/index.js";
 
 /**
  * Base character entity for all 5th Edition game systems.
@@ -8,10 +9,10 @@ import { DamageTracker5th } from "../../value-objects/index.js";
  *
  * @remarks
  * Character5th adds 5th edition specific mechanics:
- * - Willpower with superficial/aggravated damage (Value Object)
- * - Health with superficial/aggravated damage (Value Object)
+ * - Willpower with superficial/aggravated damage (DamageTracker5th VO)
+ * - Health with superficial/aggravated damage (DamageTracker5th VO)
  * - Attributes (9 attributes rated 1-5)
- * - Skills (27 skills rated 0-5)
+ * - Skills (27 skills rated 0-5 with optional specialties, using Skill VO)
  *
  * Inheritance: Character → Character5th → Vampire5th/Hunter5th/etc
  *
@@ -56,39 +57,39 @@ export abstract class Character5th extends Character {
 
   /**
    * Character skills (9 per category: Physical, Social, Mental)
-   * Each rated 0-5
+   * Each is a Skill value object with rating (0-5) and optional specialties
    */
   public skills: {
     // Physical
-    athletics: number;
-    brawl: number;
-    craft: number;
-    drive: number;
-    firearms: number;
-    melee: number;
-    larceny: number;
-    stealth: number;
-    survival: number;
+    athletics: Skill;
+    brawl: Skill;
+    craft: Skill;
+    drive: Skill;
+    firearms: Skill;
+    melee: Skill;
+    larceny: Skill;
+    stealth: Skill;
+    survival: Skill;
     // Social
-    animalKen: number;
-    etiquette: number;
-    insight: number;
-    intimidation: number;
-    leadership: number;
-    performance: number;
-    persuasion: number;
-    streetwise: number;
-    subterfuge: number;
+    animalKen: Skill;
+    etiquette: Skill;
+    insight: Skill;
+    intimidation: Skill;
+    leadership: Skill;
+    performance: Skill;
+    persuasion: Skill;
+    streetwise: Skill;
+    subterfuge: Skill;
     // Mental
-    academics: number;
-    awareness: number;
-    finance: number;
-    investigation: number;
-    medicine: number;
-    occult: number;
-    politics: number;
-    science: number;
-    technology: number;
+    academics: Skill;
+    awareness: Skill;
+    finance: Skill;
+    investigation: Skill;
+    medicine: Skill;
+    occult: Skill;
+    politics: Skill;
+    science: Skill;
+    technology: Skill;
   };
 
   /**
@@ -98,62 +99,61 @@ export abstract class Character5th extends Character {
    * @param data.name - Character name
    * @param data.userId - Discord user ID (Snowflake)
    * @param data.splat - Character type/splat
+   * @param data.id - Database ID
+   * @param data.guildId - Guild ID (optional)
+   * @param data.isSheet - Whether this is the active sheet
+   * @param data.experience - Character experience (optional)
+   * @param data.status - Character status (optional)
+   * @param data.color - Theme color (optional)
+   * @param data.thumbnail - Avatar URL (optional)
+   * @param data.createdAt - Creation timestamp (optional)
+   * @param data.lastUpdated - Last update timestamp (optional)
    * @param data.health - Health tracker (default: total 4, no damage)
    * @param data.willpower - Willpower tracker (default: total 2, no damage)
    * @param data.attributes - Character attributes (default: all 1)
    * @param data.skills - Character skills (default: all 0)
-   * Additional base Character fields are also accepted
    */
   protected constructor(data: {
+    // Base Character fields
     name: string;
     userId: Snowflake;
     splat: Splats;
-    id?: number | null;
+    id: Snowflake;
     guildId?: Snowflake | null;
     isSheet?: boolean;
-    expTotal?: number;
-    expCurrent?: number;
+    experience?: Experience;
     status?: SheetStatus;
     color?: string;
     thumbnail?: string | null;
     createdAt?: Date;
     lastUpdated?: Date;
-    health?:
-      | DamageTracker5th
-      | { total: number; superficial: number; aggravated: number };
-    willpower?:
-      | DamageTracker5th
-      | { total: number; superficial: number; aggravated: number };
+    // Character5th specific fields
+    health?: DamageTracker5th;
+    willpower?: DamageTracker5th;
     attributes?: Partial<Character5th["attributes"]>;
     skills?: Partial<Character5th["skills"]>;
   }) {
-    super(data);
+    // Pass only Character fields to super
+    super({
+      name: data.name,
+      userId: data.userId,
+      splat: data.splat,
+      id: data.id,
+      guildId: data.guildId,
+      isSheet: data.isSheet,
+      experience: data.experience,
+      status: data.status,
+      color: data.color,
+      thumbnail: data.thumbnail,
+      createdAt: data.createdAt,
+      lastUpdated: data.lastUpdated,
+    });
 
-    // Initialize willpower (accept Value Object or plain object)
-    if (data.willpower instanceof DamageTracker5th) {
-      this.willpower = data.willpower;
-    } else if (data.willpower) {
-      this.willpower = new DamageTracker5th(
-        data.willpower.total,
-        data.willpower.superficial,
-        data.willpower.aggravated
-      );
-    } else {
-      this.willpower = new DamageTracker5th(2, 0, 0); // Default
-    }
+    // Initialize willpower (must be DamageTracker5th)
+    this.willpower = data.willpower ?? new DamageTracker5th(2, 0, 0);
 
-    // Initialize health (accept Value Object or plain object)
-    if (data.health instanceof DamageTracker5th) {
-      this.health = data.health;
-    } else if (data.health) {
-      this.health = new DamageTracker5th(
-        data.health.total,
-        data.health.superficial,
-        data.health.aggravated
-      );
-    } else {
-      this.health = new DamageTracker5th(4, 0, 0); // Default
-    }
+    // Initialize health (must be DamageTracker5th)
+    this.health = data.health ?? new DamageTracker5th(4, 0, 0);
 
     // Initialize attributes with defaults (all start at 1)
     this.attributes = {
@@ -169,35 +169,35 @@ export abstract class Character5th extends Character {
       ...data.attributes,
     };
 
-    // Initialize skills with defaults (all start at 0)
+    // Initialize skills with Skill VOs (all start at rating 0, no specialties)
     this.skills = {
-      athletics: 0,
-      brawl: 0,
-      craft: 0,
-      drive: 0,
-      firearms: 0,
-      melee: 0,
-      larceny: 0,
-      stealth: 0,
-      survival: 0,
-      animalKen: 0,
-      etiquette: 0,
-      insight: 0,
-      intimidation: 0,
-      leadership: 0,
-      performance: 0,
-      persuasion: 0,
-      streetwise: 0,
-      subterfuge: 0,
-      academics: 0,
-      awareness: 0,
-      finance: 0,
-      investigation: 0,
-      medicine: 0,
-      occult: 0,
-      politics: 0,
-      science: 0,
-      technology: 0,
+      athletics: Skill.zero(),
+      brawl: Skill.zero(),
+      craft: Skill.zero(),
+      drive: Skill.zero(),
+      firearms: Skill.zero(),
+      melee: Skill.zero(),
+      larceny: Skill.zero(),
+      stealth: Skill.zero(),
+      survival: Skill.zero(),
+      animalKen: Skill.zero(),
+      etiquette: Skill.zero(),
+      insight: Skill.zero(),
+      intimidation: Skill.zero(),
+      leadership: Skill.zero(),
+      performance: Skill.zero(),
+      persuasion: Skill.zero(),
+      streetwise: Skill.zero(),
+      subterfuge: Skill.zero(),
+      academics: Skill.zero(),
+      awareness: Skill.zero(),
+      finance: Skill.zero(),
+      investigation: Skill.zero(),
+      medicine: Skill.zero(),
+      occult: Skill.zero(),
+      politics: Skill.zero(),
+      science: Skill.zero(),
+      technology: Skill.zero(),
       ...data.skills,
     };
   }
@@ -213,7 +213,6 @@ export abstract class Character5th extends Character {
    */
   public takeSuperficialWillpowerDamage(amount: number): void {
     this.willpower = this.willpower.takeSuperficial(amount);
-    this.markChanged("willpower", this.willpower);
   }
 
   /**
@@ -223,7 +222,6 @@ export abstract class Character5th extends Character {
    */
   public takeAggravatedWillpowerDamage(amount: number): void {
     this.willpower = this.willpower.takeAggravated(amount);
-    this.markChanged("willpower", this.willpower);
   }
 
   /**
@@ -233,7 +231,6 @@ export abstract class Character5th extends Character {
    */
   public healSuperficialWillpower(amount: number): void {
     this.willpower = this.willpower.healSuperficial(amount);
-    this.markChanged("willpower", this.willpower);
   }
 
   /**
@@ -243,7 +240,6 @@ export abstract class Character5th extends Character {
    */
   public healAggravatedWillpower(amount: number): void {
     this.willpower = this.willpower.healAggravated(amount);
-    this.markChanged("willpower", this.willpower);
   }
 
   /**
@@ -253,7 +249,6 @@ export abstract class Character5th extends Character {
    */
   public setWillpowerTotal(total: number): void {
     this.willpower = this.willpower.setTotal(total);
-    this.markChanged("willpower", this.willpower);
   }
 
   /**
@@ -270,8 +265,8 @@ export abstract class Character5th extends Character {
    *
    * @returns True if no willpower damage
    */
-  public isWillpowerFull(): boolean {
-    return this.willpower.isEmpty;
+  public isWillpowerImpaired(): boolean {
+    return this.willpower.isImpaired;
   }
 
   // ==========================================
@@ -285,7 +280,6 @@ export abstract class Character5th extends Character {
    */
   public takeSuperficialHealthDamage(amount: number): void {
     this.health = this.health.takeSuperficial(amount);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -295,7 +289,6 @@ export abstract class Character5th extends Character {
    */
   public takeAggravatedHealthDamage(amount: number): void {
     this.health = this.health.takeAggravated(amount);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -305,7 +298,6 @@ export abstract class Character5th extends Character {
    */
   public healSuperficialHealth(amount: number): void {
     this.health = this.health.healSuperficial(amount);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -315,7 +307,6 @@ export abstract class Character5th extends Character {
    */
   public healAggravatedHealth(amount: number): void {
     this.health = this.health.healAggravated(amount);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -325,7 +316,6 @@ export abstract class Character5th extends Character {
    */
   public setHealthTotal(total: number): void {
     this.health = this.health.setTotal(total);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -342,8 +332,8 @@ export abstract class Character5th extends Character {
    *
    * @returns True if no health damage
    */
-  public isHealthFull(): boolean {
-    return this.health.isEmpty;
+  public isHealthImpaired(): boolean {
+    return this.health.isImpaired;
   }
 
   /**
@@ -352,7 +342,7 @@ export abstract class Character5th extends Character {
    * @returns True if health is fully damaged
    */
   public isIncapacitated(): boolean {
-    return this.health.isFull;
+    return this.health.isImpaired;
   }
 
   // ==========================================
@@ -380,28 +370,69 @@ export abstract class Character5th extends Character {
     value: number
   ): void {
     this.attributes[attribute] = value;
-    this.markChanged("attributes", this.attributes);
+    this.lastUpdated = new Date();
   }
 
   /**
-   * Gets a skill value.
+   * Gets a skill.
    *
    * @param skill - Skill name
-   * @returns Skill value (0-5)
+   * @returns Skill value object
    */
-  public getSkill(skill: keyof Character5th["skills"]): number {
+  public getSkill(skill: keyof Character5th["skills"]): Skill {
     return this.skills[skill];
   }
 
   /**
-   * Sets a skill value.
+   * Gets a skill rating.
    *
    * @param skill - Skill name
-   * @param value - New value (0-5)
+   * @returns Skill rating (0-5)
    */
-  public setSkill(skill: keyof Character5th["skills"], value: number): void {
-    this.skills[skill] = value;
-    this.markChanged("skills", this.skills);
+  public getSkillRating(skill: keyof Character5th["skills"]): number {
+    return this.skills[skill].rating;
+  }
+
+  /**
+   * Sets a skill rating.
+   *
+   * @param skill - Skill name
+   * @param rating - New rating (0-5)
+   */
+  public setSkillRating(
+    skill: keyof Character5th["skills"],
+    rating: number
+  ): void {
+    this.skills[skill] = this.skills[skill].setRating(rating);
+    this.lastUpdated = new Date();
+  }
+
+  /**
+   * Adds a specialty to a skill.
+   *
+   * @param skill - Skill name
+   * @param specialty - Specialty name
+   */
+  public addSkillSpecialty(
+    skill: keyof Character5th["skills"],
+    specialty: string
+  ): void {
+    this.skills[skill] = this.skills[skill].addSpecialty(specialty);
+    this.lastUpdated = new Date();
+  }
+
+  /**
+   * Removes a specialty from a skill.
+   *
+   * @param skill - Skill name
+   * @param specialty - Specialty name
+   */
+  public removeSkillSpecialty(
+    skill: keyof Character5th["skills"],
+    specialty: string
+  ): void {
+    this.skills[skill] = this.skills[skill].removeSpecialty(specialty);
+    this.lastUpdated = new Date();
   }
 
   // ==========================================
@@ -436,12 +467,8 @@ export abstract class Character5th extends Character {
       }
     }
 
-    // Validate skills (0-5)
-    for (const [skill, value] of Object.entries(this.skills)) {
-      if (value < 0 || value > 5) {
-        errors.push(`Skill ${skill} must be between 0 and 5`);
-      }
-    }
+    // Skills self-validate via Skill VO, but we can add additional checks if needed
+    // For now, Skill VO ensures rating is 0-5
 
     return {
       isValid: errors.length === 0,

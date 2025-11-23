@@ -1,5 +1,6 @@
 import { Character } from "./character.entity.js";
 import type { Splats, SheetStatus, Snowflake } from "types";
+import { Experience } from "../../value-objects/index.js";
 
 /**
  * Base character entity for Chronicles of Darkness game systems.
@@ -35,7 +36,7 @@ export abstract class CharacterCoD extends Character {
     name: string;
     userId: Snowflake;
     splat: Splats;
-    id?: number | null;
+    id: Snowflake;
     guildId?: Snowflake | null;
     isSheet?: boolean;
     expTotal?: number;
@@ -46,7 +47,24 @@ export abstract class CharacterCoD extends Character {
     createdAt?: Date;
     lastUpdated?: Date;
   }) {
-    super(data);
+    // Only pass Character-specific fields to super()
+    super({
+      name: data.name,
+      userId: data.userId,
+      splat: data.splat,
+      id: data.id,
+      guildId: data.guildId,
+      isSheet: data.isSheet,
+      experience:
+        data.expTotal !== undefined || data.expCurrent !== undefined
+          ? new Experience(data.expTotal ?? 0, data.expCurrent ?? 0)
+          : Experience.zero(),
+      status: data.status,
+      color: data.color,
+      thumbnail: data.thumbnail,
+      createdAt: data.createdAt,
+      lastUpdated: data.lastUpdated,
+    });
     throw new Error(
       "Chronicles of Darkness character implementation is not yet available. " +
         "This game system is planned for a future release."

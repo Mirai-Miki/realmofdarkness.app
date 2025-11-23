@@ -1,6 +1,7 @@
 import type { Splats, Snowflake } from "types";
 import { SheetStatus } from "types";
 import { RealmError } from "@realm/errors";
+import { Experience } from "../../value-objects/character/experience.vo.js";
 
 /**
  * Base Character entity representing all common character data across all game systems.
@@ -27,7 +28,7 @@ export abstract class Character {
   /**
    * Database ID (null for new characters not yet persisted)
    */
-  public id: number | null = null;
+  public id: Snowflake;
 
   /**
    * Character name (max 50 characters)
@@ -55,14 +56,9 @@ export abstract class Character {
   public isSheet: boolean = false;
 
   /**
-   * Total experience points earned
+   * Character experience (total earned and current unspent)
    */
-  public expTotal: number = 0;
-
-  /**
-   * Current unspent experience points
-   */
-  public expCurrent: number = 0;
+  public experience: Experience = Experience.zero();
 
   /**
    * Character sheet status (Draft, Review, Active, Dead, Archive)
@@ -90,12 +86,6 @@ export abstract class Character {
   public lastUpdated: Date;
 
   /**
-   * Track field changes for change detection
-   * @private
-   */
-  protected _changes: Record<string, unknown> = {};
-
-  /**
    * Creates a new Character instance.
    *
    * @param data - Character initialization data
@@ -105,8 +95,7 @@ export abstract class Character {
    * @param data.id - Database ID (optional for new characters)
    * @param data.guildId - Guild ID (optional)
    * @param data.isSheet - Whether this is the active sheet (default: false)
-   * @param data.expTotal - Total experience points (default: 0)
-   * @param data.expCurrent - Current unspent experience (default: 0)
+   * @param data.experience - Character experience (default: zero)
    * @param data.status - Character status (default: Draft)
    * @param data.color - Theme color (default: #000000)
    * @param data.thumbnail - Avatar URL (optional)
@@ -117,11 +106,10 @@ export abstract class Character {
     name: string;
     userId: Snowflake;
     splat: Splats;
-    id?: number | null;
+    id: Snowflake;
     guildId?: Snowflake | null;
     isSheet?: boolean;
-    expTotal?: number;
-    expCurrent?: number;
+    experience?: Experience;
     status?: SheetStatus;
     color?: string;
     thumbnail?: string | null;
@@ -133,11 +121,10 @@ export abstract class Character {
     this.name = data.name;
     this.userId = data.userId;
     this.splat = data.splat;
-    this.id = data.id ?? null;
+    this.id = data.id;
     this.guildId = data.guildId ?? null;
     this.isSheet = data.isSheet ?? false;
-    this.expTotal = data.expTotal ?? 0;
-    this.expCurrent = data.expCurrent ?? 0;
+    this.experience = data.experience ?? Experience.zero();
     this.status = data.status ?? ("Draft" as SheetStatus);
     this.color = data.color ?? "#000000";
     this.thumbnail = data.thumbnail ?? null;
@@ -168,23 +155,18 @@ export abstract class Character {
    * @returns True if character can afford the cost
    */
   public canAffordExperience(cost: number): boolean {
-    return this.expCurrent >= cost;
+    return this.experience.canAfford(cost);
   }
 
   /**
    * Spends experience points.
    *
    * @param cost - The experience cost to spend
-   * @throws {ClientError} If character doesn't have enough experience
+   * @throws {RealmError} If character doesn't have enough experience
    */
   public spendExperience(cost: number): void {
-    if (!this.canAffordExperience(cost)) {
-      throw new RealmError(
-        `Insufficient experience. Required: ${cost}, Available: ${this.expCurrent}`
-      );
-    }
-    this.expCurrent -= cost;
-    this.markChanged("expCurrent", this.expCurrent);
+    this.experience = this.experience.spend(cost);
+    this.lastUpdated = new Date();
   }
 
   /**
@@ -193,13 +175,8 @@ export abstract class Character {
    * @param amount - The amount of experience to award
    */
   public awardExperience(amount: number): void {
-    if (amount < 0) {
-      throw new RealmError("Cannot award negative experience");
-    }
-    this.expTotal += amount;
-    this.expCurrent += amount;
-    this.markChanged("expTotal", this.expTotal);
-    this.markChanged("expCurrent", this.expCurrent);
+    this.experience = this.experience.award(amount);
+    this.lastUpdated = new Date();
   }
 
   /**
@@ -208,11 +185,8 @@ export abstract class Character {
    * @param total - The total experience points
    */
   public setExperienceTotal(total: number): void {
-    if (total < 0) {
-      throw new RealmError("Experience total cannot be negative");
-    }
-    this.expTotal = total;
-    this.markChanged("expTotal", total);
+    this.experience = this.experience.setTotal(total);
+    this.lastUpdated = new Date();
   }
 
   /**
@@ -221,51 +195,8 @@ export abstract class Character {
    * @param current - The current unspent experience points
    */
   public setExperienceCurrent(current: number): void {
-    if (current < 0) {
-      throw new RealmError("Current experience cannot be negative");
-    }
-    if (current > this.expTotal) {
-      throw new Error("Current experience cannot exceed total experience");
-    }
-    this.expCurrent = current;
-    this.markChanged("expCurrent", current);
-  }
-
-  /**
-   * Marks a field as changed for change tracking.
-   *
-   * @param field - The field name that changed
-   * @param value - The new value
-   * @protected
-   */
-  protected markChanged(field: string, value: unknown): void {
-    this._changes[field] = value;
+    this.experience = this.experience.setCurrent(current);
     this.lastUpdated = new Date();
-  }
-
-  /**
-   * Gets the changes made to this character since last save.
-   *
-   * @returns Object containing changed fields and their new values
-   */
-  public getChanges(): Record<string, unknown> {
-    return { ...this._changes };
-  }
-
-  /**
-   * Checks if the character has unsaved changes.
-   *
-   * @returns True if there are unsaved changes
-   */
-  public hasChanges(): boolean {
-    return Object.keys(this._changes).length > 0;
-  }
-
-  /**
-   * Clears the change tracking (typically after successful save).
-   */
-  public clearChanges(): void {
-    this._changes = {};
   }
 
   /**
@@ -285,13 +216,7 @@ export abstract class Character {
       errors.push("Character name cannot exceed 50 characters");
     }
 
-    if (this.expCurrent < 0) {
-      errors.push("Current experience cannot be negative");
-    }
-
-    if (this.expCurrent > this.expTotal) {
-      errors.push("Current experience cannot exceed total experience");
-    }
+    // Experience validation handled by Experience value object
 
     return {
       isValid: errors.length === 0,

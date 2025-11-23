@@ -3,6 +3,7 @@ import type { Splats, SheetStatus, Snowflake } from "types";
 import {
   DamageTracker20th,
   WillpowerTracker20th,
+  Experience,
 } from "../../value-objects/index.js";
 
 /**
@@ -55,7 +56,7 @@ export abstract class Character20th extends Character {
     name: string;
     userId: Snowflake;
     splat: Splats;
-    id?: number | null;
+    id: Snowflake;
     guildId?: Snowflake | null;
     isSheet?: boolean;
     expTotal?: number;
@@ -70,7 +71,24 @@ export abstract class Character20th extends Character {
       | { total: number; bashing: number; lethal: number; aggravated: number };
     willpower?: WillpowerTracker20th | { total: number; current: number };
   }) {
-    super(data);
+    // Only pass Character-specific fields to super()
+    super({
+      name: data.name,
+      userId: data.userId,
+      splat: data.splat,
+      id: data.id,
+      guildId: data.guildId,
+      isSheet: data.isSheet,
+      experience:
+        data.expTotal !== undefined || data.expCurrent !== undefined
+          ? new Experience(data.expTotal ?? 0, data.expCurrent ?? 0)
+          : Experience.zero(),
+      status: data.status,
+      color: data.color,
+      thumbnail: data.thumbnail,
+      createdAt: data.createdAt,
+      lastUpdated: data.lastUpdated,
+    });
 
     // Initialize willpower (accept Value Object or plain object)
     if (data.willpower instanceof WillpowerTracker20th) {
@@ -110,7 +128,6 @@ export abstract class Character20th extends Character {
    */
   public setWillpowerTotal(total: number): void {
     this.willpower = this.willpower.setTotal(total);
-    this.markChanged("willpower", this.willpower);
   }
 
   /**
@@ -120,7 +137,6 @@ export abstract class Character20th extends Character {
    */
   public setWillpowerCurrent(current: number): void {
     this.willpower = this.willpower.setCurrent(current);
-    this.markChanged("willpower", this.willpower);
   }
 
   /**
@@ -130,7 +146,6 @@ export abstract class Character20th extends Character {
    */
   public spendWillpower(amount: number): void {
     this.willpower = this.willpower.spend(amount);
-    this.markChanged("willpower", this.willpower);
   }
 
   /**
@@ -140,7 +155,6 @@ export abstract class Character20th extends Character {
    */
   public recoverWillpower(amount: number): void {
     this.willpower = this.willpower.recover(amount);
-    this.markChanged("willpower", this.willpower);
   }
 
   /**
@@ -148,7 +162,6 @@ export abstract class Character20th extends Character {
    */
   public recoverAllWillpower(): void {
     this.willpower = this.willpower.recoverAll();
-    this.markChanged("willpower", this.willpower);
   }
 
   /**
@@ -180,7 +193,6 @@ export abstract class Character20th extends Character {
    */
   public setHealthTotal(total: number): void {
     this.health = this.health.setTotal(total);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -190,7 +202,6 @@ export abstract class Character20th extends Character {
    */
   public takeBashingDamage(amount: number): void {
     this.health = this.health.takeBashing(amount);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -200,7 +211,6 @@ export abstract class Character20th extends Character {
    */
   public takeLethalDamage(amount: number): void {
     this.health = this.health.takeLethal(amount);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -210,7 +220,6 @@ export abstract class Character20th extends Character {
    */
   public takeAggravatedDamage(amount: number): void {
     this.health = this.health.takeAggravated(amount);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -220,7 +229,6 @@ export abstract class Character20th extends Character {
    */
   public healBashingDamage(amount: number): void {
     this.health = this.health.healBashing(amount);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -230,7 +238,6 @@ export abstract class Character20th extends Character {
    */
   public healLethalDamage(amount: number): void {
     this.health = this.health.healLethal(amount);
-    this.markChanged("health", this.health);
   }
 
   /**
@@ -240,7 +247,6 @@ export abstract class Character20th extends Character {
    */
   public healAggravatedDamage(amount: number): void {
     this.health = this.health.healAggravated(amount);
-    this.markChanged("health", this.health);
   }
 
   /**
