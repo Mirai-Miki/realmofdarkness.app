@@ -8,11 +8,11 @@
  */
 import type { BotType, BotCommand, BotComponent, BotEvent } from "types";
 
-import "@realm/core/utils/source-maps";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
-import { logger, RealmError } from "@realm/core";
+import { logger } from "@realm/logger";
+import { RealmError } from "@realm/logger/errors";
 import { Client, GatewayIntentBits, Collection, Partials } from "discord.js";
 import {
   BotCommandSchema,

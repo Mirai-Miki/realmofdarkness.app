@@ -263,7 +263,6 @@ scripts/update_packages.sh
 3. **Test your environment**
    - Make sure the backend runs and all tests pass after updating dependencies.
 4. **Synchronize production requirements**
-
    - Use the sync script to automatically update `requirements.txt` with matching package versions from `requirements-dev.txt`:
 
    ```bash

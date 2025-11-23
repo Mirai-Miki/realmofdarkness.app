@@ -22,6 +22,7 @@ The Realm of Darkness combines a modern web application with Discord bots to cre
 **Current Branch:** `refactor/project-overhaul`
 
 This project is undergoing a major refactor to modernize the tech stack:
+
 - **From:** Django/MariaDB/JavaScript → **To:** TypeScript/NestJS/PostgreSQL/Drizzle ORM
 - **Goal:** Unify codebase under TypeScript for better type safety and code sharing
 - **Status:** ~35% complete - See [REFACTOR_STATUS.md](./REFACTOR_STATUS.md)

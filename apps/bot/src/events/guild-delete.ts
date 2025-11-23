@@ -3,7 +3,7 @@ import type { Guild } from "discord.js";
 import { Events } from "discord.js";
 import { setActivity } from "utilities";
 import { GuildDeleteService } from "services";
-import { logger } from "@realm/core/logger";
+import { logger } from "@realm/logger";
 
 module.exports = {
   name: Events.GuildDelete,

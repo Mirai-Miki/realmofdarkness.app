@@ -1,7 +1,6 @@
-export * from "./supporter";
-export * from "./character";
-export * from "./logger";
-export * from "./http-status";
+export * from "./supporter.types";
+export * from "./character.types";
+export * from "./http-status.types";
 
 /**
  * Type alias for snowflake IDs to improve type safety

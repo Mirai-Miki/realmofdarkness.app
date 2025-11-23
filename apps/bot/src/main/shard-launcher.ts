@@ -6,10 +6,11 @@
  * - World of Darkness 5th Edition (5th)
  * - World of Darkness 20th Anniversary Edition (20th)
  */
-import "@realm/core/utils/source-maps";
 import * as path from "path";
 import { ShardingManager } from "discord.js";
 import * as dotenv from "dotenv";
+
+import { logger } from "@realm/logger";
 
 // Load environment variables
 dotenv.config();
@@ -62,7 +63,7 @@ const fileExtension: string = isDev ? "ts" : "js";
 const botType = getBotType();
 const config = BOT_CONFIG[botType];
 
-console.log(`Starting ${config.name} shard manager...`);
+logger.info(`Starting ${config.name} shard manager...`);
 
 // Path to the unified bot file
 const botFile: string = path.join(__dirname, `bot.${fileExtension}`);
@@ -77,22 +78,22 @@ const manager = new ShardingManager(botFile, {
 
 // Event handlers
 manager.on("shardCreate", (shard) => {
-  console.log(`Launched ${config.name} shard ${shard.id}`);
+  logger.info(`Launched ${config.name} shard ${shard.id}`);
 
   shard.on("error", (error) => {
-    console.error(`Error in ${config.name} shard ${shard.id}:`, error);
+    logger.error(`Error in ${config.name} shard ${shard.id}:`, error);
   });
 
   shard.on("ready", () => {
-    console.log(`${config.name} shard ${shard.id} is ready`);
+    logger.info(`${config.name} shard ${shard.id} is ready`);
   });
 
   shard.on("disconnect", () => {
-    console.log(`${config.name} shard ${shard.id} disconnected`);
+    logger.info(`${config.name} shard ${shard.id} disconnected`);
   });
 
   shard.on("reconnecting", () => {
-    console.log(`${config.name} shard ${shard.id} reconnecting`);
+    logger.info(`${config.name} shard ${shard.id} reconnecting`);
   });
 });
 

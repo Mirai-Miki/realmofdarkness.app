@@ -167,23 +167,23 @@ packages:
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "!dist/**/*.map"]
+      "outputs": ["dist/**", "!dist/**/*.map"],
     },
     "lint": {
-      "outputs": []
+      "outputs": [],
     },
     "test": {
       "dependsOn": ["build"],
-      "outputs": ["coverage/**"]
+      "outputs": ["coverage/**"],
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
     },
     "codegen": {
-      "outputs": ["src/generated/**"]
-    }
-  }
+      "outputs": ["src/generated/**"],
+    },
+  },
 }
 ```
 
@@ -198,8 +198,8 @@ packages:
     "lint": "turbo run lint",
     "test": "turbo run test",
     "codegen": "turbo run codegen",
-    "migrate": "pnpm --filter @realm/db exec drizzle-kit migrate"
-  }
+    "migrate": "pnpm --filter @realm/db exec drizzle-kit migrate",
+  },
 }
 ```
 

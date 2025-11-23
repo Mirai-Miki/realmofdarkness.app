@@ -7,11 +7,13 @@
 ## Overview
 
 The Realm of Darkness platform consists of multiple independent processes:
+
 - **NestJS API** - HTTP/WebSocket server for the web frontend
 - **Discord Bot Shards** - Multiple bot instances handling Discord events
 - **Web Frontend** - React SPA connected via WebSocket
 
 These processes need to communicate changes in real-time:
+
 - Bot updates character → API notifies web clients via WebSocket
 - API creates dice roll → Bot posts result to Discord channel
 - API broadcasts event → All connected clients receive update
@@ -115,7 +117,7 @@ events/
 ```typescript
 // events/src/types/event-metadata.ts
 
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Standard metadata for all events
@@ -123,19 +125,19 @@ import { z } from 'zod';
 export const EventMetadataSchema = z.object({
   /** Unique event ID (UUID v7 for time-ordering) */
   eventId: z.string().uuid(),
-  
+
   /** Event schema version (semver) */
   version: z.string().regex(/^\d+\.\d+\.\d+$/),
-  
+
   /** ISO timestamp when event was created */
   timestamp: z.string().datetime(),
-  
+
   /** Source application that published the event */
-  source: z.enum(['api', 'bot', 'migration', 'system']),
-  
+  source: z.enum(["api", "bot", "migration", "system"]),
+
   /** Optional correlation ID for tracing related events */
   correlationId: z.string().uuid().optional(),
-  
+
   /** Optional user/actor who triggered the event */
   actorId: z.string().optional(),
 });
@@ -157,15 +159,15 @@ export type BaseEvent = z.infer<typeof BaseEventSchema>;
 ```typescript
 // events/src/contracts/character-events.ts
 
-import { z } from 'zod';
-import { BaseEventSchema } from '../types/event-metadata.js';
-import { Splats } from 'shared';
+import { z } from "zod";
+import { BaseEventSchema } from "../types/event-metadata.js";
+import { Splats } from "shared";
 
 /**
  * Published when a character is created
  */
 export const CharacterCreatedEventSchema = BaseEventSchema.extend({
-  type: z.literal('character:created'),
+  type: z.literal("character:created"),
   data: z.object({
     characterId: z.number().int().positive(),
     userId: z.bigint(),
@@ -181,7 +183,7 @@ export type CharacterCreatedEvent = z.infer<typeof CharacterCreatedEventSchema>;
  * Published when a character is updated
  */
 export const CharacterUpdatedEventSchema = BaseEventSchema.extend({
-  type: z.literal('character:updated'),
+  type: z.literal("character:updated"),
   data: z.object({
     characterId: z.number().int().positive(),
     userId: z.bigint(),
@@ -199,7 +201,7 @@ export type CharacterUpdatedEvent = z.infer<typeof CharacterUpdatedEventSchema>;
  * Published when a character is deleted
  */
 export const CharacterDeletedEventSchema = BaseEventSchema.extend({
-  type: z.literal('character:deleted'),
+  type: z.literal("character:deleted"),
   data: z.object({
     characterId: z.number().int().positive(),
     userId: z.bigint(),
@@ -212,7 +214,7 @@ export type CharacterDeletedEvent = z.infer<typeof CharacterDeletedEventSchema>;
 /**
  * Union of all character events
  */
-export const CharacterEventSchema = z.discriminatedUnion('type', [
+export const CharacterEventSchema = z.discriminatedUnion("type", [
   CharacterCreatedEventSchema,
   CharacterUpdatedEventSchema,
   CharacterDeletedEventSchema,
@@ -226,24 +228,24 @@ export type CharacterEvent = z.infer<typeof CharacterEventSchema>;
 ```typescript
 // events/src/contracts/gateway-events.ts
 
-import { z } from 'zod';
-import { BaseEventSchema } from '../types/event-metadata.js';
+import { z } from "zod";
+import { BaseEventSchema } from "../types/event-metadata.js";
 
 /**
  * Published when data should be broadcast to web clients
  */
 export const GatewayBroadcastEventSchema = BaseEventSchema.extend({
-  type: z.literal('gateway:broadcast'),
+  type: z.literal("gateway:broadcast"),
   data: z.object({
     /** Target channel/room (e.g., "user:123456", "guild:789012") */
     channel: z.string(),
-    
+
     /** The message to broadcast to WebSocket clients */
     message: z.object({
       type: z.string(),
       payload: z.unknown(),
     }),
-    
+
     /** Optional: specific connection IDs to target */
     connectionIds: z.array(z.string()).optional(),
   }),
@@ -257,15 +259,15 @@ export type GatewayBroadcastEvent = z.infer<typeof GatewayBroadcastEventSchema>;
 ```typescript
 // events/src/contracts/discord-events.ts
 
-import { z } from 'zod';
-import { BaseEventSchema } from '../types/event-metadata.js';
+import { z } from "zod";
+import { BaseEventSchema } from "../types/event-metadata.js";
 
 /**
  * Request to post a message to Discord channel
  * Published by API, consumed by bot
  */
 export const DiscordMessageRequestSchema = BaseEventSchema.extend({
-  type: z.literal('discord:message:request'),
+  type: z.literal("discord:message:request"),
   data: z.object({
     guildId: z.bigint(),
     channelId: z.bigint(),
@@ -285,7 +287,7 @@ export type DiscordMessageRequest = z.infer<typeof DiscordMessageRequestSchema>;
  * Dice roll result to post to Discord
  */
 export const DiscordDiceRollEventSchema = BaseEventSchema.extend({
-  type: z.literal('discord:diceroll:post'),
+  type: z.literal("discord:diceroll:post"),
   data: z.object({
     guildId: z.bigint(),
     channelId: z.bigint(),
@@ -298,7 +300,7 @@ export const DiscordDiceRollEventSchema = BaseEventSchema.extend({
       successes: z.number().int(),
       criticals: z.number().int().optional(),
       botches: z.number().int().optional(),
-      type: z.enum(['5th', '20th', 'cod']),
+      type: z.enum(["5th", "20th", "cod"]),
     }),
   }),
 });
@@ -319,23 +321,23 @@ export type DiscordDiceRollEvent = z.infer<typeof DiscordDiceRollEventSchema>;
  */
 export const Channels = {
   // Character events
-  CHARACTER_CREATED: 'realm:character:created',
-  CHARACTER_UPDATED: 'realm:character:updated',
-  CHARACTER_DELETED: 'realm:character:deleted',
-  
+  CHARACTER_CREATED: "realm:character:created",
+  CHARACTER_UPDATED: "realm:character:updated",
+  CHARACTER_DELETED: "realm:character:deleted",
+
   // Gateway/WebSocket events
-  GATEWAY_BROADCAST: 'realm:gateway:broadcast',
-  
+  GATEWAY_BROADCAST: "realm:gateway:broadcast",
+
   // Discord events
-  DISCORD_MESSAGE_REQUEST: 'realm:discord:message:request',
-  DISCORD_DICE_ROLL: 'realm:discord:diceroll:post',
-  
+  DISCORD_MESSAGE_REQUEST: "realm:discord:message:request",
+  DISCORD_DICE_ROLL: "realm:discord:diceroll:post",
+
   // System events
-  SYSTEM_HEALTH: 'realm:system:health',
-  SYSTEM_SHUTDOWN: 'realm:system:shutdown',
+  SYSTEM_HEALTH: "realm:system:health",
+  SYSTEM_SHUTDOWN: "realm:system:shutdown",
 } as const;
 
-export type ChannelName = typeof Channels[keyof typeof Channels];
+export type ChannelName = (typeof Channels)[keyof typeof Channels];
 ```
 
 ---
@@ -345,11 +347,11 @@ export type ChannelName = typeof Channels[keyof typeof Channels];
 ```typescript
 // events/src/client/RedisEventClient.ts
 
-import Redis from 'ioredis';
-import { z } from 'zod';
-import { RealmLogger, RealmError } from 'shared';
-import type { ChannelName } from '../channels/index.js';
-import { EventMetadataSchema } from '../types/event-metadata.js';
+import Redis from "ioredis";
+import { z } from "zod";
+import { RealmLogger, RealmError } from "shared";
+import type { ChannelName } from "../channels/index.js";
+import { EventMetadataSchema } from "../types/event-metadata.js";
 
 /**
  * Type-safe Redis pub/sub client for domain events
@@ -358,7 +360,10 @@ export class RedisEventClient {
   private publisher: Redis;
   private subscriber: Redis;
   private logger = RealmLogger.getInstance();
-  private handlers = new Map<string, Array<(event: unknown) => void | Promise<void>>>();
+  private handlers = new Map<
+    string,
+    Array<(event: unknown) => void | Promise<void>>
+  >();
 
   constructor(
     redisUrl: string,
@@ -366,14 +371,14 @@ export class RedisEventClient {
   ) {
     this.publisher = new Redis(redisUrl);
     this.subscriber = new Redis(redisUrl);
-    
-    this.subscriber.on('message', this.handleMessage.bind(this));
+
+    this.subscriber.on("message", this.handleMessage.bind(this));
     this.logger.setAppName(appName);
   }
 
   /**
    * Publish an event to a channel
-   * 
+   *
    * @param channel - Redis channel name
    * @param schema - Zod schema for validation
    * @param event - Event data (metadata will be added automatically)
@@ -381,7 +386,9 @@ export class RedisEventClient {
   async publish<T extends z.ZodType>(
     channel: ChannelName,
     schema: T,
-    event: Omit<z.infer<T>, 'metadata'> & { metadata?: Partial<z.infer<typeof EventMetadataSchema>> }
+    event: Omit<z.infer<T>, "metadata"> & {
+      metadata?: Partial<z.infer<typeof EventMetadataSchema>>;
+    }
   ): Promise<void> {
     try {
       // Add metadata if not provided
@@ -389,7 +396,7 @@ export class RedisEventClient {
         ...event,
         metadata: {
           eventId: crypto.randomUUID(),
-          version: '1.0.0',
+          version: "1.0.0",
           timestamp: new Date().toISOString(),
           source: this.appName,
           ...event.metadata,
@@ -404,7 +411,7 @@ export class RedisEventClient {
       await this.publisher.publish(channel, serialized);
 
       await this.logger.debug(`Event published to ${channel}`, {
-        location: 'RedisEventClient.publish',
+        location: "RedisEventClient.publish",
         fields: {
           channel,
           eventType: (validated as any).type,
@@ -412,8 +419,8 @@ export class RedisEventClient {
         },
       });
     } catch (error) {
-      throw new RealmError('Failed to publish event', {
-        location: 'RedisEventClient.publish',
+      throw new RealmError("Failed to publish event", {
+        location: "RedisEventClient.publish",
         fields: { channel },
         cause: error as Error,
       });
@@ -422,7 +429,7 @@ export class RedisEventClient {
 
   /**
    * Subscribe to a channel with type-safe event handling
-   * 
+   *
    * @param channel - Redis channel name
    * @param schema - Zod schema for validation
    * @param handler - Event handler function
@@ -440,11 +447,11 @@ export class RedisEventClient {
         const validated = schema.parse(rawEvent);
         await handler(validated);
       } catch (error) {
-        await this.logger.error('Event handler failed', {
-          location: 'RedisEventClient.subscribe',
+        await this.logger.error("Event handler failed", {
+          location: "RedisEventClient.subscribe",
           fields: {
             channel,
-            error: error instanceof Error ? error.message : 'Unknown error',
+            error: error instanceof Error ? error.message : "Unknown error",
           },
         });
       }
@@ -456,7 +463,7 @@ export class RedisEventClient {
     this.handlers.get(channel)!.push(wrappedHandler);
 
     await this.logger.info(`Subscribed to channel ${channel}`, {
-      location: 'RedisEventClient.subscribe',
+      location: "RedisEventClient.subscribe",
     });
   }
 
@@ -469,12 +476,12 @@ export class RedisEventClient {
 
     try {
       const event = JSON.parse(message);
-      
+
       // Execute all handlers for this channel
-      await Promise.all(handlers.map(handler => handler(event)));
+      await Promise.all(handlers.map((handler) => handler(event)));
     } catch (error) {
-      await this.logger.error('Failed to handle message', {
-        location: 'RedisEventClient.handleMessage',
+      await this.logger.error("Failed to handle message", {
+        location: "RedisEventClient.handleMessage",
         fields: { channel },
         cause: error as Error,
       });
@@ -487,8 +494,8 @@ export class RedisEventClient {
   async disconnect(): Promise<void> {
     await this.publisher.quit();
     await this.subscriber.quit();
-    await this.logger.info('Redis client disconnected', {
-      location: 'RedisEventClient.disconnect',
+    await this.logger.info("Redis client disconnected", {
+      location: "RedisEventClient.disconnect",
     });
   }
 }
@@ -503,22 +510,22 @@ export class RedisEventClient {
 ```typescript
 // bot/src/commands/hunger.ts
 
-import { RedisEventClient } from 'events';
-import { CharacterUpdatedEventSchema, Channels } from 'events';
-import { CharacterRepository } from 'repositories';
+import { RedisEventClient } from "events";
+import { CharacterUpdatedEventSchema, Channels } from "events";
+import { CharacterRepository } from "repositories";
 
-const eventClient = new RedisEventClient(process.env.REDIS_URL!, 'bot');
+const eventClient = new RedisEventClient(process.env.REDIS_URL!, "bot");
 const charRepo = new CharacterRepository(db);
 
 // User runs /hunger command
 async function handleHungerCommand(interaction: CommandInteraction) {
   const character = await charRepo.findByUser(
     BigInt(interaction.user.id),
-    interaction.options.getString('name')!
+    interaction.options.getString("name")!
   );
-  
+
   if (!character || !character.isVampire5th()) {
-    throw ClientError.notFound('Vampire character not found');
+    throw ClientError.notFound("Vampire character not found");
   }
 
   // Update hunger
@@ -530,19 +537,21 @@ async function handleHungerCommand(interaction: CommandInteraction) {
     Channels.CHARACTER_UPDATED,
     CharacterUpdatedEventSchema,
     {
-      type: 'character:updated',
+      type: "character:updated",
       data: {
         characterId: character.id!,
         userId: character.userId,
         guildId: character.guildId,
         name: character.name,
         splat: character.splat,
-        changedFields: ['hunger'],
+        changedFields: ["hunger"],
       },
     }
   );
 
-  await interaction.reply(`${character.name}'s hunger increased to ${character.hunger}`);
+  await interaction.reply(
+    `${character.name}'s hunger increased to ${character.hunger}`
+  );
 }
 ```
 
@@ -551,17 +560,17 @@ async function handleHungerCommand(interaction: CommandInteraction) {
 ```typescript
 // api/src/gateway/gateway.service.ts
 
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { RedisEventClient } from 'events';
-import { CharacterUpdatedEventSchema, Channels } from 'events';
-import { GatewayServer } from './gateway.server.js';
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { RedisEventClient } from "events";
+import { CharacterUpdatedEventSchema, Channels } from "events";
+import { GatewayServer } from "./gateway.server.js";
 
 @Injectable()
 export class GatewayService implements OnModuleInit {
   private eventClient: RedisEventClient;
 
   constructor(private gatewayServer: GatewayServer) {
-    this.eventClient = new RedisEventClient(process.env.REDIS_URL!, 'api');
+    this.eventClient = new RedisEventClient(process.env.REDIS_URL!, "api");
   }
 
   async onModuleInit() {
@@ -571,31 +580,25 @@ export class GatewayService implements OnModuleInit {
       CharacterUpdatedEventSchema,
       async (event) => {
         // Broadcast to relevant WebSocket clients
-        await this.gatewayServer.broadcastToUser(
-          event.data.userId,
-          {
-            type: 'CHARACTER_UPDATED',
+        await this.gatewayServer.broadcastToUser(event.data.userId, {
+          type: "CHARACTER_UPDATED",
+          payload: {
+            characterId: event.data.characterId,
+            name: event.data.name,
+            changedFields: event.data.changedFields,
+          },
+        });
+
+        // Also broadcast to guild if applicable
+        if (event.data.guildId) {
+          await this.gatewayServer.broadcastToGuild(event.data.guildId, {
+            type: "CHARACTER_UPDATED",
             payload: {
               characterId: event.data.characterId,
               name: event.data.name,
               changedFields: event.data.changedFields,
             },
-          }
-        );
-
-        // Also broadcast to guild if applicable
-        if (event.data.guildId) {
-          await this.gatewayServer.broadcastToGuild(
-            event.data.guildId,
-            {
-              type: 'CHARACTER_UPDATED',
-              payload: {
-                characterId: event.data.characterId,
-                name: event.data.name,
-                changedFields: event.data.changedFields,
-              },
-            }
-          );
+          });
         }
       }
     );
@@ -608,10 +611,10 @@ export class GatewayService implements OnModuleInit {
 ```typescript
 // api/src/dice/dice.service.ts
 
-import { Injectable } from '@nestjs/common';
-import { RedisEventClient } from 'events';
-import { DiscordDiceRollEventSchema, Channels } from 'events';
-import { DiceRoller } from 'domain/services/DiceRoller';
+import { Injectable } from "@nestjs/common";
+import { RedisEventClient } from "events";
+import { DiscordDiceRollEventSchema, Channels } from "events";
+import { DiceRoller } from "domain/services/DiceRoller";
 
 @Injectable()
 export class DiceService {
@@ -619,7 +622,7 @@ export class DiceService {
   private diceRoller: DiceRoller;
 
   constructor() {
-    this.eventClient = new RedisEventClient(process.env.REDIS_URL!, 'api');
+    this.eventClient = new RedisEventClient(process.env.REDIS_URL!, "api");
     this.diceRoller = new DiceRoller();
   }
 
@@ -639,7 +642,7 @@ export class DiceService {
       Channels.DISCORD_DICE_ROLL,
       DiscordDiceRollEventSchema,
       {
-        type: 'discord:diceroll:post',
+        type: "discord:diceroll:post",
         data: {
           guildId,
           channelId,
@@ -652,7 +655,7 @@ export class DiceService {
             successes: result.successes,
             criticals: result.criticals,
             botches: result.botches,
-            type: '5th',
+            type: "5th",
           },
         },
       }
@@ -668,11 +671,14 @@ export class DiceService {
 ```typescript
 // bot/src/events/redis-listener.ts
 
-import { RedisEventClient } from 'events';
-import { DiscordDiceRollEventSchema, Channels } from 'events';
-import { Client, EmbedBuilder } from 'discord.js';
+import { RedisEventClient } from "events";
+import { DiscordDiceRollEventSchema, Channels } from "events";
+import { Client, EmbedBuilder } from "discord.js";
 
-export function setupRedisListeners(client: Client, eventClient: RedisEventClient) {
+export function setupRedisListeners(
+  client: Client,
+  eventClient: RedisEventClient
+) {
   // Listen for dice roll requests from API
   eventClient.subscribe(
     Channels.DISCORD_DICE_ROLL,
@@ -686,13 +692,23 @@ export function setupRedisListeners(client: Client, eventClient: RedisEventClien
 
       // Create embed for dice roll result
       const embed = new EmbedBuilder()
-        .setTitle(`🎲 Dice Roll${event.data.characterName ? ` - ${event.data.characterName}` : ''}`)
-        .addFields(
-          { name: 'Pool', value: event.data.roll.pool.toString(), inline: true },
-          { name: 'Successes', value: event.data.roll.successes.toString(), inline: true },
-          { name: 'Results', value: event.data.roll.results.join(', ') }
+        .setTitle(
+          `🎲 Dice Roll${event.data.characterName ? ` - ${event.data.characterName}` : ""}`
         )
-        .setColor(event.data.roll.successes > 0 ? 'Green' : 'Red');
+        .addFields(
+          {
+            name: "Pool",
+            value: event.data.roll.pool.toString(),
+            inline: true,
+          },
+          {
+            name: "Successes",
+            value: event.data.roll.successes.toString(),
+            inline: true,
+          },
+          { name: "Results", value: event.data.roll.results.join(", ") }
+        )
+        .setColor(event.data.roll.successes > 0 ? "Green" : "Red");
 
       await channel.send({ embeds: [embed] });
     }
@@ -740,33 +756,33 @@ APP_NAME=api  # or 'bot', 'migration', etc.
 ```typescript
 // events/test/contracts.test.ts
 
-import { CharacterUpdatedEventSchema } from '@/contracts/character-events';
+import { CharacterUpdatedEventSchema } from "@/contracts/character-events";
 
-describe('CharacterUpdatedEventSchema', () => {
-  it('should validate a correct event', () => {
+describe("CharacterUpdatedEventSchema", () => {
+  it("should validate a correct event", () => {
     const event = {
       metadata: {
         eventId: crypto.randomUUID(),
-        version: '1.0.0',
+        version: "1.0.0",
         timestamp: new Date().toISOString(),
-        source: 'bot',
+        source: "bot",
       },
-      type: 'character:updated',
+      type: "character:updated",
       data: {
         characterId: 123,
         userId: 456789n,
-        name: 'Test Character',
-        splat: 'vampire5th',
+        name: "Test Character",
+        splat: "vampire5th",
       },
     };
 
     expect(() => CharacterUpdatedEventSchema.parse(event)).not.toThrow();
   });
 
-  it('should reject invalid event', () => {
+  it("should reject invalid event", () => {
     const event = {
       metadata: {},
-      type: 'character:updated',
+      type: "character:updated",
       data: {}, // Missing required fields
     };
 
@@ -780,16 +796,19 @@ describe('CharacterUpdatedEventSchema', () => {
 ```typescript
 // events/test/client.test.ts
 
-import { RedisEventClient } from '@/client/RedisEventClient';
-import { CharacterUpdatedEventSchema, Channels } from '@/index';
+import { RedisEventClient } from "@/client/RedisEventClient";
+import { CharacterUpdatedEventSchema, Channels } from "@/index";
 
-describe('RedisEventClient', () => {
+describe("RedisEventClient", () => {
   let publisher: RedisEventClient;
   let subscriber: RedisEventClient;
 
   beforeAll(() => {
-    publisher = new RedisEventClient(process.env.REDIS_URL!, 'test-publisher');
-    subscriber = new RedisEventClient(process.env.REDIS_URL!, 'test-subscriber');
+    publisher = new RedisEventClient(process.env.REDIS_URL!, "test-publisher");
+    subscriber = new RedisEventClient(
+      process.env.REDIS_URL!,
+      "test-subscriber"
+    );
   });
 
   afterAll(async () => {
@@ -797,7 +816,7 @@ describe('RedisEventClient', () => {
     await subscriber.disconnect();
   });
 
-  it('should publish and receive events', async () => {
+  it("should publish and receive events", async () => {
     const received = new Promise((resolve) => {
       subscriber.subscribe(
         Channels.CHARACTER_UPDATED,
@@ -810,12 +829,12 @@ describe('RedisEventClient', () => {
       Channels.CHARACTER_UPDATED,
       CharacterUpdatedEventSchema,
       {
-        type: 'character:updated',
+        type: "character:updated",
         data: {
           characterId: 123,
           userId: 456789n,
-          name: 'Test',
-          splat: 'vampire5th',
+          name: "Test",
+          splat: "vampire5th",
         },
       }
     );
@@ -834,17 +853,21 @@ describe('RedisEventClient', () => {
 
 ```typescript
 // ✅ DO: Validate with Zod schema
-await eventClient.publish(Channels.CHARACTER_UPDATED, CharacterUpdatedEventSchema, event);
+await eventClient.publish(
+  Channels.CHARACTER_UPDATED,
+  CharacterUpdatedEventSchema,
+  event
+);
 
 // ❌ DON'T: Publish without validation
-await redis.publish('some-channel', JSON.stringify(event));
+await redis.publish("some-channel", JSON.stringify(event));
 ```
 
 ### 2. Use Discriminated Unions
 
 ```typescript
 // ✅ DO: Use discriminated unions for related events
-export const CharacterEventSchema = z.discriminatedUnion('type', [
+export const CharacterEventSchema = z.discriminatedUnion("type", [
   CharacterCreatedEventSchema,
   CharacterUpdatedEventSchema,
   CharacterDeletedEventSchema,
@@ -872,18 +895,22 @@ await eventClient.publish(Channels.GATEWAY_BROADCAST, schema, {
 
 ```typescript
 // ✅ DO: Wrap handlers in try-catch
-await eventClient.subscribe(Channels.CHARACTER_UPDATED, schema, async (event) => {
-  try {
-    await processEvent(event);
-  } catch (error) {
-    await logger.error('Event processing failed', {
-      location: 'event-handler',
-      fields: { eventId: event.metadata.eventId },
-      cause: error,
-    });
-    // Don't rethrow - other handlers should still run
+await eventClient.subscribe(
+  Channels.CHARACTER_UPDATED,
+  schema,
+  async (event) => {
+    try {
+      await processEvent(event);
+    } catch (error) {
+      await logger.error("Event processing failed", {
+        location: "event-handler",
+        fields: { eventId: event.metadata.eventId },
+        cause: error,
+      });
+      // Don't rethrow - other handlers should still run
+    }
   }
-});
+);
 ```
 
 ### 5. Use Event Versioning
@@ -891,15 +918,15 @@ await eventClient.subscribe(Channels.CHARACTER_UPDATED, schema, async (event) =>
 ```typescript
 // When event schema changes, create new version
 export const CharacterUpdatedEventV2Schema = BaseEventSchema.extend({
-  type: z.literal('character:updated'),
+  type: z.literal("character:updated"),
   // ... new fields
 });
 
 // Handle both versions
 subscriber.subscribe(Channels.CHARACTER_UPDATED, schema, async (event) => {
-  if (event.metadata.version.startsWith('1.')) {
+  if (event.metadata.version.startsWith("1.")) {
     // Handle v1
-  } else if (event.metadata.version.startsWith('2.')) {
+  } else if (event.metadata.version.startsWith("2.")) {
     // Handle v2
   }
 });
@@ -910,11 +937,13 @@ subscriber.subscribe(Channels.CHARACTER_UPDATED, schema, async (event) => {
 ## Phase Integration
 
 The `events` package should be created in **Phase 1** alongside the `domain` package, since:
+
 - Events contracts depend on domain types
 - Repositories will need to publish events
 - API and Bot will subscribe to events
 
 **Updated Phase 1 deliverables:**
+
 - ✅ `domain/` package
 - ✅ `events/` package ← **NEW**
 - ✅ Repository interfaces (in domain)
@@ -925,18 +954,23 @@ The `events` package should be created in **Phase 1** alongside the `domain` pac
 ## Future Enhancements
 
 ### 1. Event Replay
+
 Store events in persistent log for debugging and replay.
 
 ### 2. Event Sourcing
+
 Use events as source of truth, rebuild state from event log.
 
 ### 3. Dead Letter Queue
+
 Failed events moved to DLQ for manual intervention.
 
 ### 4. Metrics & Monitoring
+
 Track event throughput, latency, error rates.
 
 ### 5. Event Schema Registry
+
 Central registry of all event schemas with versioning.
 
 ---
@@ -944,6 +978,7 @@ Central registry of all event schemas with versioning.
 ## Conclusion
 
 The Redis event system provides:
+
 - ✅ **Type safety** through Zod schemas
 - ✅ **Decoupling** between apps
 - ✅ **Real-time updates** for web clients

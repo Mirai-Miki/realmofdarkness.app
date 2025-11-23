@@ -10,7 +10,6 @@
    - Current progress snapshot
    - What's done, what's next
    - Known issues and blockers
-   
 2. **[PHASE_1_CHECKLIST.md](./PHASE_1_CHECKLIST.md)** ← **Working tasks**
    - Detailed task breakdown for current phase
    - Acceptance criteria for each task
@@ -120,6 +119,7 @@ realm-of-darkness/
 ### What You Can Work On Now
 
 #### Option 1: Create Domain Package Structure
+
 - **File:** Start `domain/package.json` and `domain/tsconfig.json`
 - **Time:** 2-4 hours
 - **Checklist:** [PHASE_1_CHECKLIST.md - Task 1](./PHASE_1_CHECKLIST.md#task-1-create-domain-package-structure)
@@ -127,6 +127,7 @@ realm-of-darkness/
 - **Impact:** Unblocks all domain development
 
 #### Option 2: Define Character Data Types
+
 - **File:** Start `shared/src/types/character-data/vampire5th.ts`
 - **Time:** 8-12 hours
 - **Checklist:** [PHASE_1_CHECKLIST.md - Task 2](./PHASE_1_CHECKLIST.md#task-2-define-complete-character-data-types)
@@ -134,6 +135,7 @@ realm-of-darkness/
 - **Impact:** Enables proper type checking for character data
 
 #### Option 3: Review Django Models
+
 - **File:** Read `backend-legacy/haven/models/Vampire5th.py`
 - **Time:** 2-4 hours
 - **Purpose:** Understand existing business logic before porting
@@ -173,6 +175,7 @@ git push origin feature/domain-vampire5th-model
 ### Branch Naming Convention
 
 Follow the existing pattern:
+
 - `feature/description` - New functionality
 - `refactor/description` - Code improvements
 - `fix/description` - Bug fixes
@@ -192,6 +195,7 @@ Follow the existing pattern:
 **Types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `style`, `perf`
 
 **Examples:**
+
 ```
 feat(domain): add Vampire5th character model
 refactor(shared): improve error handling types
@@ -212,7 +216,8 @@ function createCharacter(name: string, userId: bigint): Character {
 }
 
 // ❌ DON'T: Use any
-function createCharacter(name: any, userId: any) {  // Bad!
+function createCharacter(name: any, userId: any) {
+  // Bad!
   return new Character({ name, userId });
 }
 
@@ -222,14 +227,15 @@ function findCharacter(id: number): Character | null {
 }
 
 // ❌ DON'T: Assume values exist
-function findCharacter(id: number): Character {  // Bad!
+function findCharacter(id: number): Character {
+  // Bad!
   // What if not found?
 }
 
 // ✅ DO: Document public APIs
 /**
  * Creates a new Vampire5th character.
- * 
+ *
  * @param name - Character name (1-50 characters)
  * @param userId - Discord user ID (snowflake)
  * @returns Newly created character instance
@@ -243,11 +249,11 @@ function createVampire(name: string, userId: bigint): Vampire5th {
 ### Error Handling
 
 ```typescript
-import { RealmError, ClientError } from 'shared';
+import { RealmError, ClientError } from "shared";
 
 // ✅ DO: Use ClientError for user mistakes
 if (!name || name.length > 50) {
-  throw ClientError.badRequest('Character name must be 1-50 characters', {
+  throw ClientError.badRequest("Character name must be 1-50 characters", {
     fields: { name },
   });
 }
@@ -256,52 +262,52 @@ if (!name || name.length > 50) {
 try {
   await db.insert(characters).values(data);
 } catch (error) {
-  throw new RealmError('Failed to save character', {
-    location: 'CharacterRepository.create',
+  throw new RealmError("Failed to save character", {
+    location: "CharacterRepository.create",
     cause: error,
     fields: { characterId: data.id.toString() },
   });
 }
 
 // ❌ DON'T: Throw generic errors
-throw new Error('something went wrong');  // Bad!
+throw new Error("something went wrong"); // Bad!
 ```
 
 ### Logging
 
 ```typescript
-import { RealmLogger } from 'shared';
+import { RealmLogger } from "shared";
 
 const logger = RealmLogger.getInstance();
 
 // ✅ DO: Set app name at startup
-logger.setAppName('domain');
+logger.setAppName("domain");
 
 // ✅ DO: Include location
-await logger.info('Character created', {
-  location: 'CharacterService.create',
+await logger.info("Character created", {
+  location: "CharacterService.create",
   fields: { characterId: char.id.toString(), userId: char.userId.toString() },
 });
 
 // ✅ DO: Log errors with context
-await logger.error('Database query failed', {
-  location: 'CharacterRepository.findById',
+await logger.error("Database query failed", {
+  location: "CharacterRepository.findById",
   fields: { characterId: id.toString() },
 });
 
 // ❌ DON'T: Use console.log
-console.log('something happened');  // Bad!
+console.log("something happened"); // Bad!
 ```
 
 ### Validation
 
 ```typescript
-import { Vampire5thDataSchema } from 'shared';
+import { Vampire5thDataSchema } from "shared";
 
 // ✅ DO: Validate at boundaries (API, WebSocket, etc.)
 const result = Vampire5thDataSchema.safeParse(inputData);
 if (!result.success) {
-  throw ClientError.badRequest('Invalid character data', {
+  throw ClientError.badRequest("Invalid character data", {
     fields: { errors: result.error.message },
   });
 }
@@ -322,33 +328,35 @@ function updateHunger(char: Vampire5th, amount: number): void {
 ```typescript
 // Test file: domain/test/models/Vampire5th.test.ts
 
-import { Vampire5th } from '@/models/5th/Vampire5th';
+import { Vampire5th } from "@/models/5th/Vampire5th";
 
-describe('Vampire5th', () => {
-  describe('constructor', () => {
-    it('should create a vampire with valid data', () => {
+describe("Vampire5th", () => {
+  describe("constructor", () => {
+    it("should create a vampire with valid data", () => {
       const vampire = new Vampire5th({
-        name: 'Test Vampire',
+        name: "Test Vampire",
         userId: 123456789n,
-        clan: 'Ventrue',
+        clan: "Ventrue",
         generation: 10,
         bloodPotency: 1,
       });
-      
-      expect(vampire.name).toBe('Test Vampire');
-      expect(vampire.clan).toBe('Ventrue');
+
+      expect(vampire.name).toBe("Test Vampire");
+      expect(vampire.clan).toBe("Ventrue");
     });
   });
 
-  describe('hunger system', () => {
-    it('should increase hunger correctly', () => {
-      const vampire = new Vampire5th({ /* ... */ });
+  describe("hunger system", () => {
+    it("should increase hunger correctly", () => {
+      const vampire = new Vampire5th({
+        /* ... */
+      });
       vampire.increaseHunger(2);
       expect(vampire.hunger).toBe(2);
     });
 
-    it('should not exceed max hunger of 5', () => {
-      const vampire = new Vampire5th({ hunger: 4, /* ... */ });
+    it("should not exceed max hunger of 5", () => {
+      const vampire = new Vampire5th({ hunger: 4 /* ... */ });
       vampire.increaseHunger(5);
       expect(vampire.hunger).toBe(5);
     });
@@ -361,10 +369,10 @@ describe('Vampire5th', () => {
 ```typescript
 // Test file: repositories/test/CharacterRepository.test.ts
 
-import { CharacterRepository } from '@/CharacterRepository';
-import { db } from 'database';
+import { CharacterRepository } from "@/CharacterRepository";
+import { db } from "database";
 
-describe('CharacterRepository', () => {
+describe("CharacterRepository", () => {
   let repo: CharacterRepository;
 
   beforeAll(async () => {
@@ -372,10 +380,12 @@ describe('CharacterRepository', () => {
     repo = new CharacterRepository(db);
   });
 
-  it('should save and retrieve a character', async () => {
-    const vampire = new Vampire5th({ /* ... */ });
+  it("should save and retrieve a character", async () => {
+    const vampire = new Vampire5th({
+      /* ... */
+    });
     const saved = await repo.create(vampire);
-    
+
     const retrieved = await repo.findById(saved.id!);
     expect(retrieved).toBeDefined();
     expect(retrieved?.name).toBe(vampire.name);
@@ -425,17 +435,20 @@ psql $DATABASE_URL -c "\d characters"
 ## 📚 Reference Materials
 
 ### Internal Docs
+
 - **Architecture:** [REFACTOR_PLAN.md](./REFACTOR_PLAN.md)
 - **Current Status:** [REFACTOR_STATUS.md](./REFACTOR_STATUS.md)
 - **Current Tasks:** [PHASE_1_CHECKLIST.md](./PHASE_1_CHECKLIST.md)
 - **Shared Package:** [shared/README.md](./shared/README.md)
 
 ### Legacy Code Reference
+
 - **Django Models:** `backend-legacy/haven/models/`
 - **Django Serializers:** `backend-legacy/haven/serializers/`
 - **Old Bot Code:** `discord_bots/src/structures/characters/`
 
 ### External Resources
+
 - **TypeScript:** https://www.typescriptlang.org/docs/
 - **Drizzle ORM:** https://orm.drizzle.team/docs/overview
 - **NestJS:** https://docs.nestjs.com/
@@ -447,25 +460,33 @@ psql $DATABASE_URL -c "\d characters"
 ## ❓ FAQ
 
 ### Q: Can I work on bot migration now?
+
 **A:** Not yet. Bot migration is Phase 4. We need domain models (Phase 1) and repositories (Phase 2) first, so the bot has something to use.
 
 ### Q: Should I update the legacy code?
+
 **A:** No. `backend-legacy/`, `frontend/`, and `discord_bots/` are frozen. All new work goes in the new packages.
 
 ### Q: I found a bug in the shared package. Can I fix it?
+
 **A:** Yes! The shared package is used by everything, so fixes are welcome. Just make sure to test thoroughly.
 
 ### Q: How do I add a new character type?
+
 **A:** Wait until Phase 1 is complete and patterns are established. Then follow the Vampire5th pattern as a template.
 
 ### Q: What if I have a better architecture idea?
+
 **A:** Great! Document it and discuss before implementing. We want to be flexible but also avoid major rewrites mid-phase.
 
 ### Q: Can I use a different library/framework?
+
 **A:** Probably not. We've standardized on TypeScript, Drizzle, NestJS, etc. Introducing new tech increases complexity.
 
 ### Q: I'm stuck. Who can I ask?
+
 **A:** Check the docs first, then:
+
 1. Search closed issues/PRs for similar problems
 2. Ask in the Discord development channel
 3. Create a GitHub discussion
@@ -477,6 +498,7 @@ psql $DATABASE_URL -c "\d characters"
 Pick a task from [PHASE_1_CHECKLIST.md](./PHASE_1_CHECKLIST.md) and get started!
 
 **Remember:**
+
 - ✅ Write tests
 - ✅ Document your code
 - ✅ Use strict types

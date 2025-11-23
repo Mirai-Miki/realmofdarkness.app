@@ -4,11 +4,11 @@ about: Ask a question about the project
 title: "[Question]: "
 labels: question
 assignees: Mirai-Miki
-
 ---
 
 **Which part of the project is this question about?**
 _Select all that apply:_
+
 - [ ] Website
 - [ ] Discord Bots
 - [ ] Backend/API

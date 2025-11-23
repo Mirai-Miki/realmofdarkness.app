@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@realm/core": "workspace:*",
+    "@realm/logger": "workspace:*",
     "@realm/database": "workspace:*",
     "discord.js": "^14.25.0",
     "dotenv": "^17.2.3",

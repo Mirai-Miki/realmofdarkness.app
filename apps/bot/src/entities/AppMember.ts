@@ -1,9 +1,9 @@
 import type { GuildMember } from "discord.js";
 import type { MemberDb } from "@realm/database/schema/members";
 
-import { RealmError } from "@realm/core";
+import { RealmError } from "@realm/logger/errors";
 import { members } from "@realm/database/schema/members";
-import { logger } from "@realm/core/logger";
+import { logger } from "@realm/logger";
 import { eq, and } from "drizzle-orm";
 import { db } from "@realm/database";
 // import { AppGuild } from "./AppGuild.js";

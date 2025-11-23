@@ -14,6 +14,7 @@
 #### The Problem You Identified
 
 Multiple independent processes (NestJS API, Discord bot shards, React web) need to communicate:
+
 - Bot updates character → Web clients need to know
 - API initiates dice roll → Bot needs to post to Discord
 - Future: API interacts with Discord REST API directly
@@ -21,6 +22,7 @@ Multiple independent processes (NestJS API, Discord bot shards, React web) need 
 #### The Solution
 
 **New Package: `events/`**
+
 - Redis pub/sub with typed event contracts (Zod schemas)
 - Type-safe event client (`RedisEventClient`)
 - Channels for different event types
@@ -52,17 +54,17 @@ Multiple independent processes (NestJS API, Discord bot shards, React web) need 
 async function handleHungerCommand(interaction) {
   // Load from database
   const char = await charRepo.findByUser(userId, name);
-  
+
   // Use domain logic
   char.increaseHunger(1);
-  
+
   // Save to database
   await charRepo.update(char);
-  
+
   // Publish Redis event
   await eventClient.publish(Channels.CHARACTER_UPDATED, schema, {
-    type: 'character:updated',
-    data: { characterId, userId, guildId, name, changedFields: ['hunger'] },
+    type: "character:updated",
+    data: { characterId, userId, guildId, name, changedFields: ["hunger"] },
   });
 }
 
@@ -70,7 +72,7 @@ async function handleHungerCommand(interaction) {
 eventClient.subscribe(Channels.CHARACTER_UPDATED, schema, async (event) => {
   // Broadcast to WebSocket clients
   await gateway.broadcastToUser(event.data.userId, {
-    type: 'CHARACTER_UPDATED',
+    type: "CHARACTER_UPDATED",
     payload: event.data,
   });
 });
@@ -88,7 +90,7 @@ For future Discord interactions (like dice rolls initiated by API):
 async rollForCharacter(userId, guildId, channelId, pool) {
   // Roll using domain logic
   const result = this.diceRoller.rollV5(pool);
-  
+
   // Publish event for bot to post to Discord
   await eventClient.publish(Channels.DISCORD_DICE_ROLL, schema, {
     type: 'discord:diceroll:post',
@@ -105,6 +107,7 @@ eventClient.subscribe(Channels.DISCORD_DICE_ROLL, schema, async (event) => {
 ```
 
 **Note:** You're right that for simple Discord REST operations, you could use `@discordjs/rest` directly in the API without needing Redis events. However, Redis events provide:
+
 - ✅ Consistent pattern across all cross-app communication
 - ✅ Bot shards can route messages to correct guild
 - ✅ Decoupling (API doesn't need Discord tokens)
@@ -121,12 +124,14 @@ Choose the approach that fits each use case!
 #### The Short Answer
 
 **Domain Layer:**
+
 - Rich objects with **data + behavior** (methods)
 - Business rules live here
 - Framework-agnostic (no NestJS, no Drizzle, no Discord.js imports)
 - Easy to test, reusable everywhere
 
 **Repository Layer:**
+
 - Bridges domain models and database
 - Loads/saves domain entities
 - Hides database implementation
@@ -158,27 +163,27 @@ Choose the approach that fits each use case!
 ```typescript
 export class Vampire5th extends Character5th {
   private _hunger: number = 1;
-  
+
   // Business logic method
   increaseHunger(amount: number = 1): void {
     this._hunger = Math.min(5, this._hunger + amount);
-    
+
     if (this._hunger >= 5) {
       this.triggerHungerFrenzy(); // Domain event
     }
   }
-  
+
   // Validation
   validate(): ValidationResult {
     if (this._hunger < 0 || this._hunger > 5) {
-      return { isValid: false, errors: ['Hunger must be 0-5'] };
+      return { isValid: false, errors: ["Hunger must be 0-5"] };
     }
     return { isValid: true, errors: [] };
   }
-  
+
   // Serialization for database
   serialize(): Vampire5thData {
-    return { hunger: this._hunger, /* ... */ };
+    return { hunger: this._hunger /* ... */ };
   }
 }
 ```
@@ -190,24 +195,27 @@ export class CharacterRepository {
   async findById(id: number): Promise<Character | null> {
     // Query database
     const row = await db.select().from(characters).where(eq(characters.id, id));
-    
+
     if (!row) return null;
-    
+
     // Map to domain model (polymorphic based on splat)
     return CharacterMapper.toDomain(row);
   }
-  
+
   async update(character: Character): Promise<Character> {
     // Validate domain model
     const validation = character.validate();
-    if (!validation.isValid) throw new Error('Invalid character');
-    
+    if (!validation.isValid) throw new Error("Invalid character");
+
     // Serialize domain model to database format
     const data = CharacterMapper.fromDomain(character);
-    
+
     // Update database
-    const result = await db.update(characters).set(data).where(eq(characters.id, character.id));
-    
+    const result = await db
+      .update(characters)
+      .set(data)
+      .where(eq(characters.id, character.id));
+
     return CharacterMapper.toDomain(result);
   }
 }
@@ -256,19 +264,23 @@ export class DiceRoller {
   /**
    * Roll V5 dice (6+ success, 10s are crits, hunger dice)
    */
-  rollV5(pool: number, difficulty: number = 6, hungerDice: number = 0): V5RollResult {
+  rollV5(
+    pool: number,
+    difficulty: number = 6,
+    hungerDice: number = 0
+  ): V5RollResult {
     const normalDice = this.rollDice(pool - hungerDice);
     const hungerDiceResults = this.rollDice(hungerDice);
-    
+
     let successes = 0;
     let criticals = 0;
-    
+
     // Count successes and crits
     for (const die of normalDice) {
       if (die >= difficulty) successes++;
       if (die === 10) criticals++;
     }
-    
+
     // Hunger dice special rules
     let messyCritical = false;
     for (const die of hungerDiceResults) {
@@ -278,12 +290,12 @@ export class DiceRoller {
         messyCritical = true; // Hunger die in crits = messy
       }
     }
-    
+
     // Pairs of 10s = critical success
     if (criticals >= 2) {
       successes += Math.floor(criticals / 2) * 2;
     }
-    
+
     return {
       normalDice,
       hungerDice: hungerDiceResults,
@@ -292,20 +304,21 @@ export class DiceRoller {
       messyCritical,
     };
   }
-  
+
   rollV20(pool: number, difficulty: number = 6): V20RollResult {
     // V20 rules: 10s count double, 1s cancel successes
     // ...
   }
-  
+
   rollCoD(pool: number): CoDRollResult {
     // Chronicles rules: 8+ success, 10-again
     // ...
   }
-  
+
   private rollDice(count: number): number[] {
-    return Array.from({ length: count }, () => 
-      Math.floor(Math.random() * 10) + 1
+    return Array.from(
+      { length: count },
+      () => Math.floor(Math.random() * 10) + 1
     );
   }
 }
@@ -316,15 +329,15 @@ export class DiceRoller {
 ```typescript
 // bot/src/commands/roll.ts
 
-import { DiceRoller } from 'domain/services/DiceRoller';
+import { DiceRoller } from "domain/services/DiceRoller";
 
 export async function handleRollCommand(interaction: CommandInteraction) {
-  const pool = interaction.options.getInteger('pool', true);
-  
+  const pool = interaction.options.getInteger("pool", true);
+
   // Use domain service
   const roller = new DiceRoller();
   const result = roller.rollV5(pool);
-  
+
   // Format for Discord
   await interaction.reply(formatRollResult(result));
 }
@@ -335,12 +348,12 @@ export async function handleRollCommand(interaction: CommandInteraction) {
 ```typescript
 // api/src/dice/dice.service.ts
 
-import { DiceRoller } from 'domain/services/DiceRoller';
+import { DiceRoller } from "domain/services/DiceRoller";
 
 @Injectable()
 export class DiceService {
   private roller = new DiceRoller();
-  
+
   async rollForWeb(pool: number) {
     // Same logic as bot!
     return this.roller.rollV5(pool);
@@ -351,6 +364,7 @@ export class DiceService {
 #### What Stays in Bot?
 
 Only **Discord-specific** code:
+
 - Command registration
 - Interaction handling
 - Embed formatting
@@ -360,6 +374,7 @@ Only **Discord-specific** code:
 #### What Moves to Domain?
 
 All **game mechanics**:
+
 - Dice rolling (V5, V20, CoD)
 - Damage calculation
 - Experience spending
@@ -395,11 +410,13 @@ realm-of-darkness/
 ## 🎯 Phase 1 Updated Goals
 
 **Original:**
+
 - ✅ Create `domain/` package
 - ✅ Port character models
 - ✅ Define repository interfaces
 
 **Updated:**
+
 - ✅ Create `domain/` package
 - ✅ Create `events/` package ← **NEW**
 - ✅ Port character models
@@ -476,6 +493,7 @@ Your insights were spot-on! The refactor plan now includes:
    - Framework-agnostic design
 
 The architecture now supports:
+
 - Real-time updates from bot → web
 - API-initiated Discord messages
 - Shared game mechanics (dice, damage, XP)

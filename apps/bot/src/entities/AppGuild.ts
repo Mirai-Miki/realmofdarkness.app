@@ -1,8 +1,8 @@
 import type { GuildDb } from "@realm/database";
 import type { Guild } from "discord.js";
 
-import { RealmError } from "@realm/core";
-import { logger } from "@realm/core/logger";
+import { RealmError } from "@realm/logger/errors";
+import { logger } from "@realm/logger";
 import { db } from "@realm/database";
 import { guilds } from "@realm/database/schema/guilds";
 import { eq } from "drizzle-orm";

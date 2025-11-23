@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { logger } from "@realm/core/logger";
+import { logger } from "@realm/logger";
 
 // Schema imports
 import * as users from "./schema/users.js";
@@ -35,7 +35,9 @@ function createDatabase() {
   }
 
   logger.debug("Initializing database connection", {
-    location: "database/src/index.ts",
+    fields: {
+      location: "database/src/index.ts",
+    },
   });
 
   return drizzle({

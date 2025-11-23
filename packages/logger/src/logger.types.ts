@@ -1,3 +1,5 @@
+import type { Environment } from "./types";
+
 /**
  * Log level enumeration for the Realm of Darkness logger.
  */
@@ -7,15 +9,6 @@ export const enum LogLevel {
   Warning = "warning",
   Error = "error",
   Fatal = "fatal",
-}
-
-/**
- * Environment types that determine logging behavior.
- */
-export const enum Environment {
-  Development = "development",
-  Preproduction = "preproduction",
-  Production = "production",
 }
 
 /**

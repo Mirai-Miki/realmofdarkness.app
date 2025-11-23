@@ -1,6 +1,6 @@
 import type { Guild } from "discord.js";
 
-import { logger } from "@realm/core/logger";
+import { logger } from "@realm/logger";
 import { setActivity } from "utilities";
 import { Events } from "discord.js";
 import { AppGuild } from "entities";

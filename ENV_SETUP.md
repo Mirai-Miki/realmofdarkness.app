@@ -27,6 +27,7 @@ realm-of-darkness/
 ## 🔄 How It Works
 
 ### 1. **Root `.env` File** (Shared Variables)
+
 The root `.env` file contains variables that are **automatically available** to all packages:
 
 - `NODE_ENV` - Environment mode (development/production/preprod)
@@ -40,7 +41,9 @@ The root `.env` file contains variables that are **automatically available** to 
 These are configured in `turbo.json` under `globalEnv` and automatically passed to all tasks.
 
 ### 2. **Package-Specific `.env` Files** (Overrides & Additions)
+
 Each package can have its own `.env` file for:
+
 - **Package-specific variables** (e.g., Discord bot tokens, API keys)
 - **Overriding root variables** (if needed for testing)
 
@@ -78,6 +81,7 @@ All packages will automatically use this value! 🎉
 ## 📝 Environment-Specific Configurations
 
 ### Development
+
 ```bash
 # Root .env
 NODE_ENV=development
@@ -86,6 +90,7 @@ ENABLE_CONSOLE_LOGGING=true
 ```
 
 ### Pre-Production
+
 ```bash
 # Root .env
 NODE_ENV=preprod
@@ -95,6 +100,7 @@ ENABLE_DISCORD_LOGGING=true
 ```
 
 ### Production
+
 ```bash
 # Root .env
 NODE_ENV=production
@@ -141,9 +147,11 @@ NODE_ENV=development  # Overrides root NODE_ENV for API only
 ## 📚 Reference
 
 ### Turbo Environment Variables
+
 - [Turbo Docs: Environment Variables](https://turbo.build/repo/docs/core-concepts/monorepos/environment-variables)
 
 ### Current Global Variables (from `turbo.json`)
+
 ```json
 {
   "globalEnv": [

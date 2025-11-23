@@ -1,4 +1,4 @@
-import type { LogLevel, LogEntry } from "types";
+import type { LogLevel, LogEntry } from "./logger.types";
 
 import { EmbedBuilder } from "@discordjs/builders";
 import { REST } from "@discordjs/rest";

@@ -1,7 +1,7 @@
 import type { UserDb } from "@realm/database";
 import { User } from "discord.js";
-import { RealmError } from "@realm/core";
-import { logger } from "@realm/core/logger";
+import { RealmError } from "@realm/logger/errors";
+import { logger } from "@realm/logger";
 import { db } from "@realm/database";
 import { users } from "@realm/database/schema/users";
 import { eq } from "drizzle-orm";

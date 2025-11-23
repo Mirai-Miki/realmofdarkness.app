@@ -15,17 +15,17 @@
       "outputs": ["dist/**", "!dist/**/*.map"],
       "env": ["NODE_ENV"]
     },
-    "lint": { 
+    "lint": {
       "outputs": [],
       "env": ["NODE_ENV"]
     },
-    "test": { 
-      "dependsOn": ["build"], 
+    "test": {
+      "dependsOn": ["build"],
       "outputs": ["coverage/**"],
       "env": ["NODE_ENV", "DATABASE_URL"]
     },
-    "dev": { 
-      "cache": false, 
+    "dev": {
+      "cache": false,
       "persistent": true,
       "env": [
         "NODE_ENV",

@@ -1,12 +1,16 @@
-import type { LoggerConfig, LogEntry, LogOptions } from "../types";
+import type { LoggerConfig, LogEntry, LogOptions } from "./logger.types";
+
+// Initialize source map support for better stack traces
+import "source-map-support/register";
 
 import * as dotenv from "dotenv";
 import * as path from "path";
-import { RealmError } from "errors";
+import { HTTPError } from "discord.js";
+import { RealmError } from "./errors";
+import { Environment } from "./types";
 import { DiscordLogger } from "./discord-logger";
 import { FileLogger } from "./file-logger";
-import { LogLevel, Environment } from "types/logger";
-import { HTTPError } from "discord.js";
+import { LogLevel } from "./logger.types";
 
 /**
  * Log level priority mapping for filtering.
@@ -22,6 +26,9 @@ const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
 /**
  * Singleton logger class for the Realm of Darkness application.
  * Provides async logging with Discord integration and file backup.
+ *
+ * Source map support is automatically initialized when this module is imported,
+ * providing enhanced stack traces for TypeScript code.
  */
 class Logger {
   private appName: string = "unknown-app";
@@ -34,11 +41,40 @@ class Logger {
 
   /**
    * Private constructor to enforce singleton pattern.
+   * Also sets up global error handlers for unhandled rejections and exceptions.
    */
   constructor() {
     // Load environment variables
     dotenv.config();
     this.initializeFromEnv();
+    this.setupGlobalErrorHandlers();
+  }
+
+  /**
+   * Sets up global error handlers for unhandled promise rejections and uncaught exceptions.
+   * This ensures that critical errors are always logged even if not explicitly caught.
+   */
+  private setupGlobalErrorHandlers(): void {
+    // Handle unhandled promise rejections in all environments
+    process.on("unhandledRejection", (reason: unknown) => {
+      this.fatal("Unhandled Promise Rejection", {
+        fields: {
+          Reason: String(reason),
+          Environment: process.env.NODE_ENV || "unknown",
+        },
+      });
+    });
+
+    // Handle uncaught exceptions in all environments
+    process.on("uncaughtException", (error: Error) => {
+      this.fatal("Uncaught Exception", {
+        fields: {
+          Error: error.message,
+          Stack: error.stack || "No stack trace",
+          Environment: process.env.NODE_ENV || "unknown",
+        },
+      });
+    });
   }
 
   /**
@@ -526,11 +562,11 @@ class Logger {
  * @example
  * ```typescript
  * // In bot/src/main.ts
- * import { logger } from "shared/logger";
+ * import { logger } from "@realm/logger";
  * logger.setAppName("bot");
  *
  * // In bot/src/commands/dice.ts
- * import { logger } from "shared/logger"; // Same instance!
+ * import { logger } from "@realm/logger"; // Same instance!
  * console.log(logger.getAppName()); // "bot"
  * ```
  */

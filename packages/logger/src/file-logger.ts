@@ -1,4 +1,4 @@
-import type { LogEntry } from "types";
+import type { LogEntry } from "./logger.types";
 
 import { promises as fs } from "fs";
 import { dirname } from "path";

@@ -3,10 +3,8 @@
  * Tests core logging functionality, configuration, and error handling.
  */
 
-import { logger } from "../src/logger/index.js";
-import { Environment } from "../src/types/logger.js";
-import { RealmError } from "../src/errors/realm-error.js";
-import { ClientError } from "../src/errors/client-error.js";
+import { logger, Environment } from "../src/index";
+import { RealmError, ClientError } from "../src/index";
 
 describe("Logging", () => {
   beforeEach(() => {

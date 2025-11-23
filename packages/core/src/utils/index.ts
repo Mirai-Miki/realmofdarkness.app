@@ -3,4 +3,3 @@
  */
 
 export * from "./snowflake";
-export * from "./source-maps";

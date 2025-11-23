@@ -24,6 +24,7 @@
     "@nestjs/core": "^11.1.9",
     "@nestjs/platform-fastify": "^11.1.9",
     "@realm/core": "workspace:*",
+    "@realm/logger": "workspace:*",
     "@realm/database": "workspace:*",
     "fastify": "^5.6.2",
     "reflect-metadata": "^0.2.2",

@@ -69,6 +69,7 @@ This phase establishes the domain layer with rich character models and completes
 - [ ] Test package builds: `pnpm --filter domain build`
 
 **Acceptance Criteria:**
+
 - ✅ Package builds successfully
 - ✅ Can import from other packages via workspace protocol
 - ✅ TypeScript compilation works with project references
@@ -150,13 +151,14 @@ This phase establishes the domain layer with rich character models and completes
 ### 2.5: Update Database Types
 
 - [ ] Update `database/src/types/index.ts` to use real types:
+
   ```typescript
   import type {
     Vampire5thData,
     Hunter5thData,
     // ... all other types
-  } from 'shared/types/character-data';
-  
+  } from "shared/types/character-data";
+
   export type SplatDataMap = {
     [Splats.Vampire5th]: Vampire5thData;
     [Splats.Hunter5th]: Hunter5thData;
@@ -167,18 +169,20 @@ This phase establishes the domain layer with rich character models and completes
 ### 2.6: Validate Types Match Zod Schemas
 
 - [ ] Write type tests to ensure Zod schemas match TypeScript interfaces:
+
   ```typescript
   // shared/test/schema-type-alignment.test.ts
-  import { Vampire5thDataSchema } from '@/validations';
-  import type { Vampire5thData } from '@/types/character-data';
-  
+  import { Vampire5thDataSchema } from "@/validations";
+  import type { Vampire5thData } from "@/types/character-data";
+
   type InferredFromSchema = z.infer<typeof Vampire5thDataSchema>;
-  
+
   // This test will fail to compile if types don't match
   const assertTypesMatch: InferredFromSchema = {} as Vampire5thData;
   ```
 
 **Acceptance Criteria:**
+
 - ✅ All character data types fully defined with proper TypeScript interfaces
 - ✅ No `Record<string, unknown>` or `any` types
 - ✅ Types match existing Zod schemas
@@ -257,6 +261,7 @@ This phase establishes the domain layer with rich character models and completes
 - [ ] Test type guards
 
 **Acceptance Criteria:**
+
 - ✅ Base `Character` class compiles without errors
 - ✅ All common functionality implemented
 - ✅ Tests pass with >80% coverage
@@ -280,9 +285,21 @@ This phase establishes the domain layer with rich character models and completes
 - [ ] Add attributes:
   ```typescript
   attributes: {
-    physical: { strength: number; dexterity: number; stamina: number };
-    social: { charisma: number; manipulation: number; composure: number };
-    mental: { intelligence: number; wits: number; resolve: number };
+    physical: {
+      strength: number;
+      dexterity: number;
+      stamina: number;
+    }
+    social: {
+      charisma: number;
+      manipulation: number;
+      composure: number;
+    }
+    mental: {
+      intelligence: number;
+      wits: number;
+      resolve: number;
+    }
   }
   ```
 - [ ] Implement methods:
@@ -343,6 +360,7 @@ This phase establishes the domain layer with rich character models and completes
 - [ ] Test validation
 
 **Acceptance Criteria:**
+
 - ✅ `Character5th` class compiles and extends `Character`
 - ✅ All 5th edition mechanics implemented
 - ✅ Tests pass with >80% coverage
@@ -452,6 +470,7 @@ This phase establishes the domain layer with rich character models and completes
 - [ ] Test mending
 
 **Acceptance Criteria:**
+
 - ✅ `Vampire5th` class compiles and extends `Character5th`
 - ✅ All vampire mechanics implemented per V5 rules
 - ✅ Tests pass with >85% coverage
@@ -509,6 +528,7 @@ This phase establishes the domain layer with rich character models and completes
 - [ ] Create `domain/src/interfaces/IMemberRepository.ts`
 
 **Acceptance Criteria:**
+
 - ✅ All repository interfaces defined
 - ✅ Interfaces are generic and domain-focused
 - ✅ No implementation details (no Drizzle/SQL references)
@@ -548,6 +568,7 @@ This phase establishes the domain layer with rich character models and completes
 - [ ] Write unit tests
 
 **Acceptance Criteria:**
+
 - ✅ All 5th edition character classes implemented
 - ✅ All classes extend Character5th
 - ✅ Tests pass with >80% coverage
@@ -572,6 +593,7 @@ This phase establishes the domain layer with rich character models and completes
 - [ ] Write unit tests
 
 **Acceptance Criteria:**
+
 - ✅ `Character20th` class compiles and extends `Character`
 - ✅ 20th anniversary mechanics implemented
 - ✅ Tests pass
@@ -633,6 +655,7 @@ This phase establishes the domain layer with rich character models and completes
 - [ ] Write unit tests
 
 **Acceptance Criteria:**
+
 - ✅ All 20th anniversary character classes implemented
 - ✅ All classes extend Character20th
 - ✅ Tests pass with >80% coverage
@@ -665,6 +688,7 @@ This phase establishes the domain layer with rich character models and completes
 - [ ] Explain design decisions
 
 **Acceptance Criteria:**
+
 - ✅ README.md complete and clear
 - ✅ All public APIs documented
 - ✅ Examples provided
@@ -691,15 +715,15 @@ Before moving to Phase 2, verify:
 
 ## Success Metrics
 
-| Metric | Target | Status |
-|--------|--------|--------|
-| TypeScript Errors | 0 | ⏳ |
-| ESLint Errors | 0 | ⏳ |
-| Test Coverage | >80% | ⏳ |
-| Documentation | 100% of public APIs | ⏳ |
-| Character Classes | 13/13 | 0/13 |
-| Data Types Defined | 13/13 | 0/13 |
-| Repository Interfaces | 4/4 | 0/4 |
+| Metric                | Target              | Status |
+| --------------------- | ------------------- | ------ |
+| TypeScript Errors     | 0                   | ⏳     |
+| ESLint Errors         | 0                   | ⏳     |
+| Test Coverage         | >80%                | ⏳     |
+| Documentation         | 100% of public APIs | ⏳     |
+| Character Classes     | 13/13               | 0/13   |
+| Data Types Defined    | 13/13               | 0/13   |
+| Repository Interfaces | 4/4                 | 0/4    |
 
 ---
 
