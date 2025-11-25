@@ -1,6 +1,6 @@
 import { Character } from "./character.entity.js";
 import type { Splats, SheetStatus, Snowflake } from "types";
-import type { Experience, ReferenceItem } from "../../value-objects/index.js";
+import type { Experience } from "../../value-objects/index.js";
 import { DamageTracker5th, Skill } from "../../value-objects/index.js";
 
 /**

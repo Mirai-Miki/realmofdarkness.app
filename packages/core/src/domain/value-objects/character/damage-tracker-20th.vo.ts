@@ -6,8 +6,8 @@ import { RealmError } from "@realm/errors";
  *
  * @remarks
  * This is an immutable value object - all modifications return a new instance.
- * Damage types have a hierarchy: bashing < lethal < aggravated.
- * When track is full, bashing can upgrade to lethal, lethal to aggravated.
+ * Damage types (bashing, lethal, aggravated) are tracked independently.
+ * When tracker is full, additional damage is simply capped at available space.
  *
  * @example
  * ```typescript
@@ -43,8 +43,8 @@ export class DamageTracker20th {
    * @private
    */
   private validate(): void {
-    if (this.total < 0) {
-      throw new RealmError("Tracker total cannot be negative", {
+    if (this.total < 7 || this.total > 15) {
+      throw new RealmError("Tracker total must be between 7 and 15", {
         fields: { total: this.total.toString() },
       });
     }
@@ -102,12 +102,12 @@ export class DamageTracker20th {
    * Creates a new tracker with modified total.
    * Adjusts damage if it exceeds new total.
    *
-   * @param newTotal - New total boxes (1-15)
+   * @param newTotal - New total boxes (7-15)
    * @returns New tracker instance
    */
   public setTotal(newTotal: number): DamageTracker20th {
-    if (newTotal < 0) {
-      throw new RealmError("Tracker total cannot be negative", {
+    if (newTotal < 7 || newTotal > 15) {
+      throw new RealmError("Tracker total must be between 7 and 15", {
         fields: { newTotal: newTotal.toString() },
       });
     }
@@ -148,7 +148,7 @@ export class DamageTracker20th {
 
   /**
    * Takes bashing damage.
-   * If track is full, upgrades bashing to lethal.
+   * If total damage would exceed tracker total, caps bashing at available space.
    *
    * @param amount - Amount of bashing damage to take
    * @returns New tracker instance with damage applied
@@ -162,23 +162,10 @@ export class DamageTracker20th {
 
     const available = this.current;
     const actualBashing = Math.min(amount, available);
-    const newBashing = this.bashing + actualBashing;
-
-    // If there's overflow and we have bashing damage, upgrade it to lethal
-    const overflow = amount - actualBashing;
-    if (overflow > 0 && this.bashing > 0) {
-      const upgraded = Math.min(overflow, this.bashing);
-      return new DamageTracker20th(
-        this.total,
-        newBashing - upgraded,
-        this.lethal + upgraded,
-        this.aggravated
-      );
-    }
 
     return new DamageTracker20th(
       this.total,
-      newBashing,
+      this.bashing + actualBashing,
       this.lethal,
       this.aggravated
     );
@@ -186,7 +173,7 @@ export class DamageTracker20th {
 
   /**
    * Takes lethal damage.
-   * Converts bashing to lethal if needed when track is full.
+   * If total damage would exceed tracker total, caps lethal at available space.
    *
    * @param amount - Amount of lethal damage to take
    * @returns New tracker instance with damage applied
@@ -199,33 +186,19 @@ export class DamageTracker20th {
     }
 
     const available = this.current;
-
-    if (available >= amount) {
-      // Enough space for all lethal damage
-      return new DamageTracker20th(
-        this.total,
-        this.bashing,
-        this.lethal + amount,
-        this.aggravated
-      );
-    }
-
-    // Not enough space - convert bashing to lethal
-    const newLethal = this.lethal + available;
-    const remaining = amount - available;
-    const converted = Math.min(remaining, this.bashing);
+    const actualLethal = Math.min(amount, available);
 
     return new DamageTracker20th(
       this.total,
-      this.bashing - converted,
-      newLethal + converted,
+      this.bashing,
+      this.lethal + actualLethal,
       this.aggravated
     );
   }
 
   /**
    * Takes aggravated damage.
-   * Converts lethal and bashing to aggravated if needed.
+   * If total damage would exceed tracker total, caps aggravated at available space.
    *
    * @param amount - Amount of aggravated damage to take
    * @returns New tracker instance with damage applied
@@ -238,37 +211,13 @@ export class DamageTracker20th {
     }
 
     const available = this.current;
-
-    if (available >= amount) {
-      // Enough space for all aggravated damage
-      return new DamageTracker20th(
-        this.total,
-        this.bashing,
-        this.lethal,
-        this.aggravated + amount
-      );
-    }
-
-    // Not enough space - convert lethal and bashing to aggravated
-    let newAggravated = this.aggravated + available;
-    let remaining = amount - available;
-
-    // Convert lethal first
-    const lethalConverted = Math.min(remaining, this.lethal);
-    newAggravated += lethalConverted;
-    remaining -= lethalConverted;
-    const newLethal = this.lethal - lethalConverted;
-
-    // Then convert bashing
-    const bashingConverted = Math.min(remaining, this.bashing);
-    newAggravated += bashingConverted;
-    const newBashing = this.bashing - bashingConverted;
+    const actualAggravated = Math.min(amount, available);
 
     return new DamageTracker20th(
       this.total,
-      newBashing,
-      newLethal,
-      newAggravated
+      this.bashing,
+      this.lethal,
+      this.aggravated + actualAggravated
     );
   }
 

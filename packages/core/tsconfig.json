@@ -5,6 +5,7 @@
     "outDir": "dist",
     "baseUrl": "./src",
     "paths": {
+      "@/*": ["./*"],
       "domain": ["./domain"],
       "domain/*": ["./domain/*"],
       "application": ["./application"],

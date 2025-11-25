@@ -41,8 +41,8 @@ export class DamageTracker5th {
    * @private
    */
   private validate(): void {
-    if (this.total < 0) {
-      throw new RealmError("Tracker total cannot be negative", {
+    if (this.total < 1 || this.total > 20) {
+      throw new RealmError("Tracker total must be between 1 and 20", {
         fields: { total: this.total.toString() },
       });
     }
@@ -95,6 +95,15 @@ export class DamageTracker5th {
   }
 
   /**
+   * Checks if character is dead or in torpor state.
+   *
+   * @returns True if aggravated damage equals total
+   */
+  public get isDead(): boolean {
+    return this.aggravated >= this.total;
+  }
+
+  /**
    * Creates a new tracker with modified total.
    * Adjusts damage if it exceeds new total.
    *
@@ -128,7 +137,7 @@ export class DamageTracker5th {
 
   /**
    * Takes superficial damage.
-   * If tracker is full, overflow converts superficial to aggravated.
+   * If damage exceeds available boxes, overflow converts superficial to aggravated.
    *
    * @param amount - Amount of superficial damage to take
    * @returns New tracker instance with damage applied
@@ -140,22 +149,33 @@ export class DamageTracker5th {
       });
     }
 
-    const available = this.current;
-    const actualSuperficial = Math.min(amount, available);
-    const newSuperficial = this.superficial + actualSuperficial;
+    const availableBoxes = this.current;
 
-    // If there's overflow and we have superficial damage, convert it to aggravated
-    const overflow = amount - actualSuperficial;
-    if (overflow > 0 && this.superficial > 0) {
-      const converted = Math.min(overflow, this.superficial);
+    if (amount <= availableBoxes) {
+      // Simple case: enough empty boxes for all superficial damage
       return new DamageTracker5th(
         this.total,
-        newSuperficial - converted,
-        this.aggravated + converted
+        this.superficial + amount,
+        this.aggravated
       );
     }
 
-    return new DamageTracker5th(this.total, newSuperficial, this.aggravated);
+    // Complex case: not enough empty boxes
+    // First fill all empty boxes with superficial
+    const newSuperficial = this.superficial + availableBoxes;
+
+    // Calculate excess damage that needs conversion
+    const excess = amount - availableBoxes;
+
+    // Convert superficial boxes to aggravated for the excess
+    // Each point of excess damage converts one superficial to aggravated
+    const conversionAmount = Math.min(excess, newSuperficial);
+
+    return new DamageTracker5th(
+      this.total,
+      newSuperficial - conversionAmount,
+      this.aggravated + conversionAmount
+    );
   }
 
   /**
