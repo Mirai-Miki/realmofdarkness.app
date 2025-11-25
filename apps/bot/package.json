@@ -5,6 +5,7 @@
   "scripts": {
     "start": "./scripts/run.sh",
     "build": "tsup",
+    "clean": "rimraf dist .turbo",
     "build:watch": "tsup --watch",
     "dev": "tsup --watch",
     "dev:5th": "npm run format && npm run generate-types && node scripts/deployCommands.js 5th dev && npm run emoji:sync:5th && nodemon src/main/shardLauncher.ts 5th",
@@ -31,7 +32,6 @@
     "emoji:sync:cod": "node scripts/syncEmojis.js cod",
     "emoji:sync:all": "node scripts/syncEmojis.js 5th && node scripts/syncEmojis.js 20th && node scripts/syncEmojis.js cod",
     "generate-types": "node scripts/generateEmojiTypes.js",
-    "test": "jest",
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,ts,json}\"",
     "lint": "eslint . --ext .js,.ts"

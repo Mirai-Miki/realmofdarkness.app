@@ -1,4 +1,4 @@
-import { DamageTracker20th } from "../../../../src/domain";
+import { DamageTracker20th } from "@/domain/value-objects";
 import { RealmError } from "@realm/errors";
 
 describe("DamageTracker20th Value Object", () => {

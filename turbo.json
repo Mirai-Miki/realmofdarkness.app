@@ -22,7 +22,11 @@
     "test": {
       "dependsOn": ["build"],
       "outputs": ["coverage/**"],
-      "env": ["NODE_ENV", "DATABASE_URL"]
+      "env": ["NODE_ENV", "DATABASE_URL"],
+      "cache": false
+    },
+    "clean": {
+      "cache": false
     },
     "dev": {
       "cache": false,

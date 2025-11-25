@@ -13,6 +13,7 @@
   },
   "scripts": {
     "build": "tsc -b tsconfig.build.json",
+    "clean": "rimraf dist coverage .turbo",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
     "test": "jest",

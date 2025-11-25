@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src",
     "outDir": "dist",
     "baseUrl": "./src",
     "paths": {
@@ -18,7 +17,7 @@
       "validations/*": ["./validations/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src/**/*", "test/**/*"],
   "exclude": ["dist", "node_modules"],
   "references": [{ "path": "../../packages/errors" }]
 }

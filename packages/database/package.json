@@ -15,7 +15,8 @@
     }
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b tsconfig.build.json",
+    "clean": "rimraf dist .turbo",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
     "generate": "drizzle-kit generate",
@@ -23,6 +24,7 @@
     "studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@realm/core": "workspace:*", 
     "@realm/logger": "workspace:*",
     "drizzle-orm": "^0.44.7",
     "pg": "^8.16.3",

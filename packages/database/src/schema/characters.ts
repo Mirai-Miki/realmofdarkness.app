@@ -17,7 +17,7 @@ import { users } from "./users.js";
 import { guilds } from "./guilds.js";
 import { members } from "./members.js";
 import { snowflake } from "../schema_types.js";
-import { Splats } from "@realm/core/types/index.js";
+import { Splats } from "@realm/core";
 
 /**
  * Character Splat types Enum
