@@ -1,7 +1,8 @@
 import type { Splats, Snowflake } from "types";
 import { SheetStatus } from "types";
 import { RealmError } from "@realm/errors";
-import { Experience } from "../../value-objects/character/experience.vo.js";
+import { Experience } from "../../value-objects/";
+import type { ActiveEffect } from "../../value-objects/";
 
 /**
  * Base Character entity representing all common character data across all game systems.
@@ -222,6 +223,64 @@ export abstract class Character {
       isValid: errors.length === 0,
       errors,
     };
+  }
+
+  /**
+   * Active effects currently applied to the character.
+   */
+  public activeEffects: ActiveEffect[] = [];
+
+  /**
+   * Adds an active effect to the character.
+   * @param effect The effect to add
+   */
+  public addEffect(effect: ActiveEffect): void {
+    this.activeEffects.push(effect);
+  }
+
+  /**
+   * Removes an active effect by ID.
+   * @param effectId The ID of the effect to remove
+   */
+  public removeEffect(effectId: string): void {
+    this.activeEffects = this.activeEffects.filter((e) => e.id !== effectId);
+  }
+
+  /**
+   * Gets all effects targeting a specific property.
+   * @param target The target property name
+   */
+  public getEffectsFor(target: string): ActiveEffect[] {
+    return this.activeEffects.filter((e) => e.target === target);
+  }
+
+  /**
+   * Applies active effects to a base value.
+   * Pipeline: Base -> ADD -> MULTIPLY -> OVERRIDE
+   * @param target The target property name
+   * @param baseValue The base value to modify
+   * @returns The final modified value
+   */
+  protected applyEffects(target: string, baseValue: number): number {
+    const effects = this.getEffectsFor(target);
+
+    // 1. Check for overrides first (if any override exists, it takes precedence)
+    const override = effects.find((e) => e.type === "OVERRIDE");
+    if (override) return override.value;
+
+    let value = baseValue;
+
+    // 2. Apply additions
+    effects
+      .filter((e) => e.type === "ADD" || e.type === undefined)
+      .forEach((e) => (value += e.value));
+
+    // 3. Apply multipliers
+    effects
+      .filter((e) => e.type === "MULTIPLY")
+      .forEach((e) => (value *= e.value));
+
+    return value;
   }
 
   /**

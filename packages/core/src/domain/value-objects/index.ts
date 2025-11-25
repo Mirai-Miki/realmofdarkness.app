@@ -10,3 +10,5 @@ export { DamageTracker20th } from "./character/damage-tracker-20th.vo.js";
 export { WillpowerTracker20th } from "./character/willpower-tracker-20th.vo.js";
 export { Experience } from "./character/experience.vo.js";
 export { Skill } from "./character/skill.vo.js";
+export { ReferenceItem } from "./reference-item.vo.js";
+export { ActiveEffect } from "./active-effect.vo.js";

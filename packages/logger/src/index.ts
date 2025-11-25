@@ -26,4 +26,3 @@
 export { logger } from "./logger";
 export type { LoggerConfig, LogEntry, LogOptions } from "./logger.types";
 export { LogLevel } from "./logger.types";
-export { Environment } from "./types";

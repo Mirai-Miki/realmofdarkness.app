@@ -1,6 +1,6 @@
 import { Character } from "./character.entity.js";
 import type { Splats, SheetStatus, Snowflake } from "types";
-import type { Experience } from "../../value-objects/index.js";
+import type { Experience, ReferenceItem } from "../../value-objects/index.js";
 import { DamageTracker5th, Skill } from "../../value-objects/index.js";
 
 /**
@@ -350,12 +350,24 @@ export abstract class Character5th extends Character {
   // ==========================================
 
   /**
-   * Gets an attribute value.
+   * Gets an attribute value (with active effects applied).
    *
    * @param attribute - Attribute name
-   * @returns Attribute value (1-5)
+   * @returns Attribute value (1-5 + effects)
    */
   public getAttribute(attribute: keyof Character5th["attributes"]): number {
+    const baseValue = this.attributes[attribute];
+    return this.applyEffects(attribute, baseValue);
+  }
+
+  /**
+   * Gets the raw attribute value (without active effects).
+   * Useful for editing or displaying base stats.
+   *
+   * @param attribute - Attribute name
+   * @returns Base attribute value (1-5)
+   */
+  public getRawAttribute(attribute: keyof Character5th["attributes"]): number {
     return this.attributes[attribute];
   }
 
@@ -384,12 +396,23 @@ export abstract class Character5th extends Character {
   }
 
   /**
-   * Gets a skill rating.
+   * Gets a skill rating (with active effects applied).
    *
    * @param skill - Skill name
-   * @returns Skill rating (0-5)
+   * @returns Skill rating (0-5 + effects)
    */
   public getSkillRating(skill: keyof Character5th["skills"]): number {
+    const baseValue = this.skills[skill].rating;
+    return this.applyEffects(skill, baseValue);
+  }
+
+  /**
+   * Gets the raw skill rating (without active effects).
+   *
+   * @param skill - Skill name
+   * @returns Base skill rating (0-5)
+   */
+  public getRawSkillRating(skill: keyof Character5th["skills"]): number {
     return this.skills[skill].rating;
   }
 
