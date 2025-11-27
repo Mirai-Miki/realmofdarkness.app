@@ -52,7 +52,7 @@ export abstract class Character {
   public readonly splat: Splats;
 
   /**
-   * Whether this is the user's active character sheet in the guild
+   * If this character is a sheet or not.
    */
   public isSheet: boolean = false;
 

@@ -79,8 +79,6 @@ logs/
 *.out
 .VSCodeCounter
 
-.vscode/
-
 # Temporary and backup files
 *.save
 *.save.*

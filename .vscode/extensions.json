@@ -1,0 +1,34 @@
+{
+  // Recommended extensions for this workspace
+  "recommendations": [
+    // TypeScript/JavaScript
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-typescript-next",
+
+    // Monorepo tools
+    "unifiedjs.vscode-mdx",
+
+    // Utilities
+    "eamodio.gitlens",
+    "christian-kohler.path-intellisense",
+    "visualstudioexptteam.vscodeintellicode",
+    "usernamehw.errorlens",
+    "wayou.vscode-todo-highlight",
+    "yoavbls.pretty-ts-errors",
+
+    // Database
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-pg",
+
+    // Markdown
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint"
+  ],
+
+  // Extensions that shouldn't be used (to avoid conflicts)
+  "unwantedRecommendations": [
+    "hookyqr.beautify",
+    "ms-vscode.vscode-typescript-tslint-plugin"
+  ]
+}

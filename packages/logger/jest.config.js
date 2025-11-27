@@ -41,9 +41,7 @@ export default {
   testPathIgnorePatterns: ["/node_modules/", "/dist/", "/test/setup.ts"],
 
   // Transform workspace packages (don't ignore @realm packages)
-  transformIgnorePatterns: [
-    "node_modules/(?!(@realm)/)",
-  ],
+  transformIgnorePatterns: ["node_modules/(?!(@realm)/)"],
 
   // Coverage configuration
   collectCoverageFrom: [
