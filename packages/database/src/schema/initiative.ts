@@ -2,6 +2,8 @@ import { pgTable, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { guilds } from "./guilds.js";
 import { snowflake } from "../schema_types";
 
+import type { InferSelectModel } from "drizzle-orm";
+
 /**
  * InitiativeTracker table - stores initiative tracking data for V20 sessions
  *
@@ -23,3 +25,6 @@ export const initiativeTrackers = pgTable("initiative_trackers", {
   /** When the tracker was last updated */
   lastUpdated: timestamp().defaultNow().notNull(),
 });
+
+// Type exports for use in other parts of the application
+export type InitiativeTrackerDb = InferSelectModel<typeof initiativeTrackers>;

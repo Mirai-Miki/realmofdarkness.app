@@ -8,6 +8,8 @@ import {
 import { users } from "./users.js";
 import { snowflake } from "../schema_types";
 
+import type { InferSelectModel } from "drizzle-orm";
+
 /**
  * CommandStats table - tracks usage statistics for bot commands
  *
@@ -41,3 +43,6 @@ export const commandStats = pgTable(
     unique().on(table.userId, table.command, table.botId),
   ]
 );
+
+// Type exports for use in other parts of the application
+export type CommandStatDb = InferSelectModel<typeof commandStats>;

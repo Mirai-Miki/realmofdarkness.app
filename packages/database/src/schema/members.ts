@@ -5,10 +5,11 @@ import {
   timestamp,
   primaryKey,
 } from "drizzle-orm/pg-core";
-import type { InferSelectModel } from "drizzle-orm";
 import { users } from "./users.js";
 import { guilds } from "./guilds.js";
 import { snowflake } from "../schema_types";
+
+import type { InferSelectModel } from "drizzle-orm";
 
 /**
  * Member table - represents a user's membership in a specific guild
@@ -31,6 +32,9 @@ export const members = pgTable(
 
     admin: boolean().notNull().default(false),
     storyteller: boolean().notNull().default(false),
+
+    /** Is this user boosting this guild? */
+    boosted: boolean().notNull().default(false),
 
     nickname: varchar({ length: 100 }).notNull().default(""),
     avatarUrl: varchar({ length: 500 }).notNull().default(""),

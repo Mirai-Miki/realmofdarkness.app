@@ -1,4 +1,3 @@
-import type { CharacterJsonbData } from "../types/index.js";
 import type { InferSelectModel } from "drizzle-orm";
 
 import {
@@ -7,7 +6,6 @@ import {
   varchar,
   boolean,
   timestamp,
-  serial,
   jsonb,
   uniqueIndex,
   unique,
@@ -18,6 +16,11 @@ import { guilds } from "./guilds.js";
 import { members } from "./members.js";
 import { snowflake } from "../schema_types.js";
 import { Splats } from "@realm/core";
+
+// Placeholder for CharacterJsonbData
+export interface CharacterJsonbData {
+  [key: string]: unknown;
+}
 
 /**
  * Character Splat types Enum
@@ -47,7 +50,7 @@ export const characterSplats = pgEnum("character_splats", [
 export const characters = pgTable(
   "characters",
   {
-    id: serial().primaryKey(),
+    id: snowflake().primaryKey(),
     name: varchar({ length: 50 }).notNull(),
 
     userId: snowflake()

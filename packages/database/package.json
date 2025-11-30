@@ -6,12 +6,8 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    },
-    "./*": {
-      "types": "./src/*.ts",
-      "default": "./src/*"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
@@ -24,7 +20,7 @@
     "studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@realm/core": "workspace:*", 
+    "@realm/core": "workspace:*",
     "@realm/logger": "workspace:*",
     "drizzle-orm": "^0.44.7",
     "pg": "^8.16.3",

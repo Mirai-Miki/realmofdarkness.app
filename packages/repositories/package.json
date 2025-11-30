@@ -21,6 +21,7 @@
     "@realm/core": "workspace:*",
     "@realm/database": "workspace:*",
     "@realm/errors": "workspace:*",
-    "@realm/logger": "workspace:*"
+    "@realm/logger": "workspace:*",
+    "drizzle-orm": "^0.44.7"
   }
 }

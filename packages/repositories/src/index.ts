@@ -6,14 +6,23 @@
  *
  * @example
  * ```typescript
- * import { CharacterRepository } from "@realm/repositories";
+ * import { UserRepository } from "@realm/repositories";
+ * import { db } from "@realm/database";
  *
- * const repo = new CharacterRepository(db);
- * const character = await repo.findById(123);
+ * const userRepo = new UserRepository(db);
+ * const user = await userRepo.findById("123456789012345678");
  * ```
  */
 
-// Export repositories when implemented
+// Export repositories
+export { UserRepository } from "./user.repository.js";
+export { SupporterRepository } from "./supporter.repository.js";
+
+// Export mappers
+export { UserMapper } from "./mappers/user.mapper.js";
+export { SupporterMapper } from "./mappers/supporter.mapper.js";
+
+// TODO: Export when implemented
 // export { CharacterRepository } from "./character.repository.js";
-// export { UserRepository } from "./user.repository.js";
 // export { GuildRepository } from "./guild.repository.js";
+// export { MemberRepository } from "./member.repository.js";

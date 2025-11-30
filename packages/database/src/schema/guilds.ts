@@ -1,6 +1,8 @@
 import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
 import { snowflake } from "../schema_types";
 
+import type { InferSelectModel } from "drizzle-orm";
+
 /**
  * Guild table - represents a Discord Guild/Server that uses the bot
  * Renamed from Chronicle to align with Discord conventions
@@ -35,3 +37,7 @@ export const storytellerRoles = pgTable("storyteller_roles", {
     .notNull()
     .references(() => guilds.id, { onDelete: "cascade" }),
 });
+
+// Type exports for use in other parts of the application
+export type GuildDb = InferSelectModel<typeof guilds>;
+export type StorytellerRoleDb = InferSelectModel<typeof storytellerRoles>;

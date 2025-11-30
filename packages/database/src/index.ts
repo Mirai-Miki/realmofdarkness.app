@@ -9,8 +9,27 @@ import * as guilds from "./schema/guilds.js";
 import * as initiative from "./schema/initiative.js";
 import * as stats from "./schema/stats.js";
 import * as characters from "./schema/characters.js";
+import * as supporters from "./schema/supporters.js";
 
-export * from "./types/index.js";
+// Export schema tables
+export { users, type UserDb } from "./schema/users.js";
+export {
+  supporters,
+  supporterLevel,
+  type SupporterDb,
+} from "./schema/supporters.js";
+export { members, type MemberDb } from "./schema/members.js";
+export { guilds, storytellerRoles } from "./schema/guilds.js";
+export {
+  characters,
+  characterSplats,
+  type CharacterDb,
+} from "./schema/characters.js";
+export {
+  initiativeTrackers,
+  type InitiativeTrackerDb,
+} from "./schema/initiative.js";
+export { commandStats, type CommandStatDb } from "./schema/stats.js";
 
 /**
  * Drizzle database instance singleton.
@@ -50,6 +69,7 @@ function createDatabase() {
       ...initiative,
       ...stats,
       ...characters,
+      ...supporters,
     },
   });
 }
@@ -64,3 +84,6 @@ export const db = (() => {
   }
   return _db;
 })();
+
+// Export the database type for use in repositories
+export type Database = typeof db;
