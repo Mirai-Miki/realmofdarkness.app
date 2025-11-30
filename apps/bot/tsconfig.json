@@ -9,10 +9,6 @@
     "paths": {
       "@realm/core": ["../../packages/core/src/index.ts"],
       "@realm/core/*": ["../../packages/core/src/*"],
-      "database": ["../../packages/database/src/index.ts"],
-      "database/*": ["../../packages/database/src/*"],
-      "entities": ["src/entities/index.ts"],
-      "entities/*": ["src/entities/*"],
       "services": ["src/services/index.ts"],
       "services/*": ["src/services/*"],
       "utilities": ["src/utilities/index.ts"],

@@ -5,6 +5,11 @@
  * - Chronicles of Darkness (cod)
  * - World of Darkness 5th Edition (5th)
  * - World of Darkness 20th Anniversary Edition (20th)
+ *
+ * @remarks
+ * This launcher uses Discord.js ShardingManager to automatically spawn
+ * and manage multiple bot shards for horizontal scaling. Shards are
+ * automatically distributed based on Discord's recommended shard count.
  */
 import * as path from "path";
 import { ShardingManager } from "discord.js";
@@ -15,14 +20,26 @@ import { logger } from "@realm/logger";
 // Load environment variables
 dotenv.config();
 
-// Bot type configuration
+/**
+ * Supported bot types for the World of Darkness platform.
+ * Each bot type corresponds to a different game system.
+ */
 type BotType = "cod" | "5th" | "20th";
 
+/**
+ * Configuration for a specific bot instance.
+ */
 interface BotConfig {
+  /** Discord bot token from environment variables */
   token: string;
+  /** Human-readable name for logging */
   name: string;
 }
 
+/**
+ * Configuration mapping for all bot types.
+ * Each bot type has its own Discord token and display name.
+ */
 const BOT_CONFIG: Record<BotType, BotConfig> = {
   cod: {
     token: process.env.TOKEN_COD!,
@@ -39,6 +56,12 @@ const BOT_CONFIG: Record<BotType, BotConfig> = {
 };
 
 // Get bot type from command line arguments
+/**
+ * Parses and validates the bot type from command line arguments.
+ *
+ * @returns The validated bot type ("cod", "5th", or "20th")
+ * @throws Exits the process with code 1 if no argument is provided or invalid bot type
+ */
 function getBotType(): BotType {
   const args = process.argv.slice(2);
   if (args.length === 0) {
@@ -62,6 +85,14 @@ const isDev: boolean = process.env.NODE_ENV === "development";
 const fileExtension: string = isDev ? "ts" : "js";
 const botType = getBotType();
 const config = BOT_CONFIG[botType];
+
+// Validate token exists
+if (!config.token) {
+  logger.error(
+    `Missing token for ${config.name} (TOKEN_${botType.toUpperCase()})`
+  );
+  process.exit(1);
+}
 
 logger.info(`Starting ${config.name} shard manager...`);
 

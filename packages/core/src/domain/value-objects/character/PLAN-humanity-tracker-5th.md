@@ -176,7 +176,10 @@ export class HumanityTracker5th {
    * @param data - Plain object with humanity and stains
    * @returns New HumanityTracker5th instance
    */
-  static fromJSON(data: { humanity: number; stains: number }): HumanityTracker5th;
+  static fromJSON(data: {
+    humanity: number;
+    stains: number;
+  }): HumanityTracker5th;
 
   // ==========================================
   // VALIDATION

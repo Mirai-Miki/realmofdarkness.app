@@ -5,6 +5,14 @@
  * - Chronicles of Darkness (CoD)
  * - World of Darkness 5th Edition (V5)
  * - World of Darkness 20th Anniversary Edition (V20)
+ *
+ * @remarks
+ * This bot is designed to handle thousands of guilds with minimal memory footprint
+ * by using aggressive cache management. It primarily responds to slash command
+ * interactions and does not require extensive caching of guild members, channels,
+ * messages, or other Discord entities.
+ *
+ * @see {@link https://discord.js.org/docs/packages/discord.js/14.25.1/Client:Class#options | Discord.js Client Options}
  */
 import type { BotType, BotCommand, BotComponent, BotEvent } from "types";
 
@@ -13,7 +21,20 @@ import * as path from "path";
 import * as dotenv from "dotenv";
 import { logger } from "@realm/logger";
 import { RealmError } from "@realm/errors";
-import { Client, GatewayIntentBits, Collection, Partials } from "discord.js";
+import type {
+  GuildMember,
+  User,
+  CacheWithLimitsOptions,
+  SweeperOptions,
+  Snowflake,
+} from "discord.js";
+import {
+  Client,
+  GatewayIntentBits,
+  Collection,
+  Partials,
+  Options,
+} from "discord.js";
 import {
   BotCommandSchema,
   BotComponentSchema,
@@ -25,6 +46,14 @@ dotenv.config();
 
 /**
  * Type-safe dynamic import helper for bot commands using Zod validation
+ *
+ * @param filePath - Absolute path to the command module file
+ * @returns Validated BotCommand object or null if validation fails
+ *
+ * @remarks
+ * This function dynamically imports a command module and validates its structure
+ * against the BotCommandSchema using Zod. Invalid commands are logged but don't
+ * stop the bot from starting.
  */
 async function loadCommand(filePath: string): Promise<BotCommand | null> {
   try {
@@ -44,15 +73,19 @@ async function loadCommand(filePath: string): Promise<BotCommand | null> {
       return null;
     }
   } catch (error) {
-    logger.error(`Failed to load command from ${filePath}`, {
-      error,
-    });
+    logger.exception(`Failed to load command from ${filePath}`, error);
     return null;
   }
 }
 
 /**
  * Type-safe dynamic import helper for bot components using Zod validation
+ *
+ * @param filePath - Absolute path to the component module file
+ * @returns Validated BotComponent object or null if validation fails
+ *
+ * @remarks
+ * Components are interactive message elements (buttons, select menus, etc.)
  */
 async function loadComponent(filePath: string): Promise<BotComponent | null> {
   try {
@@ -79,6 +112,13 @@ async function loadComponent(filePath: string): Promise<BotComponent | null> {
 
 /**
  * Type-safe dynamic import helper for bot events using Zod validation
+ *
+ * @param filePath - Absolute path to the event module file
+ * @returns Validated BotEvent object or null if validation fails
+ *
+ * @remarks
+ * Events are Discord.js lifecycle and gateway events (ready, interactionCreate,
+ * guildCreate, etc.) that the bot responds to.
  */
 async function loadEvent(filePath: string): Promise<BotEvent | null> {
   try {
@@ -103,7 +143,12 @@ async function loadEvent(filePath: string): Promise<BotEvent | null> {
   }
 }
 
-// Determine bot type from environment variable or command line argument
+/**
+ * Determines the bot type from environment variables or command line arguments
+ *
+ * @returns The bot type ('cod', '5th', or '20th')
+ * @throws {RealmError} If bot type is not specified or invalid
+ */
 const getBotType = (): BotType => {
   // Check environment variable first
   if (process.env.BOT_TYPE) {
@@ -121,12 +166,37 @@ const getBotType = (): BotType => {
   );
 };
 
-// Bot configuration
-const BOT_CONFIG = {
+/**
+ * Configuration for a single bot instance
+ */
+interface BotConfig {
+  /** Discord bot token */
+  token: string;
+  /** Human-readable bot name */
+  name: string;
+  /** Gateway intents required for this bot */
+  intents: GatewayIntentBits[];
+  /** Path to command files */
+  commandsPath: string;
+  /** Path to component files */
+  componentsPath: string;
+  /** Whether this bot uses components (buttons, select menus) */
+  hasComponents: boolean;
+}
+
+/**
+ * Bot configuration for each game system
+ *
+ * @remarks
+ * Each bot has different requirements:
+ * - CoD: Minimal intents, no components
+ * - 5th/20th: Require GuildMembers intent for user tracking, use components
+ */
+const BOT_CONFIG: Record<BotType, BotConfig> = {
   cod: {
     token: process.env.TOKEN_COD!,
     name: "Chronicles of Darkness Bot",
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages],
+    intents: [GatewayIntentBits.Guilds],
     commandsPath: "interactions/commands/cod",
     componentsPath: "interactions/components/cod",
     hasComponents: false,
@@ -134,11 +204,7 @@ const BOT_CONFIG = {
   "5th": {
     token: process.env.TOKEN_5TH!,
     name: "5th Edition Bot",
-    intents: [
-      GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMembers,
-      GatewayIntentBits.DirectMessages,
-    ],
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
     commandsPath: "commands/5th",
     componentsPath: "components/5th",
     hasComponents: true,
@@ -146,33 +212,156 @@ const BOT_CONFIG = {
   "20th": {
     token: process.env.TOKEN_20TH!,
     name: "20th Anniversary Edition Bot",
-    intents: [
-      GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMembers,
-      GatewayIntentBits.DirectMessages,
-    ],
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
     commandsPath: "commands/20th",
     componentsPath: "components/20th",
     hasComponents: true,
   },
 } as const;
 
-// Determine environment and source directory
-const runningFromDist = process.env.NODE_ENV !== "development";
-const srcDir = runningFromDist ? "dist" : "src";
-
 // Get bot type and configuration
 const botType = getBotType();
 const config = BOT_CONFIG[botType];
 logger.setAppName(config.name);
 
-// Initialize Discord client with bot-specific configuration
+/**
+ * Cache limit settings for Discord.js managers
+ *
+ * @remarks
+ * These settings are passed to Options.cacheWithLimits() to create a cache factory.
+ * This minimizes memory usage for bots serving thousands of guilds by aggressively
+ * limiting what gets cached.
+ *
+ * Cache Strategy:
+ * - Only cache users who are registered in our database
+ * - Keep bot's own user/member always cached
+ * - Use keepOverLimit to filter based on registration status
+ * - Rely on sweepers to periodically clean up unregistered users
+ *
+ * @see {@link https://discord.js.org/docs/packages/discord.js/14.25.1/SweeperOptions:Interface | Sweeper Options}
+ * @see {@link https://discordjs.guide/legacy/miscellaneous/cache-customization | Cache Customization Guide}
+ */
+const makeCacheSettings: CacheWithLimitsOptions = {
+  // ===== Application Commands (keep small cache for quick lookups) =====
+  ApplicationCommandManager: 10,
+
+  // ===== Emojis (keep limited for command responses) =====
+  ApplicationEmojiManager: 500,
+  BaseGuildEmojiManager: 0, // Don't cache guild emojis separately
+  GuildEmojiManager: 0, // Don't cache guild emojis separately
+
+  // ===== Auto Moderation (not used by bot) =====
+  AutoModerationRuleManager: 0,
+
+  // ===== Messages (not needed - interaction-based only) =====
+  MessageManager: 0,
+  GuildMessageManager: 0,
+  DMMessageManager: 0,
+
+  // ===== Threads (not needed - slash commands don't use threads) =====
+  ThreadManager: 0,
+  GuildTextThreadManager: 0,
+  GuildForumThreadManager: 0,
+  ThreadMemberManager: 0,
+
+  // ===== Reactions (not used) =====
+  ReactionManager: 0,
+  ReactionUserManager: 0,
+
+  // ===== Voice & Presence (not needed) =====
+  VoiceStateManager: 0,
+  PresenceManager: 0,
+
+  // ===== Stage Instances (not used) =====
+  StageInstanceManager: 0,
+
+  // ===== Bans (not needed - bot doesn't manage bans) =====
+  GuildBanManager: 0,
+
+  // ===== Invites (not needed) =====
+  GuildInviteManager: 0,
+
+  // ===== Scheduled Events (not needed) =====
+  GuildScheduledEventManager: 0,
+
+  // ===== Stickers (keep small cache for command responses) =====
+  GuildStickerManager: 20,
+
+  // ===== Entitlements (not used - no premium features via Discord) =====
+  EntitlementManager: 0,
+
+  // ===== Guild Members (minimal caching) =====
+  // TODO: Implement registered user check in keepOverLimit
+  GuildMemberManager: {
+    maxSize: 1,
+    keepOverLimit: (member: GuildMember) =>
+      member.id === member.client.user?.id,
+  },
+
+  // ===== Users (minimal caching) =====
+  // TODO: Implement registered user check in keepOverLimit
+  UserManager: {
+    maxSize: 1,
+    keepOverLimit: (user: User) => user.id === user.client.user?.id,
+  },
+
+  // NOTE: The following managers CANNOT be customized (Discord.js limitation):
+  // - GuildManager, ChannelManager, GuildChannelManager
+  // - RoleManager, PermissionOverwriteManager
+  // Attempting to customize these will break core functionality!
+};
+
+/**
+ * Sweeper options to periodically clear caches
+ *
+ * @remarks
+ * Sweepers run at intervals to remove stale cache entries, keeping memory usage low.
+ * More aggressive sweeping = lower memory usage but more API calls.
+ */
+const sweeperOptions: SweeperOptions = {
+  // Sweep guild members every 5 minutes - remove everything except bot
+  // TODO: Implement registered user check in filter
+  guildMembers: {
+    interval: 300,
+    filter: () => (member: GuildMember) => member.id !== member.client.user?.id,
+  },
+  // Sweep users every 10 minutes - remove everything except bot
+  // TODO: Implement registered user check in filter
+  users: {
+    interval: 600,
+    filter: () => (user: User) => user.id !== user.client.user?.id,
+  },
+  // Sweep threads every hour (default behavior, can be customized)
+  threads: {
+    interval: 3600, // Every hour
+    lifetime: 14400, // Remove threads archived more than 4 hours ago
+  },
+};
+
+// Initialize Discord client with bot-specific configuration and aggressive caching
 const client = new Client({
   intents: config.intents,
   partials: [Partials.GuildMember, Partials.User],
+  makeCache: Options.cacheWithLimits(makeCacheSettings),
+  sweepers: sweeperOptions,
+  // Don't wait for guild data to be ready (faster startup)
+  waitGuildTimeout: 0,
+  // Reduce REST request timeout for faster failures
+  rest: {
+    timeout: 15_000, // 15 seconds
+  },
 });
 
-/* Loading Command Interaction in Client */
+// Determine environment and source directory
+const runningFromDist = process.env.NODE_ENV !== "development";
+const srcDir = runningFromDist ? "dist" : "src";
+
+/* ============================================================================
+ * Command Loading
+ * ============================================================================
+ * Dynamically loads slash command implementations from the file system.
+ * Commands are organized by game system (cod/5th/20th) in separate directories.
+ */
 client.commands = new Collection<string, BotCommand>();
 const commandsPath = path.join(process.cwd(), srcDir, config.commandsPath);
 
@@ -197,7 +386,12 @@ if (fs.existsSync(commandsPath)) {
   process.exit(1);
 }
 
-/* Loading Component Interactions in Client (for bots that support them) */
+/* ============================================================================
+ * Component Loading (5th/20th bots only)
+ * ============================================================================
+ * Loads interactive message components (buttons, select menus, modals).
+ * Components have custom IDs that can include data separated by pipes (|).
+ */
 client.components = new Collection<string, BotComponent>();
 
 if (config.hasComponents) {
@@ -228,7 +422,12 @@ if (config.hasComponents) {
   }
 }
 
-/* Event Listeners */
+/* ============================================================================
+ * Event Listeners
+ * ============================================================================
+ * Loads Discord.js event handlers for lifecycle and gateway events.
+ * Events can be configured to run once (e.g., ClientReady) or repeatedly.
+ */
 const eventsPath = path.join(process.cwd(), srcDir, "events");
 
 if (fs.existsSync(eventsPath)) {
@@ -272,7 +471,12 @@ if (fs.existsSync(eventsPath)) {
   process.exit(1);
 }
 
-// Log in to Discord using bot-specific token
+/* ============================================================================
+ * Discord Authentication
+ * ============================================================================
+ * Authenticates with Discord using the bot token for the selected game system.
+ * The token is loaded from environment variables (TOKEN_COD, TOKEN_5TH, TOKEN_20TH).
+ */
 client.login(config.token).catch((error) => {
   if (error instanceof Error)
     logger.error(`Failed to log in ${config.name} to Discord:`, { error });

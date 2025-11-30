@@ -137,6 +137,5 @@
   },
 
   // Monorepo-specific settings
-  "npm.packageManager": "pnpm",
-  "npm.enableScriptExplorer": true
+  "npm.packageManager": "pnpm"
 }
