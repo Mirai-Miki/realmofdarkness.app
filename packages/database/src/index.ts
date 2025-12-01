@@ -19,7 +19,7 @@ export {
   type SupporterDb,
 } from "./schema/supporters.js";
 export { members, type MemberDb } from "./schema/members.js";
-export { guilds, storytellerRoles } from "./schema/guilds.js";
+export { guilds, storytellerRoles, type GuildDb } from "./schema/guilds.js";
 export {
   characters,
   characterSplats,

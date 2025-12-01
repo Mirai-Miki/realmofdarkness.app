@@ -2,11 +2,10 @@ import { eq, gt } from "drizzle-orm";
 import { supporters, type Database } from "@realm/database";
 import { RealmError } from "@realm/errors";
 import { logger } from "@realm/logger";
-import type { Supporter } from "@realm/core";
+import type { Snowflake } from "@realm/core";
+import { Supporter } from "@realm/core";
 import { type ISupporterRepository, SupporterName } from "@realm/core";
 import { SupporterMapper } from "./mappers/supporter.mapper.js";
-
-type Snowflake = string;
 
 /**
  * Repository for Supporter entity persistence operations.
@@ -48,14 +47,12 @@ export class SupporterRepository implements ISupporterRepository {
 
       if (result.length === 0) {
         // Return default Base tier supporter for users without subscription
-        return SupporterMapper.toDomain({
+        return new Supporter({
           userId,
           level: SupporterName.Base,
           totalBoosts: 0,
           firstSupported: null,
           lastSupported: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         });
       }
 
@@ -212,10 +209,7 @@ export class SupporterRepository implements ISupporterRepository {
 
       const result = await this.db
         .update(supporters)
-        .set({
-          ...dbRecord,
-          updatedAt: new Date(),
-        })
+        .set(dbRecord)
         .where(eq(supporters.userId, supporter.userId))
         .returning();
 

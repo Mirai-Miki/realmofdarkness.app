@@ -18,34 +18,147 @@ export interface UserProps {
  * For subscription/supporter information, use the Supporter entity.
  */
 export class User {
-  public readonly id: string;
-  public username: string;
-  public displayName: string;
-  public email: string | null;
-  public avatarUrl: string;
-  public registered: boolean;
-  public admin: boolean;
-  public readonly createdAt: Date;
-  public updatedAt: Date;
-  public lastActive: Date;
+  private readonly _id: string;
+  private _username: string;
+  private _displayName: string;
+  private _email: string | null;
+  private _avatarUrl: string;
+  private _registered: boolean;
+  private _admin: boolean;
+  private readonly _createdAt: Date;
+  private readonly _updatedAt: Date;
+  private _lastActive: Date;
 
   constructor(props: UserProps) {
-    this.id = props.id;
-    this.username = props.username;
-    this.displayName = props.displayName;
-    this.email = props.email ?? null;
-    this.avatarUrl = props.avatarUrl;
-    this.registered = props.registered;
-    this.admin = props.admin;
-    this.createdAt = props.createdAt;
-    this.updatedAt = props.updatedAt;
-    this.lastActive = props.lastActive;
+    this._id = props.id;
+    this._username = props.username;
+    this._displayName = props.displayName;
+    this._email = props.email ?? null;
+    this._avatarUrl = props.avatarUrl;
+    this._registered = props.registered;
+    this._admin = props.admin;
+    this._createdAt = props.createdAt;
+    this._updatedAt = props.updatedAt;
+    this._lastActive = props.lastActive;
+  }
+
+  // Getters
+  public get id(): string {
+    return this._id;
+  }
+
+  public get username(): string {
+    return this._username;
+  }
+
+  public get displayName(): string {
+    return this._displayName;
+  }
+
+  public get email(): string | null {
+    return this._email;
+  }
+
+  public get avatarUrl(): string {
+    return this._avatarUrl;
+  }
+
+  public get registered(): boolean {
+    return this._registered;
+  }
+
+  public get admin(): boolean {
+    return this._admin;
+  }
+
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  public get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
+  public get lastActive(): Date {
+    return this._lastActive;
+  }
+
+  // Business methods
+
+  /**
+   * Update the user's username.
+   *
+   * @param username - New username
+   */
+  public updateUsername(username: string): void {
+    if (!username || username.trim().length === 0) {
+      throw new Error("Username cannot be empty");
+    }
+    this._username = username;
+  }
+
+  /**
+   * Update the user's display name.
+   *
+   * @param displayName - New display name
+   */
+  public updateDisplayName(displayName: string): void {
+    if (!displayName || displayName.trim().length === 0) {
+      throw new Error("Display name cannot be empty");
+    }
+    this._displayName = displayName;
+  }
+
+  /**
+   * Update the user's email address.
+   *
+   * @param email - New email address (or null to clear)
+   */
+  public updateEmail(email: string | null): void {
+    this._email = email;
+  }
+
+  /**
+   * Update the user's avatar URL.
+   *
+   * @param avatarUrl - New avatar URL
+   */
+  public updateAvatarUrl(avatarUrl: string): void {
+    this._avatarUrl = avatarUrl;
+  }
+
+  /**
+   * Mark the user as registered.
+   */
+  public register(): void {
+    this._registered = true;
+  }
+
+  /**
+   * Mark the user as unregistered.
+   */
+  public unregister(): void {
+    this._registered = false;
+  }
+
+  /**
+   * Grant admin privileges to the user.
+   */
+  public grantAdmin(): void {
+    this._admin = true;
+  }
+
+  /**
+   * Revoke admin privileges from the user.
+   */
+  public revokeAdmin(): void {
+    this._admin = false;
   }
 
   /**
    * Update the user's last active timestamp.
    */
   public updateLastActive(): void {
-    this.lastActive = new Date();
+    this._lastActive = new Date();
   }
 }

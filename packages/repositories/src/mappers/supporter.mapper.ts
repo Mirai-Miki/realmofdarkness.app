@@ -1,4 +1,5 @@
 import type { SupporterDb } from "@realm/database";
+import type { SupporterName } from "@realm/core";
 import { Supporter } from "@realm/core";
 import { RealmError } from "@realm/errors";
 
@@ -56,7 +57,7 @@ export class SupporterMapper {
     try {
       return {
         userId: supporter.userId,
-        level: supporter.level,
+        level: supporter.getLevel(),
         totalBoosts: supporter.totalBoosts,
         firstSupported: supporter.firstSupported,
         lastSupported: supporter.lastSupported,

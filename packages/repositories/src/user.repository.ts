@@ -2,11 +2,9 @@ import { eq } from "drizzle-orm";
 import { users, type Database } from "@realm/database";
 import { RealmError } from "@realm/errors";
 import { logger } from "@realm/logger";
-import type { User } from "@realm/core";
+import type { User, Snowflake } from "@realm/core";
 import { type IUserRepository } from "@realm/core";
 import { UserMapper } from "./mappers/user.mapper.js";
-
-type Snowflake = string;
 
 /**
  * Repository for User entity persistence operations.

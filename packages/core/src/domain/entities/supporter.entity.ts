@@ -76,46 +76,69 @@ export interface SupporterProps {
  * ```
  */
 export class Supporter {
-  public readonly userId: string;
-  public level: SupporterName;
-  public totalBoosts: number;
-  public firstSupported: Date | null;
-  public lastSupported: Date | null;
+  private readonly _userId: string;
+  private _level: SupporterName;
+  private _totalBoosts: number;
+  private _firstSupported: Date | null;
+  private _lastSupported: Date | null;
 
   constructor(props: SupporterProps) {
-    this.userId = props.userId;
-    this.level = props.level;
-    this.totalBoosts = props.totalBoosts;
-    this.firstSupported = props.firstSupported;
-    this.lastSupported = props.lastSupported;
+    this._userId = props.userId;
+    this._level = props.level;
+    this._totalBoosts = props.totalBoosts;
+    this._firstSupported = props.firstSupported;
+    this._lastSupported = props.lastSupported;
   }
+
+  // Getters
+  public get userId(): string {
+    return this._userId;
+  }
+
+  public get level(): SupporterName {
+    return this._level;
+  }
+
+  public get totalBoosts(): number {
+    return this._totalBoosts;
+  }
+
+  public get firstSupported(): Date | null {
+    return this._firstSupported;
+  }
+
+  public get lastSupported(): Date | null {
+    return this._lastSupported;
+  }
+
+  // Business methods
 
   /**
    * Check if the user is an active supporter (not Base tier).
    */
   public isActive(): boolean {
-    return this.level !== SupporterName.Base;
+    return this._level !== SupporterName.Base;
   }
 
   /**
    * Get the supporter's tier level.
    */
   public getLevel(): SupporterName {
-    return this.level;
+    return this._level;
   }
 
   /**
    * Check if the supporter has available boosts to allocate.
    */
   public hasAvailableBoosts(): boolean {
-    return this.totalBoosts > 0;
+    return this._totalBoosts > 0;
   }
 
   /**
    * Get the number of available boosts.
    */
   public getAvailableBoosts(): number {
-    return this.totalBoosts;
+    return this._totalBoosts;
   }
 
   /**
@@ -124,13 +147,8 @@ export class Supporter {
    * @param newLevel - New supporter tier
    * @param newBoostAllocation - Total boosts for the new tier
    */
-  public updateLevel(
-    newLevel: SupporterName,
-    newBoostAllocation: number
-  ): void {
-    this.level = newLevel;
-    this.totalBoosts = newBoostAllocation;
-    this.lastSupported = new Date();
+  public updateLevel(newLevel: SupporterName): void {
+    this._level = newLevel;
   }
 
   /**
@@ -140,11 +158,11 @@ export class Supporter {
    * @returns True if supporter has been active for at least this long
    */
   public hasSupportedForMonths(months: number): boolean {
-    if (!this.firstSupported) return false;
+    if (!this._firstSupported) return false;
 
     const now = new Date();
     const monthsDiff =
-      (now.getTime() - this.firstSupported.getTime()) /
+      (now.getTime() - this._firstSupported.getTime()) /
       (1000 * 60 * 60 * 24 * 30);
 
     return monthsDiff >= months;
@@ -155,11 +173,11 @@ export class Supporter {
    * Assumes monthly billing with 5-day grace period.
    */
   public isExpired(): boolean {
-    if (!this.lastSupported) return true;
+    if (!this._lastSupported) return true;
 
     const now = new Date();
     const daysSinceLastSupport =
-      (now.getTime() - this.lastSupported.getTime()) / (1000 * 60 * 60 * 24);
+      (now.getTime() - this._lastSupported.getTime()) / (1000 * 60 * 60 * 24);
 
     return daysSinceLastSupport > 35;
   }
@@ -168,14 +186,14 @@ export class Supporter {
    * Get the character sheet limit for this supporter tier.
    */
   public getSheetLimit(): number {
-    return SUPPORTER_SHEET_LIMITS[this.level];
+    return SUPPORTER_SHEET_LIMITS[this._level];
   }
 
   /**
    * Get the tracker limit for this supporter tier.
    */
   public getTrackerLimit(): number {
-    return SUPPORTER_TRACKER_LIMITS[this.level];
+    return SUPPORTER_TRACKER_LIMITS[this._level];
   }
 
   /**
@@ -183,7 +201,7 @@ export class Supporter {
    * Useful for comparisons.
    */
   public getLevelValue(): number {
-    return SUPPORTER_LEVEL_VALUES[this.level];
+    return SUPPORTER_LEVEL_VALUES[this._level];
   }
 
   /**

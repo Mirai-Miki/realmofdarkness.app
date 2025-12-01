@@ -17,12 +17,13 @@
 // Export repositories
 export { UserRepository } from "./user.repository.js";
 export { SupporterRepository } from "./supporter.repository.js";
+export { GuildRepository } from "./guild.repository.js";
 
 // Export mappers
 export { UserMapper } from "./mappers/user.mapper.js";
 export { SupporterMapper } from "./mappers/supporter.mapper.js";
+export { GuildMapper } from "./mappers/guild.mapper.js";
 
 // TODO: Export when implemented
 // export { CharacterRepository } from "./character.repository.js";
-// export { GuildRepository } from "./guild.repository.js";
 // export { MemberRepository } from "./member.repository.js";
