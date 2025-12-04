@@ -1,4 +1,4 @@
-import type { Guild } from "discord.js";
+import type { Guild as DiscordGuild } from "discord.js";
 
 import { Events } from "discord.js";
 import { logger } from "@realm/logger";
@@ -10,7 +10,7 @@ import { setActivity } from "utilities";
 module.exports = {
   name: Events.GuildCreate,
   once: false,
-  async execute(guild: Guild) {
+  async execute(guild: DiscordGuild) {
     await setActivity(guild.client);
 
     // Create guild service
@@ -29,22 +29,24 @@ module.exports = {
       }
 
       // Create new guild entity
+      const now = new Date();
       const realmGuild = new RealmGuild({
         id: guild.id,
         name: guild.name,
         iconUrl: guild.iconURL() || "",
         trackerChannel: "",
+        createdAt: now,
+        lastUpdated: now,
       });
 
       // Save to database
       await guildService.create(realmGuild);
 
       logger.info(`Bot added to new guild: ${guild.name}`, {
-        fields: { guildId: guild.id, memberCount: guild.memberCount },
+        fields: { guildId: guild.id, memberCount: String(guild.memberCount) },
       });
 
-      // TODO: Update all existing guild members to create member relations
-      // This will be implemented when member management is added
+      // TODO: Find all RealmUsers in this guild and create RealmMembers for them
     } catch (error) {
       logger.exception(
         `Failed to create guild ${guild.name} (${guild.id}):`,

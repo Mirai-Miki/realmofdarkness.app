@@ -52,6 +52,8 @@ export interface SupporterProps {
   totalBoosts: number;
   firstSupported: Date | null;
   lastSupported: Date | null;
+  createdAt: Date;
+  lastUpdated: Date;
 }
 
 /**
@@ -81,6 +83,8 @@ export class Supporter {
   private _totalBoosts: number;
   private _firstSupported: Date | null;
   private _lastSupported: Date | null;
+  private readonly _createdAt: Date;
+  private readonly _lastUpdated: Date;
 
   constructor(props: SupporterProps) {
     this._userId = props.userId;
@@ -88,6 +92,8 @@ export class Supporter {
     this._totalBoosts = props.totalBoosts;
     this._firstSupported = props.firstSupported;
     this._lastSupported = props.lastSupported;
+    this._createdAt = props.createdAt;
+    this._lastUpdated = props.lastUpdated;
   }
 
   // Getters
@@ -109,6 +115,14 @@ export class Supporter {
 
   public get lastSupported(): Date | null {
     return this._lastSupported;
+  }
+
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  public get lastUpdated(): Date {
+    return this._lastUpdated;
   }
 
   // Business methods

@@ -5,6 +5,8 @@ export interface GuildProps {
   name: string;
   iconUrl: string;
   trackerChannel: string;
+  createdAt: Date;
+  lastUpdated: Date;
 }
 
 /**
@@ -30,12 +32,16 @@ export class Guild {
   private _name: string;
   private _iconUrl: string;
   private _trackerChannel: string;
+  private readonly _createdAt: Date;
+  private readonly _lastUpdated: Date;
 
   constructor(props: GuildProps) {
     this._id = props.id;
     this._name = props.name;
     this._iconUrl = props.iconUrl;
     this._trackerChannel = props.trackerChannel;
+    this._createdAt = props.createdAt;
+    this._lastUpdated = props.lastUpdated;
   }
 
   // Getters
@@ -53,6 +59,14 @@ export class Guild {
 
   public get trackerChannel(): string {
     return this._trackerChannel;
+  }
+
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  public get lastUpdated(): Date {
+    return this._lastUpdated;
   }
 
   // Business methods

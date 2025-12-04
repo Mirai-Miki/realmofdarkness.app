@@ -33,6 +33,8 @@ export class GuildMapper {
         name: db.name,
         iconUrl: db.iconUrl,
         trackerChannel: db.trackerChannel,
+        createdAt: db.createdAt,
+        lastUpdated: db.lastUpdated,
       });
     } catch (error) {
       throw new RealmError("Failed to map guild from database to domain", {

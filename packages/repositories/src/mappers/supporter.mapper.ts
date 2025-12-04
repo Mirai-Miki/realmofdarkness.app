@@ -34,6 +34,8 @@ export class SupporterMapper {
         totalBoosts: db.totalBoosts,
         firstSupported: db.firstSupported,
         lastSupported: db.lastSupported,
+        createdAt: db.createdAt,
+        lastUpdated: db.lastUpdated,
       });
     } catch (error) {
       throw new RealmError("Failed to map supporter from database to domain", {
@@ -52,7 +54,7 @@ export class SupporterMapper {
    */
   static fromDomain(
     supporter: Supporter
-  ): Omit<SupporterDb, "createdAt" | "updatedAt"> {
+  ): Omit<SupporterDb, "createdAt" | "lastUpdated"> {
     try {
       return {
         userId: supporter.userId,

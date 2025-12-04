@@ -1,4 +1,4 @@
-import type { Guild } from "discord.js";
+import type { Guild as DiscordGuild } from "discord.js";
 
 import { logger } from "@realm/logger";
 import { GuildRepository } from "@realm/repositories";
@@ -9,7 +9,7 @@ import { setActivity } from "utilities";
 module.exports = {
   name: Events.GuildDelete,
   once: false,
-  async execute(guild: Guild) {
+  async execute(guild: DiscordGuild) {
     await setActivity(guild.client);
 
     // Simple instantiation - repositories use singleton db internally

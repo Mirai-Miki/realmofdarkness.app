@@ -37,6 +37,9 @@ export const supporters = pgTable("supporters", {
 
   /** When the user last had an active subscription */
   lastSupported: timestamp(),
+
+  createdAt: timestamp().defaultNow().notNull(),
+  lastUpdated: timestamp().defaultNow().notNull(),
 });
 
 // Type exports for use in other parts of the application

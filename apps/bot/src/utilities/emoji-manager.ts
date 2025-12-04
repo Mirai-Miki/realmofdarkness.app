@@ -1,6 +1,6 @@
 import type { Client, ApplicationEmoji } from "discord.js";
 import type { EmojiName } from "../types/emoji-types.js";
-import { RealmError } from "@realm/logger/errors";
+import { RealmError } from "@realm/errors";
 
 /**
  * Dynamic emoji manager for Discord applications

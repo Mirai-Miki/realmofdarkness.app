@@ -8,3 +8,4 @@
 export * from "./user.repository.interface.js";
 export * from "./supporter.repository.interface.js";
 export * from "./guild.repository.interface.js";
+export * from "./member.repository.interface.js";

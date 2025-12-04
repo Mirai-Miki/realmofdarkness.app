@@ -9,3 +9,4 @@ export * from "./characters/character-cod.entity.js";
 export * from "./user.entity.js";
 export * from "./supporter.entity.js";
 export * from "./guild.entity.js";
+export * from "./member.entity.js";
