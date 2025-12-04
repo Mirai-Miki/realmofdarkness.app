@@ -31,7 +31,7 @@ This document outlines the comprehensive refactoring plan to migrate Realm of Da
 
 #### 2. **Shared Package** (`shared/`)
 
-- ✅ Unified error handling system (`RealmError`, `ClientError`)
+- ✅ Unified error handling system (`RealmError`, `UserError`)
 - ✅ Singleton logger with Discord integration
 - ✅ Base type definitions (`Splats`, `SheetStatus`, `SupporterLevel`)
 - ✅ Zod validation schemas for character data:
@@ -169,7 +169,7 @@ type Hunter5thData = Record<string, unknown>;
 
 - **Purpose:** Code used by ALL other packages
 - **Contents:**
-  - Error handling (`RealmError`, `ClientError`)
+  - Error handling (`RealmError`, `UserError`)
   - Logger (singleton pattern)
   - Zod validation schemas (DTOs)
   - Type definitions (`Splats`, enums, constants)
@@ -567,8 +567,8 @@ class CharacterMapper {
 
 **Tasks:**
 
-- [ ] Global exception filter using `ClientError` for 4xx responses
-- [ ] Log all errors with `RealmLogger` from `shared`
+- [ ] Global exception filter using `UserError` for 4xx responses
+- [ ] Log all errors with `logger` from `@realm/logger`
 - [ ] Request logging middleware
 
 **Deliverables:**
@@ -606,8 +606,8 @@ class CharacterMapper {
 
 - [ ] Refactor command handlers to use typed domain models
 - [ ] Add Zod validation for command inputs
-- [ ] Use `RealmLogger` for logging
-- [ ] Use `ClientError` for user-facing errors
+- [ ] Use `logger` for logging
+- [ ] Use `UserError` for user-facing errors
 
 **Example:**
 
@@ -620,7 +620,7 @@ import { CharacterRepository } from "repositories";
 const charRepo = new CharacterRepository(db);
 const char = await charRepo.findByUser(BigInt(user.id), name);
 if (!char) {
-  throw ClientError.notFound("Character not found");
+  throw new UserError("Character not found");
 }
 ```
 
@@ -1000,8 +1000,7 @@ throw new RealmError("Database connection failed", {
 });
 
 // User errors (not logged)
-throw ClientError.notFound("Character not found", {
-  errorCode: "CHARACTER_NOT_FOUND",
+throw new UserError("Character not found", {
   fields: { name, userId },
 });
 ```
@@ -1016,7 +1015,7 @@ throw ClientError.notFound("Character not found", {
 - Include location for all logs: `logger.info('msg', { location: 'Class.method' })`
 - Add contextual fields: `{ fields: { userId, characterId } }`
 - Use appropriate levels (debug/info/warning/error/fatal)
-- Don't log `ClientError` (user mistakes)
+- Don't log `UserError` (user mistakes)
 
 ### 6. **Testing Strategy**
 

@@ -428,7 +428,7 @@ if (config.hasComponents) {
  * Loads Discord.js event handlers for lifecycle and gateway events.
  * Events can be configured to run once (e.g., ClientReady) or repeatedly.
  */
-const eventsPath = path.join(process.cwd(), srcDir, "events");
+const eventsPath = path.join(process.cwd(), srcDir, "discord-events");
 
 if (fs.existsSync(eventsPath)) {
   const eventFiles = fs

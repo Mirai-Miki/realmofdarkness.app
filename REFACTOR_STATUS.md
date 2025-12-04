@@ -1,6 +1,6 @@
 # Refactor Status - Quick Reference
 
-**Last Updated:** November 1, 2025  
+**Last Updated:** November 1, 2025
 **Branch:** `refactor/project-overhaul`
 
 ---
@@ -43,7 +43,7 @@
 
 ### Shared Package (100%)
 
-- ✅ Error handling system (RealmError, ClientError)
+- ✅ Error handling system (RealmError, UserError)
 - ✅ Singleton logger with Discord integration
 - ✅ Base type definitions (Splats, SheetStatus, SupporterLevel, HttpStatus)
 - ✅ Complete Zod validation schemas for all character types

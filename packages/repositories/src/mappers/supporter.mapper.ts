@@ -1,5 +1,4 @@
 import type { SupporterDb } from "@realm/database";
-import type { SupporterName } from "@realm/core";
 import { Supporter } from "@realm/core";
 import { RealmError } from "@realm/errors";
 

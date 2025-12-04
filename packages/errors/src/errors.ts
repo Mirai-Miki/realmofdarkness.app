@@ -79,16 +79,16 @@ export class RealmError extends Error {
 }
 
 /**
- * Client error class for user-facing errors that should not be logged.
- * These are errors that occur due to user input or client-side issues,
+ * User error class for user-facing errors that should not be logged.
+ * These are errors that occur due to user input or mistakes,
  * not problems with our application code.
  */
-export class ClientError extends RealmError {
+export class UserError extends RealmError {
   /** HTTP status code for this error */
   public readonly statusCode: number;
 
   /**
-   * Creates a new ClientError instance.
+   * Creates a new UserError instance.
    *
    * @param message - The error message
    * @param options - Additional error options
@@ -104,18 +104,18 @@ export class ClientError extends RealmError {
       statusCode?: number;
     } = {}
   ) {
-    // Pass log option to parent constructor with default of false for ClientError
+    // Pass log option to parent constructor with default of false for UserError
     super(message, {
       ...options,
       log: options.log ?? false,
     });
 
-    this.name = "ClientError";
+    this.name = "UserError";
     this.statusCode = options.statusCode ?? HttpStatus.BAD_REQUEST;
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ClientError);
+      Error.captureStackTrace(this, UserError);
     }
   }
 

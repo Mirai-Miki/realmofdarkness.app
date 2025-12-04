@@ -1,6 +1,6 @@
 # Value Objects Implementation - Summary
 
-**Date:** January 2025  
+**Date:** January 2025
 **Status:** ✅ Complete - Phase 1a
 
 ---
@@ -32,7 +32,7 @@ Created three **Value Object** classes following Domain-Driven Design principles
    - Properties: `total`, `current`
    - Computed: `isFull`, `isEmpty`
    - Methods: `spend()`, `recover()`, `recoverAll()`, `setCurrent()`, `setTotal()`
-   - Validation: Throws `ClientError` if trying to spend more than available
+   - Validation: Throws `UserError` if trying to spend more than available
    - Serialization: `toJSON()`, `static fromJSON()`
 
 4. **`packages/core/src/domain/entities/value-objects/index.ts`**
@@ -102,10 +102,10 @@ Every Value Object validates its invariants in the constructor:
 ```typescript
 constructor(total: number, superficial: number, aggravated: number) {
   if (total < 0) {
-    throw new ClientError("Tracker total cannot be negative");
+    throw new UserError("Tracker total cannot be negative");
   }
   if (superficial + aggravated > total) {
-    throw new ClientError("Total damage cannot exceed tracker total");
+    throw new UserError("Total damage cannot exceed tracker total");
   }
   // ... etc
 }
@@ -211,7 +211,7 @@ Fixed 3 TypeScript errors:
 
 1. ✅ Character20th constructor: `bigint` → `Snowflake`
 2. ✅ CharacterCoD constructor: `bigint` → `Snowflake`
-3. ✅ Character5th: Removed unused `ClientError` import
+3. ✅ Character5th: Removed unused `UserError` import
 
 ---
 
@@ -228,11 +228,11 @@ pnpm format
 
 ```typescript
 // ✅ Correct
-import { ClientError } from "errors";
+import { UserError } from "errors";
 import type { Snowflake } from "types";
 
 // ❌ Wrong (relative paths)
-import { ClientError } from "../../../errors";
+import { UserError } from "../../../errors";
 ```
 
 ✅ **All files documented with JSDoc**
@@ -370,19 +370,19 @@ class Character5th {
   // Cannot violate rules
   someMethod() {
     this.health.superficial = 999; // TypeScript compile error!
-    this.health = new DamageTracker5th(7, 999, 0); // ClientError thrown!
+    this.health = new DamageTracker5th(7, 999, 0); // UserError thrown!
   }
 }
 ```
 
 ### Improvements
 
-✅ **Type Safety**: Impossible to create invalid state  
-✅ **Immutability**: Prevents accidental mutations  
-✅ **Encapsulation**: Logic lives with the data  
-✅ **Testability**: Can test trackers independently  
-✅ **Reusability**: Same class for health and willpower  
-✅ **Maintainability**: Change rules in one place  
+✅ **Type Safety**: Impossible to create invalid state
+✅ **Immutability**: Prevents accidental mutations
+✅ **Encapsulation**: Logic lives with the data
+✅ **Testability**: Can test trackers independently
+✅ **Reusability**: Same class for health and willpower
+✅ **Maintainability**: Change rules in one place
 ✅ **Clarity**: Intent is obvious from the API
 
 ---
@@ -416,11 +416,11 @@ describe("DamageTracker5th", () => {
 
   describe("validation", () => {
     it("should throw on negative total", () => {
-      expect(() => new DamageTracker5th(-1, 0, 0)).toThrow(ClientError);
+      expect(() => new DamageTracker5th(-1, 0, 0)).toThrow(UserError);
     });
 
     it("should throw on damage exceeding total", () => {
-      expect(() => new DamageTracker5th(7, 5, 3)).toThrow(ClientError);
+      expect(() => new DamageTracker5th(7, 5, 3)).toThrow(UserError);
     });
   });
 });
@@ -438,7 +438,7 @@ We successfully implemented three Value Objects that:
 4. ✅ Follow Domain-Driven Design principles
 5. ✅ Are independently testable and reusable
 6. ✅ Use Snowflake type for Discord IDs
-7. ✅ Use proper error types (ClientError/RealmError)
+7. ✅ Use proper error types (UserError/RealmError)
 8. ✅ Have comprehensive JSDoc documentation
 9. ✅ Use absolute imports with path aliases
 10. ✅ Pass TypeScript compilation

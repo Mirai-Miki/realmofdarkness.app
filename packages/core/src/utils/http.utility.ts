@@ -32,7 +32,7 @@ export function isRedirection(code: number): boolean {
  * @param code - The HTTP status code to check
  * @returns True if the code is in the 4xx range
  */
-export function isClientError(code: number): boolean {
+export function isUserError(code: number): boolean {
   return code >= 400 && code < 500;
 }
 

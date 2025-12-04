@@ -6,7 +6,7 @@
  * - File backup logging
  * - Source map support for better stack traces
  * - Global error handling
- * - Custom error types (RealmError, ClientError)
+ * - Custom error types (RealmError, UserError)
  *
  * Simply importing this package initializes source map support and global error handlers.
  *

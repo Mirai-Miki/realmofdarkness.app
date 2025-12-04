@@ -567,7 +567,7 @@ export class CharacterMapper {
 import { CommandInteraction } from "discord.js";
 import { CharacterRepository } from "repositories";
 import { db } from "database";
-import { ClientError } from "shared";
+import { UserError } from "shared";
 
 export async function handleHungerCommand(interaction: CommandInteraction) {
   const characterName = interaction.options.getString("character", true);
@@ -578,12 +578,12 @@ export async function handleHungerCommand(interaction: CommandInteraction) {
   const character = await repo.findByUser(userId, characterName);
 
   if (!character) {
-    throw ClientError.notFound("Character not found");
+    throw new UserError("Character not found");
   }
 
   // 2. TYPE GUARD: Ensure it's a vampire
-  if (!character.isVampire5th()) {
-    throw ClientError.badRequest("Character must be a vampire");
+  if (!char.isVampire5th()) {
+    throw new UserError("Character must be a vampire");
   }
 
   // 3. DOMAIN: Use business logic

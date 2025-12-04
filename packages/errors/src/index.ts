@@ -3,12 +3,12 @@
  *
  * Provides custom error types for better error handling:
  * - RealmError: Internal application errors that should be logged
- * - ClientError: User-facing errors (validation, not found, etc.)
+ * - UserError: User-facing errors (validation, bad input, etc.) - not logged
  * - HttpStatus: Type-safe HTTP status code enum
  *
  * @example
  * ```typescript
- * import { RealmError, ClientError, HttpStatus } from "@realm/errors";
+ * import { RealmError, UserError, HttpStatus } from "@realm/errors";
  *
  * // Internal error (logged)
  * throw new RealmError("Database connection failed", {
@@ -16,13 +16,13 @@
  *   cause: originalError
  * });
  *
- * // Client error (not logged)
- * throw new ClientError("Invalid email format", {
+ * // User error (not logged)
+ * throw new UserError("Invalid email format", {
  *   statusCode: HttpStatus.BAD_REQUEST,
  *   fields: { email: userInput }
  * });
  * ```
  */
 
-export { RealmError, ClientError } from "./errors.js";
+export { RealmError, UserError } from "./errors.js";
 export { HttpStatus } from "./types.js";

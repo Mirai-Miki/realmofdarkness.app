@@ -23,7 +23,7 @@ export class WillpowerTracker20th {
    *
    * @param total - Total willpower (1-10)
    * @param current - Current willpower (0 to total)
-   * @throws {ClientError} If values are invalid
+   * @throws {RealmError} If values are invalid
    */
   constructor(
     public readonly total: number,
@@ -35,7 +35,7 @@ export class WillpowerTracker20th {
   /**
    * Validates tracker values.
    *
-   * @throws {ClientError} If values are invalid
+   * @throws {RealmError} If values are invalid
    * @private
    */
   private validate(): void {
@@ -127,7 +127,7 @@ export class WillpowerTracker20th {
    *
    * @param amount - Amount of willpower to spend
    * @returns New tracker instance
-   * @throws {ClientError} If insufficient willpower
+   * @throws {RealmError} If insufficient willpower
    */
   public spend(amount: number): WillpowerTracker20th {
     if (amount < 0) {

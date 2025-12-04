@@ -4,16 +4,17 @@
   "type": "module",
   "scripts": {
     "start": "./scripts/run.sh",
-    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "build": "pnpm run typecheck && tsup",
     "clean": "rimraf dist .turbo",
     "build:watch": "tsup --watch",
     "dev": "tsup --watch",
-    "dev:5th": "npm run format && npm run generate-types && node scripts/deployCommands.js 5th dev && npm run emoji:sync:5th && nodemon src/main/shardLauncher.ts 5th",
-    "dev:20th": "npm run format && npm run generate-types && node scripts/deployCommands.js 20th dev && npm run emoji:sync:20th && nodemon src/main/shardLauncher.ts 20th",
-    "dev:cod": "npm run format && npm run generate-types && node scripts/deployCommands.js cod dev && npm run emoji:sync:cod && nodemon src/main/shardLauncher.ts cod",
-    "dev:5th:global": "npm run format && npm run generate-types && node scripts/deployCommands.js 5th dev-global && npm run emoji:sync:5th && nodemon src/main/shardLauncher.ts 5th",
-    "dev:20th:global": "npm run format && npm run generate-types && node scripts/deployCommands.js 20th dev-global && npm run emoji:sync:20th && nodemon src/main/shardLauncher.ts 20th",
-    "dev:cod:global": "npm run format && npm run generate-types && node scripts/deployCommands.js cod dev-global && npm run emoji:sync:cod && nodemon src/main/shardLauncher.ts cod",
+    "dev:5th": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js 5th dev && pnpm run emoji:sync:5th && nodemon src/main/shardLauncher.ts 5th",
+    "dev:20th": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js 20th dev && pnpm run emoji:sync:20th && nodemon src/main/shardLauncher.ts 20th",
+    "dev:cod": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js cod dev && pnpm run emoji:sync:cod && nodemon src/main/shardLauncher.ts cod",
+    "dev:5th:global": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js 5th dev-global && pnpm run emoji:sync:5th && nodemon src/main/shardLauncher.ts 5th",
+    "dev:20th:global": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js 20th dev-global && pnpm run emoji:sync:20th && nodemon src/main/shardLauncher.ts 20th",
+    "dev:cod:global": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js cod dev-global && pnpm run emoji:sync:cod && nodemon src/main/shardLauncher.ts cod",
     "deploy:5th": "node scripts/deployCommands.js 5th prod && node scripts/syncEmojis.js 5th",
     "deploy:20th": "node scripts/deployCommands.js 20th prod && node scripts/syncEmojis.js 20th",
     "deploy:cod": "node scripts/deployCommands.js cod prod && node scripts/syncEmojis.js cod",
@@ -36,18 +37,21 @@
     "format:check": "prettier --check \"src/**/*.{js,ts,json}\"",
     "lint": "eslint . --ext .js,.ts"
   },
-  "dependencies": { 
+  "dependencies": {
     "@realm/core": "workspace:*",
     "@realm/logger": "workspace:*",
-    "@realm/database": "workspace:*",
+    "@realm/repositories": "workspace:*",
     "@realm/errors": "workspace:*",
+    "tsup": "^8.5.1",
     "discord.js": "^14.25.0",
     "dotenv": "^17.2.3",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "yaml": "^2.4.2"
   },
   "devDependencies": {
     "fs-extra": "^11.3.2",
     "glob": "^11.1.0",
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.11",
+    "tsup": "^8.5.1"
   }
 }

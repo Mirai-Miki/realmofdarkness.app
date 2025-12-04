@@ -45,33 +45,33 @@ throw new RealmError("Cache miss", {
 });
 ```
 
-### ClientError - User-Facing Errors
+### UserError - User-Facing Errors
 
-Use `ClientError` for errors caused by **user input** or client-side issues. These are not logged by default (they're expected user mistakes, not bugs).
+Use `UserError` for errors caused by **user input** or mistakes. These are not logged by default (they're expected user mistakes, not bugs).
 
 ```typescript
-import { ClientError, HttpStatus } from "@realm/errors";
+import { UserError, HttpStatus } from "@realm/errors";
 
 // Validation error
-throw new ClientError("Character name cannot contain special characters", {
+throw new UserError("Character name cannot contain special characters", {
   statusCode: HttpStatus.BAD_REQUEST,
   fields: { name: userInput },
 });
 
 // Not found
-throw new ClientError("Character not found", {
+throw new UserError("Character not found", {
   statusCode: HttpStatus.NOT_FOUND,
   fields: { characterId: id.toString() },
 });
 
 // Unauthorized
-throw new ClientError("You don't have permission to edit this character", {
+throw new UserError("You don't have permission to edit this character", {
   statusCode: HttpStatus.FORBIDDEN,
   fields: { userId: user.id.toString(), characterId: char.id.toString() },
 });
 
 // Override logging (for debugging)
-throw new ClientError("Suspicious validation failure", {
+throw new UserError("Suspicious validation failure", {
   log: true, // Force logging for investigation
   statusCode: HttpStatus.BAD_REQUEST,
   fields: { pattern: "multiple failed attempts" },
@@ -90,8 +90,8 @@ res.status(HttpStatus.OK).json(data);
 res.status(HttpStatus.CREATED).json(newCharacter);
 res.status(HttpStatus.NOT_FOUND).json({ error: "Not found" });
 
-// In ClientError
-throw new ClientError("Invalid request", {
+// In UserError
+throw new UserError("Invalid request", {
   statusCode: HttpStatus.UNPROCESSABLE_ENTITY, // 422
 });
 ```
@@ -126,14 +126,14 @@ new RealmError(message: string, options?: {
 
 - `toJSON(): Record<string, unknown>` - Serialize to JSON for logging/storage
 
-### `ClientError`
+### `UserError`
 
 User-facing error class (extends `RealmError`).
 
 **Constructor:**
 
 ```typescript
-new ClientError(message: string, options?: {
+new UserError(message: string, options?: {
   log?: boolean;        // Whether to log (default: false)
   fields?: Record<string, string>;  // Additional context
   cause?: unknown;      // Original error
@@ -190,14 +190,14 @@ See [types.ts](./src/types.ts) for the complete list.
 
 ❌ **Don't use RealmError for:**
 
-- User input validation (use ClientError)
-- "Not found" scenarios (use ClientError)
-- Authentication/authorization failures (use ClientError)
-- Expected business rule violations from user actions (use ClientError)
+- User input validation (use UserError)
+- "Not found" scenarios (use UserError)
+- Authentication/authorization failures (use UserError)
+- Expected business rule violations from user actions (use UserError)
 
-### When to use ClientError
+### When to use UserError
 
-✅ **Use ClientError for:**
+✅ **Use UserError for:**
 
 - Form validation errors
 - Invalid user input
@@ -206,7 +206,7 @@ See [types.ts](./src/types.ts) for the complete list.
 - Rate limiting
 - Duplicate entries from user actions
 
-❌ **Don't use ClientError for:**
+❌ **Don't use UserError for:**
 
 - Bugs in our code (use RealmError)
 - System failures (use RealmError)
@@ -218,7 +218,7 @@ See [types.ts](./src/types.ts) for the complete list.
 **Ask yourself:** "Is this error caused by **our code** or by **the user**?"
 
 - **Our code** → `RealmError` (logged, indicates a bug we need to fix)
-- **The user** → `ClientError` (not logged, expected user mistake)
+- **The user** → `UserError` (not logged, expected user mistake)
 
 ## Examples
 
@@ -258,7 +258,7 @@ class CharacterService {
   async createCharacter(userId: bigint, data: CreateCharacterDto) {
     // Validate user input (external boundary)
     if (!data.name || data.name.length > 50) {
-      throw new ClientError("Character name must be 1-50 characters", {
+      throw new UserError("Character name must be 1-50 characters", {
         statusCode: HttpStatus.BAD_REQUEST,
         fields: { name: data.name },
       });
@@ -267,7 +267,7 @@ class CharacterService {
     // Check if character already exists
     const existing = await this.repo.findByName(userId, data.name);
     if (existing) {
-      throw new ClientError("Character with this name already exists", {
+      throw new UserError("Character with this name already exists", {
         statusCode: HttpStatus.CONFLICT,
         fields: { name: data.name },
       });
@@ -300,7 +300,7 @@ export class CharacterController {
       const character = await this.service.createCharacter(user.id, dto);
       return character;
     } catch (error) {
-      if (error instanceof ClientError) {
+      if (error instanceof UserError) {
         // User error - return appropriate status code
         throw new HttpException(error.message, error.statusCode);
       }
@@ -314,7 +314,7 @@ export class CharacterController {
 
 ## Integration with Logger
 
-The `@realm/logger` package automatically handles `RealmError` and `ClientError`:
+The `@realm/logger` package automatically handles `RealmError` and `UserError`:
 
 ```typescript
 import { logger } from "@realm/logger";
@@ -325,7 +325,7 @@ try {
   // Logger checks error.log property
   await logger.error("Operation failed", error);
   // RealmError: logged with full context
-  // ClientError: not logged (unless log: true)
+  // UserError: not logged (unless log: true)
 }
 ```
 
@@ -334,22 +334,22 @@ try {
 All types are fully exported for TypeScript consumers:
 
 ```typescript
-import type { RealmError, ClientError } from "@realm/errors";
+import type { RealmError, UserError } from "@realm/errors";
 
 // Type guards
 function isRealmError(error: unknown): error is RealmError {
   return error instanceof RealmError;
 }
 
-function isClientError(error: unknown): error is ClientError {
-  return error instanceof ClientError;
+function isUserError(error: unknown): error is UserError {
+  return error instanceof UserError;
 }
 
 // Use in catch blocks
 try {
   await riskyOperation();
 } catch (error) {
-  if (isClientError(error)) {
+  if (isUserError(error)) {
     // Handle user error
     return { error: error.message, statusCode: error.statusCode };
   }
@@ -371,7 +371,7 @@ try {
 ```
 @realm/errors/
 ├── src/
-│   ├── errors.ts      # RealmError and ClientError classes
+│   ├── errors.ts      # RealmError and UserError classes
 │   ├── types.ts       # HttpStatus enum
 │   └── index.ts       # Public API exports
 ├── dist/              # Compiled output
@@ -386,7 +386,7 @@ This package has **zero runtime dependencies** - it only extends the native Java
 
 ## Stability Guarantee
 
-This package is considered **stable**. The public API (`RealmError`, `ClientError`, `HttpStatus`) will not have breaking changes without a major version bump.
+This package is considered **stable**. The public API (`RealmError`, `UserError`, `HttpStatus`) will not have breaking changes without a major version bump.
 
 Safe to use:
 

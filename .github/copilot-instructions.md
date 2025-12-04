@@ -23,18 +23,18 @@
 
 ### Error Handling (MANDATORY)
 
-- **All errors** must be either `RealmError` or `ClientError` (from `core/errors`)
+- **All errors** must be either `RealmError` or `UserError` (from `core/errors`)
 - **RealmError**: For application/system errors - things that break in our code (database failures, unexpected states, logic errors). These are logged and monitored.
-- **ClientError**: For user/client errors - invalid input, validation failures, illegal characters, etc. These are returned to the client but generally not logged as they're expected user mistakes.
+- **UserError**: For user/client errors - invalid input, validation failures, illegal characters, etc. These are returned to the client but generally not logged as they're expected user mistakes.
 - **NEVER** throw generic `Error` objects
 - Example:
 
   ```typescript
-  import { RealmError, ClientError } from "@realm/core/errors";
+  import { RealmError, UserError } from "@realm/core/errors";
 
   // User provided invalid input
   if (name.includes("~")) {
-    throw ClientError("Character name cannot contain ~ character");
+    throw new UserError("Character name cannot contain ~ character");
   }
 
   // System error
@@ -78,7 +78,7 @@ realm-of-darkness/
 │   │   ├── ports/                # Repository interfaces and service contracts
 │   │   ├── types/                # Shared type definitions
 │   │   ├── validations/          # Zod schemas for all character types
-│   │   ├── errors/               # Error classes (RealmError, ClientError)
+│   │   ├── errors/               # Error classes (RealmError, UserError)
 │   │   ├── logger/               # Singleton logger with Discord integration
 │   │   └── utils/                # Shared utilities
 │   │

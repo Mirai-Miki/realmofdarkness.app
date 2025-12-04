@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { users, type Database } from "@realm/database";
+import { db, users } from "@realm/database";
 import { RealmError } from "@realm/errors";
 import { logger } from "@realm/logger";
 import type { User, Snowflake } from "@realm/core";
@@ -14,7 +14,7 @@ import { UserMapper } from "./mappers/user.mapper.js";
  *
  * @example
  * ```typescript
- * const userRepo = new UserRepository(db);
+ * const userRepo = new UserRepository();
  *
  * // Find user by Discord ID
  * const user = await userRepo.findById("123456789012345678");
@@ -25,8 +25,6 @@ import { UserMapper } from "./mappers/user.mapper.js";
  * ```
  */
 export class UserRepository implements IUserRepository {
-  constructor(private db: Database) {}
-
   /**
    * Find a user by their Discord snowflake ID.
    *
@@ -36,7 +34,7 @@ export class UserRepository implements IUserRepository {
    */
   async findById(id: Snowflake): Promise<User | null> {
     try {
-      const result = await this.db
+      const result = await db
         .select()
         .from(users)
         .where(eq(users.id, id))
@@ -64,7 +62,7 @@ export class UserRepository implements IUserRepository {
    */
   async findByUsername(username: string): Promise<User | null> {
     try {
-      const result = await this.db
+      const result = await db
         .select()
         .from(users)
         .where(eq(users.username, username))
@@ -93,11 +91,7 @@ export class UserRepository implements IUserRepository {
    */
   async findAll(limit: number = 100, offset: number = 0): Promise<User[]> {
     try {
-      const results = await this.db
-        .select()
-        .from(users)
-        .limit(limit)
-        .offset(offset);
+      const results = await db.select().from(users).limit(limit).offset(offset);
 
       return results.map((db) => UserMapper.toDomain(db));
     } catch (error) {
@@ -122,7 +116,7 @@ export class UserRepository implements IUserRepository {
     try {
       const dbRecord = UserMapper.fromDomain(user);
 
-      const result = await this.db.insert(users).values(dbRecord).returning();
+      const result = await db.insert(users).values(dbRecord).returning();
 
       logger.info("User created", {
         fields: { userId: result[0].id, location: "UserRepository.create" },
@@ -148,7 +142,7 @@ export class UserRepository implements IUserRepository {
     try {
       const dbRecord = UserMapper.fromDomain(user);
 
-      const result = await this.db
+      const result = await db
         .update(users)
         .set({
           ...dbRecord,
@@ -184,7 +178,7 @@ export class UserRepository implements IUserRepository {
    */
   async updateLastActive(id: Snowflake): Promise<void> {
     try {
-      await this.db
+      await db
         .update(users)
         .set({ lastActive: new Date() })
         .where(eq(users.id, id));
@@ -208,7 +202,7 @@ export class UserRepository implements IUserRepository {
    */
   async delete(id: Snowflake): Promise<void> {
     try {
-      await this.db.delete(users).where(eq(users.id, id));
+      await db.delete(users).where(eq(users.id, id));
 
       logger.info("User deleted", {
         fields: { userId: id, location: "UserRepository.delete" },
@@ -230,7 +224,7 @@ export class UserRepository implements IUserRepository {
    */
   async exists(id: Snowflake): Promise<boolean> {
     try {
-      const result = await this.db
+      const result = await db
         .select({ id: users.id })
         .from(users)
         .where(eq(users.id, id))
@@ -253,7 +247,7 @@ export class UserRepository implements IUserRepository {
    */
   async count(): Promise<number> {
     try {
-      const result = await this.db.select({ count: users.id }).from(users);
+      const result = await db.select({ count: users.id }).from(users);
 
       return result.length;
     } catch (error) {

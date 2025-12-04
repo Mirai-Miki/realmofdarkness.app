@@ -349,7 +349,8 @@ export type ChannelName = (typeof Channels)[keyof typeof Channels];
 
 import Redis from "ioredis";
 import { z } from "zod";
-import { RealmLogger, RealmError } from "shared";
+import { logger } from "@realm/logger";
+import { RealmError } from "@realm/errors";
 import type { ChannelName } from "../channels/index.js";
 import { EventMetadataSchema } from "../types/event-metadata.js";
 
@@ -359,7 +360,6 @@ import { EventMetadataSchema } from "../types/event-metadata.js";
 export class RedisEventClient {
   private publisher: Redis;
   private subscriber: Redis;
-  private logger = RealmLogger.getInstance();
   private handlers = new Map<
     string,
     Array<(event: unknown) => void | Promise<void>>
@@ -373,7 +373,6 @@ export class RedisEventClient {
     this.subscriber = new Redis(redisUrl);
 
     this.subscriber.on("message", this.handleMessage.bind(this));
-    this.logger.setAppName(appName);
   }
 
   /**
@@ -410,8 +409,7 @@ export class RedisEventClient {
       const serialized = JSON.stringify(validated);
       await this.publisher.publish(channel, serialized);
 
-      await this.logger.debug(`Event published to ${channel}`, {
-        location: "RedisEventClient.publish",
+      logger.debug(`Event published to ${channel}`, {
         fields: {
           channel,
           eventType: (validated as any).type,
@@ -420,9 +418,8 @@ export class RedisEventClient {
       });
     } catch (error) {
       throw new RealmError("Failed to publish event", {
-        location: "RedisEventClient.publish",
         fields: { channel },
-        cause: error as Error,
+        cause: error,
       });
     }
   }
@@ -447,8 +444,7 @@ export class RedisEventClient {
         const validated = schema.parse(rawEvent);
         await handler(validated);
       } catch (error) {
-        await this.logger.error("Event handler failed", {
-          location: "RedisEventClient.subscribe",
+        logger.error("Event handler failed", {
           fields: {
             channel,
             error: error instanceof Error ? error.message : "Unknown error",
@@ -462,9 +458,7 @@ export class RedisEventClient {
     }
     this.handlers.get(channel)!.push(wrappedHandler);
 
-    await this.logger.info(`Subscribed to channel ${channel}`, {
-      location: "RedisEventClient.subscribe",
-    });
+    logger.info(`Subscribed to channel ${channel}`);
   }
 
   /**
@@ -480,10 +474,9 @@ export class RedisEventClient {
       // Execute all handlers for this channel
       await Promise.all(handlers.map((handler) => handler(event)));
     } catch (error) {
-      await this.logger.error("Failed to handle message", {
-        location: "RedisEventClient.handleMessage",
+      logger.error("Failed to handle message", {
         fields: { channel },
-        cause: error as Error,
+        error: error,
       });
     }
   }
@@ -494,9 +487,7 @@ export class RedisEventClient {
   async disconnect(): Promise<void> {
     await this.publisher.quit();
     await this.subscriber.quit();
-    await this.logger.info("Redis client disconnected", {
-      location: "RedisEventClient.disconnect",
-    });
+    logger.info("Redis client disconnected");
   }
 }
 ```
@@ -525,7 +516,7 @@ async function handleHungerCommand(interaction: CommandInteraction) {
   );
 
   if (!character || !character.isVampire5th()) {
-    throw ClientError.notFound("Vampire character not found");
+    throw new UserError("Vampire character not found");
   }
 
   // Update hunger

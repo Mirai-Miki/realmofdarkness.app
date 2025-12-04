@@ -1,5 +1,5 @@
 import { eq, gt } from "drizzle-orm";
-import { supporters, type Database } from "@realm/database";
+import { db, supporters } from "@realm/database";
 import { RealmError } from "@realm/errors";
 import { logger } from "@realm/logger";
 import type { Snowflake } from "@realm/core";
@@ -15,7 +15,7 @@ import { SupporterMapper } from "./mappers/supporter.mapper.js";
  *
  * @example
  * ```typescript
- * const supporterRepo = new SupporterRepository(db);
+ * const supporterRepo = new SupporterRepository();
  *
  * // Find supporter by user ID
  * const supporter = await supporterRepo.findByUserId("123456789012345678");
@@ -26,8 +26,6 @@ import { SupporterMapper } from "./mappers/supporter.mapper.js";
  * ```
  */
 export class SupporterRepository implements ISupporterRepository {
-  constructor(private db: Database) {}
-
   /**
    * Find a supporter by their user ID.
    * If no supporter record exists, returns a default Base tier supporter.
@@ -39,7 +37,7 @@ export class SupporterRepository implements ISupporterRepository {
    */
   async findByUserId(userId: Snowflake): Promise<Supporter> {
     try {
-      const result = await this.db
+      const result = await db
         .select()
         .from(supporters)
         .where(eq(supporters.userId, userId))
@@ -75,7 +73,7 @@ export class SupporterRepository implements ISupporterRepository {
    */
   async findAll(limit: number = 100, offset: number = 0): Promise<Supporter[]> {
     try {
-      const results = await this.db
+      const results = await db
         .select()
         .from(supporters)
         .limit(limit)
@@ -108,7 +106,7 @@ export class SupporterRepository implements ISupporterRepository {
     offset: number = 0
   ): Promise<Supporter[]> {
     try {
-      const results = await this.db
+      const results = await db
         .select()
         .from(supporters)
         .where(eq(supporters.level, level))
@@ -141,7 +139,7 @@ export class SupporterRepository implements ISupporterRepository {
     offset: number = 0
   ): Promise<Supporter[]> {
     try {
-      const results = await this.db
+      const results = await db
         .select()
         .from(supporters)
         .where(gt(supporters.totalBoosts, 0))
@@ -171,10 +169,7 @@ export class SupporterRepository implements ISupporterRepository {
     try {
       const dbRecord = SupporterMapper.fromDomain(supporter);
 
-      const result = await this.db
-        .insert(supporters)
-        .values(dbRecord)
-        .returning();
+      const result = await db.insert(supporters).values(dbRecord).returning();
 
       logger.info("Supporter created", {
         fields: {
@@ -207,7 +202,7 @@ export class SupporterRepository implements ISupporterRepository {
     try {
       const dbRecord = SupporterMapper.fromDomain(supporter);
 
-      const result = await this.db
+      const result = await db
         .update(supporters)
         .set(dbRecord)
         .where(eq(supporters.userId, supporter.userId))
@@ -250,7 +245,7 @@ export class SupporterRepository implements ISupporterRepository {
    */
   async delete(userId: Snowflake): Promise<void> {
     try {
-      await this.db.delete(supporters).where(eq(supporters.userId, userId));
+      await db.delete(supporters).where(eq(supporters.userId, userId));
 
       logger.info("Supporter deleted", {
         fields: { userId, location: "SupporterRepository.delete" },
@@ -272,7 +267,7 @@ export class SupporterRepository implements ISupporterRepository {
    */
   async exists(userId: Snowflake): Promise<boolean> {
     try {
-      const result = await this.db
+      const result = await db
         .select({ userId: supporters.userId })
         .from(supporters)
         .where(eq(supporters.userId, userId))
@@ -295,7 +290,7 @@ export class SupporterRepository implements ISupporterRepository {
    */
   async count(): Promise<number> {
     try {
-      const result = await this.db
+      const result = await db
         .select({ userId: supporters.userId })
         .from(supporters);
 
@@ -316,7 +311,7 @@ export class SupporterRepository implements ISupporterRepository {
    */
   async countByLevel(level: SupporterName): Promise<number> {
     try {
-      const result = await this.db
+      const result = await db
         .select({ userId: supporters.userId })
         .from(supporters)
         .where(eq(supporters.level, level));

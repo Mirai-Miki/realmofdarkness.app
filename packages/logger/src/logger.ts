@@ -251,7 +251,7 @@ class Logger {
 
   /**
    * Logs a RealmError with all its metadata.
-   * ClientErrors are not logged as they represent user errors, not system issues.
+   * UserErrors are not logged as they represent user errors, not system issues.
    *
    * @param error - The error to log
    * @param additionalOptions - Additional logging options to merge

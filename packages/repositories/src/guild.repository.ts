@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { guilds } from "@realm/database";
+import { db, guilds } from "@realm/database";
 import type { IGuildRepository, Snowflake } from "@realm/core";
 import type { Guild } from "@realm/core";
 import { RealmError } from "@realm/errors";
@@ -14,13 +13,11 @@ import { GuildMapper } from "./mappers/guild.mapper";
  *
  * @example
  * ```typescript
- * const repo = new GuildRepository(db);
+ * const repo = new GuildRepository();
  * const guild = await repo.findById("123456789012345678");
  * ```
  */
 export class GuildRepository implements IGuildRepository {
-  constructor(private readonly db: NodePgDatabase) {}
-
   /**
    * Find a guild by Discord guild ID.
    *
@@ -29,7 +26,7 @@ export class GuildRepository implements IGuildRepository {
    */
   async findById(id: Snowflake): Promise<Guild | null> {
     try {
-      const result = await this.db
+      const result = await db
         .select()
         .from(guilds)
         .where(eq(guilds.id, id))
@@ -58,7 +55,7 @@ export class GuildRepository implements IGuildRepository {
     try {
       const dbRecord = GuildMapper.fromDomain(guild);
 
-      const result = await this.db.insert(guilds).values(dbRecord).returning();
+      const result = await db.insert(guilds).values(dbRecord).returning();
 
       return GuildMapper.toDomain(result[0]);
     } catch (error) {
@@ -79,7 +76,7 @@ export class GuildRepository implements IGuildRepository {
     try {
       const dbRecord = GuildMapper.fromDomain(guild);
 
-      const result = await this.db
+      const result = await db
         .update(guilds)
         .set({
           ...dbRecord,
@@ -113,7 +110,7 @@ export class GuildRepository implements IGuildRepository {
    */
   async delete(id: Snowflake): Promise<void> {
     try {
-      await this.db.delete(guilds).where(eq(guilds.id, id));
+      await db.delete(guilds).where(eq(guilds.id, id));
     } catch (error) {
       throw new RealmError("Failed to delete guild", {
         cause: error,
@@ -130,7 +127,7 @@ export class GuildRepository implements IGuildRepository {
    */
   async exists(id: Snowflake): Promise<boolean> {
     try {
-      const result = await this.db
+      const result = await db
         .select({ id: guilds.id })
         .from(guilds)
         .where(eq(guilds.id, id))

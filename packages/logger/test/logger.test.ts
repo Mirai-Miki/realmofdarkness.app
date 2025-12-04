@@ -4,7 +4,7 @@
  */
 
 import { logger, Environment } from "../src/index";
-import { RealmError, ClientError } from "@realm/errors";
+import { RealmError, UserError } from "@realm/errors";
 
 describe("Logging", () => {
   beforeEach(() => {
@@ -232,28 +232,28 @@ describe("Logging", () => {
     });
 
     /**
-     * Test ClientError handling.
+     * Test UserError handling.
      */
-    it("should handle ClientError correctly (default no log)", () => {
+    it("should handle UserError correctly (default no log)", () => {
       const consoleSpy = jest.spyOn(console, "error").mockImplementation();
 
       logger.configure({
         enableConsoleLogging: true,
       });
 
-      // ClientError defaults to log: false
-      const clientError = new ClientError("User error");
-      logger.exception("Client error occurred", clientError);
+      // UserError defaults to log: false
+      const userError = new UserError("User error");
+      logger.exception("User error occurred", userError);
 
       expect(consoleSpy).not.toHaveBeenCalled();
 
       consoleSpy.mockClear();
 
-      // ClientError with log: true
-      const loggedClientError = new ClientError("Important user error", {
+      // UserError with log: true
+      const loggedUserError = new UserError("Important user error", {
         log: true,
       });
-      logger.exception("Important client error", loggedClientError);
+      logger.exception("Important user error", loggedUserError);
 
       expect(consoleSpy).toHaveBeenCalled();
 

@@ -1,28 +1,27 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": ".",
     "outDir": "dist",
     "experimentalDecorators": true,
     "typeRoots": ["node_modules/@types", "./src/types"],
-    "baseUrl": "./",
+    "baseUrl": "./src",
     "paths": {
-      "@realm/core": ["../../packages/core/src/index.ts"],
-      "@realm/core/*": ["../../packages/core/src/*"],
-      "services": ["src/services/index.ts"],
-      "services/*": ["src/services/*"],
-      "utilities": ["src/utilities/index.ts"],
-      "utilities/*": ["src/utilities/*"],
-      "types": ["src/types/index.js"],
-      "types/*": ["src/types/*"],
-      "validations": ["src/validations.ts"]
+      "services": ["./services/index.ts"],
+      "services/*": ["./services/*"],
+      "utilities": ["./utilities/index.ts"],
+      "utilities/*": ["./utilities/*"],
+      "types": ["./types/index.js"],
+      "types/*": ["./types/*"],
+      "validations": ["./validations.ts"]
     }
   },
-  "include": ["src", "tsup.config.ts", "test"],
-  "exclude": ["node_modules", "dist", "scripts"],
+  "include": ["src/**/*", "tsup.config.ts", "test/**/*, scripts/**/*"],
+  "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../../packages/errors" },
     { "path": "../../packages/logger" },
-    { "path": "../../packages/core" }
+    { "path": "../../packages/core" },
+    { "path": "../../packages/repositories" },
+    { "path": "../../packages/database" }
   ]
 }

@@ -8,7 +8,7 @@ Logging infrastructure package for the Realm of Darkness application suite.
 - **File Backup**: Automatic fallback to file logging if Discord is unavailable
 - **Source Map Support**: Enhanced stack traces for TypeScript code (auto-initialized)
 - **Global Error Handling**: Catches unhandled rejections and uncaught exceptions
-- **Custom Error Types**: RealmError and ClientError with metadata support
+- **Custom Error Types**: RealmError and UserError with metadata support
 - **Environment-Based Configuration**: Different behavior for dev/preprod/prod
 - **Singleton Pattern**: Single logger instance per application
 
@@ -41,7 +41,7 @@ logger.fatal("Critical failure", { fields: { userId: "12345" } });
 ### Using Errors
 
 ```typescript
-import { RealmError, ClientError } from "@realm/logger/errors";
+import { RealmError, UserError } from "@realm/logger/errors";
 import { logger } from "@realm/logger";
 
 // System error (will be logged)
@@ -51,7 +51,7 @@ throw new RealmError("Database connection failed", {
 });
 
 // User error (won't be logged by default)
-throw new ClientError("Invalid input", {
+throw new UserError("Invalid input", {
   statusCode: 400,
   fields: { field: "email" },
 });
@@ -149,14 +149,14 @@ throw new RealmError("Something went wrong", {
 });
 ```
 
-### ClientError
+### UserError
 
 For user/client errors that shouldn't clutter logs:
 
 ```typescript
-import { ClientError } from "@realm/logger/errors";
+import { UserError } from "@realm/logger/errors";
 
-throw new ClientError("Invalid username", {
+throw new UserError("Invalid username", {
   log: false, // default
   statusCode: 400,
   fields: {
@@ -196,7 +196,7 @@ If you're migrating from `@realm/core`:
 
 ```typescript
 import { logger } from "@realm/core/logger";
-import { RealmError, ClientError } from "@realm/core/errors";
+import { RealmError, UserError } from "@realm/core/errors";
 import "source-map-support/register";
 ```
 
@@ -204,7 +204,7 @@ import "source-map-support/register";
 
 ```typescript
 import { logger } from "@realm/logger";
-import { RealmError, ClientError } from "@realm/logger/errors";
+import { RealmError, UserError } from "@realm/logger/errors";
 // No source map import needed!
 ```
 

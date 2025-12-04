@@ -239,7 +239,7 @@ function findCharacter(id: number): Character {
  * @param name - Character name (1-50 characters)
  * @param userId - Discord user ID (snowflake)
  * @returns Newly created character instance
- * @throws {ClientError} If validation fails
+ * @throws {UserError} If validation fails
  */
 function createVampire(name: string, userId: bigint): Vampire5th {
   // ...
@@ -249,11 +249,11 @@ function createVampire(name: string, userId: bigint): Vampire5th {
 ### Error Handling
 
 ```typescript
-import { RealmError, ClientError } from "shared";
+import { RealmError, UserError } from "@realm/errors";
 
-// ✅ DO: Use ClientError for user mistakes
+// ✅ DO: Use UserError for user mistakes (not logged)
 if (!name || name.length > 50) {
-  throw ClientError.badRequest("Character name must be 1-50 characters", {
+  throw new UserError("Character name must be 1-50 characters", {
     fields: { name },
   });
 }
@@ -276,22 +276,18 @@ throw new Error("something went wrong"); // Bad!
 ### Logging
 
 ```typescript
-import { RealmLogger } from "shared";
+import { logger } from "@realm/logger";
 
-const logger = RealmLogger.getInstance();
-
-// ✅ DO: Set app name at startup
+// ✅ DO: Set app name at startup (in main entry point)
 logger.setAppName("domain");
 
-// ✅ DO: Include location
-await logger.info("Character created", {
-  location: "CharacterService.create",
+// ✅ DO: Use logger directly (it's a singleton)
+logger.info("Character created", {
   fields: { characterId: char.id.toString(), userId: char.userId.toString() },
 });
 
 // ✅ DO: Log errors with context
-await logger.error("Database query failed", {
-  location: "CharacterRepository.findById",
+logger.error("Database query failed", {
   fields: { characterId: id.toString() },
 });
 
@@ -302,12 +298,12 @@ console.log("something happened"); // Bad!
 ### Validation
 
 ```typescript
-import { Vampire5thDataSchema } from "shared";
+import { Vampire5thDataSchema } from "@realm/core";
 
 // ✅ DO: Validate at boundaries (API, WebSocket, etc.)
 const result = Vampire5thDataSchema.safeParse(inputData);
 if (!result.success) {
-  throw ClientError.badRequest("Invalid character data", {
+  throw new UserError("Invalid character data", {
     fields: { errors: result.error.message },
   });
 }

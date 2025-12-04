@@ -39,9 +39,6 @@ export const members = pgTable(
     nickname: varchar({ length: 100 }).notNull().default(""),
     avatarUrl: varchar({ length: 500 }).notNull().default(""),
 
-    /** Foreign key to the member's default character in this guild */
-    defaultCharacterId: snowflake(), // Will reference characters table when available
-
     createdAt: timestamp().defaultNow().notNull(),
     lastUpdated: timestamp().defaultNow().notNull(),
   },
