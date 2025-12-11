@@ -83,8 +83,8 @@ export class Supporter {
   private _totalBoosts: number;
   private _firstSupported: Date | null;
   private _lastSupported: Date | null;
-  private readonly _createdAt: Date;
-  private readonly _lastUpdated: Date;
+  private _createdAt: Date;
+  private _lastUpdated: Date;
 
   constructor(props: SupporterProps) {
     this._userId = props.userId;
@@ -226,6 +226,26 @@ export class Supporter {
    */
   public meetsRequirement(required: SupporterName): boolean {
     return this.getLevelValue() >= SUPPORTER_LEVEL_VALUES[required];
+  }
+
+  /**
+   * Set the createdAt timestamp.
+   *
+   * @internal This should only be used by repositories or migration tools.
+   * @param date - The creation timestamp
+   */
+  public setCreatedAt(date: Date): void {
+    this._createdAt = date;
+  }
+
+  /**
+   * Set the lastUpdated timestamp.
+   *
+   * @internal This should only be used by repositories or migration tools.
+   * @param date - The last updated timestamp
+   */
+  public setLastUpdated(date: Date): void {
+    this._lastUpdated = date;
   }
 }
 

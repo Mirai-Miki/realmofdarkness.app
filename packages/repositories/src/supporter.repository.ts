@@ -45,12 +45,15 @@ export class SupporterRepository implements ISupporterRepository {
 
       if (result.length === 0) {
         // Return default Base tier supporter for users without subscription
+        const now = new Date();
         return new Supporter({
           userId,
           level: SupporterName.Base,
           totalBoosts: 0,
           firstSupported: null,
           lastSupported: null,
+          createdAt: now,
+          lastUpdated: now,
         });
       }
 

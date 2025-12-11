@@ -44,8 +44,8 @@ export class Member {
   private _boosted: boolean;
   private _nickname: string;
   private _avatarUrl: string;
-  private readonly _createdAt: Date;
-  private readonly _lastUpdated: Date;
+  private _createdAt: Date;
+  private _lastUpdated: Date;
 
   constructor(props: MemberProps) {
     this._guildId = props.guildId;
@@ -187,5 +187,25 @@ export class Member {
    */
   public clearNickname(): void {
     this._nickname = "";
+  }
+
+  /**
+   * Set the createdAt timestamp.
+   *
+   * @internal This should only be used by repositories or migration tools.
+   * @param date - The creation timestamp
+   */
+  public setCreatedAt(date: Date): void {
+    this._createdAt = date;
+  }
+
+  /**
+   * Set the lastUpdated timestamp.
+   *
+   * @internal This should only be used by repositories or migration tools.
+   * @param date - The last updated timestamp
+   */
+  public setLastUpdated(date: Date): void {
+    this._lastUpdated = date;
   }
 }

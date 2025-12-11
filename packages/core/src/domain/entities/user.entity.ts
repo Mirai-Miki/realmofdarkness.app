@@ -161,4 +161,27 @@ export class User {
   public updateLastActive(): void {
     this._lastActive = new Date();
   }
+
+  /**
+   * Set the createdAt timestamp.
+   *
+   * @internal This should only be used by repositories or migration tools.
+   * @param date - The creation timestamp
+   */
+  public setCreatedAt(date: Date): void {
+    // Note: _createdAt is readonly, but this method allows controlled setting
+    // TypeScript will allow this because we're inside the class
+    (this as any)._createdAt = date;
+  }
+
+  /**
+   * Set the updatedAt timestamp.
+   *
+   * @internal This should only be used by repositories or migration tools.
+   * @param date - The updated timestamp
+   */
+  public setUpdatedAt(date: Date): void {
+    // Note: _updatedAt is readonly, but this method allows controlled setting
+    (this as any)._updatedAt = date;
+  }
 }
