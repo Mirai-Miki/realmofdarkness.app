@@ -38,8 +38,6 @@ export async function setActivity(client: Client): Promise<void> {
       type: ActivityType.Watching,
     });
   } catch (error) {
-    logger.exception("Failed to set bot activity:", error, {
-      location: "bot/src/utilities/set-activity.ts",
-    });
+    logger.exception("Failed to set bot activity:", error});
   }
 }

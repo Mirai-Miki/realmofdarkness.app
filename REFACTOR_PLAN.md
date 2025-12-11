@@ -994,7 +994,6 @@ class Vampire5th extends Character5th {
 ```typescript
 // System errors (logged)
 throw new RealmError("Database connection failed", {
-  location: "CharacterRepository.findById",
   fields: { characterId: id.toString() },
   cause: originalError,
 });
@@ -1012,7 +1011,6 @@ throw new UserError("Character not found", {
 **Best practices:**
 
 - Set app name at startup: `logger.setAppName('api')`
-- Include location for all logs: `logger.info('msg', { location: 'Class.method' })`
 - Add contextual fields: `{ fields: { userId, characterId } }`
 - Use appropriate levels (debug/info/warning/error/fatal)
 - Don't log `UserError` (user mistakes)

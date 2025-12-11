@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": "./src"
+  },
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["dist", "node_modules"],
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/errors" },
+    { "path": "../../packages/logger" }
+  ]
+}

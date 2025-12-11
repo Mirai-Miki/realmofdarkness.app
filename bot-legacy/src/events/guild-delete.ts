@@ -14,9 +14,7 @@ module.exports = {
     try {
       await GuildDeleteService.execute(guild);
     } catch (error) {
-      logger.exception(`Failed to delete guild ${guild.id}:`, error, {
-        location: "bot/src/events/guild-delete.ts",
-      });
+      logger.exception(`Failed to delete guild ${guild.id}:`, error);
     }
   },
 };

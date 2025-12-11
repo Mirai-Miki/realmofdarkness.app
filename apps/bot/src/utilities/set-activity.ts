@@ -2,7 +2,6 @@ import type { Client } from "discord.js";
 
 import { ActivityType } from "discord.js";
 import { RealmError } from "@realm/errors";
-import { logger } from "@realm/logger";
 
 /**
  * Sets the bot's activity status showing the number of guilds it's connected to
@@ -39,6 +38,8 @@ export async function setActivity(client: Client): Promise<void> {
       type: ActivityType.Watching,
     });
   } catch (error) {
-    logger.exception("Failed to set bot activity:", error);
+    throw new RealmError("Failed to set bot activity", {
+      cause: error,
+    });
   }
 }

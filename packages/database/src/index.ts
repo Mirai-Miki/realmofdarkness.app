@@ -53,11 +53,7 @@ function createDatabase() {
     throw new Error("DATABASE_URL environment variable is required");
   }
 
-  logger.debug("Initializing database connection", {
-    fields: {
-      location: "database/src/index.ts",
-    },
-  });
+  logger.debug("Initializing database connection");
 
   return drizzle({
     connection: process.env.DATABASE_URL,

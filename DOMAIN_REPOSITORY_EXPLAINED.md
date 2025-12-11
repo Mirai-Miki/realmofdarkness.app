@@ -397,7 +397,6 @@ export class CharacterRepository implements ICharacterRepository {
     const validation = character.validate();
     if (!validation.isValid) {
       throw new RealmError("Cannot save invalid character", {
-        location: "CharacterRepository.create",
         fields: { errors: validation.errors.join(", ") },
       });
     }
@@ -417,16 +416,13 @@ export class CharacterRepository implements ICharacterRepository {
    */
   async update(character: Character): Promise<Character> {
     if (!character.id) {
-      throw new RealmError("Cannot update character without ID", {
-        location: "CharacterRepository.update",
-      });
+      throw new RealmError("Cannot update character without ID");
     }
 
     // Validate before saving
     const validation = character.validate();
     if (!validation.isValid) {
       throw new RealmError("Cannot save invalid character", {
-        location: "CharacterRepository.update",
         fields: { errors: validation.errors.join(", ") },
       });
     }
@@ -531,7 +527,6 @@ export class CharacterMapper {
 
       default:
         throw new RealmError("Unknown character splat", {
-          location: "CharacterMapper.toDomain",
           fields: { splat: db.splat },
         });
     }
@@ -674,7 +669,6 @@ export class DiceRoller {
   ): V5RollResult {
     if (pool < 0) {
       throw new RealmError("Dice pool cannot be negative", {
-        location: "DiceRoller.rollV5",
         fields: { pool: pool.toString() },
       });
     }
@@ -682,7 +676,6 @@ export class DiceRoller {
     const normalPool = pool - hungerDice;
     if (normalPool < 0) {
       throw new RealmError("Hunger dice cannot exceed pool", {
-        location: "DiceRoller.rollV5",
         fields: { pool: pool.toString(), hungerDice: hungerDice.toString() },
       });
     }

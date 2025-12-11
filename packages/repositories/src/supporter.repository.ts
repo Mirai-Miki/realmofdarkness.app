@@ -178,7 +178,6 @@ export class SupporterRepository implements ISupporterRepository {
         fields: {
           userId: result[0].userId,
           level: result[0].level,
-          location: "SupporterRepository.create",
         },
       });
 
@@ -188,7 +187,6 @@ export class SupporterRepository implements ISupporterRepository {
         cause: error,
         fields: {
           userId: supporter.userId,
-          location: "SupporterRepository.create",
         },
       });
     }
@@ -215,7 +213,6 @@ export class SupporterRepository implements ISupporterRepository {
         throw new RealmError("Supporter not found for update", {
           fields: {
             userId: supporter.userId,
-            location: "SupporterRepository.update",
           },
         });
       }
@@ -224,7 +221,6 @@ export class SupporterRepository implements ISupporterRepository {
         fields: {
           userId: result[0].userId,
           level: result[0].level,
-          location: "SupporterRepository.update",
         },
       });
 
@@ -234,7 +230,6 @@ export class SupporterRepository implements ISupporterRepository {
         cause: error,
         fields: {
           userId: supporter.userId,
-          location: "SupporterRepository.update",
         },
       });
     }
@@ -251,7 +246,7 @@ export class SupporterRepository implements ISupporterRepository {
       await db.delete(supporters).where(eq(supporters.userId, userId));
 
       logger.info("Supporter deleted", {
-        fields: { userId, location: "SupporterRepository.delete" },
+        fields: { userId },
       });
     } catch (error) {
       throw new RealmError("Failed to delete supporter", {

@@ -263,7 +263,6 @@ try {
   await db.insert(characters).values(data);
 } catch (error) {
   throw new RealmError("Failed to save character", {
-    location: "CharacterRepository.create",
     cause: error,
     fields: { characterId: data.id.toString() },
   });

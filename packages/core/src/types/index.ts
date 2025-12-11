@@ -1,5 +1,6 @@
 export * from "./character.types";
 export * from "./supporter.types";
+export * from "./repository.types";
 
 /**
  * Type alias for snowflake IDs to improve type safety

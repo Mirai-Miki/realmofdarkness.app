@@ -26,7 +26,6 @@ import type {
   User,
   CacheWithLimitsOptions,
   SweeperOptions,
-  Snowflake,
 } from "discord.js";
 import {
   Client,

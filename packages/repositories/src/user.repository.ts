@@ -119,14 +119,14 @@ export class UserRepository implements IUserRepository {
       const result = await db.insert(users).values(dbRecord).returning();
 
       logger.info("User created", {
-        fields: { userId: result[0].id, location: "UserRepository.create" },
+        fields: { userId: result[0].id },
       });
 
       return UserMapper.toDomain(result[0]);
     } catch (error) {
       throw new RealmError("Failed to create user", {
         cause: error,
-        fields: { username: user.username, location: "UserRepository.create" },
+        fields: { username: user.username },
       });
     }
   }
@@ -153,19 +153,19 @@ export class UserRepository implements IUserRepository {
 
       if (result.length === 0) {
         throw new RealmError("User not found for update", {
-          fields: { userId: user.id, location: "UserRepository.update" },
+          fields: { userId: user.id },
         });
       }
 
       logger.info("User updated", {
-        fields: { userId: result[0].id, location: "UserRepository.update" },
+        fields: { userId: result[0].id },
       });
 
       return UserMapper.toDomain(result[0]);
     } catch (error) {
       throw new RealmError("Failed to update user", {
         cause: error,
-        fields: { userId: user.id, location: "UserRepository.update" },
+        fields: { userId: user.id },
       });
     }
   }
@@ -205,7 +205,7 @@ export class UserRepository implements IUserRepository {
       await db.delete(users).where(eq(users.id, id));
 
       logger.info("User deleted", {
-        fields: { userId: id, location: "UserRepository.delete" },
+        fields: { userId: id },
       });
     } catch (error) {
       throw new RealmError("Failed to delete user", {
