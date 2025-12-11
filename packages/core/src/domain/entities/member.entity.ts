@@ -6,7 +6,7 @@ export interface MemberProps {
   userId: Snowflake;
   admin: boolean;
   storyteller: boolean;
-  boosted: boolean;
+  boosted: number;
   nickname: string;
   avatarUrl: string;
   createdAt: Date;
@@ -41,7 +41,7 @@ export class Member {
   private readonly _userId: Snowflake;
   private _admin: boolean;
   private _storyteller: boolean;
-  private _boosted: boolean;
+  private _boosted: number;
   private _nickname: string;
   private _avatarUrl: string;
   private _createdAt: Date;
@@ -76,7 +76,7 @@ export class Member {
     return this._storyteller;
   }
 
-  public get boosted(): boolean {
+  public get boosted(): number {
     return this._boosted;
   }
 
@@ -129,15 +129,18 @@ export class Member {
   /**
    * Mark this member as boosting the guild.
    */
-  public markAsBoosted(): void {
-    this._boosted = true;
+  public addBoost(): void {
+    this._boosted += 1;
   }
 
   /**
    * Mark this member as no longer boosting the guild.
    */
-  public markAsNotBoosted(): void {
-    this._boosted = false;
+  public removeBoost(): void {
+    this._boosted -= 1;
+    if (this._boosted < 0) {
+      this._boosted = 0;
+    }
   }
 
   /**

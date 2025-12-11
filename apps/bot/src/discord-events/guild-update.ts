@@ -15,9 +15,9 @@ module.exports = {
 
     try {
       // Fetch current guild from database
-      const realmGuild = await guildService.findById(newGuild.id);
+      const appGuild = await guildService.findById(newGuild.id);
 
-      if (!realmGuild) {
+      if (!appGuild) {
         logger.warn(
           `Guild update received for unknown guild: ${newGuild.name}`,
           {
@@ -29,7 +29,7 @@ module.exports = {
 
       // Update guild properties if they changed
       if (oldGuild.name !== newGuild.name) {
-        realmGuild.updateName(newGuild.name);
+        appGuild.updateName(newGuild.name);
         logger.debug(
           `Guild name updated: ${oldGuild.name} -> ${newGuild.name}`,
           {
@@ -40,14 +40,14 @@ module.exports = {
 
       const newIconUrl = newGuild.iconURL() || "";
       if (oldGuild.iconURL() !== newIconUrl) {
-        realmGuild.updateIconUrl(newIconUrl);
+        appGuild.updateIconUrl(newIconUrl);
         logger.debug(`Guild icon updated`, {
           fields: { guildId: newGuild.id },
         });
       }
 
       // Save updated guild to database
-      await guildService.update(realmGuild);
+      await guildService.update(appGuild);
 
       logger.debug(`Guild updated: ${newGuild.name}`, {
         fields: { guildId: newGuild.id },

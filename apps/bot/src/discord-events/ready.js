@@ -1,7 +1,8 @@
 "use strict";
 require(`${process.cwd()}/alias`);
+const { logger } = require("@realm/logger");
 const { Events } = require("discord.js");
-const setActivity = require("@utilsset-activity");
+const { ActivityService } = require("../services");
 const updateAllGuilds = require("@modules/updateAllGuilds");
 const API = require("@api");
 const { initializeEmojis } = require("@utilsemoji-manager");
@@ -15,9 +16,9 @@ module.exports = {
 
     await API.updateBot(client);
     await updateAllGuilds(client);
-    await setActivity(client);
+    ActivityService.update(client);
     setInterval(() => {
-      setActivity(client);
+      ActivityService.update(client);
     }, 300000);
   },
 };

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db, users } from "@realm/database";
 import { RealmError } from "@realm/errors";
 import { logger } from "@realm/logger";
@@ -49,6 +49,31 @@ export class UserRepository implements IUserRepository {
       throw new RealmError("Failed to find user by ID", {
         cause: error,
         fields: { userId: id },
+      });
+    }
+  }
+
+  /**
+   * Find multiple users by their Discord snowflake IDs.
+   *
+   * @param ids - Array of Discord user snowflake IDs
+   * @returns Array of User entities found
+   * @throws {RealmError} If database query fails
+   */
+  async findManyByIds(ids: Snowflake[]): Promise<User[]> {
+    if (ids.length === 0) return [];
+
+    try {
+      const results = await db
+        .select()
+        .from(users)
+        .where(inArray(users.id, ids));
+
+      return results.map((r) => UserMapper.toDomain(r));
+    } catch (error) {
+      throw new RealmError("Failed to find users by IDs", {
+        cause: error,
+        fields: { count: ids.length.toString() },
       });
     }
   }

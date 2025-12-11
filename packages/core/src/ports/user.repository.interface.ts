@@ -35,6 +35,15 @@ export interface IUserRepository {
   findById(id: Snowflake): Promise<User | null>;
 
   /**
+   * Find multiple users by their Discord snowflake IDs.
+   *
+   * @param ids - Array of Discord user snowflake IDs
+   * @returns Array of User entities found
+   * @throws {RealmError} If database query fails
+   */
+  findManyByIds(ids: Snowflake[]): Promise<User[]>;
+
+  /**
    * Find a user by their Discord username.
    *
    * @param username - Discord username (unique)

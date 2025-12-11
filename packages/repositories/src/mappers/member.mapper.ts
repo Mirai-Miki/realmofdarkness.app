@@ -57,17 +57,17 @@ export class MemberMapper {
    * @returns Database record (without auto-generated timestamps)
    * @throws {RealmError} If mapping fails
    */
-  static fromDomain(
-    member: Member
-  ): Omit<MemberDb, "createdAt" | "lastUpdated"> {
+  static fromDomain(member: Member): MemberDb {
     try {
       const guildId: string = member.guildId;
       const userId: string = member.userId;
       const admin: boolean = member.admin;
       const storyteller: boolean = member.storyteller;
-      const boosted: boolean = member.boosted;
+      const boosted: number = member.boosted;
       const nickname: string = member.nickname;
       const avatarUrl: string = member.avatarUrl;
+      const createdAt: Date = member.createdAt;
+      const lastUpdated: Date = member.lastUpdated;
 
       return {
         guildId,
@@ -77,6 +77,8 @@ export class MemberMapper {
         boosted,
         nickname,
         avatarUrl,
+        createdAt,
+        lastUpdated,
       };
     } catch (error) {
       throw new RealmError("Failed to map member from domain to database", {

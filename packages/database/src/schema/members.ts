@@ -3,6 +3,7 @@ import {
   varchar,
   boolean,
   timestamp,
+  integer,
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { users } from "./users.js";
@@ -34,7 +35,7 @@ export const members = pgTable(
     storyteller: boolean().notNull().default(false),
 
     /** Is this user boosting this guild? */
-    boosted: boolean().notNull().default(false),
+    boosted: integer().notNull().default(0),
 
     nickname: varchar({ length: 100 }).notNull().default(""),
     avatarUrl: varchar({ length: 500 }).notNull().default(""),

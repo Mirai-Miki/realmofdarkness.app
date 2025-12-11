@@ -441,23 +441,15 @@ if (fs.existsSync(eventsPath)) {
     if (event) {
       if (event.once) {
         client.once(event.name, (...args: Parameters<typeof event.execute>) => {
-          try {
-            // Execute the event handler
-            void event.execute(...args);
-          } catch (error) {
-            if (error instanceof Error)
-              logger.error(`Event ${event.name} execution failed`, { error });
-          }
+          Promise.resolve(event.execute(...args)).catch((error) => {
+            logger.exception(`Event ${event.name} execution failed`, error);
+          });
         });
       } else {
         client.on(event.name, (...args: Parameters<typeof event.execute>) => {
-          try {
-            // Execute the event handler
-            void event.execute(...args);
-          } catch (error) {
-            if (error instanceof Error)
-              logger.error(`Event ${event.name} execution failed`, { error });
-          }
+          Promise.resolve(event.execute(...args)).catch((error) => {
+            logger.exception(`Event ${event.name} execution failed`, error);
+          });
         });
       }
       logger.debug(`Loaded event: ${event.name}`);

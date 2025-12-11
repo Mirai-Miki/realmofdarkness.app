@@ -3,7 +3,7 @@ import type { IMemberRepository } from "@realm/core";
 import type { Member } from "@realm/core";
 import type { Snowflake } from "@realm/core";
 import { RealmError } from "@realm/errors";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, or, gt } from "drizzle-orm";
 import { MemberMapper } from "./mappers/member.mapper.js";
 
 /**
@@ -326,7 +326,7 @@ export class MemberRepository implements IMemberRepository {
       const result = await db
         .select()
         .from(members)
-        .where(and(eq(members.guildId, guildId), eq(members.boosted, true)));
+        .where(and(eq(members.guildId, guildId), gt(members.boosted, 0)));
 
       return result.map((record) => MemberMapper.toDomain(record));
     } catch (error) {

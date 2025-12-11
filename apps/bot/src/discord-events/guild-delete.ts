@@ -4,22 +4,25 @@ import { logger } from "@realm/logger";
 import { GuildRepository } from "@realm/repositories";
 import { GuildService } from "@realm/core";
 import { Events } from "discord.js";
-import { setActivity } from "utilities";
+import { ActivityService } from "services";
 
 module.exports = {
   name: Events.GuildDelete,
   once: false,
   async execute(guild: DiscordGuild) {
-    await setActivity(guild.client);
+    ActivityService.update(guild.client);
 
-    // Simple instantiation - repositories use singleton db internally
     const guildRepository = new GuildRepository();
     const guildService = new GuildService(guildRepository);
 
     try {
       await guildService.delete(guild.id);
+
+      logger.info(
+        `Guild deleted and members cleaned up: ${guild.name} (${guild.id})`
+      );
     } catch (error) {
-      logger.exception(`Failed to delete guild`, error);
+      logger.exception(`Failed to delete guild or cleanup members`, error);
     }
   },
 };
