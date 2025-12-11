@@ -3,7 +3,8 @@ import type { IMemberRepository } from "@realm/core";
 import type { Member } from "@realm/core";
 import type { Snowflake } from "@realm/core";
 import { RealmError } from "@realm/errors";
-import { eq, and, or, gt } from "drizzle-orm";
+import { eq, and, or, gt, sum } from "drizzle-orm";
+
 import { MemberMapper } from "./mappers/member.mapper.js";
 
 /**
@@ -331,6 +332,46 @@ export class MemberRepository implements IMemberRepository {
       return result.map((record) => MemberMapper.toDomain(record));
     } catch (error) {
       throw new RealmError("Failed to find boosting members by guild", {
+        cause: error,
+        fields: { guildId },
+      });
+    }
+  }
+
+  /**
+   * Count the total number of boosts a user has assigned across all guilds.
+   *
+   * @param userId - Discord user ID
+   * @returns Total number of boosts
+   */
+  async countTotalBoostsByUser(userId: Snowflake): Promise<number> {
+    try {
+      const result = await db
+        .select({ total: sum(members.boosted) })
+        .from(members)
+        .where(eq(members.userId, userId));
+
+      // drizzle sum returns string likely, or null if no matches
+      return Number(result[0]?.total ?? 0);
+    } catch (error) {
+      throw new RealmError("Failed to count total boosts by user", {
+        cause: error,
+        fields: { userId },
+      });
+    }
+  }
+
+  /**
+   * Delete all member records for a specific guild.
+   *
+   * @param guildId - Discord guild ID
+   * @throws {RealmError} If database error occurs
+   */
+  async deleteByGuild(guildId: Snowflake): Promise<void> {
+    try {
+      await db.delete(members).where(eq(members.guildId, guildId));
+    } catch (error) {
+      throw new RealmError("Failed to delete all members by guild", {
         cause: error,
         fields: { guildId },
       });

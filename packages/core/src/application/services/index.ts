@@ -9,3 +9,5 @@
  */
 
 export { GuildService } from "./guild.service";
+export { UserService } from "./user.service";
+export { MemberService } from "./member.service";

@@ -6,11 +6,13 @@ import {
   GuildRepository,
   UserRepository,
   MemberRepository,
+  SupporterRepository,
 } from "@realm/repositories";
 import {
   GuildService,
+  UserService,
+  MemberService,
   Guild as AppGuild,
-  Member as AppMember,
 } from "@realm/core";
 import { ActivityService } from "services";
 
@@ -20,11 +22,20 @@ module.exports = {
   async execute(guild: DiscordGuild) {
     ActivityService.update(guild.client);
 
-    // Create services and repositories
+    // Create services
     const guildRepository = new GuildRepository();
-    const userRepository = new UserRepository();
-    const memberRepository = new MemberRepository();
     const guildService = new GuildService(guildRepository);
+
+    const userRepository = new UserRepository();
+    const userService = new UserService(userRepository);
+
+    const memberRepository = new MemberRepository();
+    const supporterRepository = new SupporterRepository();
+    const memberService = new MemberService(
+      memberRepository,
+      supporterRepository,
+      userRepository
+    );
 
     try {
       // Check if guild already exists
@@ -62,7 +73,7 @@ module.exports = {
         const memberIds = Array.from(discordMembers.keys());
 
         // Find which members are registered users
-        const registeredUsers = await userRepository.findManyByIds(memberIds);
+        const registeredUsers = await userService.findManyByIds(memberIds);
 
         if (registeredUsers.length > 0) {
           logger.info(
@@ -78,24 +89,18 @@ module.exports = {
               const discordMember = discordMembers.get(user.id);
               if (!discordMember) return;
 
-              const member = new AppMember({
-                guildId: guild.id,
-                userId: user.id,
-                admin: discordMember.permissions.has("Administrator"),
-                storyteller: false, // TODO: Check against configured storyteller roles in DB
-                boosted: false,
-                nickname: discordMember.nickname || "",
-                avatarUrl: discordMember.avatarURL() || "",
-                createdAt: now,
-                lastUpdated: now,
-              });
-
-              await memberRepository.create(member).catch((err) => {
-                logger.exception(
-                  `Failed to create member for user ${user.id}`,
-                  err
-                );
-              });
+              await memberService
+                .create(guild.id, user.id, {
+                  nickname: discordMember.nickname || "",
+                  avatarUrl: discordMember.displayAvatarURL(),
+                  admin: discordMember.permissions.has("Administrator"),
+                })
+                .catch((err) => {
+                  logger.exception(
+                    `Failed to create member for user ${user.id}`,
+                    err
+                  );
+                });
             })
           );
         }

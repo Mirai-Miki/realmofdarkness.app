@@ -82,6 +82,14 @@ export interface IMemberRepository {
   delete(guildId: Snowflake, userId: Snowflake): Promise<void>;
 
   /**
+   * Delete all member records for a specific guild.
+   *
+   * @param guildId - Discord guild ID
+   * @throws {RealmError} If database error occurs
+   */
+  deleteByGuild(guildId: Snowflake): Promise<void>;
+
+  /**
    * Check if a member exists.
    *
    * @param guildId - Discord guild ID
@@ -131,4 +139,12 @@ export interface IMemberRepository {
    * @returns Array of boosting members (empty if none)
    */
   findBoostingMembers(guildId: Snowflake): Promise<Member[]>;
+
+  /**
+   * Count the total number of boosts a user has assigned across all guilds.
+   *
+   * @param userId - Discord user ID
+   * @returns Total number of boosts
+   */
+  countTotalBoostsByUser(userId: Snowflake): Promise<number>;
 }

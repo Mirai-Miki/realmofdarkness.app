@@ -2,7 +2,12 @@ import type { GuildMember, PartialGuildMember } from "discord.js";
 
 import { Events } from "discord.js";
 import { logger } from "@realm/logger";
-import { MemberRepository } from "@realm/repositories";
+import {
+  MemberRepository,
+  SupporterRepository,
+  UserRepository,
+} from "@realm/repositories";
+import { MemberService } from "@realm/core";
 
 module.exports = {
   name: Events.GuildMemberRemove,
@@ -12,21 +17,17 @@ module.exports = {
 
     try {
       const memberRepository = new MemberRepository();
+      const supporterRepository = new SupporterRepository();
+      const userRepository = new UserRepository();
 
-      // Check if member record exists
-      const exists = await memberRepository.exists(member.guild.id, member.id);
-      if (!exists) {
-        return;
-      }
+      const memberService = new MemberService(
+        memberRepository,
+        supporterRepository,
+        userRepository
+      );
 
-      await memberRepository.delete(member.guild.id, member.id);
-
-      logger.info(`Deleted member record for user`, {
-        fields: {
-          userId: member.id,
-          guildId: member.guild.id,
-        },
-      });
+      // Service handles deletion logic including existence check or idempotency
+      await memberService.delete(member.guild.id, member.id);
     } catch (error) {
       logger.exception(
         `Failed to handle member remove for user ${member.id}`,

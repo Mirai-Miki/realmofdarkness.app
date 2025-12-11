@@ -2,8 +2,12 @@ import type { GuildMember as DiscordGuildMember } from "discord.js";
 
 import { Events } from "discord.js";
 import { logger } from "@realm/logger";
-import { UserRepository, MemberRepository } from "@realm/repositories";
-import { Member as AppMember } from "@realm/core";
+import {
+  UserRepository,
+  MemberRepository,
+  SupporterRepository,
+} from "@realm/repositories";
+import { MemberService } from "@realm/core";
 
 module.exports = {
   name: Events.GuildMemberAdd,
@@ -14,48 +18,24 @@ module.exports = {
     try {
       if (member.partial) await member.fetch();
 
+      // Instantiate services
       const userRepository = new UserRepository();
+      // UserService not strictly needed if we assume MemberService handles user checks or if we trust addMember
+      // But addMember calls userService.exists(userId) so it needs IUserRepository.
+      // We pass userRepository to MemberService.
+
       const memberRepository = new MemberRepository();
-
-      // Check if user is registered in our system
-      const userExists = await userRepository.exists(member.id);
-      if (!userExists) {
-        return;
-      }
-
-      // Check if member record already exists (sanity check)
-      const memberExists = await memberRepository.exists(
-        member.guild.id,
-        member.id
+      const supporterRepository = new SupporterRepository();
+      const memberService = new MemberService(
+        memberRepository,
+        supporterRepository,
+        userRepository
       );
-      if (memberExists) {
-        logger.debug(
-          `Member record already exists for user ${member.id} in guild ${member.guild.id}`
-        );
-        return;
-      }
 
-      const now = new Date();
-      const newMember = new AppMember({
-        guildId: member.guild.id,
-        userId: member.id,
-        admin: member.permissions.has("Administrator"),
-        storyteller: false, // TODO: Check against configured storyteller roles in DB
-        boosted: false,
+      await memberService.create(member.guild.id, member.id, {
         nickname: member.nickname || "",
         avatarUrl: member.displayAvatarURL(),
-        createdAt: now,
-        lastUpdated: now,
-      });
-
-      await memberRepository.create(newMember);
-
-      logger.info(`Created member record for registered user`, {
-        fields: {
-          userId: member.id,
-          guildId: member.guild.id,
-          username: member.user.username,
-        },
+        admin: member.permissions.has("Administrator"),
       });
     } catch (error) {
       logger.exception(
