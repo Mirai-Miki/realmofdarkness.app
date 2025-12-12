@@ -1,44 +1,46 @@
 import type { SupporterDb } from "@realm/database";
-import { Supporter } from "@realm/core";
-import { RealmError } from "@realm/errors";
+import type { SupporterDto } from "@realm/common";
+import { RealmError } from "@realm/common";
 
 /**
- * Mapper for translating between Supporter database records and Supporter domain entities.
+ * Mapper for translating between Supporter database records and Supporter DTOs.
  *
  * Handles the conversion of:
- * - Database records (SupporterDb) → Domain entities (Supporter)
- * - Domain entities (Supporter) → Database records (SupporterDb)
+ * - Database records (SupporterDb) → Data Transfer Objects (SupporterDto)
+ * - Data Transfer Objects (SupporterDto) → Database records (SupporterDb)
  *
  * @example
  * ```typescript
- * // Database → Domain
- * const supporter = SupporterMapper.toDomain(dbRecord);
+ * // Database → DTO
+ * const supporterDto = SupporterMapper.toDto(dbRecord);
  *
- * // Domain → Database
- * const dbRecord = SupporterMapper.fromDomain(supporter);
+ * // DTO → Database
+ * const dbRecord = SupporterMapper.fromDto(supporterDto);
  * ```
  */
 export class SupporterMapper {
   /**
-   * Convert database record to Supporter domain entity.
+   * Convert database record to Supporter DTO.
    *
    * @param db - Supporter database record
-   * @returns Supporter domain entity
+   * @returns Supporter DTO
    * @throws {RealmError} If mapping fails
    */
-  static toDomain(db: SupporterDb): Supporter {
+  static toDto(db: SupporterDb): SupporterDto {
     try {
-      return new Supporter({
+      return {
         userId: db.userId,
-        level: db.level,
-        totalBoosts: db.totalBoosts,
-        firstSupported: db.firstSupported,
-        lastSupported: db.lastSupported,
+        supporterName: db.level, // Use level from database
+        customerId: undefined,
+        subscriptionId: undefined,
+        boostsUsed: db.totalBoosts,
+        startedAt: db.firstSupported || new Date(), // Default to now if null
+        expiresAt: db.lastSupported || undefined,
         createdAt: db.createdAt,
-        lastUpdated: db.lastUpdated,
-      });
+        updatedAt: db.lastUpdated,
+      };
     } catch (error) {
-      throw new RealmError("Failed to map supporter from database to domain", {
+      throw new RealmError("Failed to map supporter from database to DTO", {
         cause: error,
         fields: { userId: db.userId },
       });
@@ -46,27 +48,27 @@ export class SupporterMapper {
   }
 
   /**
-   * Convert Supporter domain entity to database record.
+   * Convert Supporter DTO to database record.
    *
-   * @param supporter - Supporter domain entity
+   * @param dto - Supporter DTO
    * @returns Database record (without auto-generated timestamps)
    * @throws {RealmError} If mapping fails
    */
-  static fromDomain(
-    supporter: Supporter
+  static fromDto(
+    dto: SupporterDto
   ): Omit<SupporterDb, "createdAt" | "lastUpdated"> {
     try {
       return {
-        userId: supporter.userId,
-        level: supporter.getLevel(),
-        totalBoosts: supporter.totalBoosts,
-        firstSupported: supporter.firstSupported,
-        lastSupported: supporter.lastSupported,
+        userId: dto.userId,
+        level: dto.supporterName, // Use supporterName as level
+        totalBoosts: dto.boostsUsed,
+        firstSupported: dto.startedAt,
+        lastSupported: dto.expiresAt || null,
       };
     } catch (error) {
-      throw new RealmError("Failed to map supporter from domain to database", {
+      throw new RealmError("Failed to map supporter from DTO to database", {
         cause: error,
-        fields: { userId: supporter.userId },
+        fields: { userId: dto.userId },
       });
     }
   }

@@ -1,8 +1,8 @@
 import { Redis, type RedisOptions } from "ioredis";
 import { v4 as uuidv4, v7 as uuidv7 } from "uuid";
 import type { z } from "zod";
-import { logger } from "@realm/logger";
-import { RealmError } from "@realm/errors";
+import type { ILogger, Snowflake } from "@realm/common";
+import { RealmError } from "@realm/common";
 import type { ChannelName } from "../channels/index.js";
 import {
   buildCharacterChannel,
@@ -11,7 +11,6 @@ import {
   buildUserChannel,
 } from "../channels/index.js";
 import { EventMetadataSchema } from "../contracts/base-event.js";
-import type { Snowflake } from "@realm/core";
 
 /**
  * Scope information for determining which hierarchical channels to publish to.
@@ -133,14 +132,17 @@ export class EventClient {
   private readonly subscriptions = new Map<string, Subscription<any>[]>();
   private readonly recentEventIds = new Set<string>();
   private cleanupInterval?: NodeJS.Timeout;
+  private readonly logger: ILogger;
 
   /**
    * Create a new Redis event client.
    *
+   * @param logger - Logger instance for event client operations
    * @param options - ioredis connection options or connection string
    */
-  constructor(options?: EventOptions) {
+  constructor(logger: ILogger, options?: EventOptions) {
     this.publisherId = uuidv4();
+    this.logger = logger;
 
     // Create Redis clients
     if (options?.redisOptions) {
@@ -166,7 +168,7 @@ export class EventClient {
       this.recentEventIds.clear();
     }, 60000);
 
-    logger.debug("RedisEventClient created", {
+    this.logger.debug("RedisEventClient created", {
       fields: { publisherId: this.publisherId },
     });
   }
@@ -176,7 +178,7 @@ export class EventClient {
    */
   async connect(): Promise<void> {
     await Promise.all([this.redis.connect(), this.redisSub.connect()]);
-    logger.info("RedisEventClient connected", {
+    this.logger.info("RedisEventClient connected", {
       fields: { publisherId: this.publisherId },
     });
   }
@@ -267,7 +269,7 @@ export class EventClient {
       channels.map((channel) => this.redis.publish(channel, message))
     );
 
-    logger.debug("Published event to multiple channels", {
+    this.logger.debug("Published event to multiple channels", {
       fields: {
         eventType:
           "type" in event && typeof event.type === "string"
@@ -328,7 +330,7 @@ export class EventClient {
     }
     this.subscriptions.get(channel)!.push(subscription);
 
-    logger.debug("Subscribed to channel", {
+    this.logger.debug("Subscribed to channel", {
       fields: { channel, publisherId: this.publisherId },
     });
   }
@@ -377,7 +379,7 @@ export class EventClient {
     }
     this.subscriptions.get(pattern)!.push(subscription);
 
-    logger.debug("Subscribed to channel pattern", {
+    this.logger.debug("Subscribed to channel pattern", {
       fields: { pattern, publisherId: this.publisherId },
     });
   }
@@ -402,7 +404,7 @@ export class EventClient {
       await this.redisSub.unsubscribe(channelOrPattern);
     }
 
-    logger.debug("Unsubscribed from channel", {
+    this.logger.debug("Unsubscribed from channel", {
       fields: { channel: channelOrPattern, publisherId: this.publisherId },
     });
   }
@@ -417,7 +419,7 @@ export class EventClient {
 
     await Promise.all([this.redis.quit(), this.redisSub.quit()]);
 
-    logger.info("RedisEventClient disconnected", {
+    this.logger.info("RedisEventClient disconnected", {
       fields: { publisherId: this.publisherId },
     });
   }
@@ -517,7 +519,7 @@ export class EventClient {
         rawEvent === null ||
         !("metadata" in rawEvent)
       ) {
-        logger.error("Event missing metadata property", {
+        this.logger.error("Event missing metadata property", {
           fields: { channel },
         });
         return;
@@ -528,7 +530,7 @@ export class EventClient {
         rawEvent.metadata
       );
       if (!metadataValidation.success) {
-        logger.error("Invalid event metadata", {
+        this.logger.error("Invalid event metadata", {
           fields: {
             channel,
             errors: metadataValidation.error.message,
@@ -574,7 +576,7 @@ export class EventClient {
                 ? rawEvent.type
                 : "unknown";
 
-            logger.error("Event validation failed for subscription", {
+            this.logger.error("Event validation failed for subscription", {
               fields: {
                 channel,
                 eventType,
@@ -597,7 +599,7 @@ export class EventClient {
               ? rawEvent.type
               : "unknown";
 
-          logger.exception("Event handler error", error, {
+          this.logger.exception("Event handler error", error, {
             fields: {
               channel,
               eventType,
@@ -606,7 +608,7 @@ export class EventClient {
         }
       }
     } catch (error) {
-      logger.exception("Failed to process Redis message", error, {
+      this.logger.exception("Failed to process Redis message", error, {
         fields: {
           channel,
         },

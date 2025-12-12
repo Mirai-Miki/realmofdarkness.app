@@ -1,47 +1,43 @@
 import type { UserDb } from "@realm/database";
-import { User } from "@realm/core";
-import { RealmError } from "@realm/errors";
+import type { UserDto } from "@realm/common";
+import { RealmError } from "@realm/common";
 
 /**
- * Mapper for translating between User database records and User domain entities.
+ * Mapper for translating between User database records and User DTOs.
  *
  * Handles the conversion of:
- * - Database records (UserDb) → Domain entities (User)
- * - Domain entities (User) → Database records (UserDb)
+ * - Database records (UserDb) → DTOs (UserDto)
+ * - DTOs (UserDto) → Database records (UserDb)
  *
  * @example
  * ```typescript
- * // Database → Domain
- * const user = UserMapper.toDomain(dbRecord);
+ * // Database → DTO
+ * const userDto = UserMapper.toDto(dbRecord);
  *
- * // Domain → Database
- * const dbRecord = UserMapper.fromDomain(user);
+ * // DTO → Database
+ * const dbRecord = UserMapper.fromDto(userDto);
  * ```
  */
 export class UserMapper {
   /**
-   * Convert database record to User domain entity.
+   * Convert database record to User DTO.
    *
    * @param db - User database record
-   * @returns User domain entity
+   * @returns User DTO
    * @throws {RealmError} If mapping fails
    */
-  static toDomain(db: UserDb): User {
+  static toDto(db: UserDb): UserDto {
     try {
-      return new User({
+      return {
         id: db.id,
         username: db.username,
         displayName: db.displayName,
-        email: db.email,
         avatarUrl: db.avatarUrl,
-        registered: db.registered,
-        admin: db.admin,
         createdAt: db.createdAt,
-        updatedAt: db.updatedAt,
         lastActive: db.lastActive,
-      });
+      };
     } catch (error) {
-      throw new RealmError("Failed to map user from database to domain", {
+      throw new RealmError("Failed to map user from database to DTO", {
         cause: error,
         fields: { userId: db.id },
       });
@@ -49,27 +45,27 @@ export class UserMapper {
   }
 
   /**
-   * Convert User domain entity to database record.
+   * Convert User DTO to database record.
    *
-   * @param user - User domain entity
+   * @param dto - User DTO
    * @returns User database record (without timestamps for insert)
    * @throws {RealmError} If mapping fails
    */
-  static fromDomain(
-    user: User
+  static fromDto(
+    dto: UserDto
   ): Omit<UserDb, "createdAt" | "updatedAt" | "lastActive"> {
     try {
       return {
-        id: user.id,
-        username: user.username,
-        displayName: user.displayName,
-        email: user.email,
-        avatarUrl: user.avatarUrl,
-        registered: user.registered,
-        admin: user.admin,
+        id: dto.id,
+        username: dto.username,
+        displayName: dto.displayName,
+        email: "", // Not in DTO, set by auth system
+        avatarUrl: dto.avatarUrl || "",
+        registered: true, // Implied by existence of DTO
+        admin: false, // Set by separate admin management
       };
     } catch (error) {
-      throw new RealmError("Failed to map user from domain to database", {
+      throw new RealmError("Failed to map user from DTO to database", {
         cause: error,
       });
     }

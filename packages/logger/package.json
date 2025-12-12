@@ -21,15 +21,13 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@realm/errors": "workspace:*",
+    "@realm/common": "workspace:*",
     "@discordjs/builders": "^1.13.0",
     "@discordjs/rest": "^2.6.0",
     "discord.js": "^14.25.0",
-    "dotenv": "^17.2.3",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
     "@types/source-map-support": "^0.5.10",
     "discord-api-types": "^0.38.34"
   }

@@ -41,7 +41,7 @@
     "@realm/core": "workspace:*",
     "@realm/logger": "workspace:*",
     "@realm/repositories": "workspace:*",
-    "@realm/errors": "workspace:*",
+    "@realm/common": "workspace:*",
     "tsup": "^8.5.1",
     "discord.js": "^14.25.0",
     "dotenv": "^17.2.3",

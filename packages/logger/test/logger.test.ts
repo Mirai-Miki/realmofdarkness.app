@@ -4,7 +4,7 @@
  */
 
 import { logger, Environment } from "../src/index";
-import { RealmError, UserError } from "@realm/errors";
+import { RealmError, UserError } from "@realm/common";
 
 describe("Logging", () => {
   beforeEach(() => {

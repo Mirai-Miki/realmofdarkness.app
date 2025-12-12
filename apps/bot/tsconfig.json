@@ -18,7 +18,7 @@
   "include": ["src/**/*", "tsup.config.ts", "test/**/*, scripts/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
-    { "path": "../../packages/errors" },
+    { "path": "../../packages/common" },
     { "path": "../../packages/logger" },
     { "path": "../../packages/core" },
     { "path": "../../packages/repositories" },

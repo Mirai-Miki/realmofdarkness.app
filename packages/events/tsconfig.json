@@ -6,9 +6,5 @@
   },
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["dist", "node_modules"],
-  "references": [
-    { "path": "../../packages/core" },
-    { "path": "../../packages/errors" },
-    { "path": "../../packages/logger" }
-  ]
+  "references": [{ "path": "../../packages/common" }]
 }

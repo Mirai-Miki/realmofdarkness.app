@@ -1,9 +1,12 @@
 import { eq, inArray } from "drizzle-orm";
 import { db, users } from "@realm/database";
-import { RealmError } from "@realm/errors";
-import { logger } from "@realm/logger";
-import type { User, Snowflake } from "@realm/core";
-import { type IUserRepository } from "@realm/core";
+import { RealmError } from "@realm/common";
+import type {
+  ILogger,
+  Snowflake,
+  IUserRepository,
+  UserDto,
+} from "@realm/common";
 import { UserMapper } from "./mappers/user.mapper.js";
 
 /**
@@ -25,14 +28,20 @@ import { UserMapper } from "./mappers/user.mapper.js";
  * ```
  */
 export class UserRepository implements IUserRepository {
+  private readonly logger: ILogger;
+
+  constructor(logger: ILogger) {
+    this.logger = logger;
+  }
+
   /**
    * Find a user by their Discord snowflake ID.
    *
    * @param id - Discord user snowflake ID
-   * @returns User entity if found, null otherwise
+   * @returns User DTO if found, null otherwise
    * @throws {RealmError} If database query fails
    */
-  async findById(id: Snowflake): Promise<User | null> {
+  async findById(id: Snowflake): Promise<UserDto | null> {
     try {
       const result = await db
         .select()
@@ -44,7 +53,7 @@ export class UserRepository implements IUserRepository {
         return null;
       }
 
-      return UserMapper.toDomain(result[0]);
+      return UserMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to find user by ID", {
         cause: error,
@@ -57,10 +66,10 @@ export class UserRepository implements IUserRepository {
    * Find multiple users by their Discord snowflake IDs.
    *
    * @param ids - Array of Discord user snowflake IDs
-   * @returns Array of User entities found
+   * @returns Array of User DTOs found
    * @throws {RealmError} If database query fails
    */
-  async findManyByIds(ids: Snowflake[]): Promise<User[]> {
+  async findManyByIds(ids: Snowflake[]): Promise<UserDto[]> {
     if (ids.length === 0) return [];
 
     try {
@@ -69,7 +78,7 @@ export class UserRepository implements IUserRepository {
         .from(users)
         .where(inArray(users.id, ids));
 
-      return results.map((r) => UserMapper.toDomain(r));
+      return results.map((r) => UserMapper.toDto(r));
     } catch (error) {
       throw new RealmError("Failed to find users by IDs", {
         cause: error,
@@ -97,7 +106,7 @@ export class UserRepository implements IUserRepository {
         return null;
       }
 
-      return UserMapper.toDomain(result[0]);
+      return UserMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to find user by username", {
         cause: error,
@@ -111,14 +120,14 @@ export class UserRepository implements IUserRepository {
    *
    * @param limit - Maximum number of results (default: 100)
    * @param offset - Number of results to skip (default: 0)
-   * @returns Array of User entities
+   * @returns Array of User DTOs
    * @throws {RealmError} If database query fails
    */
-  async findAll(limit: number = 100, offset: number = 0): Promise<User[]> {
+  async findAll(limit: number = 100, offset: number = 0): Promise<UserDto[]> {
     try {
       const results = await db.select().from(users).limit(limit).offset(offset);
 
-      return results.map((db) => UserMapper.toDomain(db));
+      return results.map((db) => UserMapper.toDto(db));
     } catch (error) {
       throw new RealmError("Failed to find all users", {
         cause: error,
@@ -133,25 +142,25 @@ export class UserRepository implements IUserRepository {
   /**
    * Create a new user.
    *
-   * @param user - User entity to create
-   * @returns Created user entity with updated metadata
+   * @param user - User DTO to create
+   * @returns Created user DTO with updated metadata
    * @throws {RealmError} If user creation fails or user already exists
    */
-  async create(user: User): Promise<User> {
+  async create(user: UserDto): Promise<UserDto> {
     try {
-      const dbRecord = UserMapper.fromDomain(user);
+      const dbRecord = UserMapper.fromDto(user);
 
       const result = await db.insert(users).values(dbRecord).returning();
 
-      logger.info("User created", {
+      this.logger.info("User created", {
         fields: { userId: result[0].id },
       });
 
-      return UserMapper.toDomain(result[0]);
+      return UserMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to create user", {
         cause: error,
-        fields: { username: user.username },
+        fields: { userId: user.id, username: user.username },
       });
     }
   }
@@ -159,13 +168,13 @@ export class UserRepository implements IUserRepository {
   /**
    * Update an existing user.
    *
-   * @param user - User entity to update
-   * @returns Updated user entity with refreshed metadata
+   * @param user - User DTO to update
+   * @returns Updated user DTO with refreshed metadata
    * @throws {RealmError} If update fails or user doesn't exist
    */
-  async update(user: User): Promise<User> {
+  async update(user: UserDto): Promise<UserDto> {
     try {
-      const dbRecord = UserMapper.fromDomain(user);
+      const dbRecord = UserMapper.fromDto(user);
 
       const result = await db
         .update(users)
@@ -182,11 +191,11 @@ export class UserRepository implements IUserRepository {
         });
       }
 
-      logger.info("User updated", {
+      this.logger.info("User updated", {
         fields: { userId: result[0].id },
       });
 
-      return UserMapper.toDomain(result[0]);
+      return UserMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to update user", {
         cause: error,
@@ -208,7 +217,7 @@ export class UserRepository implements IUserRepository {
         .set({ lastActive: new Date() })
         .where(eq(users.id, id));
 
-      logger.debug("User last active updated", {
+      this.logger.debug("User last active updated", {
         fields: { userId: id },
       });
     } catch (error) {
@@ -229,7 +238,7 @@ export class UserRepository implements IUserRepository {
     try {
       await db.delete(users).where(eq(users.id, id));
 
-      logger.info("User deleted", {
+      this.logger.info("User deleted", {
         fields: { userId: id },
       });
     } catch (error) {
@@ -282,3 +291,5 @@ export class UserRepository implements IUserRepository {
     }
   }
 }
+
+

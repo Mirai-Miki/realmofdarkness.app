@@ -1,5 +1,5 @@
 import { DamageTracker20th } from "@/domain/value-objects";
-import { RealmError } from "@realm/errors";
+import { RealmError } from "@realm/common";
 
 describe("DamageTracker20th Value Object", () => {
   describe("Constructor and Validation", () => {

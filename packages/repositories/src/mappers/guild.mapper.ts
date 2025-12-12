@@ -1,43 +1,44 @@
 import type { GuildDb } from "@realm/database";
-import { Guild } from "@realm/core";
-import { RealmError } from "@realm/errors";
+import type { GuildDto } from "@realm/common";
+import { RealmError } from "@realm/common";
 
 /**
- * Mapper for translating between Guild database records and Guild domain entities.
+ * Mapper for translating between Guild database records and Guild DTOs.
  *
  * Handles the conversion of:
- * - Database records (GuildDb) → Domain entities (Guild)
- * - Domain entities (Guild) → Database records (GuildDb)
+ * - Database records (GuildDb) → Data Transfer Objects (GuildDto)
+ * - Data Transfer Objects (GuildDto) → Database records (GuildDb)
  *
  * @example
  * ```typescript
- * // Database → Domain
- * const guild = GuildMapper.toDomain(dbRecord);
+ * // Database → DTO
+ * const guildDto = GuildMapper.toDto(dbRecord);
  *
- * // Domain → Database
- * const dbRecord = GuildMapper.fromDomain(guild);
+ * // DTO → Database
+ * const dbRecord = GuildMapper.fromDto(guildDto);
  * ```
  */
 export class GuildMapper {
   /**
-   * Convert database record to Guild domain entity.
+   * Convert database record to Guild DTO.
    *
    * @param db - Guild database record
-   * @returns Guild domain entity
+   * @returns Guild DTO
    * @throws {RealmError} If mapping fails
    */
-  static toDomain(db: GuildDb): Guild {
+  static toDto(db: GuildDb): GuildDto {
     try {
-      return new Guild({
+      return {
         id: db.id,
         name: db.name,
-        iconUrl: db.iconUrl,
-        trackerChannel: db.trackerChannel,
+        iconUrl: db.iconUrl || undefined,
+        trackerChannel: db.trackerChannel || undefined,
+        storytellerRoles: [], // Populated by repository via join
         createdAt: db.createdAt,
-        lastUpdated: db.lastUpdated,
-      });
+        updatedAt: db.lastUpdated,
+      };
     } catch (error) {
-      throw new RealmError("Failed to map guild from database to domain", {
+      throw new RealmError("Failed to map guild from database to DTO", {
         cause: error,
         fields: { guildId: db.id },
       });
@@ -45,29 +46,24 @@ export class GuildMapper {
   }
 
   /**
-   * Convert Guild domain entity to database record.
+   * Convert Guild DTO to database record.
    *
-   * @param guild - Guild domain entity
+   * @param dto - Guild DTO
    * @returns Database record (without auto-generated timestamps)
    * @throws {RealmError} If mapping fails
    */
-  static fromDomain(guild: Guild): Omit<GuildDb, "createdAt" | "lastUpdated"> {
+  static fromDto(dto: GuildDto): Omit<GuildDb, "createdAt" | "lastUpdated"> {
     try {
-      const guildId: string = guild.id;
-      const guildName: string = guild.name;
-      const guildIconUrl: string = guild.iconUrl;
-      const guildTrackerChannel: string = guild.trackerChannel;
-
       return {
-        id: guildId,
-        name: guildName,
-        iconUrl: guildIconUrl,
-        trackerChannel: guildTrackerChannel,
+        id: dto.id,
+        name: dto.name,
+        iconUrl: dto.iconUrl || "",
+        trackerChannel: dto.trackerChannel || "",
       };
     } catch (error) {
-      throw new RealmError("Failed to map guild from domain to database", {
+      throw new RealmError("Failed to map guild from DTO to database", {
         cause: error,
-        fields: { guildId: guild.id },
+        fields: { guildId: dto.id },
       });
     }
   }

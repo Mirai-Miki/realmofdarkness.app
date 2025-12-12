@@ -1,6 +1,6 @@
 import type { Client } from "discord.js";
 import { ActivityType } from "discord.js";
-import { RealmError } from "@realm/errors";
+import { RealmError } from "@realm/common";
 import { logger } from "@realm/logger";
 
 /**

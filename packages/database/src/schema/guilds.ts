@@ -22,22 +22,5 @@ export const guilds = pgTable("guilds", {
   lastUpdated: timestamp().defaultNow().notNull(),
 });
 
-/**
- * StorytellerRole table - tracks Discord roles that grant Storyteller permissions
- *
- * These roles allow users to have storyteller privileges in the guild.
- * Primary key is the Discord Role Snowflake ID.
- */
-export const storytellerRoles = pgTable("storyteller_roles", {
-  /** Discord Role Snowflake ID */
-  id: snowflake().primaryKey(),
-
-  /** Foreign key to the Guild this role belongs to */
-  guildId: snowflake()
-    .notNull()
-    .references(() => guilds.id, { onDelete: "cascade" }),
-});
-
 // Type exports for use in other parts of the application
 export type GuildDb = InferSelectModel<typeof guilds>;
-export type StorytellerRoleDb = InferSelectModel<typeof storytellerRoles>;

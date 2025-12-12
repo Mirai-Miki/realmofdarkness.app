@@ -20,8 +20,7 @@
     "studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@realm/core": "workspace:*",
-    "@realm/logger": "workspace:*",
+    "@realm/common": "workspace:*",
     "drizzle-orm": "^0.44.7",
     "pg": "^8.16.3",
     "dotenv": "^17.2.3"

@@ -4,26 +4,11 @@
  * @packageDocumentation
  */
 
-/**
- * Environment enumeration for the Realm of Darkness application.
- * Defines the different environments in which the application can run.
- */
-export const enum Environment {
-  Development = "development",
-  Preproduction = "preproduction",
-  Production = "production",
-}
+// Import types from @realm/common
+import type { Environment, LogLevel } from "@realm/common";
 
-/**
- * Log level enumeration for the Realm of Darkness logger.
- */
-export const enum LogLevel {
-  Debug = "debug",
-  Info = "info",
-  Warning = "warning",
-  Error = "error",
-  Fatal = "fatal",
-}
+// Re-export enums from @realm/common for convenience
+export { Environment, LogLevel } from "@realm/common";
 
 /**
  * Configuration options for the RealmLogger singleton.

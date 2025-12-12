@@ -1,20 +1,19 @@
 import { eq } from "drizzle-orm";
 import { db, guilds } from "@realm/database";
-import type { IGuildRepository, Snowflake } from "@realm/core";
-import type { Guild } from "@realm/core";
-import { RealmError } from "@realm/errors";
+import type { IGuildRepository, GuildDto, Snowflake } from "@realm/common";
+import { RealmError } from "@realm/common";
 import { GuildMapper } from "./mappers/guild.mapper";
 
 /**
  * Repository implementation for Guild entity using Drizzle ORM.
  *
  * Handles all database operations for guilds including CRUD operations
- * and queries.
+ * and queries. Returns Guild DTOs that can be hydrated into domain entities.
  *
  * @example
  * ```typescript
  * const repo = new GuildRepository();
- * const guild = await repo.findById("123456789012345678");
+ * const guildDto = await repo.findById("123456789012345678");
  * ```
  */
 export class GuildRepository implements IGuildRepository {
@@ -22,9 +21,9 @@ export class GuildRepository implements IGuildRepository {
    * Find a guild by Discord guild ID.
    *
    * @param id - Discord guild snowflake ID
-   * @returns Guild if found, null otherwise
+   * @returns Guild DTO if found, null otherwise
    */
-  async findById(id: Snowflake): Promise<Guild | null> {
+  async findById(id: Snowflake): Promise<GuildDto | null> {
     try {
       const result = await db
         .select()
@@ -36,7 +35,7 @@ export class GuildRepository implements IGuildRepository {
         return null;
       }
 
-      return GuildMapper.toDomain(result[0]);
+      return GuildMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to find guild by ID", {
         cause: error,
@@ -48,16 +47,16 @@ export class GuildRepository implements IGuildRepository {
   /**
    * Create a new guild.
    *
-   * @param guild - Guild entity to create
-   * @returns Created guild
+   * @param guild - Guild DTO to create
+   * @returns Created guild DTO
    */
-  async create(guild: Guild): Promise<Guild> {
+  async create(guild: GuildDto): Promise<GuildDto> {
     try {
-      const dbRecord = GuildMapper.fromDomain(guild);
+      const dbRecord = GuildMapper.fromDto(guild);
 
       const result = await db.insert(guilds).values(dbRecord).returning();
 
-      return GuildMapper.toDomain(result[0]);
+      return GuildMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to create guild", {
         cause: error,
@@ -69,12 +68,12 @@ export class GuildRepository implements IGuildRepository {
   /**
    * Update an existing guild.
    *
-   * @param guild - Guild entity to update
-   * @returns Updated guild
+   * @param guild - Guild DTO to update
+   * @returns Updated guild DTO
    */
-  async update(guild: Guild): Promise<Guild> {
+  async update(guild: GuildDto): Promise<GuildDto> {
     try {
-      const dbRecord = GuildMapper.fromDomain(guild);
+      const dbRecord = GuildMapper.fromDto(guild);
 
       const result = await db
         .update(guilds)
@@ -91,7 +90,7 @@ export class GuildRepository implements IGuildRepository {
         });
       }
 
-      return GuildMapper.toDomain(result[0]);
+      return GuildMapper.toDto(result[0]);
     } catch (error) {
       if (error instanceof RealmError) {
         throw error;

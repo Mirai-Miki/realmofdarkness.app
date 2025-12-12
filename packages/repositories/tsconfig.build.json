@@ -10,9 +10,7 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "**/*.test.ts"],
   "references": [
-    { "path": "../core/tsconfig.build.json" },
     { "path": "../database/tsconfig.build.json" },
-    { "path": "../errors/tsconfig.build.json" },
-    { "path": "../logger/tsconfig.build.json" }
+    { "path": "../common/tsconfig.build.json" }
   ]
 }

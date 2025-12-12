@@ -1,10 +1,9 @@
 import { eq, gt } from "drizzle-orm";
 import { db, supporters } from "@realm/database";
-import { RealmError } from "@realm/errors";
-import { logger } from "@realm/logger";
-import type { Snowflake } from "@realm/core";
-import { Supporter } from "@realm/core";
-import { type ISupporterRepository, SupporterName } from "@realm/core";
+import { RealmError, SupporterName } from "@realm/common";
+import type { ILogger, Snowflake } from "@realm/common";
+import { Supporter } from "@realm/common";
+import { type ISupporterRepository } from "@realm/common";
 import { SupporterMapper } from "./mappers/supporter.mapper.js";
 
 /**
@@ -26,6 +25,12 @@ import { SupporterMapper } from "./mappers/supporter.mapper.js";
  * ```
  */
 export class SupporterRepository implements ISupporterRepository {
+  private readonly logger: ILogger;
+
+  constructor(logger: ILogger) {
+    this.logger = logger;
+  }
+
   /**
    * Find a supporter by their user ID.
    * If no supporter record exists, returns a default Base tier supporter.
@@ -57,7 +62,7 @@ export class SupporterRepository implements ISupporterRepository {
         });
       }
 
-      return SupporterMapper.toDomain(result[0]);
+      return SupporterMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to find supporter by user ID", {
         cause: error,
@@ -82,7 +87,7 @@ export class SupporterRepository implements ISupporterRepository {
         .limit(limit)
         .offset(offset);
 
-      return results.map((db) => SupporterMapper.toDomain(db));
+      return results.map((db) => SupporterMapper.toDto(db));
     } catch (error) {
       throw new RealmError("Failed to find all supporters", {
         cause: error,
@@ -116,7 +121,7 @@ export class SupporterRepository implements ISupporterRepository {
         .limit(limit)
         .offset(offset);
 
-      return results.map((db) => SupporterMapper.toDomain(db));
+      return results.map((db) => SupporterMapper.toDto(db));
     } catch (error) {
       throw new RealmError("Failed to find supporters by level", {
         cause: error,
@@ -149,7 +154,7 @@ export class SupporterRepository implements ISupporterRepository {
         .limit(limit)
         .offset(offset);
 
-      return results.map((db) => SupporterMapper.toDomain(db));
+      return results.map((db) => SupporterMapper.toDto(db));
     } catch (error) {
       throw new RealmError("Failed to find supporters with available boosts", {
         cause: error,
@@ -168,20 +173,20 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Created supporter entity with updated metadata
    * @throws {RealmError} If creation fails or supporter already exists
    */
-  async create(supporter: Supporter): Promise<Supporter> {
+  async create(supporter: SupporterDto): Promise<Supporter> {
     try {
-      const dbRecord = SupporterMapper.fromDomain(supporter);
+      const dbRecord = SupporterMapper.fromDto(supporter);
 
       const result = await db.insert(supporters).values(dbRecord).returning();
 
-      logger.info("Supporter created", {
+      this.logger.info("Supporter created", {
         fields: {
           userId: result[0].userId,
           level: result[0].level,
         },
       });
 
-      return SupporterMapper.toDomain(result[0]);
+      return SupporterMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to create supporter", {
         cause: error,
@@ -199,9 +204,9 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Updated supporter entity with refreshed metadata
    * @throws {RealmError} If update fails or supporter doesn't exist
    */
-  async update(supporter: Supporter): Promise<Supporter> {
+  async update(supporter: SupporterDto): Promise<Supporter> {
     try {
-      const dbRecord = SupporterMapper.fromDomain(supporter);
+      const dbRecord = SupporterMapper.fromDto(supporter);
 
       const result = await db
         .update(supporters)
@@ -217,14 +222,14 @@ export class SupporterRepository implements ISupporterRepository {
         });
       }
 
-      logger.info("Supporter updated", {
+      this.logger.info("Supporter updated", {
         fields: {
           userId: result[0].userId,
           level: result[0].level,
         },
       });
 
-      return SupporterMapper.toDomain(result[0]);
+      return SupporterMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to update supporter", {
         cause: error,
@@ -245,7 +250,7 @@ export class SupporterRepository implements ISupporterRepository {
     try {
       await db.delete(supporters).where(eq(supporters.userId, userId));
 
-      logger.info("Supporter deleted", {
+      this.logger.info("Supporter deleted", {
         fields: { userId },
       });
     } catch (error) {
@@ -323,3 +328,6 @@ export class SupporterRepository implements ISupporterRepository {
     }
   }
 }
+
+
+

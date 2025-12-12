@@ -15,7 +15,7 @@ import { users } from "./users.js";
 import { guilds } from "./guilds.js";
 import { members } from "./members.js";
 import { snowflake } from "../schema_types.js";
-import { Splats } from "@realm/core";
+import { Splats } from "@realm/common";
 
 // Placeholder for CharacterJsonbData
 export interface CharacterJsonbData {

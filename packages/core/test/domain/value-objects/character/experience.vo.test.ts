@@ -1,5 +1,5 @@
 import { Experience } from "@/domain/value-objects";
-import { RealmError } from "@realm/errors";
+import { RealmError } from "@realm/common";
 
 describe("Experience Value Object", () => {
   describe("Constructor and Validation", () => {

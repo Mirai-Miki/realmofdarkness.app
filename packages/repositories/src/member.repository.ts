@@ -1,8 +1,6 @@
 import { db, members } from "@realm/database";
-import type { IMemberRepository } from "@realm/core";
-import type { Member } from "@realm/core";
-import type { Snowflake } from "@realm/core";
-import { RealmError } from "@realm/errors";
+import type { IMemberRepository, MemberDto, Snowflake } from "@realm/common";
+import { RealmError } from "@realm/common";
 import { eq, and, or, gt, sum } from "drizzle-orm";
 
 import { MemberMapper } from "./mappers/member.mapper.js";
@@ -11,6 +9,7 @@ import { MemberMapper } from "./mappers/member.mapper.js";
  * Repository implementation for Member entities.
  *
  * Handles persistence operations for guild members using the singleton database connection.
+ * Returns Member DTOs that can be hydrated into domain entities.
  * Members have a composite primary key (guildId + userId).
  *
  * @example
@@ -18,11 +17,11 @@ import { MemberMapper } from "./mappers/member.mapper.js";
  * const memberRepo = new MemberRepository();
  *
  * // Find specific member
- * const member = await memberRepo.findByGuildAndUser(guildId, userId);
+ * const memberDto = await memberRepo.findByGuildAndUser(guildId, userId);
  *
  * // Create member
- * const newMember = new Member({ ... });
- * await memberRepo.create(newMember);
+ * const newMemberDto = { ... };
+ * await memberRepo.create(newMemberDto);
  * ```
  */
 export class MemberRepository implements IMemberRepository {
@@ -31,12 +30,12 @@ export class MemberRepository implements IMemberRepository {
    *
    * @param guildId - Discord guild ID
    * @param userId - Discord user ID
-   * @returns The member if found, null otherwise
+   * @returns The member DTO if found, null otherwise
    */
   async findByGuildAndUser(
     guildId: Snowflake,
     userId: Snowflake
-  ): Promise<Member | null> {
+  ): Promise<MemberDto | null> {
     try {
       const result = await db
         .select()
@@ -48,7 +47,7 @@ export class MemberRepository implements IMemberRepository {
         return null;
       }
 
-      return MemberMapper.toDomain(result[0]);
+      return MemberMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to find member by guild and user", {
         cause: error,
@@ -70,7 +69,7 @@ export class MemberRepository implements IMemberRepository {
         .from(members)
         .where(eq(members.guildId, guildId));
 
-      return result.map((record) => MemberMapper.toDomain(record));
+      return result.map((record) => MemberMapper.toDto(record));
     } catch (error) {
       throw new RealmError("Failed to find members by guild", {
         cause: error,
@@ -92,7 +91,7 @@ export class MemberRepository implements IMemberRepository {
         .from(members)
         .where(eq(members.userId, userId));
 
-      return result.map((record) => MemberMapper.toDomain(record));
+      return result.map((record) => MemberMapper.toDto(record));
     } catch (error) {
       throw new RealmError("Failed to find members by user", {
         cause: error,
@@ -108,13 +107,13 @@ export class MemberRepository implements IMemberRepository {
    * @returns The created member
    * @throws {RealmError} If member already exists or database error occurs
    */
-  async create(member: Member): Promise<Member> {
+  async create(member: MemberDto): Promise<Member> {
     try {
-      const dbRecord = MemberMapper.fromDomain(member);
+      const dbRecord = MemberMapper.fromDto(member);
 
       const result = await db.insert(members).values(dbRecord).returning();
 
-      return MemberMapper.toDomain(result[0]);
+      return MemberMapper.toDto(result[0]);
     } catch (error) {
       throw new RealmError("Failed to create member", {
         cause: error,
@@ -133,9 +132,9 @@ export class MemberRepository implements IMemberRepository {
    * @returns The updated member
    * @throws {RealmError} If member does not exist or database error occurs
    */
-  async update(member: Member): Promise<Member> {
+  async update(member: MemberDto): Promise<Member> {
     try {
-      const dbRecord = MemberMapper.fromDomain(member);
+      const dbRecord = MemberMapper.fromDto(member);
 
       const result = await db
         .update(members)
@@ -160,7 +159,7 @@ export class MemberRepository implements IMemberRepository {
         });
       }
 
-      return MemberMapper.toDomain(result[0]);
+      return MemberMapper.toDto(result[0]);
     } catch (error) {
       if (error instanceof RealmError) {
         throw error;
@@ -254,7 +253,7 @@ export class MemberRepository implements IMemberRepository {
         .from(members)
         .where(and(eq(members.guildId, guildId), eq(members.admin, true)));
 
-      return result.map((record) => MemberMapper.toDomain(record));
+      return result.map((record) => MemberMapper.toDto(record));
     } catch (error) {
       throw new RealmError("Failed to find admins by guild", {
         cause: error,
@@ -278,7 +277,7 @@ export class MemberRepository implements IMemberRepository {
           and(eq(members.guildId, guildId), eq(members.storyteller, true))
         );
 
-      return result.map((record) => MemberMapper.toDomain(record));
+      return result.map((record) => MemberMapper.toDto(record));
     } catch (error) {
       throw new RealmError("Failed to find storytellers by guild", {
         cause: error,
@@ -307,7 +306,7 @@ export class MemberRepository implements IMemberRepository {
           )
         );
 
-      return result.map((record) => MemberMapper.toDomain(record));
+      return result.map((record) => MemberMapper.toDto(record));
     } catch (error) {
       throw new RealmError("Failed to find staff members by guild", {
         cause: error,
@@ -329,7 +328,7 @@ export class MemberRepository implements IMemberRepository {
         .from(members)
         .where(and(eq(members.guildId, guildId), gt(members.boosted, 0)));
 
-      return result.map((record) => MemberMapper.toDomain(record));
+      return result.map((record) => MemberMapper.toDto(record));
     } catch (error) {
       throw new RealmError("Failed to find boosting members by guild", {
         cause: error,
@@ -378,3 +377,5 @@ export class MemberRepository implements IMemberRepository {
     }
   }
 }
+
+

@@ -1,6 +1,5 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { logger } from "@realm/logger";
 
 // Schema imports
 import * as users from "./schema/users.js";
@@ -19,7 +18,7 @@ export {
   type SupporterDb,
 } from "./schema/supporters.js";
 export { members, type MemberDb } from "./schema/members.js";
-export { guilds, storytellerRoles, type GuildDb } from "./schema/guilds.js";
+export { guilds, type GuildDb } from "./schema/guilds.js";
 export {
   characters,
   characterSplats,
@@ -52,8 +51,6 @@ function createDatabase() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL environment variable is required");
   }
-
-  logger.debug("Initializing database connection");
 
   return drizzle({
     connection: process.env.DATABASE_URL,

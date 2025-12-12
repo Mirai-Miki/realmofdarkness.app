@@ -18,10 +18,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@realm/core": "workspace:*",
     "@realm/database": "workspace:*",
-    "@realm/errors": "workspace:*",
-    "@realm/logger": "workspace:*",
+    "@realm/common": "workspace:*",
     "drizzle-orm": "^0.44.7"
   }
 }

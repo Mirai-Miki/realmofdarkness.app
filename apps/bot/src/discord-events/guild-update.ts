@@ -18,7 +18,7 @@ module.exports = {
       const appGuild = await guildService.findById(newGuild.id);
 
       if (!appGuild) {
-        logger.warn(
+        logger.warning(
           `Guild update received for unknown guild: ${newGuild.name}`,
           {
             fields: { guildId: newGuild.id },

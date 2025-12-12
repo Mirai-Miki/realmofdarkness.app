@@ -14,9 +14,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@realm/core": "workspace:*",
-    "@realm/errors": "workspace:*",
-    "@realm/logger": "workspace:*",
+    "@realm/common": "workspace:*",
     "ioredis": "^5.3.2",
     "uuid": "^11.0.3",
     "zod": "^4.1.12"

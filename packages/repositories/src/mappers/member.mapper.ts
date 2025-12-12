@@ -1,46 +1,43 @@
 import type { MemberDb } from "@realm/database";
-import { Member } from "@realm/core";
-import { RealmError } from "@realm/errors";
+import type { MemberDto } from "@realm/common";
+import { RealmError } from "@realm/common";
 
 /**
- * Mapper for translating between Member database records and Member domain entities.
+ * Mapper for translating between Member database records and Member DTOs.
  *
  * Handles the conversion of:
- * - Database records (MemberDb) → Domain entities (Member)
- * - Domain entities (Member) → Database records (MemberDb)
+ * - Database records (MemberDb) → Data Transfer Objects (MemberDto)
+ * - Data Transfer Objects (MemberDto) → Database records (MemberDb)
  *
  * @example
  * ```typescript
- * // Database → Domain
- * const member = MemberMapper.toDomain(dbRecord);
+ * // Database → DTO
+ * const memberDto = MemberMapper.toDto(dbRecord);
  *
- * // Domain → Database
- * const dbRecord = MemberMapper.fromDomain(member);
+ * // DTO → Database
+ * const dbRecord = MemberMapper.fromDto(memberDto);
  * ```
  */
 export class MemberMapper {
   /**
-   * Convert database record to Member domain entity.
+   * Convert database record to Member DTO.
    *
    * @param db - Member database record
-   * @returns Member domain entity
+   * @returns Member DTO
    * @throws {RealmError} If mapping fails
    */
-  static toDomain(db: MemberDb): Member {
+  static toDto(db: MemberDb): MemberDto {
     try {
-      return new Member({
+      return {
         guildId: db.guildId,
         userId: db.userId,
-        admin: db.admin,
-        storyteller: db.storyteller,
-        boosted: db.boosted,
-        nickname: db.nickname,
-        avatarUrl: db.avatarUrl,
-        createdAt: db.createdAt,
-        lastUpdated: db.lastUpdated,
-      });
+        isStoryteller: db.storyteller,
+        experienceAwarded: db.boosted,
+        joinedAt: db.createdAt,
+        lastActive: db.lastUpdated,
+      };
     } catch (error) {
-      throw new RealmError("Failed to map member from database to domain", {
+      throw new RealmError("Failed to map member from database to DTO", {
         cause: error,
         fields: {
           guildId: db.guildId,
@@ -51,41 +48,29 @@ export class MemberMapper {
   }
 
   /**
-   * Convert Member domain entity to database record.
+   * Convert Member DTO to database record.
    *
-   * @param member - Member domain entity
+   * @param dto - Member DTO
    * @returns Database record (without auto-generated timestamps)
    * @throws {RealmError} If mapping fails
    */
-  static fromDomain(member: Member): MemberDb {
+  static fromDto(dto: MemberDto): Omit<MemberDb, "createdAt" | "lastUpdated"> {
     try {
-      const guildId: string = member.guildId;
-      const userId: string = member.userId;
-      const admin: boolean = member.admin;
-      const storyteller: boolean = member.storyteller;
-      const boosted: number = member.boosted;
-      const nickname: string = member.nickname;
-      const avatarUrl: string = member.avatarUrl;
-      const createdAt: Date = member.createdAt;
-      const lastUpdated: Date = member.lastUpdated;
-
       return {
-        guildId,
-        userId,
-        admin,
-        storyteller,
-        boosted,
-        nickname,
-        avatarUrl,
-        createdAt,
-        lastUpdated,
+        guildId: dto.guildId,
+        userId: dto.userId,
+        admin: false, // Set by separate admin management logic
+        storyteller: dto.isStoryteller,
+        boosted: dto.experienceAwarded,
+        nickname: "", // Set by Discord sync
+        avatarUrl: "", // Set by Discord sync
       };
     } catch (error) {
-      throw new RealmError("Failed to map member from domain to database", {
+      throw new RealmError("Failed to map member from DTO to database", {
         cause: error,
         fields: {
-          guildId: member.guildId,
-          userId: member.userId,
+          guildId: dto.guildId,
+          userId: dto.userId,
         },
       });
     }

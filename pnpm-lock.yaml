@@ -129,12 +129,12 @@ importers:
 
   apps/bot:
     dependencies:
+      '@realm/common':
+        specifier: workspace:*
+        version: link:../../packages/common
       '@realm/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@realm/errors':
-        specifier: workspace:*
-        version: link:../../packages/errors
       '@realm/logger':
         specifier: workspace:*
         version: link:../../packages/logger
@@ -216,26 +216,23 @@ importers:
         specifier: ^4.0.0
         version: 4.9.5
 
+  packages/common:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+
   packages/core:
     dependencies:
-      '@realm/errors':
+      '@realm/common':
         specifier: workspace:*
-        version: link:../errors
-      '@realm/logger':
-        specifier: workspace:*
-        version: link:../logger
-      zod:
-        specifier: ^4.1.12
-        version: 4.1.13
+        version: link:../common
 
   packages/database:
     dependencies:
-      '@realm/core':
+      '@realm/common':
         specifier: workspace:*
-        version: link:../core
-      '@realm/logger':
-        specifier: workspace:*
-        version: link:../logger
+        version: link:../common
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
@@ -253,19 +250,11 @@ importers:
         specifier: ^0.31.7
         version: 0.31.7
 
-  packages/errors: {}
-
   packages/events:
     dependencies:
-      '@realm/core':
+      '@realm/common':
         specifier: workspace:*
-        version: link:../core
-      '@realm/errors':
-        specifier: workspace:*
-        version: link:../errors
-      '@realm/logger':
-        specifier: workspace:*
-        version: link:../logger
+        version: link:../common
       ioredis:
         specifier: ^5.3.2
         version: 5.8.2
@@ -284,22 +273,16 @@ importers:
       '@discordjs/rest':
         specifier: ^2.6.0
         version: 2.6.0
-      '@realm/errors':
+      '@realm/common':
         specifier: workspace:*
-        version: link:../errors
+        version: link:../common
       discord.js:
         specifier: ^14.25.0
         version: 14.25.1
-      dotenv:
-        specifier: ^17.2.3
-        version: 17.2.3
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
     devDependencies:
-      '@types/node':
-        specifier: ^20.0.0
-        version: 20.19.25
       '@types/source-map-support':
         specifier: ^0.5.10
         version: 0.5.10
@@ -309,18 +292,12 @@ importers:
 
   packages/repositories:
     dependencies:
-      '@realm/core':
+      '@realm/common':
         specifier: workspace:*
-        version: link:../core
+        version: link:../common
       '@realm/database':
         specifier: workspace:*
         version: link:../database
-      '@realm/errors':
-        specifier: workspace:*
-        version: link:../errors
-      '@realm/logger':
-        specifier: workspace:*
-        version: link:../logger
       drizzle-orm:
         specifier: ^0.44.7
         version: 0.44.7(@types/pg@8.15.6)(pg@8.16.3)
@@ -2803,9 +2780,6 @@ packages:
 
   '@types/node-forge@1.3.14':
     resolution: {integrity: sha512-mhVF2BnD4BO+jtOp7z1CdzaK4mbuK0LLQYAvdOLqHTavxFNq4zA1EmYkpnFjP8HOUzedfQkRnp0E2ulSAYSzAw==}
-
-  '@types/node@20.19.25':
-    resolution: {integrity: sha512-ZsJzA5thDQMSQO788d7IocwwQbI8B5OPzmqNvpf3NY/+MHDAS759Wo0gd2WQeXYt5AAAQjzcrTVC6SKCuYgoCQ==}
 
   '@types/node@24.10.1':
     resolution: {integrity: sha512-GNWcUTRBgIRJD5zj+Tq0fKOJ5XZajIiBroOF0yvj2bSU1WvNdYS/dn9UxwsujGW4JX06dnHyjV2y9rRaybH0iQ==}
@@ -8079,9 +8053,6 @@ packages:
   underscore@1.12.1:
     resolution: {integrity: sha512-hEQt0+ZLDVUMhebKxL4x1BTtDY7bavVofhZ9KZ4aI26X9SRaE+Y3m83XUL1UP2jn8ynjndwCCpEHdUG+9pP1Tw==}
 
-  undici-types@6.21.0:
-    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
-
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
@@ -8483,6 +8454,9 @@ packages:
   yoctocolors-cjs@2.1.3:
     resolution: {integrity: sha512-U/PBtDf35ff0D8X8D0jfdzHYEPFxAI7jJlxZXwCSez5M3190m+QobIfh+sWDWSHMCWWJN2AWamkegn6vr6YBTw==}
     engines: {node: '>=18'}
+
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
   zod@4.1.13:
     resolution: {integrity: sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig==}
@@ -11223,10 +11197,6 @@ snapshots:
   '@types/node-forge@1.3.14':
     dependencies:
       '@types/node': 24.10.1
-
-  '@types/node@20.19.25':
-    dependencies:
-      undici-types: 6.21.0
 
   '@types/node@24.10.1':
     dependencies:
@@ -17610,8 +17580,6 @@ snapshots:
 
   underscore@1.12.1: {}
 
-  undici-types@6.21.0: {}
-
   undici-types@7.16.0: {}
 
   undici@6.21.3: {}
@@ -18162,5 +18130,7 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yoctocolors-cjs@2.1.3: {}
+
+  zod@3.25.76: {}
 
   zod@4.1.13: {}

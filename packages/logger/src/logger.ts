@@ -6,7 +6,7 @@ import "source-map-support/register";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import { HTTPError } from "discord.js";
-import { RealmError } from "@realm/errors";
+import { RealmError, type ILogger } from "@realm/common";
 import { DiscordLogger } from "./discord-logger";
 import { FileLogger } from "./file-logger";
 import { LogLevel, Environment } from "./logger.types";
@@ -26,10 +26,12 @@ const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
  * Singleton logger class for the Realm of Darkness application.
  * Provides async logging with Discord integration and file backup.
  *
+ * Implements the ILogger interface from @realm/common.
+ *
  * Source map support is automatically initialized when this module is imported,
  * providing enhanced stack traces for TypeScript code.
  */
-class Logger {
+class Logger implements ILogger {
   private appName: string = "unknown-app";
   private environment: Environment = Environment.Development;
   private discordLogger?: DiscordLogger;
@@ -223,7 +225,7 @@ class Logger {
    * @param message - The warning message
    * @param options - Additional logging options
    */
-  public warn(message: string, options: LogOptions = {}): void {
+  public warning(message: string, options: LogOptions = {}): void {
     this.log(LogLevel.Warning, message, options);
   }
 

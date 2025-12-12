@@ -1,5 +1,5 @@
 import { pgTable, pgEnum, timestamp, integer } from "drizzle-orm/pg-core";
-import { SupporterName } from "@realm/core";
+import { SupporterName } from "@realm/common";
 import { snowflake } from "../schema_types";
 import { users } from "./users.js";
 

@@ -19,5 +19,5 @@
   },
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["dist", "node_modules"],
-  "references": [{ "path": "../../packages/errors" }]
+  "references": [{ "path": "../../packages/common" }]
 }

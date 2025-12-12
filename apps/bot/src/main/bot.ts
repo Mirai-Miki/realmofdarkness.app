@@ -20,7 +20,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
 import { logger } from "@realm/logger";
-import { RealmError } from "@realm/errors";
+import { RealmError } from "@realm/common";
 import type {
   GuildMember,
   User,
@@ -66,7 +66,7 @@ async function loadCommand(filePath: string): Promise<BotCommand | null> {
     if (result.success) {
       return result.data as BotCommand;
     } else {
-      logger.warn(
+      logger.warning(
         `Invalid command structure in ${filePath}: ${result.error.message}`
       );
       return null;
@@ -98,7 +98,7 @@ async function loadComponent(filePath: string): Promise<BotComponent | null> {
     if (result.success) {
       return result.data as BotComponent;
     } else {
-      logger.warn(
+      logger.warning(
         `Invalid component structure in ${filePath}: ${result.error.message}`
       );
       return null;
@@ -131,7 +131,7 @@ async function loadEvent(filePath: string): Promise<BotEvent | null> {
     if (result.success) {
       return result.data as BotEvent;
     } else {
-      logger.warn(
+      logger.warning(
         `Invalid event structure in ${filePath}: ${result.error.message}`
       );
       return null;
@@ -377,7 +377,7 @@ if (fs.existsSync(commandsPath)) {
       client.commands.set(command.data.name, command);
       logger.debug(`Loaded command: ${command.data.name}`);
     } else {
-      logger.warn(`Failed to load command from file: ${file}`);
+      logger.warning(`Failed to load command from file: ${file}`);
     }
   }
 } else {
@@ -413,11 +413,11 @@ if (config.hasComponents) {
         client.components.set(component.name, component);
         logger.debug(`Loaded component: ${component.name}`);
       } else {
-        logger.warn(`Failed to load component from file: ${file}`);
+        logger.warning(`Failed to load component from file: ${file}`);
       }
     }
   } else {
-    logger.warn(`Components directory not found: ${componentsPath}`);
+    logger.warning(`Components directory not found: ${componentsPath}`);
   }
 }
 
@@ -454,7 +454,7 @@ if (fs.existsSync(eventsPath)) {
       }
       logger.debug(`Loaded event: ${event.name}`);
     } else {
-      logger.warn(`Failed to load event from file: ${file}`);
+      logger.warning(`Failed to load event from file: ${file}`);
     }
   }
 } else {
