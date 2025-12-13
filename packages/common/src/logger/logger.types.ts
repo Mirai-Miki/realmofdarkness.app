@@ -1,6 +1,9 @@
 /**
  * Log level enumeration.
  */
+
+import type { Environment } from "../primitives/index.js";
+
 export const enum LogLevel {
   Debug = "debug",
   Info = "info",

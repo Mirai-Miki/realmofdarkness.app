@@ -377,5 +377,3 @@ export class MemberRepository implements IMemberRepository {
     }
   }
 }
-
-

@@ -5,7 +5,7 @@
  * No behavior - just the data contract.
  */
 
-import type { Snowflake } from "../primitives/index.js";
+import type { Snowflake } from "../primitives";
 
 /**
  * User entity DTO.

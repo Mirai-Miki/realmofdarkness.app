@@ -11,11 +11,11 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { Splat } from "@realm/common";
 import { users } from "./users.js";
 import { guilds } from "./guilds.js";
 import { members } from "./members.js";
 import { snowflake } from "../schema_types.js";
-import { Splats } from "@realm/common";
 
 // Placeholder for CharacterJsonbData
 export interface CharacterJsonbData {
@@ -25,21 +25,8 @@ export interface CharacterJsonbData {
 /**
  * Character Splat types Enum
  */
-export const characterSplats = pgEnum("character_splats", [
-  Splats.Vampire5th,
-  Splats.Hunter5th,
-  Splats.Werewolf5th,
-  Splats.Human5th,
-  Splats.Ghoul5th,
-  Splats.Vampire20th,
-  Splats.Werewolf20th,
-  Splats.Changeling20th,
-  Splats.Mage20th,
-  Splats.Demon20th,
-  Splats.Wraith20th,
-  Splats.Human20th,
-  Splats.Ghoul20th,
-]);
+const splatValues = Object.values(Splat) as [string, ...string[]];
+const characterSplats = pgEnum("character_splats", splatValues);
 
 /**
  * Base Character table - contains all common character data
@@ -51,7 +38,7 @@ export const characters = pgTable(
   "characters",
   {
     id: snowflake().primaryKey(),
-    name: varchar({ length: 50 }).notNull(),
+    name: varchar({ length: CHARACTER_NAME.maxLength }).notNull(),
 
     userId: snowflake()
       .notNull()
@@ -61,7 +48,7 @@ export const characters = pgTable(
       onDelete: "set null",
     }),
 
-    splat: characterSplats().notNull().default(Splats.Vampire5th),
+    splat: characterSplats().notNull().default(Splat.Vampire5th),
     isSheet: boolean().notNull().default(false),
     data: jsonb().$type<CharacterJsonbData>().notNull(),
 

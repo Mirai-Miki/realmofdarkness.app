@@ -22,8 +22,29 @@
 // Errors
 export { RealmError, UserError } from "./error.definitions.js";
 
-// Primitives
-export * from "./primitives/index.js";
+// Primitives (Snowflake, HexColor, Discord URL, Environment)
+export * from "./primitives";
 
-// Interfaces (Infrastructure interfaces: logger, event client)
-export * from "./interfaces/index.js";
+// Character module
+export * from "./character";
+
+// User module
+export * from "./user/";
+
+// Guild module
+export * from "./guild";
+
+// Member module
+export * from "./member";
+
+// Logger interface
+export * from "./logger";
+
+// Event System
+export * from "./event-system.definitions";
+
+// Repository interfaces
+export * from "./repository.definitions";
+
+// Errors
+export * from "./error.definitions.js";

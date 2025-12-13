@@ -1,5 +1,5 @@
 import type { Snowflake } from "../primitives/index.js";
-import type { SupporterName } from "../character/index.js";
+import type { SupporterName } from "./supporter.types.js";
 import type { SupporterDto } from "./supporter.dto.js";
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import type { Snowflake } from "../primitives/index.js";
-import type { SupporterName } from "../character/index.js";
+import type { SupporterName } from "./supporter.types.js";
 
 /**
  * Supporter entity DTO.

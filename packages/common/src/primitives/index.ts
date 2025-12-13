@@ -12,37 +12,29 @@ export const HexColorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
 /**
  * Type alias for Discord snowflake IDs.
  * Snowflakes are unique 64-bit identifiers used by Discord.
- * We store them as strings to preserve precision (JavaScript numbers are only 53-bit).
+ * We store them as strings to preserve precision.
  */
 export const SnowflakeSchema = z.string().regex(/^\d{17,20}$/, {
   message: "Invalid snowflake ID format",
 });
 export type Snowflake = z.infer<typeof SnowflakeSchema>;
 
-export const DiscordSnowflakeSchema = z.string().regex(/^\d{17,20}$/);
-
 // Discord CDN URLs
-export const DiscordUrlSchema = z
-  .string()
-  .url()
-  .refine(
-    (url) => {
-      const hostname = new URL(url).hostname;
-      return (
-        hostname === "media.discordapp.net" || hostname === "cdn.discordapp.com"
-      );
-    },
-    {
-      message: "URL must be from Discord CDN",
-    }
-  );
+export const DiscordUrlSchema = z.url({
+  hostname: /^(media\.discordapp\.net|cdn\.discordapp\.com)$/,
+  message: "URL must be a valid Discord CDN URL",
+});
 
 /**
  * Environment modes.
  * Defines the runtime environment.
  */
-export const enum Environment {
-  Development = "development",
-  Preproduction = "preproduction",
-  Production = "production",
-}
+export const Environment = {
+  Development: "development",
+  Preproduction: "preproduction",
+  Production: "production",
+} as const;
+export const EnvironmentSchema = z.enum(
+  Object.values(Environment) as [string, ...string[]]
+);
+export type Environment = (typeof Environment)[keyof typeof Environment];
