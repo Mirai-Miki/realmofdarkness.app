@@ -12,8 +12,9 @@ module.exports = {
   async execute(guild: DiscordGuild) {
     ActivityService.update(guild.client);
 
+    // Instantiate repository and service
     const guildRepository = new GuildRepository();
-    const guildService = new GuildService(guildRepository);
+    const guildService = new GuildService(logger, guildRepository);
 
     try {
       await guildService.delete(guild.id);

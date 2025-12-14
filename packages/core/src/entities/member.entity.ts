@@ -4,8 +4,10 @@ import { RealmError, type MemberDto, type Snowflake } from "@realm/common";
  * Domain entity representing a User's membership in a Guild.
  *
  * A Member connects a User to a Guild and tracks guild-specific
- * information like permissions (storyteller), experience awards,
- * and activity.
+ * information like permissions (admin), role assignments, boosts,
+ * and profile data.
+ *
+ * Storyteller status is derived from roleIds matching guild.storytellerRoles.
  *
  * This entity wraps a MemberDto with business logic and validation.
  *
@@ -14,14 +16,20 @@ import { RealmError, type MemberDto, type Snowflake } from "@realm/common";
  * const member = new Member({
  *   guildId: "123456789012345678",
  *   userId: "987654321098765432",
- *   isStoryteller: true,
- *   experienceAwarded: 0,
- *   joinedAt: new Date(),
- *   lastActive: new Date(),
+ *   admin: false,
+ *   roleIds: ["111111111111111111", "222222222222222222"],
+ *   boosted: 0,
+ *   nickname: "Dracula",
+ *   avatarUrl: "https://cdn.discordapp.com/...",
+ *   createdAt: new Date(),
+ *   lastUpdated: new Date(),
  * });
  *
- * member.grantStoryteller();
- * member.awardExperience(5);
+ * // Check permissions (needs guild storyteller roles)
+ * const isStoryteller = member.isStoryteller(guild.storytellerRoles);
+ * const isStaff = member.isStaff(guild.storytellerRoles);
+ *
+ * member.addBoost();
  * const dto = member.toDto();
  * ```
  */
@@ -32,7 +40,10 @@ export class Member {
     this._dto = { ...dto };
   }
 
+  // ============================================================================
   // Getters
+  // ============================================================================
+
   public get guildId(): Snowflake {
     return this._dto.guildId;
   }
@@ -41,62 +52,168 @@ export class Member {
     return this._dto.userId;
   }
 
-  public get isStoryteller(): boolean {
-    return this._dto.isStoryteller;
+  public get admin(): boolean {
+    return this._dto.admin;
   }
 
-  public get experienceAwarded(): number {
-    return this._dto.experienceAwarded;
+  public get roleIds(): Snowflake[] {
+    return [...this._dto.roleIds];
   }
 
-  public get joinedAt(): Date {
-    return this._dto.joinedAt;
+  public get boosted(): number {
+    return this._dto.boosted;
   }
 
-  public get lastActive(): Date {
-    return this._dto.lastActive;
+  public get nickname(): string {
+    return this._dto.nickname;
   }
 
-  // Business methods
+  public get avatarUrl(): string {
+    return this._dto.avatarUrl;
+  }
+
+  public get createdAt(): Date {
+    return this._dto.createdAt;
+  }
+
+  public get lastUpdated(): Date {
+    return this._dto.lastUpdated;
+  }
+
+  // ============================================================================
+  // Permission Methods
+  // ============================================================================
 
   /**
-   * Grant storyteller permissions to this member.
-   */
-  public grantStoryteller(): void {
-    this._dto.isStoryteller = true;
-    this._dto.lastActive = new Date();
-  }
-
-  /**
-   * Revoke storyteller permissions from this member.
-   */
-  public revokeStoryteller(): void {
-    this._dto.isStoryteller = false;
-    this._dto.lastActive = new Date();
-  }
-
-  /**
-   * Award experience to this member.
+   * Check if member is a storyteller in this guild.
    *
-   * @param amount - Amount of experience to award
+   * Storyteller status is derived by checking if any of the member's
+   * roleIds match the guild's storyteller role IDs.
+   *
+   * @param storytellerRoles - Array of storyteller role IDs from the guild
+   * @returns True if member has at least one storyteller role
+   *
+   * @example
+   * ```typescript
+   * const guild = await guildService.getById(guildId);
+   * const isStoryteller = member.isStoryteller(guild.storytellerRoles);
+   * ```
    */
-  public awardExperience(amount: number): void {
-    if (amount < 0) {
-      throw new RealmError("Experience amount cannot be negative");
+  public isStoryteller(storytellerRoles: Snowflake[]): boolean {
+    // Early return if no storyteller roles configured
+    if (storytellerRoles.length === 0) return false;
+
+    // Check for intersection between member roles and storyteller roles
+    // Using Set for O(1) lookup instead of O(n) with includes()
+    const storytellerRoleSet = new Set(storytellerRoles);
+    return this._dto.roleIds.some((roleId) => storytellerRoleSet.has(roleId));
+  }
+
+  /**
+   * Check if member has staff permissions (admin OR storyteller).
+   *
+   * This is the most commonly used permission check. Optimized for performance
+   * with early returns and Set-based lookups.
+   *
+   * @param storytellerRoles - Array of storyteller role IDs from the guild
+   * @returns True if member is admin or has a storyteller role
+   *
+   * @example
+   * ```typescript
+   * const guild = await guildService.getById(guildId);
+   * const isStaff = member.isStaff(guild.storytellerRoles);
+   * if (isStaff) {
+   *   // Allow staff-only action
+   * }
+   * ```
+   */
+  public isStaff(storytellerRoles: Snowflake[]): boolean {
+    // Early return for admin (most common fast path)
+    if (this._dto.admin) return true;
+
+    // Check storyteller status
+    return this.isStoryteller(storytellerRoles);
+  }
+
+  /**
+   * Grant admin permissions to this member.
+   */
+  public grantAdmin(): void {
+    this._dto.admin = true;
+  }
+
+  /**
+   * Revoke admin permissions from this member.
+   */
+  public revokeAdmin(): void {
+    this._dto.admin = false;
+  }
+
+  // ============================================================================
+  // Profile Methods
+  // ============================================================================
+
+  /**
+   * Update the member's nickname.
+   *
+   * @param nickname - New nickname
+   */
+  public setNickname(nickname: string): void {
+    this._dto.nickname = nickname;
+  }
+
+  /**
+   * Update the member's avatar URL.
+   *
+   * @param avatarUrl - New avatar URL
+   */
+  public setAvatarUrl(avatarUrl: string): void {
+    this._dto.avatarUrl = avatarUrl;
+  }
+
+  /**
+   * Update the member's role IDs.
+   *
+   * @param roleIds - New array of role IDs
+   */
+  public setRoleIds(roleIds: Snowflake[]): void {
+    this._dto.roleIds = [...roleIds];
+  }
+
+  // ============================================================================
+  // Boost Methods
+  // ============================================================================
+
+  /**
+   * Add a boost to this member's guild.
+   */
+  public addBoost(): void {
+    this._dto.boosted += 1;
+  }
+
+  /**
+   * Remove a boost from this member's guild.
+   *
+   * @throws {RealmError} If no boosts to remove
+   */
+  public removeBoost(): void {
+    if (this._dto.boosted <= 0) {
+      throw new RealmError("Member has no boosts to remove");
     }
-    this._dto.experienceAwarded += amount;
-    this._dto.lastActive = new Date();
+    this._dto.boosted -= 1;
   }
 
   /**
-   * Update the member's last active timestamp.
+   * Check if member is boosting this guild.
    */
-  public updateLastActive(): void {
-    this._dto.lastActive = new Date();
+  public isBoosting(): boolean {
+    return this._dto.boosted > 0;
   }
 
-  /**
-   * Extract the DTO from this entity.
+  // ============================================================================
+  // Serialization
+  // ============================================================================
+
   /**
    * Extract the DTO from this entity.
    *

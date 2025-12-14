@@ -21,43 +21,76 @@ The Realm of Darkness combines a modern web application with Discord bots to cre
 
 **Current Branch:** `refactor/project-overhaul`
 
-This project is undergoing a major refactor to modernize the tech stack:
+This project is undergoing a major refactor to modernize the tech stack and establish clean architecture:
 
 - **From:** Django/MariaDB/JavaScript → **To:** TypeScript/NestJS/PostgreSQL/Drizzle ORM
-- **Goal:** Unify codebase under TypeScript for better type safety and code sharing
-- **Status:** ~35% complete - See [REFACTOR_STATUS.md](./REFACTOR_STATUS.md)
+- **Goal:** Unify codebase under TypeScript with proper separation of concerns
+- **Status:** ~40% complete - Domain layer and service layer complete
 
-### 📖 Refactor Documentation
+### 📖 Documentation
 
-- **[QUICKSTART.md](./QUICKSTART.md)** - Start here for developers
-- **[REFACTOR_STATUS.md](./REFACTOR_STATUS.md)** - Current progress and blockers
+- **[QUICKSTART.md](./QUICKSTART.md)** - Developer onboarding guide
+- **[REFACTOR_STATUS.md](./REFACTOR_STATUS.md)** - Current progress snapshot
 - **[REFACTOR_PLAN.md](./REFACTOR_PLAN.md)** - Complete architectural plan
-- **[PHASE_1_CHECKLIST.md](./PHASE_1_CHECKLIST.md)** - Current phase tasks
+- **[NAMING_CONVENTIONS.md](./NAMING_CONVENTIONS.md)** - Code standards and patterns
+- **[DOMAIN_REPOSITORY_EXPLAINED.md](./DOMAIN_REPOSITORY_EXPLAINED.md)** - Architecture patterns explained
+- **[ENV_SETUP.md](./ENV_SETUP.md)** - Environment variable configuration
 
 ---
 
 ## 🏗️ Project Structure
 
-### Current Structure (Refactored)
+### Monorepo Packages
 
 ```
 realm-of-darkness/
-├── shared/              ✅ Types, errors, logger, validation (TypeScript)
-├── database/            ✅ Drizzle ORM schemas (PostgreSQL)
-├── api/                 ⚠️  NestJS REST & WebSocket API (5% complete)
-├── bot/                 ⚠️  Discord.js bot (needs TS migration)
-├── web/                 ⏳ React SPA frontend (not started)
-├── domain/              ❌ Rich character models (Phase 1 - in progress)
-└── repositories/        ❌ Data access layer (Phase 2 - planned)
+├── packages/
+│   ├── common/          ✅ Shared contracts, types, DTOs (Zod schemas)
+│   ├── core/            ✅ Domain entities and services
+│   ├── database/        ✅ Drizzle ORM schemas for PostgreSQL
+│   ├── repositories/    🔄 Data access layer (mappers need work)
+│   ├── logger/          ✅ Singleton logger with Discord integration
+│   └── events/          ⏳ Redis pub/sub system (planned)
+│
+├── apps/
+│   ├── api/             ⚠️  NestJS REST & WebSocket API (scaffolded)
+│   ├── bot/             ⚠️  Discord.js bot (needs TS migration)
+│   └── frontend/        ⏳ React SPA (not started)
+│
+└── Legacy (will be removed):
+    ├── backend-legacy/   # Django REST API (frozen)
+    ├── frontend/         # Old React app (frozen)
+    └── bot-legacy/       # Old Discord bots (frozen)
 ```
 
-### Legacy Structure (Preserved for Reference)
+### Package Architecture
 
 ```
-realm-of-darkness/
-├── backend-legacy/      # Django REST API (frozen, will be removed)
-├── frontend/            # React SPA (frozen, will be replaced)
-└── discord_bots/        # Discord bots (frozen, being rewritten in TS)
+┌─────────────────────────────────────────────┐
+│  APPS (api, bot, frontend)                  │
+│  - Use services from core                   │
+│  - Inject repositories from repositories    │
+└──────────────────┬──────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────┐
+│  CORE (domain entities & services)          │
+│  - Pure TypeScript business logic           │
+│  - Uses contracts from common               │
+└──────────────────┬──────────────────────────┘
+                   │
+        ┌──────────┴──────────┐
+        │                     │
+        ▼                     ▼
+┌──────────────┐      ┌──────────────┐
+│ REPOSITORIES │      │ COMMON       │
+│ (data access)│      │ (contracts)  │
+└──────┬───────┘      └──────────────┘
+       │
+       ▼
+┌──────────────┐
+│ DATABASE     │
+│ (Drizzle ORM)│
+└──────────────┘
 ```
 
 ## 🚀 Quick Start

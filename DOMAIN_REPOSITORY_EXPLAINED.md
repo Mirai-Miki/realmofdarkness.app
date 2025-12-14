@@ -336,9 +336,9 @@ A repository is a class that:
 
 import { db } from "database";
 import { characters, type CharacterDb } from "database";
-import { Vampire5th, Hunter5th, Character } from "domain";
+import { Vampire5th, Hunter5th, Character } from "@realm/core";
 import { CharacterMapper } from "./mappers/CharacterMapper";
-import { ICharacterRepository } from "domain/interfaces";
+import { ICharacterRepository } from "@realm/common";
 
 /**
  * Repository for Character entities.
@@ -487,8 +487,8 @@ import {
   Hunter5th,
   Werewolf5th,
   // ... all character types
-} from "domain";
-import { Splats } from "shared";
+} from "@realm/core";
+import { Splat } from "@realm/common";
 
 /**
  * Mapper between database records and domain models.
@@ -562,7 +562,7 @@ export class CharacterMapper {
 import { CommandInteraction } from "discord.js";
 import { CharacterRepository } from "repositories";
 import { db } from "database";
-import { UserError } from "shared";
+import { UserError } from "@realm/common";
 
 export async function handleHungerCommand(interaction: CommandInteraction) {
   const characterName = interaction.options.getString("character", true);
@@ -819,7 +819,7 @@ export class DiceRoller {
 ```typescript
 // bot/src/commands/roll.ts
 
-import { DiceRoller } from "domain/services/DiceRoller";
+import { DiceRoller } from "@realm/core";
 
 export async function handleRollCommand(interaction: CommandInteraction) {
   const pool = interaction.options.getInteger("pool", true);
@@ -841,8 +841,8 @@ export async function handleRollCommand(interaction: CommandInteraction) {
 ```typescript
 // api/src/dice/dice.service.ts
 
-import { DiceRoller } from "domain/services/DiceRoller";
-import { RedisEventClient, Channels } from "events";
+import { DiceRoller } from "@realm/core";
+import { RedisEventClient, Channels } from "@realm/events";
 
 @Injectable()
 export class DiceService {
@@ -917,7 +917,7 @@ export class DiceService {
 
 **A:** In two places:
 
-- **Zod schemas** (shared package) - validate data at boundaries (API requests, WebSocket messages)
+- **Zod schemas** (common package) - validate data at boundaries (API requests, WebSocket messages)
 - **Domain models** - validate business rules (hunger 0-5, humanity 0-10, etc.)
 
 ### Q: Can I query the database directly?

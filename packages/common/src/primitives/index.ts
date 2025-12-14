@@ -7,6 +7,17 @@
 
 import { z } from "zod";
 
+// Re-export HttpStatus enum
+export { HttpStatus } from "./http-status.enum.js";
+
+export const DISCORD_FIELD_RULES = {
+  // Display names, usernames, nicknames.
+  username: { minLength: 1, maxLength: 35 },
+  // Server names.
+  guildName: { minLength: 1, maxLength: 100 },
+  cdnUrl: { maxLength: 500 },
+};
+
 export const HexColorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
 
 /**
@@ -22,9 +33,10 @@ export type Snowflake = z.infer<typeof SnowflakeSchema>;
 // Discord CDN URLs
 export const DiscordUrlSchema = z.url({
   hostname: /^(media\.discordapp\.net|cdn\.discordapp\.com)$/,
+  protocol: /^https:$/,
   message: "URL must be a valid Discord CDN URL",
 });
-
+export type DiscordUrl = z.infer<typeof DiscordUrlSchema>;
 /**
  * Environment modes.
  * Defines the runtime environment.

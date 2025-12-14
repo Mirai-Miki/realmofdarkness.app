@@ -1,20 +1,15 @@
+import type { InferSelectModel } from "drizzle-orm";
+
 import { pgTable, pgEnum, timestamp, integer } from "drizzle-orm/pg-core";
-import { SupporterName } from "@realm/common";
+import { SupporterLevel } from "@realm/common";
 import { snowflake } from "../schema_types";
 import { users } from "./users.js";
 
-import type { InferSelectModel } from "drizzle-orm";
-
-export const supporterLevel = pgEnum("supporter_level", [
-  SupporterName.Base,
-  SupporterName.Mortal,
-  SupporterName.Fledgling,
-  SupporterName.Neonate,
-  SupporterName.Ancilla,
-  SupporterName.Elder,
-  SupporterName.Methuselah,
-  SupporterName.Antediluvian,
-]);
+const supporterLevelValues = Object.values(SupporterLevel) as [
+  string,
+  ...string[],
+];
+const supporterLevel = pgEnum("supporter_level", supporterLevelValues);
 
 /**
  * Supporter subscription and boost tracking.
@@ -27,19 +22,13 @@ export const supporters = pgTable("supporters", {
     .references(() => users.id, { onDelete: "cascade" }),
 
   /** Supporter tier level */
-  level: supporterLevel().notNull().default(SupporterName.Base),
+  level: supporterLevel().notNull().default(SupporterLevel.Base),
 
   /** Total boosts available to this supporter */
-  totalBoosts: integer().notNull().default(0),
+  boosts: integer().notNull().default(0),
 
   /** When the user first became a supporter */
   firstSupported: timestamp(),
-
-  /** When the user last had an active subscription */
-  lastSupported: timestamp(),
-
-  createdAt: timestamp().defaultNow().notNull(),
-  lastUpdated: timestamp().defaultNow().notNull(),
 });
 
 // Type exports for use in other parts of the application

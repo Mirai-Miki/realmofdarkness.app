@@ -1,3 +1,5 @@
+import type { InferSelectModel } from "drizzle-orm";
+
 import {
   pgTable,
   varchar,
@@ -7,8 +9,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./users.js";
 import { snowflake } from "../schema_types";
-
-import type { InferSelectModel } from "drizzle-orm";
 
 /**
  * CommandStats table - tracks usage statistics for bot commands

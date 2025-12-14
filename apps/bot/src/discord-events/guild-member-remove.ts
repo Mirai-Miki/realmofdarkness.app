@@ -2,11 +2,7 @@ import type { GuildMember, PartialGuildMember } from "discord.js";
 
 import { Events } from "discord.js";
 import { logger } from "@realm/logger";
-import {
-  MemberRepository,
-  SupporterRepository,
-  UserRepository,
-} from "@realm/repositories";
+import { MemberRepository } from "@realm/repositories";
 import { MemberService } from "@realm/core";
 
 module.exports = {
@@ -16,17 +12,11 @@ module.exports = {
     if (member.user.bot) return;
 
     try {
+      // Instantiate repository and service
       const memberRepository = new MemberRepository();
-      const supporterRepository = new SupporterRepository();
-      const userRepository = new UserRepository();
+      const memberService = new MemberService(logger, memberRepository);
 
-      const memberService = new MemberService(
-        memberRepository,
-        supporterRepository,
-        userRepository
-      );
-
-      // Service handles deletion logic including existence check or idempotency
+      // Service handles deletion logic including existence check
       await memberService.delete(member.guild.id, member.id);
     } catch (error) {
       logger.exception(

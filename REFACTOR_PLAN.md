@@ -24,12 +24,12 @@ This document outlines the comprehensive refactoring plan to migrate Realm of Da
 
 #### 1. **Monorepo Infrastructure**
 
-- ✅ pnpm workspace configured with 6 packages: `api`, `bot`, `database`, `shared`, `web`, `scripts`
+- ✅ pnpm workspace configured with 6 packages: `api`, `bot`, `database`, `common`, `web`, `scripts`
 - ✅ Turborepo setup for build orchestration
 - ✅ Root-level TypeScript configuration with project references
 - ✅ ESLint and Prettier configured for code quality
 
-#### 2. **Shared Package** (`shared/`)
+#### 2. **Common Package** (`common/`)
 
 - ✅ Unified error handling system (`RealmError`, `UserError`)
 - ✅ Singleton logger with Discord integration
@@ -165,7 +165,7 @@ type Hunter5thData = Record<string, unknown>;
 
 ### Package Breakdown
 
-#### **`shared/` - Cross-Cutting Concerns**
+#### **`common/` - Cross-Cutting Concerns**
 
 - **Purpose:** Code used by ALL other packages
 - **Contents:**
@@ -186,7 +186,7 @@ type Hunter5thData = Record<string, unknown>;
   - Channel name constants
   - Event metadata types
   - Type-safe event emitter
-- **Dependencies:** `shared` (for types, errors, logger)
+- **Dependencies:** `common` (for types, errors, logger)
 - **Exports:** Event client, event schemas, channel names
 - **Use Cases:**
   - Bot updates character → API notifies web clients
@@ -202,21 +202,21 @@ type Hunter5thData = Record<string, unknown>;
   - Database connection setup
   - Type exports from schemas (`UserDb`, `CharacterDb`, etc.)
   - Migration files
-- **Dependencies:** `shared` (for types/enums)
+- **Dependencies:** `common` (for types/enums)
 - **Exports:** `db` instance, schema types, table definitions
 
-#### **`domain/` - NEW PACKAGE - Business Logic**
+#### **`core/` - Business Logic**
 
-- **Purpose:** Rich domain models and business rules (framework-agnostic)
+- **Purpose:** Rich entities and business rules (framework-agnostic)
 - **Contents:**
-  - **Character classes** (Vampire5th, Hunter5th, etc.) - rich models with behavior
-  - **Domain services** (DiceRoller, ExperienceCalculator) - stateless business logic
-  - **Game mechanics** (damage calculation, dice rolling, XP spending)
+  - **Entities** (Character, Vampire5th, etc.) - rich models with behavior
+  - **Services** (pure services) - stateless business logic
+  - **Actions** (coordinator services) - orchestrate multiple services
   - **Repository interfaces** - contracts for data access (no implementations)
   - **Domain events** - internal event emitter for domain actions
   - **Validators** - business rule validation
-- **Dependencies:** `shared` (types only), `database` (types only, no DB access)
-- **Exports:** Domain models, services, repository interfaces
+- **Dependencies:** `common` (types only), `database` (types only, no DB access)
+- **Exports:** Entities, services, actions, repository interfaces
 - **Key Principle:** NO framework code (no NestJS, no Discord.js, no Drizzle queries)
 - **Examples:**
   - `Vampire5th.increaseHunger()` - hunger system rules
@@ -231,7 +231,7 @@ type Hunter5thData = Record<string, unknown>;
   - Query builders
   - Transaction management
   - Data mapping (DB types ↔ Domain models)
-- **Dependencies:** `shared`, `database`, `domain`
+- **Dependencies:** `common`, `database`, `core`
 - **Exports:** Repository classes
 
 #### **`api/` - HTTP/WebSocket API**
@@ -241,7 +241,7 @@ type Hunter5thData = Record<string, unknown>;
   - Controllers (HTTP handlers)
   - Guards (authentication/authorization)
   - Modules (feature organization)
-  - DTOs (request/response types using Zod from `shared`)
+  - DTOs (request/response types using Zod from `common`)
   - WebSocket gateway
 - **Dependencies:** `shared`, `domain`, `repositories`
 - **Exports:** None (entry point)
@@ -267,7 +267,7 @@ type Hunter5thData = Record<string, unknown>;
   - WebSocket client
   - State management
   - UI utilities
-- **Dependencies:** `shared` (types, schemas for validation)
+- **Dependencies:** `common` (types, schemas for validation)
 - **Exports:** None (entry point)
 
 #### **`migration/` - NEW PACKAGE - Data Migration**
@@ -279,75 +279,65 @@ type Hunter5thData = Record<string, unknown>;
   - Validation/integrity checks
   - Migration CLI
   - Dry-run reports
-- **Dependencies:** `shared`, `database`, `domain`, `repositories`
+- **Dependencies:** `common`, `database`, `core`, `repositories`
 - **Exports:** Migration CLI
 
 ---
 
 ## Implementation Phases
 
-### **Phase 1: Foundation & Domain Models** ⏱️ 2-3 weeks
+### **Phase 1: Foundation & Core Package** ⏱️ 2-3 weeks
 
-**Goal:** Establish the domain layer, event system, and complete type definitions.
+**Goal:** Establish the core business logic layer, event system, and complete type definitions.
 
-#### 1.1 Create `domain/` Package
+#### 1.1 Enhance `core/` Package
 
 ```bash
-# Directory structure
-domain/
+# Directory structure (already exists)
+core/
 ├── package.json
 ├── tsconfig.json
 ├── src/
 │   ├── index.ts
-│   ├── models/
-│   │   ├── base/
-│   │   │   ├── Character.ts
-│   │   │   ├── Trackable.ts
-│   │   │   └── Experience.ts
-│   │   ├── 5th/
-│   │   │   ├── Character5th.ts
-│   │   │   ├── Vampire5th.ts
-│   │   │   ├── Hunter5th.ts
-│   │   │   ├── Werewolf5th.ts
-│   │   │   ├── Human5th.ts
-│   │   │   └── Ghoul5th.ts
-│   │   └── 20th/
-│   │       ├── Character20th.ts
-│   │       ├── Vampire20th.ts
-│   │       ├── Werewolf20th.ts
-│   │       ├── Changeling20th.ts
-│   │       ├── Mage20th.ts
-│   │       ├── Demon20th.ts
-│   │       ├── Wraith20th.ts
-│   │       ├── Human20th.ts
-│   │       └── Ghoul20th.ts
+│   ├── entities/
+│   │   ├── user.entity.ts         # ✅ DONE
+│   │   ├── guild.entity.ts        # ✅ DONE
+│   │   ├── member.entity.ts       # ✅ DONE
+│   │   ├── supporter.entity.ts    # ✅ DONE
+│   │   └── characters/
+│   │       ├── character.entity.ts          # ⏳ WIP
+│   │       ├── character-5th.entity.ts      # ⏳ WIP
+│   │       ├── vampire-5th.entity.ts        # ⏳ WIP
+│   │       └── ... (other character types)
 │   ├── services/
-│   │   ├── DiceRoller.ts         # V5, V20, CoD dice mechanics
-│   │   ├── ExperienceService.ts  # XP calculation rules
-│   │   └── DamageService.ts      # Damage/healing mechanics
-│   ├── events/
-│   │   ├── DomainEvents.ts       # Internal domain events
-│   │   └── EventEmitter.ts       # Event emitter implementation
-│   └── interfaces/
-│       ├── ICharacterRepository.ts
-│       ├── IUserRepository.ts
-│       └── IGuildRepository.ts
+│   │   ├── user.service.ts        # ✅ DONE
+│   │   ├── guild.service.ts       # ✅ DONE
+│   │   ├── member.service.ts      # ✅ DONE
+│   │   └── dice-roller.service.ts # ⏳ TODO - V5, V20, CoD dice mechanics
+│   ├── actions/                   # ⏳ TODO - Coordinator services
+│   │   └── create-character-sheet.action.ts
+│   └── value-objects/
+│       ├── damage-tracker-5th.vo.ts    # ✅ DONE
+│       ├── damage-tracker-20th.vo.ts   # ✅ DONE
+│       └── willpower-tracker.vo.ts     # ✅ DONE
 └── test/
-    ├── models/
+    ├── entities/
     └── services/
 ```
 
 **Tasks:**
 
-- [ ] Create `domain/` package with proper `package.json` and `tsconfig.json`
-- [ ] Port character model hierarchy from Django models to TypeScript classes
-  - [ ] Base `Character` class with common properties
+- [x] Core package structure created
+- [x] User, Guild, Member, Supporter entities implemented
+- [x] Pure services for User, Guild, Member implemented
+- [ ] Port character entity hierarchy from Django models
+  - [ ] Base `Character` entity with common properties
   - [ ] `Character5th` intermediate class
   - [ ] `Character20th` intermediate class
   - [ ] All splat-specific classes (Vampire5th, Hunter5th, etc.)
-- [ ] Implement domain methods (validation, state changes, calculations)
-- [ ] **Move dice rolling logic from bot to `services/DiceRoller.ts`**
-- [ ] Define repository interfaces (no implementations yet)
+- [ ] Implement character domain methods (validation, state changes, calculations)
+- [ ] **Move dice rolling logic from bot to `services/dice-roller.service.ts`**
+- [ ] Create coordinator actions in `actions/` folder
 - [ ] Add unit tests for domain logic
 
 #### 1.1b Create `events/` Package
@@ -595,7 +585,7 @@ class CharacterMapper {
   - [ ] `src/modules/` - **DELETE dice rolling (moved to domain), keep Discord-specific utilities**
 - [ ] Remove `src/realm_api/` folder entirely
   - Bot will use repositories directly instead of HTTP API
-- [ ] Update imports to use domain models from `domain/`
+- [ ] Update imports to use entities from `@realm/core`
 - [ ] Use repositories for data access
 - [ ] **Set up Redis event listeners for Discord message requests**
 - [ ] **Publish character update events when bot modifies characters**
@@ -777,7 +767,7 @@ pnpm migration validate --source=mariadb://... --target=postgresql://...
 
 **Tasks:**
 
-- [ ] Use Zod schemas from `shared` for client-side validation
+- [ ] Use Zod schemas from `common` for client-side validation
 - [ ] Form validation
 - [ ] Type-safe API client
 
@@ -1107,20 +1097,22 @@ const users = await db.select().from(usersTable);
 
 ## Immediate Next Steps
 
-### Week 1-2: Domain Foundation
+### Week 1-2: Core Package Enhancement
 
-1. [ ] Create `domain/` package structure
-2. [ ] Port `Character` base class from Django
-3. [ ] Port `Character5th` intermediate class
-4. [ ] Port `Vampire5th` class with all fields and methods
-5. [ ] Add unit tests for Vampire5th
+1. [x] Enhance `core/` package with User, Guild, Member entities
+2. [x] Implement pure services for User, Guild, Member
+3. [ ] Port `Character` base entity from Django
+4. [ ] Port `Character5th` intermediate class
+5. [ ] Port `Vampire5th` class with all fields and methods
+6. [ ] Add unit tests for Vampire5th
 
-### Week 3: Character Data Types
+### Week 3: Character Data Types & Events
 
-1. [ ] Define `Vampire5thData` interface in `shared/`
+1. [ ] Define `Vampire5thData` interface in `common/`
 2. [ ] Update `database/src/types/index.ts`
 3. [ ] Verify Zod schema matches type
 4. [ ] Test serialization/deserialization
+5. [ ] Set up `events/` package for Redis pub/sub
 
 ### Week 4: Repository Pattern
 

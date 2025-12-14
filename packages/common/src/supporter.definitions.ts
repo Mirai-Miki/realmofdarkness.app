@@ -1,6 +1,56 @@
-import type { Snowflake } from "../primitives/index.js";
-import type { SupporterName } from "./supporter.types.js";
-import type { SupporterDto } from "./supporter.dto.js";
+import { z } from "zod";
+
+import type { Snowflake } from "./primitives";
+import { SnowflakeSchema } from "./primitives";
+
+export const SupporterLevel = {
+  Base: "base",
+  Mortal: "mortal",
+  Fledgling: "fledgling",
+  Neonate: "neonate",
+  Ancilla: "ancilla",
+  Elder: "elder",
+  Methuselah: "methuselah",
+  Antediluvian: "antediluvian",
+} as const;
+
+export const SupporterLevelField = z.enum(SupporterLevel);
+export type SupporterLevel = z.infer<typeof SupporterLevelField>;
+
+export const BoostsField = z.number().int().min(0);
+export const FirstSupportedField = z.date().nullable();
+
+/**
+ * Supporter entity DTO schema.
+ */
+export const SupporterDtoSchema = z.object({
+  userId: SnowflakeSchema,
+  level: SupporterLevelField,
+  boosts: BoostsField,
+  firstSupported: FirstSupportedField,
+});
+export type SupporterDto = z.infer<typeof SupporterDtoSchema>;
+
+/**
+ * Input DTO for creating a new supporter.
+ */
+export const CreateSupporterInputSchema = z.object({
+  userId: SnowflakeSchema,
+  level: SupporterLevelField.default(SupporterLevel.Base),
+  boosts: BoostsField.default(0),
+  firstSupported: FirstSupportedField.default(null),
+});
+export type CreateSupporterInput = z.infer<typeof CreateSupporterInputSchema>;
+
+/**
+ * Input DTO for updating a supporter.
+ */
+export const UpdateSupporterInputSchema = z.object({
+  level: SupporterLevelField.optional(),
+  boosts: BoostsField.optional(),
+  firstSupported: FirstSupportedField.optional(),
+});
+export type UpdateSupporterInput = z.infer<typeof UpdateSupporterInputSchema>;
 
 /**
  * Repository interface for Supporter entity persistence operations.
@@ -62,7 +112,7 @@ export interface ISupporterRepository {
    * @throws {RealmError} If database query fails
    */
   findByLevel(
-    level: SupporterName,
+    level: SupporterLevel,
     limit?: number,
     offset?: number
   ): Promise<SupporterDto[]>;
@@ -130,5 +180,5 @@ export interface ISupporterRepository {
    * @returns Count of supporters at this level
    * @throws {RealmError} If query fails
    */
-  countByLevel(level: SupporterName): Promise<number>;
+  countByLevel(level: SupporterLevel): Promise<number>;
 }

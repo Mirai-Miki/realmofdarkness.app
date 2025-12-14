@@ -1,7 +1,8 @@
-import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
-import { snowflake } from "../schema_types";
-
 import type { InferSelectModel } from "drizzle-orm";
+
+import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
+import { DISCORD_FIELD_RULES } from "@realm/common";
+import { snowflake } from "../schema_types";
 
 /**
  * Guild table - represents a Discord Guild/Server that uses the bot
@@ -14,9 +15,13 @@ import type { InferSelectModel } from "drizzle-orm";
 export const guilds = pgTable("guilds", {
   /** Discord Guild Snowflake ID */
   id: snowflake().primaryKey(),
-  name: varchar({ length: 200 }).notNull(),
-  iconUrl: varchar({ length: 500 }).notNull().default(""),
-  trackerChannel: snowflake().notNull().default(""),
+  name: varchar({
+    length: DISCORD_FIELD_RULES.guildName.maxLength,
+  }).notNull(),
+  iconUrl: varchar({ length: DISCORD_FIELD_RULES.cdnUrl.maxLength })
+    .notNull()
+    .default(""),
+  storytellerRoleIds: snowflake().array().notNull().default([]),
 
   createdAt: timestamp().defaultNow().notNull(),
   lastUpdated: timestamp().defaultNow().notNull(),

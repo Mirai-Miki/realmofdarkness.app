@@ -92,13 +92,15 @@ cp database/.env.example database/.env
 
 ```
 realm-of-darkness/
-├── shared/          ✅ COMPLETE - Types, errors, logger, validation
-├── database/        ✅ MOSTLY COMPLETE - Drizzle schemas and DB connection
-├── api/             ⚠️  IN PROGRESS - NestJS API (5% done)
-├── bot/             ⚠️  NOT MIGRATED - Still JavaScript
-├── web/             ⏳ NOT STARTED - React frontend
-├── domain/          ❌ TODO - Phase 1 - Rich character models + dice logic
-└── events/          ❌ TODO - Phase 1 - Redis pub/sub for real-time
+├── packages/common/        ✅ COMPLETE - DTOs, contracts, Zod schemas
+├── packages/core/          🔄 IN PROGRESS - Entities, services, actions
+├── packages/database/      ✅ COMPLETE - Drizzle schemas
+├── packages/repositories/  ⏳ NOT STARTED - Data access
+├── packages/logger/        ✅ COMPLETE - Logging
+├── packages/events/        ⏳ NOT STARTED - Redis pub/sub
+├── apps/api/               ⏳ NOT STARTED - NestJS API
+├── apps/bot/               ⏳ NOT STARTED - Discord bots
+└── backend-legacy/         ⚠️  Frozen Django code
 ```
 
 ### Planned Packages
@@ -434,7 +436,7 @@ psql $DATABASE_URL -c "\d characters"
 - **Architecture:** [REFACTOR_PLAN.md](./REFACTOR_PLAN.md)
 - **Current Status:** [REFACTOR_STATUS.md](./REFACTOR_STATUS.md)
 - **Current Tasks:** [PHASE_1_CHECKLIST.md](./PHASE_1_CHECKLIST.md)
-- **Shared Package:** [shared/README.md](./shared/README.md)
+- **Common Package:** [packages/common/README.md](./packages/common/README.md)
 
 ### Legacy Code Reference
 
@@ -462,9 +464,9 @@ psql $DATABASE_URL -c "\d characters"
 
 **A:** No. `backend-legacy/`, `frontend/`, and `discord_bots/` are frozen. All new work goes in the new packages.
 
-### Q: I found a bug in the shared package. Can I fix it?
+### Q: I found a bug in the common package. Can I fix it?
 
-**A:** Yes! The shared package is used by everything, so fixes are welcome. Just make sure to test thoroughly.
+**A:** Yes! The common package is used by everything, so fixes are welcome. Just make sure to test thoroughly.
 
 ### Q: How do I add a new character type?
 

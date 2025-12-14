@@ -11,7 +11,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { Splat } from "@realm/common";
+import { Splat, CHARACTER_RULES } from "@realm/common";
 import { users } from "./users.js";
 import { guilds } from "./guilds.js";
 import { members } from "./members.js";
@@ -38,7 +38,7 @@ export const characters = pgTable(
   "characters",
   {
     id: snowflake().primaryKey(),
-    name: varchar({ length: CHARACTER_NAME.maxLength }).notNull(),
+    name: varchar({ length: CHARACTER_RULES.name.maxLength }).notNull(),
 
     userId: snowflake()
       .notNull()

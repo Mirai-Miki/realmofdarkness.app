@@ -7,6 +7,47 @@ This document defines the naming conventions for the Realm of Darkness monorepo.
 - **Type Safety First**: All code must use explicit types, interfaces, and type annotations
 - **Documentation Required**: All functions, classes, and modules must include clear documentation
 - **Consistency**: Follow established patterns across all packages and applications
+- **Domain-Driven Organization**: Organize by domain rather than by type (in `@realm/common`)
+
+---
+
+## Architecture Overview
+
+### Package Responsibilities
+
+```
+@realm/common     - Shared kernel (DTOs, interfaces, contracts, Zod schemas)
+@realm/core       - Business logic (entities, services, actions)
+@realm/repositories - Data access implementations
+@realm/database   - Database schema and connection
+@realm/logger     - Logging singleton
+@realm/events     - Event system (Redis pub/sub)
+apps/api          - NestJS REST/WebSocket API
+apps/bot          - Discord.js bot
+apps/frontend     - React SPA
+```
+
+### Service Layer Architecture (`@realm/core`)
+
+**Pure Services** (`src/services/`)
+
+- Standalone operations (create character, update character, roll dice)
+- **May** call repositories directly
+- **Do NOT** call other services
+- Return DTOs
+
+**Coordinator Services** (`src/actions/`)
+
+- Complex workflows requiring multiple pure services
+- Orchestrate between services
+- Handle cross-cutting concerns
+- Return DTOs
+
+**Apps (API, Bot)**
+
+- Get data from endpoints/Discord
+- Call coordinator services or pure services
+- Handle presentation layer concerns
 
 ---
 
@@ -14,112 +55,179 @@ This document defines the naming conventions for the Realm of Darkness monorepo.
 
 All files use **kebab-case** with descriptive suffixes to indicate their purpose.
 
-### Domain Layer (`packages/core/src/domain/`)
+### Common Package (`packages/common/src/`)
 
-| Type               | Pattern             | Example                              |
-| ------------------ | ------------------- | ------------------------------------ |
-| **Entity**         | `{name}.entity.ts`  | `character.entity.ts`                |
-| **Value Object**   | `{name}.vo.ts`      | `dice-pool.vo.ts`, `attribute.vo.ts` |
-| **Domain Service** | `{name}.service.ts` | `experience-calculator.service.ts`   |
+**Organization Principle**: Organize by **domain**, not by type.
+
+**Small Domains** (single file):
+
+```
+user.definitions.ts          # All user-related: DTO, schemas, repository interface
+guild.definitions.ts          # All guild-related: DTO, schemas, repository interface
+member.definitions.ts         # All member-related: DTO, schemas, repository interface
+supporter.definitions.ts      # All supporter-related: DTO, schemas, repository interface
+```
+
+**Large Domains** (folder with splits):
+
+```
+character/
+├── character.definitions.ts           # Base character DTO, schemas, repository
+├── v5.definitions.ts         # Vampire5th specific schemas
+├── h5.definitions.ts          # Hunter5th specific schemas
+├── w20.definitions.ts       # Werewolf20th specific schemas
+└── index.ts                            # Barrel export
+```
+
+**Cross-Cutting Concerns** (folder split by type when it makes sense):
+
+```
+primitives/
+├── snowflake.definitions.ts              # Snowflake type and schema
+├── http-status.enum.ts       # HTTP status codes enum
+├── environment.enum.ts       # Environment type
+└── index.ts
+
+logger/
+├── logger.port.ts       # ILogger contract
+├── logger.types.ts      # Logger types
+└── index.ts
+
+event-system.definitions.ts   # Event contracts and types
+error.definitions.ts           # RealmError, UserError
+repository.definitions.ts      # Base repository interfaces
+```
+
+### Core Package (`packages/core/src/`)
+
+**Pure Services** (`services/`)
+
+- Pattern: `{name}.service.ts`
+- Examples: `character.service.ts`, `user.service.ts`, `guild.service.ts`
+- Purpose: Standalone business operations
+- May call repositories
+- Do NOT call other services
+
+**Coordinator Services** (`actions/`)
+
+- Pattern: `{name}.action.ts`
+- Examples: `create-character-sheet.action.ts`, `sync-member-profile.action.ts`
+- Purpose: Complex workflows orchestrating multiple services
+- Call pure services
+- Handle transactions and multi-step operations
+
+**Entities** (`entities/`)
+
+- Pattern: `{name}.entity.ts`
+- Examples: `user.entity.ts`, `member.entity.ts`, `guild.entity.ts`
+- Purpose: Domain models wrapping DTOs with business logic
+- Expose `toDto()` method for persistence
+
+**Value Objects** (`value-objects/`)
+
+- Pattern: `{name}.vo.ts`
+- Examples: `dice-pool.vo.ts`, `damage-tracker.vo.ts`
+- Purpose: Immutable objects defined by their values
+
+**Utilities** (`utils/`)
+
+- Pattern: `{name}.util.ts`
+- Examples: `http.utility.ts`, `validation.utility.ts`
 
 **Example Structure:**
 
 ```
-domain/
+core/
 ├── entities/
-│   ├── character.entity.ts
-│   ├── chronicle.entity.ts
+│   ├── user.entity.ts
+│   ├── guild.entity.ts
+│   ├── member.entity.ts
+│   ├── supporter.entity.ts
+│   └── characters/
+│       ├── character.entity.ts
+│       ├── vampire-5th.entity.ts
+│       └── index.ts
+├── services/
+│   ├── user.service.ts
+│   ├── guild.service.ts
+│   ├── member.service.ts
+│   └── index.ts
+├── actions/
+│   ├── create-character-sheet.action.ts
+│   ├── sync-member-profile.action.ts
 │   └── index.ts
 ├── value-objects/
-│   ├── attribute.vo.ts
 │   ├── dice-pool.vo.ts
+│   ├── damage-tracker.vo.ts
 │   └── index.ts
-└── services/
-    ├── character-creation.service.ts
-    ├── experience-calculator.service.ts
+└── utils/
+    ├── http.utility.ts
     └── index.ts
 ```
 
-### Application Layer (`packages/core/src/application/`)
+### Repositories Package (`packages/repositories/src/`)
 
-| Type                    | Pattern              | Example                           |
-| ----------------------- | -------------------- | --------------------------------- |
-| **Application Service** | `{name}.service.ts`  | `character-management.service.ts` |
-| **Use Case**            | `{name}.use-case.ts` | `create-character.use-case.ts`    |
-| **DTO**                 | `{name}.dto.ts`      | `create-character.dto.ts`         |
+| Type           | Pattern                | Example                   |
+| -------------- | ---------------------- | ------------------------- |
+| **Repository** | `{name}.repository.ts` | `character.repository.ts` |
+| **Mapper**     | `{name}.mapper.ts`     | `character.mapper.ts`     |
 
 **Example Structure:**
 
 ```
-application/
-├── services/
-│   ├── character-management.service.ts
-│   ├── chronicle-sync.service.ts
-│   └── index.ts
-└── use-cases/
-    ├── create-character.use-case.ts
-    ├── update-character.use-case.ts
-    └── index.ts
+repositories/
+├── user.repository.ts
+├── guild.repository.ts
+├── member.repository.ts
+└── mappers/
+    ├── user.mapper.ts
+    ├── guild.mapper.ts
+    └── member.mapper.ts
 ```
 
-### Contracts Layer (`packages/core/src/contracts/`)
+### Database Package (`packages/database/src/`)
 
-| Type                     | Pattern                | Example                    |
-| ------------------------ | ---------------------- | -------------------------- |
-| **Repository Interface** | `{name}.repository.ts` | `character.repository.ts`  |
-| **Service Interface**    | `{name}.interface.ts`  | `dice-roller.interface.ts` |
-| **Port**                 | `{name}.port.ts`       | `notification.port.ts`     |
+| Type       | Pattern     | Example                 |
+| ---------- | ----------- | ----------------------- |
+| **Schema** | `{name}.ts` | `users.ts`, `guilds.ts` |
 
 **Example Structure:**
 
 ```
-contracts/
-├── repositories/
-│   ├── character.repository.ts
-│   ├── chronicle.repository.ts
-│   └── index.ts
-└── services/
-    ├── dice-roller.interface.ts
-    ├── notification.interface.ts
-    └── index.ts
+database/
+├── schema/
+│   ├── users.ts
+│   ├── guilds.ts
+│   ├── members.ts
+│   ├── supporters.ts
+│   └── characters.ts
+├── schema_types.ts
+└── index.ts
 ```
 
-### Shared Layer (`packages/core/src/shared/`)
-
-| Type          | Pattern                | Example                                  |
-| ------------- | ---------------------- | ---------------------------------------- |
-| **Types**     | `{scope}.types.ts`     | `character.types.ts`, `common.types.ts`  |
-| **Enums**     | `{name}.enum.ts`       | `game-system.enum.ts`, `splat.enum.ts`   |
-| **Constants** | `{scope}.constants.ts` | `experience.constants.ts`                |
-| **Utils**     | `{name}.util.ts`       | `validation.util.ts`, `dice.util.ts`     |
-| **Errors**    | `{scope}.error.ts`     | `domain.error.ts`, `validation.error.ts` |
-
-**Example Structure:**
-
-```
-shared/
 ├── types/
-│   ├── character.types.ts
-│   ├── system.types.ts
-│   ├── common.types.ts
-│   └── index.ts
+│ ├── character.types.ts
+│ ├── system.types.ts
+│ ├── common.types.ts
+│ └── index.ts
 ├── enums/
-│   ├── splat.enum.ts
-│   ├── game-system.enum.ts
-│   └── index.ts
+│ ├── splat.enum.ts
+│ ├── game-system.enum.ts
+│ └── index.ts
 ├── constants/
-│   ├── experience.constants.ts
-│   ├── validation.constants.ts
-│   └── index.ts
+│ ├── experience.constants.ts
+│ ├── validation.constants.ts
+│ └── index.ts
 ├── utils/
-│   ├── dice.util.ts
-│   ├── validation.util.ts
-│   └── index.ts
+│ ├── dice.util.ts
+│ ├── validation.util.ts
+│ └── index.ts
 └── errors/
-    ├── domain.error.ts
-    ├── validation.error.ts
-    └── index.ts
-```
+├── domain.error.ts
+├── validation.error.ts
+└── index.ts
+
+````
 
 ### Application-Specific Files
 
@@ -128,13 +236,13 @@ shared/
 | Type            | Pattern                 | Example                     |
 | --------------- | ----------------------- | --------------------------- |
 | **Controller**  | `{name}.controller.ts`  | `character.controller.ts`   |
-| **Service**     | `{name}.service.ts`     | `character.service.ts`      |
-| **Repository**  | `{name}.repository.ts`  | `character.repository.ts`   |
 | **Module**      | `{name}.module.ts`      | `character.module.ts`       |
 | **Guard**       | `{name}.guard.ts`       | `auth.guard.ts`             |
 | **Interceptor** | `{name}.interceptor.ts` | `logging.interceptor.ts`    |
 | **Decorator**   | `{name}.decorator.ts`   | `current-user.decorator.ts` |
 | **Pipe**        | `{name}.pipe.ts`        | `validation.pipe.ts`        |
+
+**Note**: API uses services and actions from `@realm/core`, not its own service layer.
 
 #### Discord Bot (`apps/bot/src/`)
 
@@ -142,7 +250,8 @@ shared/
 | ----------- | ------------------- | ---------------------------------------- |
 | **Command** | `{name}.command.ts` | `roll.command.ts`, `sheet.command.ts`    |
 | **Event**   | `{name}.event.ts`   | `ready.event.ts`, `interaction.event.ts` |
-| **Module**  | `{name}.module.ts`  | `dice.module.ts`, `character.module.ts`  |
+
+**Note**: Bot uses services and actions from `@realm/core`, not its own service layer.
 
 #### Frontend (`apps/frontend/src/`)
 
@@ -176,7 +285,7 @@ export interface INotificationService {}
 // Type aliases: PascalCase
 export type CharacterId = string;
 export type GameSystem = "V5" | "V20" | "CoD";
-```
+````
 
 #### Functions and Variables
 
@@ -366,11 +475,11 @@ function rollDice(diceCount, difficulty) {
 }
 
 // ✅ Good - Type-only imports
-import type { Character } from "@domain/entities/character.entity";
-import type { CharacterId } from "@shared/types";
+import type { Character } from "@realm/core";
+import type { CharacterId } from "@realm/common";
 
 // ❌ Bad - Mixed imports when only types are needed
-import { Character, CharacterId } from "@domain/entities/character.entity";
+import { Character, CharacterId } from "@realm/core";
 ```
 
 ---
@@ -389,16 +498,16 @@ Organize imports in the following order:
 import { Injectable } from "@nestjs/common";
 import { v4 as uuidv4 } from "uuid";
 
-// 2. Internal package imports
-import { Character } from "@core/domain/entities/character.entity";
-import { GameSystem } from "@core/shared/enums/game-system.enum";
+// 2. Internal package imports (path aliases)
+import { Character } from "@realm/core";
+import { GameSystem } from "@realm/common";
 
 // 3. Relative imports
 import { CharacterMapper } from "./character.mapper";
 
 // 4. Type-only imports
-import type { ICharacterRepository } from "@core/contracts/repositories/character.repository";
-import type { CharacterId } from "@core/shared/types";
+import type { ICharacterRepository } from "@realm/common";
+import type { CharacterId } from "@realm/common";
 ```
 
 ---
@@ -414,37 +523,25 @@ export * from "./chronicle.entity";
 export * from "./vampire.entity";
 
 // Usage elsewhere
-import { Character, Chronicle, Vampire } from "@domain/entities";
+import { Character, Chronicle, Vampire } from "@realm/core";
 ```
 
 ---
 
 ## Module Path Aliases
 
-Configure path aliases in `tsconfig.json` for clean imports:
-
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@domain/*": ["src/domain/*"],
-      "@application/*": ["src/application/*"],
-      "@contracts/*": ["src/contracts/*"],
-      "@shared/*": ["src/shared/*"]
-    }
-  }
-}
-```
-
-**Usage:**
+The monorepo uses package references instead of path aliases. Import packages directly:
 
 ```typescript
-// Instead of:
-import { Character } from "../../../domain/entities/character.entity";
-
-// Use:
-import { Character } from "@domain/entities/character.entity";
+// Import from packages using their names
+import { Character, User, Guild } from "@realm/core";
+import { UserDto, GuildDto, Splat } from "@realm/common";
+import { db } from "@realm/database";
+import { UserRepository } from "@realm/repositories";
+import { logger } from "@realm/logger";
 ```
+
+**No need for path aliases** - pnpm workspace and TypeScript project references handle this automatically.
 
 ---
 
@@ -453,9 +550,9 @@ import { Character } from "@domain/entities/character.entity";
 ### Complete Entity Example
 
 ```typescript
-import type { CharacterId, PlayerId } from "@shared/types";
-import type { Splat } from "@shared/enums/splat.enum";
-import type { GameSystem } from "@shared/enums/game-system.enum";
+import type { CharacterId, PlayerId } from "@realm/common";
+import type { Splat } from "@realm/common";
+import type { GameSystem } from "@realm/common";
 
 /**
  * Base character entity representing a playable character in the World of Darkness.
@@ -528,8 +625,8 @@ export class Character {
 ### Complete Repository Interface Example
 
 ```typescript
-import type { Character } from "@domain/entities/character.entity";
-import type { CharacterId, PlayerId } from "@shared/types";
+import type { Character } from "@realm/core";
+import type { CharacterId, PlayerId } from "@realm/common";
 
 /**
  * Repository contract for character persistence operations.

@@ -1,8 +1,8 @@
+import type { InferSelectModel } from "drizzle-orm";
+
 import { pgTable, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { guilds } from "./guilds.js";
 import { snowflake } from "../schema_types";
-
-import type { InferSelectModel } from "drizzle-orm";
 
 /**
  * InitiativeTracker table - stores initiative tracking data for V20 sessions

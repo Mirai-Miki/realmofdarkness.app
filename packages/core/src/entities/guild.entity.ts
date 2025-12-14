@@ -1,4 +1,4 @@
-import { RealmError, type GuildDto } from "@realm/common";
+import { RealmError, DISCORD_FIELD_RULES, type GuildDto } from "@realm/common";
 
 /**
  * Domain entity representing a Discord Guild (Server).
@@ -44,12 +44,8 @@ export class Guild {
     return this._dto.iconUrl;
   }
 
-  public get trackerChannel(): string | undefined {
-    return this._dto.trackerChannel;
-  }
-
   public get storytellerRoles(): string[] {
-    return this._dto.storytellerRoles;
+    return this._dto.storytellerRoleIds;
   }
 
   public get createdAt(): Date {
@@ -57,7 +53,7 @@ export class Guild {
   }
 
   public get updatedAt(): Date {
-    return this._dto.updatedAt;
+    return this._dto.lastUpdated;
   }
 
   // Business methods
@@ -71,11 +67,12 @@ export class Guild {
     if (!name || name.trim().length === 0) {
       throw new RealmError("Guild name cannot be empty");
     }
-    if (name.length > 200) {
-      throw new RealmError("Guild name cannot exceed 200 characters");
+    if (name.length > DISCORD_FIELD_RULES.guildName.maxLength) {
+      throw new RealmError(
+        `Guild name cannot exceed ${DISCORD_FIELD_RULES.guildName.maxLength} characters`
+      );
     }
     this._dto.name = name;
-    this._dto.updatedAt = new Date();
   }
 
   /**
@@ -84,38 +81,12 @@ export class Guild {
    * @param iconUrl - New icon URL
    */
   public updateIconUrl(iconUrl: string): void {
-    if (iconUrl.length > 500) {
-      throw new RealmError("Icon URL cannot exceed 500 characters");
+    if (iconUrl.length > DISCORD_FIELD_RULES.cdnUrl.maxLength) {
+      throw new RealmError(
+        `Icon URL cannot exceed ${DISCORD_FIELD_RULES.cdnUrl.maxLength} characters`
+      );
     }
     this._dto.iconUrl = iconUrl;
-    this._dto.updatedAt = new Date();
-  }
-
-  /**
-   * Update the tracker channel for this guild.
-   *
-   * @param channelId - Discord channel snowflake ID
-   */
-  public updateTrackerChannel(channelId: string): void {
-    this._dto.trackerChannel = channelId;
-    this._dto.updatedAt = new Date();
-  }
-
-  /**
-   * Check if a tracker channel is configured.
-   *
-   * @returns True if tracker channel is set
-   */
-  public hasTrackerChannel(): boolean {
-    return !!this._dto.trackerChannel && this._dto.trackerChannel.length > 0;
-  }
-
-  /**
-   * Clear the tracker channel.
-   */
-  public clearTrackerChannel(): void {
-    this._dto.trackerChannel = undefined;
-    this._dto.updatedAt = new Date();
   }
 
   /**
@@ -124,9 +95,8 @@ export class Guild {
    * @param roleId - Discord role snowflake ID
    */
   public addStorytellerRole(roleId: string): void {
-    if (!this._dto.storytellerRoles.includes(roleId)) {
-      this._dto.storytellerRoles.push(roleId);
-      this._dto.updatedAt = new Date();
+    if (!this._dto.storytellerRoleIds.includes(roleId)) {
+      this._dto.storytellerRoleIds.push(roleId);
     }
   }
 
@@ -136,10 +106,9 @@ export class Guild {
    * @param roleId - Discord role snowflake ID
    */
   public removeStorytellerRole(roleId: string): void {
-    const index = this._dto.storytellerRoles.indexOf(roleId);
+    const index = this._dto.storytellerRoleIds.indexOf(roleId);
     if (index > -1) {
-      this._dto.storytellerRoles.splice(index, 1);
-      this._dto.updatedAt = new Date();
+      this._dto.storytellerRoleIds.splice(index, 1);
     }
   }
 

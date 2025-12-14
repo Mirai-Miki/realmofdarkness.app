@@ -1,53 +1,40 @@
 # @realm/repositories
 
-Repository implementations for the Realm of Darkness application. Provides the data access layer that bridges between domain models and database persistence.
+Repository implementations for the Realm of Darkness application. Provides the data access layer that bridges between DTOs and database persistence.
 
-## Installation
+## ⚠️ Status
 
-This is a workspace package. Add it to your package dependencies:
+**In Progress** - Core CRUD operations complete, mappers need alignment with updated DTO fields.
 
-```json
-{
-  "dependencies": {
-    "@realm/repositories": "workspace:*"
-  }
-}
-```
-
-## Overview
+## 🎯 Purpose
 
 The repository layer is responsible for:
 
-- Loading domain entities from the database
-- Saving domain entities to the database
-- Translating between database records and domain models
-- Hiding database implementation details from the domain layer
+- Loading DTOs from the database via Drizzle ORM
+- Saving DTOs to the database
+- Translating between database records and DTOs via mappers
+- Hiding database implementation details from application/domain layers
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  PRESENTATION LAYER (API, Bot)                      │
-│  - Controllers, Command Handlers                    │
+│  APPLICATION LAYER (Services)                       │
+│  - Uses repository interfaces from @realm/common    │
 └──────────────────┬──────────────────────────────────┘
                    │
 ┌──────────────────▼──────────────────────────────────┐
-│  APPLICATION LAYER                                  │
-│  - Services, Use Cases                              │
-└──────────────────┬──────────────────────────────────┘
-                   │ uses
-┌──────────────────▼──────────────────────────────────┐
 │  REPOSITORY LAYER (this package)                    │
-│  - CharacterRepository, UserRepository, etc.        │
-│  - Mappers (DB ↔ Domain)                           │
+│  - UserRepository, GuildRepository, etc.            │
+│  - Mappers (DB ↔ DTO)                              │
 └──────────────────┬──────────────────────────────────┘
                    │
         ┌──────────┴──────────┐
         │                     │
         ▼                     ▼
 ┌──────────────┐      ┌──────────────┐
-│ DOMAIN LAYER │      │ DATABASE     │
-│ (Entities)   │      │ (Drizzle)    │
+│ COMMON       │      │ DATABASE     │
+│ (DTOs)       │      │ (Drizzle)    │
 └──────────────┘      └──────────────┘
 ```
 
@@ -55,56 +42,91 @@ The repository layer is responsible for:
 
 ### Basic CRUD Operations
 
-```typescript
+````typescript
 import { CharacterRepository } from "@realm/repositories";
 import { db } from "@realm/database";
 
 const repo = new CharacterRepository(db);
 
+// Find bUserRepository } from '@realm/repositories';
+import { db } from '@realm/database';
+
+const userRepo = new UserRepository(db);
+
 // Find by ID
-const character = await repo.findById(123);
+const user = await userRepo.findById('123456789012345678');
 
-// Find by user and name
-const vampire = await repo.findByUser(456789n, "Dracula");
-
-// Find all for user
-const characters = await repo.findAllByUser(456789n);
+// Find by username
+const user = await userRepo.findByUsername('Dracula');
 
 // Create
-const newChar = new Vampire5th({
-  name: "New Vampire",
-  userId: 123456n,
-  // ... other properties
-});
-const saved = await repo.create(newChar);
+const newUser: UserDto = {
+  id: '123456789012345678',
+  username: 'newuser',
+  displayName: 'New User',
+  createdAt: new Date(),
+  lastUpdated: new Date(),
+};
+const savedUser = await userRepo.create(newUser);
 
 // Update
-vampire.increaseHunger(1);
-await repo.update(vampire);
+const updatedUser = { ...user, displayName: 'Updated Name' };
+await userRepo.update(updatedUser);
 
 // Delete
-await repo.delete(123);
-```
-
-### Repository Pattern Benefits
-
-✅ **Testability**: Easy to mock for unit tests
-✅ **Flexibility**: Can swap database without changing domain
-✅ **Separation**: Domain doesn't know about SQL/Drizzle
+await userRepo.delete('123456789012345678'sy to mock for unit tests
+✅ **Flexibility**: Can swap database without c
+✅ **Flexibility**: Can swap database without changing services
+✅ **Separation**: Services don't know about SQL/Drizzle
 ✅ **Clarity**: Clear contract for data access
 
-## Repository Interface
+## 📦 Available Repositories
 
-All repositories implement standard CRUD operations:
+- **UserRepository**: User CRUD operations
+- **GuildRepository**: Guild CRUD operations
+- **MemberRepository**: Guild membership operations (with composite key)
+- **SupporterRepository**: Supporter subscription operations
+- **CharacterRepository**: Character CRUD operations (WIP)
+
+## 🔧 Implementation Pattern
+
+Each repository follows this structure:
 
 ```typescript
-interface IRepository<T, ID> {
+import type { IUserRepository, UserDto, Snowflake } from '@realm/common';
+import { RealmError } from '@realm/common';
+import { db, users } from '@realm/database';
+import { UserMapper } from './mappers/user.mapper';
+
+export class UserRepository implements IUserRepository {
+  async findById(id: Snowflake): Promise<UserDto | null> {
+    try {
+      const result = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1);
+
+      if (result.length === 0) return null;
+
+      return UserMapper.toDto(result[0]);
+    } catch (error) {
+      throw new RealmError('Failed to find user by ID', {
+        cause: error,
+        fields: { id },
+      });
+    }
+  }
+
+  // ... other methods
+}
+```pository<T, ID> {
   findById(id: ID): Promise<T | null>;
   create(entity: T): Promise<T>;
   update(entity: T): Promise<T>;
   delete(id: ID): Promise<void>;
 }
-```
+````
 
 ## Mappers
 

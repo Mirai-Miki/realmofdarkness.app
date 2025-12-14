@@ -32,8 +32,12 @@ export class UserMapper {
         id: db.id,
         username: db.username,
         displayName: db.displayName,
+        email: db.email,
+        registered: db.registered,
+        admin: db.admin,
         avatarUrl: db.avatarUrl,
         createdAt: db.createdAt,
+        updatedAt: db.updatedAt,
         lastActive: db.lastActive,
       };
     } catch (error) {

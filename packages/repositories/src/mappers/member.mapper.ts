@@ -31,10 +31,13 @@ export class MemberMapper {
       return {
         guildId: db.guildId,
         userId: db.userId,
-        isStoryteller: db.storyteller,
-        experienceAwarded: db.boosted,
-        joinedAt: db.createdAt,
-        lastActive: db.lastUpdated,
+        admin: db.admin,
+        roleIds: db.roleIds,
+        boosted: db.boosted,
+        nickname: db.nickname,
+        avatarUrl: db.avatarUrl,
+        createdAt: db.createdAt,
+        lastUpdated: db.lastUpdated,
       };
     } catch (error) {
       throw new RealmError("Failed to map member from database to DTO", {
@@ -59,11 +62,11 @@ export class MemberMapper {
       return {
         guildId: dto.guildId,
         userId: dto.userId,
-        admin: false, // Set by separate admin management logic
-        storyteller: dto.isStoryteller,
-        boosted: dto.experienceAwarded,
-        nickname: "", // Set by Discord sync
-        avatarUrl: "", // Set by Discord sync
+        admin: dto.admin,
+        roleIds: dto.roleIds,
+        boosted: dto.boosted,
+        nickname: dto.nickname,
+        avatarUrl: dto.avatarUrl,
       };
     } catch (error) {
       throw new RealmError("Failed to map member from DTO to database", {

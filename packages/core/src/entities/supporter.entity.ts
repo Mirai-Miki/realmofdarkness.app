@@ -1,48 +1,48 @@
-import { RealmError, SupporterName, type SupporterDto } from "@realm/common";
+import { RealmError, SupporterLevel, type SupporterDto } from "@realm/common";
 
 /**
  * Character sheet limits per supporter tier.
  * These are business rules that determine feature access.
  */
-export const SUPPORTER_SHEET_LIMITS: Record<SupporterName, number> = {
-  [SupporterName.Base]: 2,
-  [SupporterName.Mortal]: 4,
-  [SupporterName.Fledgling]: 8,
-  [SupporterName.Neonate]: 30,
-  [SupporterName.Ancilla]: 60,
-  [SupporterName.Elder]: 150,
-  [SupporterName.Methuselah]: 300,
-  [SupporterName.Antediluvian]: 500,
+export const SUPPORTER_SHEET_LIMITS: Record<SupporterLevel, number> = {
+  [SupporterLevel.Base]: 2,
+  [SupporterLevel.Mortal]: 4,
+  [SupporterLevel.Fledgling]: 8,
+  [SupporterLevel.Neonate]: 30,
+  [SupporterLevel.Ancilla]: 60,
+  [SupporterLevel.Elder]: 150,
+  [SupporterLevel.Methuselah]: 300,
+  [SupporterLevel.Antediluvian]: 500,
 } as const;
 
 /**
  * Tracker limits per supporter tier.
  * These are business rules that determine feature access.
  */
-export const SUPPORTER_TRACKER_LIMITS: Record<SupporterName, number> = {
-  [SupporterName.Base]: 50,
-  [SupporterName.Mortal]: 75,
-  [SupporterName.Fledgling]: 100,
-  [SupporterName.Neonate]: 150,
-  [SupporterName.Ancilla]: 200,
-  [SupporterName.Elder]: 300,
-  [SupporterName.Methuselah]: 500,
-  [SupporterName.Antediluvian]: 1000,
+export const SUPPORTER_TRACKER_LIMITS: Record<SupporterLevel, number> = {
+  [SupporterLevel.Base]: 50,
+  [SupporterLevel.Mortal]: 75,
+  [SupporterLevel.Fledgling]: 100,
+  [SupporterLevel.Neonate]: 150,
+  [SupporterLevel.Ancilla]: 200,
+  [SupporterLevel.Elder]: 300,
+  [SupporterLevel.Methuselah]: 500,
+  [SupporterLevel.Antediluvian]: 1000,
 } as const;
 
 /**
  * Numeric level values for supporter tiers.
  * Used for comparison and ordering.
  */
-export const SUPPORTER_LEVEL_VALUES: Record<SupporterName, number> = {
-  [SupporterName.Base]: 0,
-  [SupporterName.Mortal]: 1,
-  [SupporterName.Fledgling]: 2,
-  [SupporterName.Neonate]: 3,
-  [SupporterName.Ancilla]: 4,
-  [SupporterName.Elder]: 5,
-  [SupporterName.Methuselah]: 6,
-  [SupporterName.Antediluvian]: 7,
+export const SUPPORTER_LEVEL_VALUES: Record<SupporterLevel, number> = {
+  [SupporterLevel.Base]: 0,
+  [SupporterLevel.Mortal]: 1,
+  [SupporterLevel.Fledgling]: 2,
+  [SupporterLevel.Neonate]: 3,
+  [SupporterLevel.Ancilla]: 4,
+  [SupporterLevel.Elder]: 5,
+  [SupporterLevel.Methuselah]: 6,
+  [SupporterLevel.Antediluvian]: 7,
 } as const;
 
 /**
@@ -57,7 +57,7 @@ export const SUPPORTER_LEVEL_VALUES: Record<SupporterName, number> = {
  * ```typescript
  * const supporter = new Supporter({
  *   userId: "123456789012345678",
- *   supporterName: SupporterName.Neonate,
+ *   supporterLevel: SupporterLevel.Neonate,
  *   boostsUsed: 2,
  *   startedAt: new Date(),
  *   expiresAt: undefined,
@@ -80,28 +80,16 @@ export class Supporter {
     return this._dto.userId;
   }
 
-  public get supporterName(): SupporterName {
-    return this._dto.supporterName;
+  public get level(): SupporterLevel {
+    return this._dto.level;
   }
 
-  public get boostsUsed(): number {
-    return this._dto.boostsUsed;
+  public get boosts(): number {
+    return this._dto.boosts;
   }
 
-  public get startedAt(): Date {
-    return this._dto.startedAt;
-  }
-
-  public get expiresAt(): Date | undefined {
-    return this._dto.expiresAt;
-  }
-
-  public get createdAt(): Date {
-    return this._dto.createdAt;
-  }
-
-  public get updatedAt(): Date {
-    return this._dto.updatedAt;
+  public get firstSupported(): Date | null {
+    return this._dto.firstSupported;
   }
 
   // Business methods
@@ -110,28 +98,28 @@ export class Supporter {
    * Check if the user is an active supporter (not Base tier).
    */
   public isActive(): boolean {
-    return this._dto.supporterName !== SupporterName.Base;
+    return this._dto.level !== SupporterLevel.Base;
   }
 
   /**
    * Get the supporter's tier level.
    */
-  public getLevel(): SupporterName {
-    return this._dto.supporterName;
+  public getLevel(): SupporterLevel {
+    return this._dto.level;
   }
 
   /**
-   * Check if the supporter has available boosts to allocate.
+   * Check if the supporter has used any boosts.
    */
-  public hasAvailableBoosts(): boolean {
-    return this._dto.boostsUsed > 0;
+  public hasUsedBoosts(): boolean {
+    return this._dto.boosts > 0;
   }
 
   /**
    * Get the number of boosts currently used.
    */
   public getBoostsUsed(): number {
-    return this._dto.boostsUsed;
+    return this._dto.boosts;
   }
 
   /**
@@ -139,26 +127,23 @@ export class Supporter {
    *
    * @param newLevel - New supporter tier
    */
-  public updateLevel(newLevel: SupporterName): void {
-    this._dto.supporterName = newLevel;
-    this._dto.updatedAt = new Date();
+  public updateLevel(newLevel: SupporterLevel): void {
+    this._dto.level = newLevel;
   }
 
   /**
    * Allocate a server boost.
    */
   public allocateBoost(): void {
-    this._dto.boostsUsed += 1;
-    this._dto.updatedAt = new Date();
+    this._dto.boosts += 1;
   }
 
   /**
    * Deallocate a server boost.
    */
   public deallocateBoost(): void {
-    if (this._dto.boostsUsed > 0) {
-      this._dto.boostsUsed -= 1;
-      this._dto.updatedAt = new Date();
+    if (this._dto.boosts > 0) {
+      this._dto.boosts -= 1;
     }
   }
 
@@ -169,36 +154,28 @@ export class Supporter {
    * @returns True if supporter has been active for at least this long
    */
   public hasSupportedForMonths(months: number): boolean {
+    if (!this._dto.firstSupported) return false;
+
     const now = new Date();
     const monthsDiff =
-      (now.getTime() - this._dto.startedAt.getTime()) /
+      (now.getTime() - this._dto.firstSupported.getTime()) /
       (1000 * 60 * 60 * 24 * 30);
 
     return monthsDiff >= months;
   }
 
   /**
-   * Check if the subscription is expired.
-   */
-  public isExpired(): boolean {
-    if (!this._dto.expiresAt) return false;
-
-    const now = new Date();
-    return now > this._dto.expiresAt;
-  }
-
-  /**
    * Get the character sheet limit for this supporter tier.
    */
   public getSheetLimit(): number {
-    return SUPPORTER_SHEET_LIMITS[this._dto.supporterName];
+    return SUPPORTER_SHEET_LIMITS[this._dto.level];
   }
 
   /**
    * Get the tracker limit for this supporter tier.
    */
   public getTrackerLimit(): number {
-    return SUPPORTER_TRACKER_LIMITS[this._dto.supporterName];
+    return SUPPORTER_TRACKER_LIMITS[this._dto.level];
   }
 
   /**
@@ -206,7 +183,7 @@ export class Supporter {
    * Useful for comparisons.
    */
   public getLevelValue(): number {
-    return SUPPORTER_LEVEL_VALUES[this._dto.supporterName];
+    return SUPPORTER_LEVEL_VALUES[this._dto.level];
   }
 
   /**
@@ -215,7 +192,7 @@ export class Supporter {
    * @param required - The required supporter tier
    * @returns True if this supporter's tier is >= required tier
    */
-  public meetsRequirement(required: SupporterName): boolean {
+  public meetsRequirement(required: SupporterLevel): boolean {
     return this.getLevelValue() >= SUPPORTER_LEVEL_VALUES[required];
   }
 
@@ -234,7 +211,7 @@ export class Supporter {
  */
 export interface SupporterTierConfig {
   readonly level: number;
-  readonly name: SupporterName;
+  readonly name: SupporterLevel;
   readonly sheetLimit: number;
   readonly trackerLimit: number;
 }
@@ -249,66 +226,66 @@ export interface SupporterTierConfig {
 export class SupporterTier {
   /** Base supporter tier (free tier). */
   public static readonly Base: SupporterTierConfig = {
-    level: SUPPORTER_LEVEL_VALUES[SupporterName.Base],
-    name: SupporterName.Base,
-    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterName.Base],
-    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterName.Base],
+    level: SUPPORTER_LEVEL_VALUES[SupporterLevel.Base],
+    name: SupporterLevel.Base,
+    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterLevel.Base],
+    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterLevel.Base],
   } as const;
 
   /** Mortal supporter tier. */
   public static readonly Mortal: SupporterTierConfig = {
-    level: SUPPORTER_LEVEL_VALUES[SupporterName.Mortal],
-    name: SupporterName.Mortal,
-    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterName.Mortal],
-    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterName.Mortal],
+    level: SUPPORTER_LEVEL_VALUES[SupporterLevel.Mortal],
+    name: SupporterLevel.Mortal,
+    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterLevel.Mortal],
+    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterLevel.Mortal],
   } as const;
 
   /** Fledgling supporter tier. */
   public static readonly Fledgling: SupporterTierConfig = {
-    level: SUPPORTER_LEVEL_VALUES[SupporterName.Fledgling],
-    name: SupporterName.Fledgling,
-    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterName.Fledgling],
-    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterName.Fledgling],
+    level: SUPPORTER_LEVEL_VALUES[SupporterLevel.Fledgling],
+    name: SupporterLevel.Fledgling,
+    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterLevel.Fledgling],
+    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterLevel.Fledgling],
   } as const;
 
   /** Neonate supporter tier. */
   public static readonly Neonate: SupporterTierConfig = {
-    level: SUPPORTER_LEVEL_VALUES[SupporterName.Neonate],
-    name: SupporterName.Neonate,
-    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterName.Neonate],
-    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterName.Neonate],
+    level: SUPPORTER_LEVEL_VALUES[SupporterLevel.Neonate],
+    name: SupporterLevel.Neonate,
+    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterLevel.Neonate],
+    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterLevel.Neonate],
   } as const;
 
   /** Ancilla supporter tier. */
   public static readonly Ancilla: SupporterTierConfig = {
-    level: SUPPORTER_LEVEL_VALUES[SupporterName.Ancilla],
-    name: SupporterName.Ancilla,
-    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterName.Ancilla],
-    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterName.Ancilla],
+    level: SUPPORTER_LEVEL_VALUES[SupporterLevel.Ancilla],
+    name: SupporterLevel.Ancilla,
+    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterLevel.Ancilla],
+    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterLevel.Ancilla],
   } as const;
 
   /** Elder supporter tier. */
   public static readonly Elder: SupporterTierConfig = {
-    level: SUPPORTER_LEVEL_VALUES[SupporterName.Elder],
-    name: SupporterName.Elder,
-    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterName.Elder],
-    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterName.Elder],
+    level: SUPPORTER_LEVEL_VALUES[SupporterLevel.Elder],
+    name: SupporterLevel.Elder,
+    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterLevel.Elder],
+    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterLevel.Elder],
   } as const;
 
   /** Methuselah supporter tier. */
   public static readonly Methuselah: SupporterTierConfig = {
-    level: SUPPORTER_LEVEL_VALUES[SupporterName.Methuselah],
-    name: SupporterName.Methuselah,
-    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterName.Methuselah],
-    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterName.Methuselah],
+    level: SUPPORTER_LEVEL_VALUES[SupporterLevel.Methuselah],
+    name: SupporterLevel.Methuselah,
+    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterLevel.Methuselah],
+    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterLevel.Methuselah],
   } as const;
 
   /** Antediluvian supporter tier (highest tier). */
   public static readonly Antediluvian: SupporterTierConfig = {
-    level: SUPPORTER_LEVEL_VALUES[SupporterName.Antediluvian],
-    name: SupporterName.Antediluvian,
-    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterName.Antediluvian],
-    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterName.Antediluvian],
+    level: SUPPORTER_LEVEL_VALUES[SupporterLevel.Antediluvian],
+    name: SupporterLevel.Antediluvian,
+    sheetLimit: SUPPORTER_SHEET_LIMITS[SupporterLevel.Antediluvian],
+    trackerLimit: SUPPORTER_TRACKER_LIMITS[SupporterLevel.Antediluvian],
   } as const;
 
   /**
@@ -344,27 +321,27 @@ export class SupporterTier {
   /**
    * Get a supporter tier configuration by name.
    *
-   * @param name - The SupporterName to look up.
+   * @param name - The SupporterLevel to look up.
    * @returns The matching SupporterTierConfig.
    * @throws Error if the name is invalid.
    */
-  public static getByName(name: SupporterName): SupporterTierConfig {
+  public static getByName(name: SupporterLevel): SupporterTierConfig {
     switch (name) {
-      case SupporterName.Base:
+      case SupporterLevel.Base:
         return this.Base;
-      case SupporterName.Mortal:
+      case SupporterLevel.Mortal:
         return this.Mortal;
-      case SupporterName.Fledgling:
+      case SupporterLevel.Fledgling:
         return this.Fledgling;
-      case SupporterName.Neonate:
+      case SupporterLevel.Neonate:
         return this.Neonate;
-      case SupporterName.Ancilla:
+      case SupporterLevel.Ancilla:
         return this.Ancilla;
-      case SupporterName.Elder:
+      case SupporterLevel.Elder:
         return this.Elder;
-      case SupporterName.Methuselah:
+      case SupporterLevel.Methuselah:
         return this.Methuselah;
-      case SupporterName.Antediluvian:
+      case SupporterLevel.Antediluvian:
         return this.Antediluvian;
       default:
         throw new RealmError(`Invalid supporter name`);

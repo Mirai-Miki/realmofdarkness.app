@@ -1,4 +1,4 @@
-import type { Snowflake, Splats, SheetStatus } from "@realm/common";
+import type { Snowflake, Splat, SheetStatus } from "@realm/common";
 import type { Experience, DamageTracker5th } from "../../value-objects";
 
 import { Character5th } from "./character-5th.entity.js";
@@ -456,7 +456,7 @@ export class Vampire5th extends Character5th {
     super({
       name: data.name,
       userId: data.userId,
-      splat: "vampire5th" as Splats,
+      splat: "vampire5th" as Splat,
       id: data.id,
       guildId: data.guildId,
       isSheet: data.isSheet,

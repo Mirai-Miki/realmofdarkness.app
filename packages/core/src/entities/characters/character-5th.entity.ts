@@ -1,4 +1,4 @@
-import type { Splats, SheetStatus, Snowflake } from "@realm/common";
+import type { Splat, SheetStatus, Snowflake } from "@realm/common";
 import type { Experience } from "../../value-objects/index.js";
 
 import { Character } from "./character.entity.js";
@@ -118,7 +118,7 @@ export abstract class Character5th extends Character {
     // Base Character fields
     name: string;
     userId: Snowflake;
-    splat: Splats;
+    splat: Splat;
     id: Snowflake;
     guildId?: Snowflake | null;
     isSheet?: boolean;

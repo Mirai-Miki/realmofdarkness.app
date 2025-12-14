@@ -1,7 +1,7 @@
-import { db, members } from "@realm/database";
+import { db, members, guilds } from "@realm/database";
 import type { IMemberRepository, MemberDto, Snowflake } from "@realm/common";
 import { RealmError } from "@realm/common";
-import { eq, and, or, gt, sum } from "drizzle-orm";
+import { eq, and, or, gt, sum, sql } from "drizzle-orm";
 
 import { MemberMapper } from "./mappers/member.mapper.js";
 
@@ -62,7 +62,7 @@ export class MemberRepository implements IMemberRepository {
    * @param guildId - Discord guild ID
    * @returns Array of members in the guild (empty if none)
    */
-  async findByGuild(guildId: Snowflake): Promise<Member[]> {
+  async findByGuild(guildId: Snowflake): Promise<MemberDto[]> {
     try {
       const result = await db
         .select()
@@ -84,7 +84,7 @@ export class MemberRepository implements IMemberRepository {
    * @param userId - Discord user ID
    * @returns Array of member records for this user (empty if none)
    */
-  async findByUser(userId: Snowflake): Promise<Member[]> {
+  async findByUser(userId: Snowflake): Promise<MemberDto[]> {
     try {
       const result = await db
         .select()
@@ -103,11 +103,11 @@ export class MemberRepository implements IMemberRepository {
   /**
    * Create a new member record.
    *
-   * @param member - Member entity to create
-   * @returns The created member
+   * @param member - Member DTO to create
+   * @returns The created member DTO
    * @throws {RealmError} If member already exists or database error occurs
    */
-  async create(member: MemberDto): Promise<Member> {
+  async create(member: MemberDto): Promise<MemberDto> {
     try {
       const dbRecord = MemberMapper.fromDto(member);
 
@@ -128,11 +128,11 @@ export class MemberRepository implements IMemberRepository {
   /**
    * Update an existing member record.
    *
-   * @param member - Member entity with updated values
-   * @returns The updated member
+   * @param member - Member DTO with updated values
+   * @returns The updated member DTO
    * @throws {RealmError} If member does not exist or database error occurs
    */
-  async update(member: MemberDto): Promise<Member> {
+  async update(member: MemberDto): Promise<MemberDto> {
     try {
       const dbRecord = MemberMapper.fromDto(member);
 
@@ -244,9 +244,9 @@ export class MemberRepository implements IMemberRepository {
    * Find all admin members in a guild.
    *
    * @param guildId - Discord guild ID
-   * @returns Array of admin members (empty if none)
+   * @returns Array of admin member DTOs (empty if none)
    */
-  async findAdminsByGuild(guildId: Snowflake): Promise<Member[]> {
+  async findAdminsByGuild(guildId: Snowflake): Promise<MemberDto[]> {
     try {
       const result = await db
         .select()
@@ -263,46 +263,41 @@ export class MemberRepository implements IMemberRepository {
   }
 
   /**
-   * Find all storyteller members in a guild.
+   * Find all staff members in a guild.
+   *
+   * Staff members are those with either admin privileges or storyteller roles.
+   * Fetches the guild's storyteller roles from the database and checks for roleIds intersection.
    *
    * @param guildId - Discord guild ID
-   * @returns Array of storyteller members (empty if none)
+   * @returns Array of staff member DTOs (empty if none)
    */
-  async findStorytellers(guildId: Snowflake): Promise<Member[]> {
+  async findStaffMembers(guildId: Snowflake): Promise<MemberDto[]> {
     try {
-      const result = await db
-        .select()
-        .from(members)
-        .where(
-          and(eq(members.guildId, guildId), eq(members.storyteller, true))
-        );
+      // First, get the guild's storyteller role IDs
+      const guildResult = await db
+        .select({ storytellerRoleIds: guilds.storytellerRoleIds })
+        .from(guilds)
+        .where(eq(guilds.id, guildId))
+        .limit(1);
 
-      return result.map((record) => MemberMapper.toDto(record));
-    } catch (error) {
-      throw new RealmError("Failed to find storytellers by guild", {
-        cause: error,
-        fields: { guildId },
-      });
-    }
-  }
+      if (guildResult.length === 0) {
+        // Guild doesn't exist, return empty array
+        return [];
+      }
 
-  /**
-   * Find all Staff members in a guild.
-   *
-   * Staff members are those with either admin or storyteller roles.
-   *
-   * @param guildId - Discord guild ID
-   * @returns Array of staff members (empty if none)
-   */
-  async findStaffMembers(guildId: Snowflake): Promise<Member[]> {
-    try {
+      const storytellerRoles = guildResult[0].storytellerRoleIds;
+
+      // Query members who are either admins OR have any storyteller role
       const result = await db
         .select()
         .from(members)
         .where(
           and(
             eq(members.guildId, guildId),
-            or(eq(members.admin, true), eq(members.storyteller, true))
+            or(
+              eq(members.admin, true),
+              sql`${members.roleIds} && ${storytellerRoles}` // Array overlap: has any storyteller role
+            )
           )
         );
 
@@ -319,9 +314,9 @@ export class MemberRepository implements IMemberRepository {
    * Find all boosting members in a guild.
    *
    * @param guildId - Discord guild ID
-   * @returns Array of boosting members (empty if none)
+   * @returns Array of boosting member DTOs (empty if none)
    */
-  async findBoostingMembers(guildId: Snowflake): Promise<Member[]> {
+  async findBoostingMembers(guildId: Snowflake): Promise<MemberDto[]> {
     try {
       const result = await db
         .select()

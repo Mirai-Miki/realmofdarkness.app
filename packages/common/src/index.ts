@@ -12,7 +12,7 @@
  * **Contents**:
  * - **Interfaces**: ILogger, IEventClient, Repository interfaces
  * - **Types**: Snowflake, HttpStatus, DTOs
- * - **Enums**: Splats, SheetStatus, SupporterName, Environment
+ * - **Enums**: Splats, SheetStatus, SupporterLevel, Environment
  * - **Errors**: RealmError, UserError
  * - **Contracts**: Zod schemas for events and data validation
  *
@@ -28,15 +28,6 @@ export * from "./primitives";
 // Character module
 export * from "./character";
 
-// User module
-export * from "./user/";
-
-// Guild module
-export * from "./guild";
-
-// Member module
-export * from "./member";
-
 // Logger interface
 export * from "./logger";
 
@@ -46,5 +37,63 @@ export * from "./event-system.definitions";
 // Repository interfaces
 export * from "./repository.definitions";
 
-// Errors
-export * from "./error.definitions.js";
+// Supporter module
+export {
+  SupporterLevel,
+  SupporterLevelField,
+  type SupporterDto,
+  type ISupporterRepository,
+} from "./supporter.definitions.js";
+
+// Guild module
+export {
+  // Field schemas
+  GuildNameField,
+  GuildIconUrlField,
+  StorytellerRolesField,
+  // DTOs
+  GuildDtoSchema,
+  type GuildDto,
+  CreateGuildInputSchema,
+  type CreateGuildInput,
+  UpdateGuildInputSchema,
+  type UpdateGuildInput,
+  // Repository interface
+  type IGuildRepository,
+} from "./guild.definitions.js";
+
+// User module
+export {
+  // Field schemas
+  UsernameField,
+  DisplayNameField,
+  AvatarUrlField,
+  // DTOs
+  UserDtoSchema,
+  type UserDto,
+  CreateUserInputSchema,
+  type CreateUserInput,
+  UpdateUserInputSchema,
+  type UpdateUserInput,
+  // Repository interface
+  type IUserRepository,
+} from "./user.definitions.js";
+
+// Member module
+export {
+  // Field schemas
+  MemberAdminField,
+  MemberRoleIdsField,
+  MemberBoostCountField,
+  MemberNicknameField,
+  MemberAvatarUrlField,
+  // DTOs
+  MemberDtoSchema,
+  type MemberDto,
+  CreateMemberInputSchema,
+  type CreateMemberInput,
+  SyncMemberInputSchema,
+  type SyncMemberInput,
+  // Repository interface
+  type IMemberRepository,
+} from "./member.definitions.js";

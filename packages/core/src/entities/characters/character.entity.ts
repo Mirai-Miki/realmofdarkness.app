@@ -1,4 +1,4 @@
-import type { Splats, Snowflake } from "@realm/common";
+import type { Splat, Snowflake } from "@realm/common";
 import type { ActiveEffect } from "../../value-objects/";
 
 import { SheetStatus, RealmError } from "@realm/common";
@@ -49,7 +49,7 @@ export abstract class Character {
   /**
    * Character type/splat (vampire, werewolf, hunter, etc.)
    */
-  public readonly splat: Splats;
+  public readonly splat: Splat;
 
   /**
    * If this character is a sheet or not.
@@ -106,7 +106,7 @@ export abstract class Character {
   protected constructor(data: {
     name: string;
     userId: Snowflake;
-    splat: Splats;
+    splat: Splat;
     id: Snowflake;
     guildId?: Snowflake | null;
     isSheet?: boolean;

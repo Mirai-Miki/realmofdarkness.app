@@ -31,11 +31,10 @@ export class GuildMapper {
       return {
         id: db.id,
         name: db.name,
-        iconUrl: db.iconUrl || undefined,
-        trackerChannel: db.trackerChannel || undefined,
-        storytellerRoles: [], // Populated by repository via join
+        iconUrl: db.iconUrl || "",
+        storytellerRoleIds: db.storytellerRoleIds,
         createdAt: db.createdAt,
-        updatedAt: db.lastUpdated,
+        lastUpdated: db.lastUpdated,
       };
     } catch (error) {
       throw new RealmError("Failed to map guild from database to DTO", {
@@ -57,8 +56,8 @@ export class GuildMapper {
       return {
         id: dto.id,
         name: dto.name,
-        iconUrl: dto.iconUrl || "",
-        trackerChannel: dto.trackerChannel || "",
+        iconUrl: dto.iconUrl,
+        storytellerRoleIds: dto.storytellerRoleIds,
       };
     } catch (error) {
       throw new RealmError("Failed to map guild from DTO to database", {

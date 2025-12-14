@@ -1,3 +1,5 @@
+import type { InferSelectModel } from "drizzle-orm";
+
 import {
   pgTable,
   varchar,
@@ -9,8 +11,7 @@ import {
 import { users } from "./users.js";
 import { guilds } from "./guilds.js";
 import { snowflake } from "../schema_types";
-
-import type { InferSelectModel } from "drizzle-orm";
+import { DISCORD_FIELD_RULES } from "@realm/common";
 
 /**
  * Member table - represents a user's membership in a specific guild
@@ -32,13 +33,17 @@ export const members = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
 
     admin: boolean().notNull().default(false),
-    storyteller: boolean().notNull().default(false),
+    roleIds: snowflake().array().notNull().default([]),
 
     /** Is this user boosting this guild? */
     boosted: integer().notNull().default(0),
 
-    nickname: varchar({ length: 100 }).notNull().default(""),
-    avatarUrl: varchar({ length: 500 }).notNull().default(""),
+    nickname: varchar({ length: DISCORD_FIELD_RULES.username.maxLength })
+      .notNull()
+      .default(""),
+    avatarUrl: varchar({ length: DISCORD_FIELD_RULES.cdnUrl.maxLength })
+      .notNull()
+      .default(""),
 
     createdAt: timestamp().defaultNow().notNull(),
     lastUpdated: timestamp().defaultNow().notNull(),

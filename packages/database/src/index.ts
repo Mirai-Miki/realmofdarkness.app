@@ -12,18 +12,10 @@ import * as supporters from "./schema/supporters.js";
 
 // Export schema tables
 export { users, type UserDb } from "./schema/users.js";
-export {
-  supporters,
-  supporterLevel,
-  type SupporterDb,
-} from "./schema/supporters.js";
+export { supporters, type SupporterDb } from "./schema/supporters.js";
 export { members, type MemberDb } from "./schema/members.js";
 export { guilds, type GuildDb } from "./schema/guilds.js";
-export {
-  characters,
-  characterSplats,
-  type CharacterDb,
-} from "./schema/characters.js";
+export { characters, type CharacterDb } from "./schema/characters.js";
 export {
   initiativeTrackers,
   type InitiativeTrackerDb,

@@ -18,7 +18,7 @@
 | Phase                | Status         | Progress |
 | -------------------- | -------------- | -------- |
 | Infrastructure       | ✅ Complete    | 100%     |
-| Shared Package       | ✅ Complete    | 100%     |
+| Common Package       | ✅ Complete    | 100%     |
 | Database Schema      | ✅ Complete    | 95%      |
 | Domain Models        | 🔄 In Progress | 0%       |
 | Event System (Redis) | 🔄 In Progress | 0%       |
@@ -41,7 +41,7 @@
 - ✅ ESLint & Prettier configuration
 - ✅ Root-level scripts
 
-### Shared Package (100%)
+### Common Package (100%)
 
 - ✅ Error handling system (RealmError, UserError)
 - ✅ Singleton logger with Discord integration
@@ -73,15 +73,15 @@
 
 ## 🚧 Current Sprint Tasks
 
-### Week 1-2: Domain & Events Package Setup
+### Current Work: Core Package & Services
 
-**Priority 1: Create Domain Package Structure**
+**Focus: Pure Services & Coordinator Actions**
 
-- [ ] Create `domain/` package with package.json and tsconfig.json
-- [ ] Set up directory structure (models/, services/, events/, interfaces/)
-- [ ] Configure TypeScript path aliases
-- [ ] Add to pnpm workspace
-- [ ] Add to Turborepo pipeline
+- ✅ Core package structure created
+- ✅ Pure services created (user, guild, member)
+- ✅ DTOs with Zod validation in common package
+- 🔄 Repository implementations in progress
+- ⏳ Coordinator actions (actions/ folder) planned
 
 **Priority 1b: Create Events Package Structure**
 
@@ -130,9 +130,9 @@
 
 ### High Priority
 
-2. **No Domain Layer**
-   - Impact: Cannot implement repositories or services
-   - Status: Phase 1 in progress
+2. **Character Models Not Fully Implemented**
+   - Impact: Character entities need completion for character management
+   - Status: Phase 1 - Core package in progress
    - Target: Week 4
 
 3. **Bot Still Uses JavaScript**
@@ -204,9 +204,9 @@
   - **Rationale:** Simpler schema, flexible evolution, good PostgreSQL support
   - **Trade-off:** Less DB-level validation, rely on Zod schemas
 
-- **Decision:** Create separate `domain/` and `repositories/` packages
-  - **Rationale:** Clear separation of concerns, testable business logic
-  - **Pattern:** Domain models are framework-agnostic, repositories handle DB
+- **Decision:** Pure services in core/services/ and coordinator actions in core/actions/
+  - **Rationale:** Clear separation between standalone operations and complex workflows
+  - **Pattern:** Services may call repositories but never other services; actions orchestrate services
 
 - **Decision:** Bot will access database directly (no HTTP API)
   - **Rationale:** Simpler architecture, better performance, shared code

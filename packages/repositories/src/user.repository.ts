@@ -94,7 +94,7 @@ export class UserRepository implements IUserRepository {
    * @returns User entity if found, null otherwise
    * @throws {RealmError} If database query fails
    */
-  async findByUsername(username: string): Promise<User | null> {
+  async findByUsername(username: string): Promise<UserDto | null> {
     try {
       const result = await db
         .select()

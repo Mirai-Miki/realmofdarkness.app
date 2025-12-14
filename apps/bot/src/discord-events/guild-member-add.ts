@@ -2,11 +2,7 @@ import type { GuildMember as DiscordGuildMember } from "discord.js";
 
 import { Events } from "discord.js";
 import { logger } from "@realm/logger";
-import {
-  UserRepository,
-  MemberRepository,
-  SupporterRepository,
-} from "@realm/repositories";
+import { MemberRepository } from "@realm/repositories";
 import { MemberService } from "@realm/core";
 
 module.exports = {
@@ -18,24 +14,19 @@ module.exports = {
     try {
       if (member.partial) await member.fetch();
 
-      // Instantiate services
-      const userRepository = new UserRepository();
-      // UserService not strictly needed if we assume MemberService handles user checks or if we trust addMember
-      // But addMember calls userService.exists(userId) so it needs IUserRepository.
-      // We pass userRepository to MemberService.
-
+      // Instantiate repository and service
       const memberRepository = new MemberRepository();
-      const supporterRepository = new SupporterRepository();
-      const memberService = new MemberService(
-        memberRepository,
-        supporterRepository,
-        userRepository
-      );
+      const memberService = new MemberService(logger, memberRepository);
 
-      await memberService.create(member.guild.id, member.id, {
+      // Create member with DTO
+      await memberService.create({
+        guildId: member.guild.id,
+        userId: member.id,
         nickname: member.nickname || "",
         avatarUrl: member.displayAvatarURL(),
         admin: member.permissions.has("Administrator"),
+        roleIds: Array.from(member.roles.cache.keys()),
+        boosted: 0,
       });
     } catch (error) {
       logger.exception(

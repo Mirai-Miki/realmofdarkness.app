@@ -1,9 +1,12 @@
 import { eq, gt } from "drizzle-orm";
 import { db, supporters } from "@realm/database";
-import { RealmError, SupporterName } from "@realm/common";
-import type { ILogger, Snowflake } from "@realm/common";
-import { Supporter } from "@realm/common";
-import { type ISupporterRepository } from "@realm/common";
+import { RealmError, SupporterLevel } from "@realm/common";
+import type {
+  ILogger,
+  Snowflake,
+  ISupporterRepository,
+  SupporterDto,
+} from "@realm/common";
 import { SupporterMapper } from "./mappers/supporter.mapper.js";
 
 /**
@@ -40,7 +43,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Supporter entity (never null - defaults to Base tier)
    * @throws {RealmError} If database query fails
    */
-  async findByUserId(userId: Snowflake): Promise<Supporter> {
+  async findByUserId(userId: Snowflake): Promise<SupporterDto> {
     try {
       const result = await db
         .select()
@@ -50,16 +53,12 @@ export class SupporterRepository implements ISupporterRepository {
 
       if (result.length === 0) {
         // Return default Base tier supporter for users without subscription
-        const now = new Date();
-        return new Supporter({
+        return {
           userId,
-          level: SupporterName.Base,
-          totalBoosts: 0,
+          level: SupporterLevel.Base,
+          boosts: 0,
           firstSupported: null,
-          lastSupported: null,
-          createdAt: now,
-          lastUpdated: now,
-        });
+        };
       }
 
       return SupporterMapper.toDto(result[0]);
@@ -79,7 +78,10 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Array of Supporter entities
    * @throws {RealmError} If database query fails
    */
-  async findAll(limit: number = 100, offset: number = 0): Promise<Supporter[]> {
+  async findAll(
+    limit: number = 100,
+    offset: number = 0
+  ): Promise<SupporterDto[]> {
     try {
       const results = await db
         .select()
@@ -109,10 +111,10 @@ export class SupporterRepository implements ISupporterRepository {
    * @throws {RealmError} If database query fails
    */
   async findByLevel(
-    level: SupporterName,
+    level: SupporterLevel,
     limit: number = 100,
     offset: number = 0
-  ): Promise<Supporter[]> {
+  ): Promise<SupporterDto[]> {
     try {
       const results = await db
         .select()
@@ -145,12 +147,12 @@ export class SupporterRepository implements ISupporterRepository {
   async findWithAvailableBoosts(
     limit: number = 100,
     offset: number = 0
-  ): Promise<Supporter[]> {
+  ): Promise<SupporterDto[]> {
     try {
       const results = await db
         .select()
         .from(supporters)
-        .where(gt(supporters.totalBoosts, 0))
+        .where(gt(supporters.boosts, 0))
         .limit(limit)
         .offset(offset);
 
@@ -173,7 +175,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Created supporter entity with updated metadata
    * @throws {RealmError} If creation fails or supporter already exists
    */
-  async create(supporter: SupporterDto): Promise<Supporter> {
+  async create(supporter: SupporterDto): Promise<SupporterDto> {
     try {
       const dbRecord = SupporterMapper.fromDto(supporter);
 
@@ -204,7 +206,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Updated supporter entity with refreshed metadata
    * @throws {RealmError} If update fails or supporter doesn't exist
    */
-  async update(supporter: SupporterDto): Promise<Supporter> {
+  async update(supporter: SupporterDto): Promise<SupporterDto> {
     try {
       const dbRecord = SupporterMapper.fromDto(supporter);
 
@@ -312,7 +314,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Count of supporters at this level
    * @throws {RealmError} If query fails
    */
-  async countByLevel(level: SupporterName): Promise<number> {
+  async countByLevel(level: SupporterLevel): Promise<number> {
     try {
       const result = await db
         .select({ userId: supporters.userId })

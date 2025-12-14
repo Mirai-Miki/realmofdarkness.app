@@ -1,4 +1,4 @@
-import type { Splats, SheetStatus, Snowflake } from "@realm/common";
+import type { Splat, SheetStatus, Snowflake } from "@realm/common";
 
 import { Character } from "./character.entity.js";
 import {
@@ -56,7 +56,7 @@ export abstract class Character20th extends Character {
   protected constructor(data: {
     name: string;
     userId: Snowflake;
-    splat: Splats;
+    splat: Splat;
     id: Snowflake;
     guildId?: Snowflake | null;
     isSheet?: boolean;

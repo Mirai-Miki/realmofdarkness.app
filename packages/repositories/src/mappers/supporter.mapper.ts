@@ -1,6 +1,6 @@
 import type { SupporterDb } from "@realm/database";
 import type { SupporterDto } from "@realm/common";
-import { RealmError } from "@realm/common";
+import { RealmError, SupporterLevel } from "@realm/common";
 
 /**
  * Mapper for translating between Supporter database records and Supporter DTOs.
@@ -30,14 +30,9 @@ export class SupporterMapper {
     try {
       return {
         userId: db.userId,
-        supporterName: db.level, // Use level from database
-        customerId: undefined,
-        subscriptionId: undefined,
-        boostsUsed: db.totalBoosts,
-        startedAt: db.firstSupported || new Date(), // Default to now if null
-        expiresAt: db.lastSupported || undefined,
-        createdAt: db.createdAt,
-        updatedAt: db.lastUpdated,
+        level: db.level as SupporterLevel,
+        boosts: db.boosts,
+        firstSupported: db.firstSupported,
       };
     } catch (error) {
       throw new RealmError("Failed to map supporter from database to DTO", {
@@ -60,10 +55,9 @@ export class SupporterMapper {
     try {
       return {
         userId: dto.userId,
-        level: dto.supporterName, // Use supporterName as level
-        totalBoosts: dto.boostsUsed,
-        firstSupported: dto.startedAt,
-        lastSupported: dto.expiresAt || null,
+        level: dto.level,
+        boosts: dto.boosts,
+        firstSupported: dto.firstSupported,
       };
     } catch (error) {
       throw new RealmError("Failed to map supporter from DTO to database", {

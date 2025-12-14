@@ -4,13 +4,14 @@
 
 import type { Environment } from "../primitives/index.js";
 
-export const enum LogLevel {
-  Debug = "debug",
-  Info = "info",
-  Warning = "warning",
-  Error = "error",
-  Fatal = "fatal",
-}
+export const LogLevel = {
+  Debug: "debug",
+  Info: "info",
+  Warning: "warning",
+  Error: "error",
+  Fatal: "fatal",
+} as const;
+export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel];
 
 /**
  * Options for log entries.
