@@ -26,25 +26,14 @@ module.exports = {
     const memberService = new MemberService(logger, memberRepository);
 
     try {
-      // Check if guild already exists
-      const existingGuild = await guildRepository.findById(guild.id);
-
-      if (existingGuild) {
-        logger.info(`Bot re-added to existing guild: ${guild.name}`, {
-          fields: { guildId: guild.id },
-        });
-        return;
-      }
-
-      // Create new guild using DTO
-      await guildService.create({
+      // Upsert guild (creates new or updates existing)
+      await guildService.upsert({
         id: guild.id,
         name: guild.name,
         iconUrl: guild.iconURL() || "",
-        storytellerRoleIds: [],
       });
 
-      logger.info(`Bot added to new guild: ${guild.name}`, {
+      logger.info(`Bot added to guild: ${guild.name}`, {
         fields: { guildId: guild.id, memberCount: String(guild.memberCount) },
       });
 

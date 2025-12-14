@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-"use strict";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const fs = require("fs");
-const path = require("path");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Generate TypeScript types for emojis based on files in the emojis directory
@@ -43,7 +45,7 @@ function generateEmojiTypes() {
 // Generated from emoji files in the emojis/ directory
 // Run 'npm run generate-emoji-types' to regenerate
 
-import type { ApplicationEmoji } from 'discord.js';
+import type { ApplicationEmoji } from "discord.js";
 
 /**
  * Union type of all available emoji names
@@ -78,8 +80,6 @@ export declare const Emoji: EmojiObject;
 }
 
 // Run if called directly
-if (require.main === module) {
-  generateEmojiTypes();
-}
+generateEmojiTypes();
 
-module.exports = { generateEmojiTypes };
+export { generateEmojiTypes };

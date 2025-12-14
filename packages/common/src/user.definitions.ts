@@ -96,8 +96,10 @@ export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
  * Input DTO for updating user profile.
  *
  * Used when syncing user data from Discord.
+ * Contains ALL required data including the user ID.
  */
 export const UpdateUserInputSchema = z.object({
+  id: SnowflakeSchema,
   username: UsernameField.optional(),
   displayName: DisplayNameField.optional(),
   email: EmailField.optional(),

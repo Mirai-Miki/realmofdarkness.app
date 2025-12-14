@@ -1,6 +1,11 @@
 import { eq } from "drizzle-orm";
 import { db, guilds } from "@realm/database";
-import type { IGuildRepository, GuildDto, Snowflake } from "@realm/common";
+import type {
+  IGuildRepository,
+  GuildDto,
+  Snowflake,
+  UpsertGuildInput,
+} from "@realm/common";
 import { RealmError } from "@realm/common";
 import { GuildMapper } from "./mappers/guild.mapper";
 
@@ -100,6 +105,53 @@ export class GuildRepository implements IGuildRepository {
         fields: { guildId: guild.id },
       });
     }
+  }
+
+  /**
+   * Upsert a guild.
+   * If guild exists: updates provided fields (name, iconUrl, and storytellerRoleIds if provided).
+   * If guild doesn't exist: creates new guild.
+   *
+   * @param input - Guild data to upsert
+   * @returns Upserted guild DTO
+   */
+  async upsert(input: UpsertGuildInput): Promise<GuildDto> {
+    const now = new Date();
+
+    // Build the conflict update set dynamically based on provided fields
+    const updateSet: {
+      name: string;
+      iconUrl: string;
+      storytellerRoleIds?: Snowflake[];
+      lastUpdated: Date;
+    } = {
+      name: input.name,
+      iconUrl: input.iconUrl,
+      lastUpdated: now,
+    };
+
+    // If storytellerRoleIds provided, update them
+    if (input.storytellerRoleIds !== undefined) {
+      updateSet.storytellerRoleIds = input.storytellerRoleIds;
+    }
+
+    const [result] = await db
+      .insert(guilds)
+      .values({
+        id: input.id,
+        name: input.name,
+        iconUrl: input.iconUrl,
+        storytellerRoleIds: input.storytellerRoleIds || [],
+        createdAt: now,
+        lastUpdated: now,
+      })
+      .onConflictDoUpdate({
+        target: guilds.id,
+        set: updateSet,
+      })
+      .returning();
+
+    return result;
   }
 
   /**

@@ -73,13 +73,55 @@ export type CreateGuildInput = z.infer<typeof CreateGuildInputSchema>;
  * Input DTO for updating guild settings.
  *
  * Used when syncing guild data from Discord or updating settings.
+ * Contains ALL required data including the guild ID.
  */
 export const UpdateGuildInputSchema = z.object({
+  id: SnowflakeSchema,
   name: GuildNameField.optional(),
   iconUrl: GuildIconUrlField.optional(),
   storytellerRoleIds: StorytellerRolesField.optional(),
 });
 export type UpdateGuildInput = z.infer<typeof UpdateGuildInputSchema>;
+
+/**
+ * Input for upserting a guild.
+ * Works like update, but creates if guild doesn't exist.
+ * - If guild exists: updates provided fields
+ * - If guild doesn't exist: creates new guild (storytellerRoleIds defaults to [])
+ */
+export const UpsertGuildInputSchema = z.object({
+  id: SnowflakeSchema,
+  name: GuildNameField,
+  iconUrl: GuildIconUrlField,
+  storytellerRoleIds: StorytellerRolesField.optional(),
+});
+export type UpsertGuildInput = z.infer<typeof UpsertGuildInputSchema>;
+
+/**
+ * Input DTO for adding a storyteller role to a guild.
+ *
+ * Contains ALL required data including guild and role IDs.
+ */
+export const AddStorytellerRoleInputSchema = z.object({
+  guildId: SnowflakeSchema,
+  roleId: SnowflakeSchema,
+});
+export type AddStorytellerRoleInput = z.infer<
+  typeof AddStorytellerRoleInputSchema
+>;
+
+/**
+ * Input DTO for removing a storyteller role from a guild.
+ *
+ * Contains ALL required data including guild and role IDs.
+ */
+export const RemoveStorytellerRoleInputSchema = z.object({
+  guildId: SnowflakeSchema,
+  roleId: SnowflakeSchema,
+});
+export type RemoveStorytellerRoleInput = z.infer<
+  typeof RemoveStorytellerRoleInputSchema
+>;
 
 // ============================================================================
 // Guild Repository Interface
@@ -115,6 +157,16 @@ export interface IGuildRepository {
    * @returns Updated guild DTO
    */
   update(guild: GuildDto): Promise<GuildDto>;
+
+  /**
+   * Upsert a guild.
+   * If guild exists: updates name and iconUrl.
+   * If guild doesn't exist: creates new guild.
+   *
+   * @param input - Guild data to upsert
+   * @returns Upserted guild DTO
+   */
+  upsert(input: UpsertGuildInput): Promise<GuildDto>;
 
   /**
    * Delete a guild by ID.

@@ -4,8 +4,16 @@ import {
   UserError,
   CreateMemberInputSchema,
   SyncMemberInputSchema,
+  AddBoostInputSchema,
+  RemoveBoostInputSchema,
+  DeleteMemberInputSchema,
+  MemberExistsInputSchema,
   type CreateMemberInput,
   type SyncMemberInput,
+  type AddBoostInput,
+  type RemoveBoostInput,
+  type DeleteMemberInput,
+  type MemberExistsInput,
 } from "@realm/common";
 import { Member } from "../entities/member.entity.js";
 
@@ -186,20 +194,27 @@ export class MemberService {
    * **Note**: Boost availability checking is NOT done here.
    * Use an action that coordinates with SupporterService for that.
    *
-   * @param guildId - Discord guild ID
-   * @param userId - Discord user ID
+   * @param input - Complete input with guild ID and user ID
    * @returns Updated member entity
    * @throws {RealmError} If member not found
    */
-  async addBoost(guildId: Snowflake, userId: Snowflake): Promise<Member> {
+  async addBoost(input: AddBoostInput): Promise<Member> {
     this.logger.info("Adding boost to member", {
-      fields: { guildId, userId },
+      fields: { guildId: input.guildId, userId: input.userId },
     });
 
-    const dto = await this.memberRepository.findByGuildAndUser(guildId, userId);
+    const validatedInput = AddBoostInputSchema.parse(input);
+
+    const dto = await this.memberRepository.findByGuildAndUser(
+      validatedInput.guildId,
+      validatedInput.userId
+    );
     if (!dto) {
       throw new RealmError("Member not found", {
-        fields: { guildId, userId },
+        fields: {
+          guildId: validatedInput.guildId,
+          userId: validatedInput.userId,
+        },
       });
     }
 
@@ -209,7 +224,11 @@ export class MemberService {
     const updatedDto = await this.memberRepository.update(member.toDto());
 
     this.logger.debug("Boost added to member", {
-      fields: { guildId, userId, boosted: String(member.boosted) },
+      fields: {
+        guildId: validatedInput.guildId,
+        userId: validatedInput.userId,
+        boosted: String(member.boosted),
+      },
     });
 
     return new Member(updatedDto);
@@ -218,20 +237,27 @@ export class MemberService {
   /**
    * Remove a boost from a member.
    *
-   * @param guildId - Discord guild ID
-   * @param userId - Discord user ID
+   * @param input - Complete input with guild ID and user ID
    * @returns Updated member entity
    * @throws {RealmError} If member not found or has no boosts
    */
-  async removeBoost(guildId: Snowflake, userId: Snowflake): Promise<Member> {
+  async removeBoost(input: RemoveBoostInput): Promise<Member> {
     this.logger.info("Removing boost from member", {
-      fields: { guildId, userId },
+      fields: { guildId: input.guildId, userId: input.userId },
     });
 
-    const dto = await this.memberRepository.findByGuildAndUser(guildId, userId);
+    const validatedInput = RemoveBoostInputSchema.parse(input);
+
+    const dto = await this.memberRepository.findByGuildAndUser(
+      validatedInput.guildId,
+      validatedInput.userId
+    );
     if (!dto) {
       throw new RealmError("Member not found", {
-        fields: { guildId, userId },
+        fields: {
+          guildId: validatedInput.guildId,
+          userId: validatedInput.userId,
+        },
       });
     }
 
@@ -241,7 +267,11 @@ export class MemberService {
     const updatedDto = await this.memberRepository.update(member.toDto());
 
     this.logger.debug("Boost removed from member", {
-      fields: { guildId, userId, boosted: String(member.boosted) },
+      fields: {
+        guildId: validatedInput.guildId,
+        userId: validatedInput.userId,
+        boosted: String(member.boosted),
+      },
     });
 
     return new Member(updatedDto);
@@ -250,18 +280,25 @@ export class MemberService {
   /**
    * Delete a member.
    *
-   * @param guildId - Discord guild ID
-   * @param userId - Discord user ID
+   * @param input - Complete input with guild ID and user ID
    */
-  async delete(guildId: Snowflake, userId: Snowflake): Promise<void> {
+  async delete(input: DeleteMemberInput): Promise<void> {
     this.logger.info("Deleting member", {
-      fields: { guildId, userId },
+      fields: { guildId: input.guildId, userId: input.userId },
     });
 
-    await this.memberRepository.delete(guildId, userId);
+    const validatedInput = DeleteMemberInputSchema.parse(input);
+
+    await this.memberRepository.delete(
+      validatedInput.guildId,
+      validatedInput.userId
+    );
 
     this.logger.debug("Member deleted", {
-      fields: { guildId, userId },
+      fields: {
+        guildId: validatedInput.guildId,
+        userId: validatedInput.userId,
+      },
     });
   }
 
@@ -285,12 +322,15 @@ export class MemberService {
   /**
    * Check if a member exists.
    *
-   * @param guildId - Discord guild ID
-   * @param userId - Discord user ID
+   * @param input - Complete input with guild ID and user ID
    * @returns True if member exists
    */
-  async exists(guildId: Snowflake, userId: Snowflake): Promise<boolean> {
-    return this.memberRepository.exists(guildId, userId);
+  async exists(input: MemberExistsInput): Promise<boolean> {
+    const validatedInput = MemberExistsInputSchema.parse(input);
+    return this.memberRepository.exists(
+      validatedInput.guildId,
+      validatedInput.userId
+    );
   }
 
   /**

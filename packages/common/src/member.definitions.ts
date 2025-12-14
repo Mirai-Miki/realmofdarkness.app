@@ -92,6 +92,50 @@ export const SyncMemberInputSchema = z.object({
 });
 export type SyncMemberInput = z.infer<typeof SyncMemberInputSchema>;
 
+/**
+ * Input DTO for adding a boost to a member.
+ *
+ * Contains ALL required data including guild ID and user ID.
+ */
+export const AddBoostInputSchema = z.object({
+  guildId: SnowflakeSchema,
+  userId: SnowflakeSchema,
+});
+export type AddBoostInput = z.infer<typeof AddBoostInputSchema>;
+
+/**
+ * Input DTO for removing a boost from a member.
+ *
+ * Contains ALL required data including guild ID and user ID.
+ */
+export const RemoveBoostInputSchema = z.object({
+  guildId: SnowflakeSchema,
+  userId: SnowflakeSchema,
+});
+export type RemoveBoostInput = z.infer<typeof RemoveBoostInputSchema>;
+
+/**
+ * Input DTO for deleting a member.
+ *
+ * Contains ALL required data including guild ID and user ID.
+ */
+export const DeleteMemberInputSchema = z.object({
+  guildId: SnowflakeSchema,
+  userId: SnowflakeSchema,
+});
+export type DeleteMemberInput = z.infer<typeof DeleteMemberInputSchema>;
+
+/**
+ * Input DTO for checking if a member exists.
+ *
+ * Contains ALL required data including guild ID and user ID.
+ */
+export const MemberExistsInputSchema = z.object({
+  guildId: SnowflakeSchema,
+  userId: SnowflakeSchema,
+});
+export type MemberExistsInput = z.infer<typeof MemberExistsInputSchema>;
+
 // ============================================================================
 // Member Repository Interface
 // ============================================================================

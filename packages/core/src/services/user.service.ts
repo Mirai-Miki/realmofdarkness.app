@@ -97,14 +97,13 @@ export class UserService {
    *
    * Retrieves the user, applies updates, and persists changes.
    *
-   * @param userId - Discord user snowflake ID
-   * @param input - Partial user update data
+   * @param input - Complete user update data including user ID
    * @returns Updated user entity
    * @throws {RealmError} If user not found or update fails
    */
-  async update(userId: Snowflake, input: UpdateUserInput): Promise<User> {
+  async update(input: UpdateUserInput): Promise<User> {
     this.logger.debug(`Updating user`, {
-      fields: { userId },
+      fields: { userId: input.id },
     });
 
     try {
@@ -112,10 +111,10 @@ export class UserService {
       const validatedInput = UpdateUserInputSchema.parse(input);
 
       // Get existing user
-      const dto = await this.userRepository.findById(userId);
+      const dto = await this.userRepository.findById(validatedInput.id);
       if (!dto) {
         throw new RealmError("User not found", {
-          fields: { userId },
+          fields: { userId: validatedInput.id },
         });
       }
 
@@ -149,7 +148,7 @@ export class UserService {
       }
       throw new RealmError(`Failed to update user`, {
         cause: error,
-        fields: { userId },
+        fields: { userId: input.id },
       });
     }
   }

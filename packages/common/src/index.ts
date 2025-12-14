@@ -58,6 +58,12 @@ export {
   type CreateGuildInput,
   UpdateGuildInputSchema,
   type UpdateGuildInput,
+  UpsertGuildInputSchema,
+  type UpsertGuildInput,
+  AddStorytellerRoleInputSchema,
+  type AddStorytellerRoleInput,
+  RemoveStorytellerRoleInputSchema,
+  type RemoveStorytellerRoleInput,
   // Repository interface
   type IGuildRepository,
 } from "./guild.definitions.js";
@@ -94,6 +100,14 @@ export {
   type CreateMemberInput,
   SyncMemberInputSchema,
   type SyncMemberInput,
+  AddBoostInputSchema,
+  type AddBoostInput,
+  RemoveBoostInputSchema,
+  type RemoveBoostInput,
+  DeleteMemberInputSchema,
+  type DeleteMemberInput,
+  MemberExistsInputSchema,
+  type MemberExistsInput,
   // Repository interface
   type IMemberRepository,
 } from "./member.definitions.js";

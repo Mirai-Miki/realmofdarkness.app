@@ -4,8 +4,14 @@ import {
   UserError,
   CreateGuildInputSchema,
   UpdateGuildInputSchema,
+  UpsertGuildInputSchema,
+  AddStorytellerRoleInputSchema,
+  RemoveStorytellerRoleInputSchema,
   type CreateGuildInput,
   type UpdateGuildInput,
+  type UpsertGuildInput,
+  type AddStorytellerRoleInput,
+  type RemoveStorytellerRoleInput,
 } from "@realm/common";
 import { Guild } from "../entities/guild.entity";
 
@@ -126,14 +132,13 @@ export class GuildService {
    *
    * Retrieves the guild, applies updates, and persists changes.
    *
-   * @param guildId - Discord guild snowflake ID
-   * @param input - Partial guild update data
+   * @param input - Complete guild update data including guild ID
    * @returns Updated guild entity
    * @throws {RealmError} If guild not found or update fails
    */
-  async update(guildId: Snowflake, input: UpdateGuildInput): Promise<Guild> {
+  async update(input: UpdateGuildInput): Promise<Guild> {
     this.logger.info(`Updating guild`, {
-      fields: { guildId },
+      fields: { guildId: input.id },
     });
 
     try {
@@ -141,10 +146,10 @@ export class GuildService {
       const validatedInput = UpdateGuildInputSchema.parse(input);
 
       // Get existing guild
-      const dto = await this.guildRepository.findById(guildId);
+      const dto = await this.guildRepository.findById(validatedInput.id);
       if (!dto) {
         throw new RealmError("Guild not found", {
-          fields: { guildId },
+          fields: { guildId: validatedInput.id },
         });
       }
 
@@ -183,7 +188,50 @@ export class GuildService {
         throw error;
       }
       throw new RealmError(`Failed to update guild`, {
-        fields: { guildId },
+        fields: { guildId: input.id },
+        cause: error,
+      });
+    }
+  }
+
+  /**
+   * Upsert a guild (create if new, update if exists).
+   * - If guild exists: Updates provided fields (name, iconUrl, storytellerRoleIds if provided)
+   * - If guild doesn't exist: Creates new guild with provided data
+   *
+   * This is the preferred method for syncing guilds from Discord.
+   *
+   * @param input - Guild data (id, name, iconUrl required; storytellerRoleIds optional)
+   * @returns Upserted guild entity
+   * @throws {UserError} If input validation fails
+   * @throws {RealmError} If upsert fails
+   */
+  async upsert(input: UpsertGuildInput): Promise<Guild> {
+    this.logger.info(`Upserting guild: ${input.name}`, {
+      fields: { guildId: input.id },
+    });
+
+    try {
+      // Validate input DTO
+      const validatedInput = UpsertGuildInputSchema.parse(input);
+
+      // Repository handles upsert logic
+      const upsertedDto = await this.guildRepository.upsert(validatedInput);
+
+      // Hydrate DTO back to entity
+      const upserted = new Guild(upsertedDto);
+
+      this.logger.debug(`Guild upserted successfully: ${upserted.name}`, {
+        fields: { guildId: upserted.id },
+      });
+
+      return upserted;
+    } catch (error) {
+      if (error instanceof UserError || error instanceof RealmError) {
+        throw error;
+      }
+      throw new RealmError(`Failed to upsert guild: ${input.name}`, {
+        fields: { guildId: input.id },
         cause: error,
       });
     }
@@ -192,28 +240,26 @@ export class GuildService {
   /**
    * Add a storyteller role to a guild.
    *
-   * @param guildId - Discord guild snowflake ID
-   * @param roleId - Discord role snowflake ID
+   * @param input - Complete input with guild ID and role ID
    * @returns Updated guild entity
    * @throws {RealmError} If guild not found or update fails
    */
-  async addStorytellerRole(
-    guildId: Snowflake,
-    roleId: Snowflake
-  ): Promise<Guild> {
+  async addStorytellerRole(input: AddStorytellerRoleInput): Promise<Guild> {
     this.logger.info(`Adding storyteller role to guild`, {
-      fields: { guildId, roleId },
+      fields: { guildId: input.guildId, roleId: input.roleId },
     });
 
-    const dto = await this.guildRepository.findById(guildId);
+    const validatedInput = AddStorytellerRoleInputSchema.parse(input);
+
+    const dto = await this.guildRepository.findById(validatedInput.guildId);
     if (!dto) {
       throw new RealmError("Guild not found", {
-        fields: { guildId },
+        fields: { guildId: validatedInput.guildId },
       });
     }
 
     const guild = new Guild(dto);
-    guild.addStorytellerRole(roleId);
+    guild.addStorytellerRole(validatedInput.roleId);
 
     const updatedDto = await this.guildRepository.update(guild.toDto());
     return new Guild(updatedDto);
@@ -222,28 +268,28 @@ export class GuildService {
   /**
    * Remove a storyteller role from a guild.
    *
-   * @param guildId - Discord guild snowflake ID
-   * @param roleId - Discord role snowflake ID
+   * @param input - Complete input with guild ID and role ID
    * @returns Updated guild entity
    * @throws {RealmError} If guild not found or update fails
    */
   async removeStorytellerRole(
-    guildId: Snowflake,
-    roleId: Snowflake
+    input: RemoveStorytellerRoleInput
   ): Promise<Guild> {
     this.logger.info(`Removing storyteller role from guild`, {
-      fields: { guildId, roleId },
+      fields: { guildId: input.guildId, roleId: input.roleId },
     });
 
-    const dto = await this.guildRepository.findById(guildId);
+    const validatedInput = RemoveStorytellerRoleInputSchema.parse(input);
+
+    const dto = await this.guildRepository.findById(validatedInput.guildId);
     if (!dto) {
       throw new RealmError("Guild not found", {
-        fields: { guildId },
+        fields: { guildId: validatedInput.guildId },
       });
     }
 
     const guild = new Guild(dto);
-    guild.removeStorytellerRole(roleId);
+    guild.removeStorytellerRole(validatedInput.roleId);
 
     const updatedDto = await this.guildRepository.update(guild.toDto());
     return new Guild(updatedDto);

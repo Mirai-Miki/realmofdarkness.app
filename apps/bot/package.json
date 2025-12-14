@@ -5,7 +5,7 @@
   "scripts": {
     "start": "./scripts/run.sh",
     "typecheck": "tsc --noEmit",
-    "build": "pnpm run typecheck && tsup",
+    "build": "pnpm run generate-emoji-types && pnpm run typecheck && tsup",
     "clean": "rimraf dist .turbo",
     "build:watch": "tsup --watch",
     "dev": "tsup --watch",
@@ -32,6 +32,7 @@
     "emoji:sync:20th": "node scripts/syncEmojis.js 20th",
     "emoji:sync:cod": "node scripts/syncEmojis.js cod",
     "emoji:sync:all": "node scripts/syncEmojis.js 5th && node scripts/syncEmojis.js 20th && node scripts/syncEmojis.js cod",
+    "generate-emoji-types": "node scripts/generate-emoji-types.js",
     "generate-types": "node scripts/generateEmojiTypes.js",
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,ts,json}\"",

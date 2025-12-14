@@ -17,7 +17,10 @@ module.exports = {
       const memberService = new MemberService(logger, memberRepository);
 
       // Service handles deletion logic including existence check
-      await memberService.delete(member.guild.id, member.id);
+      await memberService.delete({
+        guildId: member.guild.id,
+        userId: member.id,
+      });
     } catch (error) {
       logger.exception(
         `Failed to handle member remove for user ${member.id}`,

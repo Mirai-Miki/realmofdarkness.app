@@ -1,5 +1,5 @@
 import type { Client, ApplicationEmoji } from "discord.js";
-import type { EmojiName } from "../types/emoji-types.js";
+import type { EmojiName } from "../types";
 import { RealmError } from "@realm/common";
 
 /**

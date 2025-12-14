@@ -1,26 +1,41 @@
 import type { User, PartialUser } from "discord.js";
 import type { BotEvent } from "types";
-import { Events } from "discord.js";
-import { AppUser } from "entities";
+
 import { logger } from "@realm/logger";
+import { UserRepository } from "@realm/repositories";
+import { UserService } from "@realm/core";
+import { Events } from "discord.js";
 
 /**
- * Handles Discord UserUpdate events
- * Updates user information in our database when Discord user data changes
+ * Handles Discord UserUpdate events.
+ * Updates user information in our database when Discord user data changes.
  */
 const userUpdateEvent: BotEvent<Events.UserUpdate> = {
   name: Events.UserUpdate,
   once: false,
   async execute(oldUser: User | PartialUser, newUser: User): Promise<void> {
+    // Instantiate repository and service
+    const userRepository = new UserRepository(logger);
+    const userService = new UserService(logger, userRepository);
+
     try {
       // Fetch full user data if partial
       if (newUser.partial) {
         await newUser.fetch();
       }
-      const user = AppUser.from(newUser);
-      await user.update();
+
+      // Update user profile with new Discord data
+      await userService.update({
+        id: newUser.id,
+        username: newUser.username,
+        displayName: newUser.displayName || newUser.username,
+        avatarUrl: newUser.avatarURL() || undefined,
+      });
     } catch (error) {
-      logger.exception("Failed to handle user update event", error);
+      logger.exception(
+        `Failed to handle user update for ${newUser.username} (${newUser.id}):`,
+        error
+      );
     }
   },
 };

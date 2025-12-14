@@ -14,8 +14,9 @@ module.exports = {
     const guildService = new GuildService(logger, guildRepository);
 
     try {
-      // Just pass the new data to service - it handles checking and updating
-      await guildService.update(newGuild.id, {
+      // Upsert updated guild data (updates name/icon, creates if missing)
+      await guildService.upsert({
+        id: newGuild.id,
         name: newGuild.name,
         iconUrl: newGuild.iconURL() || "",
       });
