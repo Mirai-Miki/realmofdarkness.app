@@ -1,16 +1,16 @@
 import type { z } from "zod";
 import { BaseCharacterDataSchema } from "../character.definitions";
 
-export const V20_RULES = {
-  attributes: { min: 0, max: 5 },
-  abilities: { min: 0, max: 5 },
-  disciplines: { min: 0, max: 5 },
-  virtues: { min: 0, max: 5 },
-  health: { min: 0, max: 15 },
-  willpower: { min: 0, max: 10 },
-  humanity: { min: 0, max: 10 },
-  bloodPool: { min: 0, max: 50 },
-  generation: { min: 3, max: 15 },
+export const Wod20CharacterConstraints = {
+  Attributes: { Min: 0, Max: 5 },
+  Abilities: { Min: 0, Max: 5 },
+  Disciplines: { Min: 0, Max: 5 },
+  Virtues: { Min: 0, Max: 5 },
+  Health: { Min: 0, Max: 15 },
+  Willpower: { Min: 0, Max: 10 },
+  Humanity: { Min: 0, Max: 10 },
+  BloodPool: { Min: 0, Max: 50 },
+  Generation: { Min: 3, Max: 15 },
 } as const;
 
 export const Character20thSchema = BaseCharacterDataSchema.extend({});

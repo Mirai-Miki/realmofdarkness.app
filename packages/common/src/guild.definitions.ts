@@ -10,7 +10,7 @@ import { z } from "zod";
 import {
   SnowflakeSchema,
   DiscordUrlSchema,
-  DISCORD_FIELD_RULES,
+  GuildNameConstraints,
 } from "./primitives";
 
 // ============================================================================
@@ -22,8 +22,8 @@ import {
  */
 export const GuildNameField = z
   .string()
-  .min(DISCORD_FIELD_RULES.guildName.minLength)
-  .max(DISCORD_FIELD_RULES.guildName.maxLength);
+  .min(GuildNameConstraints.MinLength)
+  .max(GuildNameConstraints.MaxLength);
 
 /**
  * Guild icon URL from Discord CDN.

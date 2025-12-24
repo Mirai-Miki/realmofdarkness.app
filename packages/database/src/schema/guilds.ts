@@ -1,7 +1,7 @@
 import type { InferSelectModel } from "drizzle-orm";
 
 import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
-import { DISCORD_FIELD_RULES } from "@realm/common";
+import { GuildNameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
 import { snowflake } from "../schema_types";
 
 /**
@@ -16,11 +16,9 @@ export const guilds = pgTable("guilds", {
   /** Discord Guild Snowflake ID */
   id: snowflake().primaryKey(),
   name: varchar({
-    length: DISCORD_FIELD_RULES.guildName.maxLength,
+    length: GuildNameConstraints.MaxLength,
   }).notNull(),
-  iconUrl: varchar({ length: DISCORD_FIELD_RULES.cdnUrl.maxLength })
-    .notNull()
-    .default(""),
+  iconUrl: varchar({ length: DiscordCdnUrlMaxLength }).notNull().default(""),
   storytellerRoleIds: snowflake().array().notNull().default([]),
 
   createdAt: timestamp().defaultNow().notNull(),

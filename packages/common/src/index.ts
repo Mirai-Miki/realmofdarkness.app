@@ -28,6 +28,9 @@ export * from "./primitives";
 // Character module
 export * from "./character";
 
+// Dice Rolling module
+export * from "./dice";
+
 // Logger interface
 export * from "./logger";
 

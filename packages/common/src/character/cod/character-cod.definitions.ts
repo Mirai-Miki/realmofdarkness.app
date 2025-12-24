@@ -1,8 +1,8 @@
-export const COD_RULES = {
-  attributes: { min: 1, max: 5 },
-  skills: { min: 0, max: 5 },
-  merits: { min: 0, max: 5 },
-  health: { min: 0, max: 15 },
-  willpower: { min: 0, max: 10 },
-  integrity: { min: 0, max: 10 },
+export const CodCharacterConstraints = {
+  Attributes: { Min: 1, Max: 5 },
+  Skills: { Min: 0, Max: 5 },
+  Merits: { Min: 0, Max: 5 },
+  Health: { Min: 0, Max: 15 },
+  Willpower: { Min: 0, Max: 10 },
+  Integrity: { Min: 0, Max: 10 },
 } as const;

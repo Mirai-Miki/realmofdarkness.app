@@ -10,13 +10,22 @@ import { z } from "zod";
 // Re-export HttpStatus enum
 export { HttpStatus } from "./http-status.enum.js";
 
-export const DISCORD_FIELD_RULES = {
-  // Display names, usernames, nicknames.
-  username: { minLength: 1, maxLength: 35 },
-  // Server names.
-  guildName: { minLength: 1, maxLength: 100 },
-  cdnUrl: { maxLength: 500 },
-};
+export const UsernameConstraints = {
+  MinLength: 1,
+  MaxLength: 35,
+} as const;
+
+export const GuildNameConstraints = {
+  MinLength: 1,
+  MaxLength: 100,
+} as const;
+
+export const DiscordCdnUrlMaxLength = 500;
+
+/**
+ * Maximum length for notes/description fields across the application.
+ */
+export const CommandNotesMaxLength = 300;
 
 export const HexColorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
 

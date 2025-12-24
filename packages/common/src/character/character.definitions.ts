@@ -12,27 +12,28 @@
 import { z } from "zod";
 import { SnowflakeSchema } from "primitives";
 
-export const CHARACTER_RULES = {
-  name: {
-    minLength: 1,
-    maxLength: 50,
-    regex: /^(?!~).*$/, // Cannot start ~ as it's reserved for system use
+export const CharacterConstraints = {
+  Name: {
+    MinLength: 1,
+    MaxLength: 50,
+    Regex: /^(?!~).*$/, // Cannot start ~ as it's reserved for system use
   },
-  experience: {
-    min: 0,
-    max: 5000,
+  Experience: {
+    Min: 0,
+    Max: 5000,
   },
-  experienceSpend: {
-    description: { minLength: 1, maxLength: 200 },
-    costMin: 0,
-    costMax: 200,
+  ExperienceSpend: {
+    DescriptionMinLength: 1,
+    DescriptionMaxLength: 200,
+    CostMin: 0,
+    CostMax: 200,
   },
-  dateOfBirth: { minLength: 0, maxLength: 20 },
-  age: { minLength: 0, maxLength: 20 },
-  history: { minLength: 0, maxLength: 5000 },
-  appearanceDescription: { minLength: 0, maxLength: 1000 },
-  notes: { minLength: 0, maxLength: 5000 },
-  notes2: { minLength: 0, maxLength: 5000 },
+  DateOfBirth: { MinLength: 0, MaxLength: 20 },
+  Age: { MinLength: 0, MaxLength: 20 },
+  History: { MinLength: 0, MaxLength: 5000 },
+  AppearanceDescription: { MinLength: 0, MaxLength: 1000 },
+  Notes: { MinLength: 0, MaxLength: 5000 },
+  Notes2: { MinLength: 0, MaxLength: 5000 },
 } as const;
 
 // ============================================================================
@@ -44,9 +45,9 @@ export const CHARACTER_RULES = {
  */
 export const NameField = z
   .string()
-  .min(CHARACTER_RULES.name.minLength)
-  .max(CHARACTER_RULES.name.maxLength)
-  .regex(CHARACTER_RULES.name.regex, {
+  .min(CharacterConstraints.Name.MinLength)
+  .max(CharacterConstraints.Name.MaxLength)
+  .regex(CharacterConstraints.Name.Regex, {
     message: `Character name cannot start with '~' as it is reserved for system use`,
   });
 
@@ -109,8 +110,8 @@ export type Splat = z.infer<typeof SplatField>;
 export const ExperienceCurrentField = z
   .number()
   .int()
-  .min(CHARACTER_RULES.experience.min)
-  .max(CHARACTER_RULES.experience.max);
+  .min(CharacterConstraints.Experience.Min)
+  .max(CharacterConstraints.Experience.Max);
 
 /**
  * Total experience points earned
@@ -118,8 +119,8 @@ export const ExperienceCurrentField = z
 export const ExperienceTotalField = z
   .number()
   .int()
-  .min(CHARACTER_RULES.experience.min)
-  .max(CHARACTER_RULES.experience.max);
+  .min(CharacterConstraints.Experience.Min)
+  .max(CharacterConstraints.Experience.Max);
 /**
  * Experience tracker object with validation
  */
@@ -139,12 +140,12 @@ export const ExperienceTrackerField = z
 export const ExperienceSpendData = z.object({
   description: z
     .string()
-    .max(CHARACTER_RULES.experienceSpend.description.maxLength),
+    .max(CharacterConstraints.ExperienceSpend.DescriptionMaxLength),
   cost: z
     .number()
     .int()
-    .min(CHARACTER_RULES.experienceSpend.costMin)
-    .max(CHARACTER_RULES.experienceSpend.costMax),
+    .min(CharacterConstraints.ExperienceSpend.CostMin)
+    .max(CharacterConstraints.ExperienceSpend.CostMax),
 });
 
 /**
@@ -161,48 +162,48 @@ export const ExperienceSpendsField = z.array(ExperienceSpendData);
  */
 export const DateOfBirthField = z
   .string()
-  .min(CHARACTER_RULES.dateOfBirth.minLength)
-  .max(CHARACTER_RULES.dateOfBirth.maxLength);
+  .min(CharacterConstraints.DateOfBirth.MinLength)
+  .max(CharacterConstraints.DateOfBirth.MaxLength);
 
 /**
  * Character age (freeform text)
  */
 export const AgeField = z
   .string()
-  .min(CHARACTER_RULES.age.minLength)
-  .max(CHARACTER_RULES.age.maxLength);
+  .min(CharacterConstraints.Age.MinLength)
+  .max(CharacterConstraints.Age.MaxLength);
 
 /**
  * Character history/background
  */
 export const HistoryField = z
   .string()
-  .min(CHARACTER_RULES.history.minLength)
-  .max(CHARACTER_RULES.history.maxLength);
+  .min(CharacterConstraints.History.MinLength)
+  .max(CharacterConstraints.History.MaxLength);
 
 /**
  * Appearance description
  */
 export const AppearanceDescriptionField = z
   .string()
-  .min(CHARACTER_RULES.appearanceDescription.minLength)
-  .max(CHARACTER_RULES.appearanceDescription.maxLength);
+  .min(CharacterConstraints.AppearanceDescription.MinLength)
+  .max(CharacterConstraints.AppearanceDescription.MaxLength);
 
 /**
  * Notes field 1
  */
 export const NotesField = z
   .string()
-  .min(CHARACTER_RULES.notes.minLength)
-  .max(CHARACTER_RULES.notes.maxLength);
+  .min(CharacterConstraints.Notes.MinLength)
+  .max(CharacterConstraints.Notes.MaxLength);
 
 /**
  * Notes field 2
  */
 export const Notes2Field = z
   .string()
-  .min(CHARACTER_RULES.notes2.minLength)
-  .max(CHARACTER_RULES.notes2.maxLength);
+  .min(CharacterConstraints.Notes2.MinLength)
+  .max(CharacterConstraints.Notes2.MaxLength);
 
 // ============================================================================
 // Base Character Data Schema

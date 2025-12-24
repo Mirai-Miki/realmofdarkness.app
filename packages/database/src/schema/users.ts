@@ -3,21 +3,19 @@ import type { InferSelectModel } from "drizzle-orm";
 import { pgTable, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { snowflake } from "../schema_types";
-import { DISCORD_FIELD_RULES } from "@realm/common";
+import { UsernameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
 import { supporters } from "./supporters.js";
 
 export const users = pgTable("users", {
   id: snowflake().primaryKey(), // Discord Snowflake
-  username: varchar({ length: DISCORD_FIELD_RULES.username.maxLength })
+  username: varchar({ length: UsernameConstraints.MaxLength })
     .notNull()
     .unique(),
-  displayName: varchar({ length: DISCORD_FIELD_RULES.username.maxLength })
+  displayName: varchar({ length: UsernameConstraints.MaxLength })
     .notNull()
     .default(""),
   email: varchar({ length: 100 }),
-  avatarUrl: varchar({ length: DISCORD_FIELD_RULES.cdnUrl.maxLength })
-    .notNull()
-    .default(""),
+  avatarUrl: varchar({ length: DiscordCdnUrlMaxLength }).notNull().default(""),
   registered: boolean().notNull().default(false), // If the user has ever logged in
   admin: boolean().notNull().default(false), // RoD admin
 

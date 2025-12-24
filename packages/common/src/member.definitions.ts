@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { SnowflakeSchema, DISCORD_FIELD_RULES } from "./primitives";
+import {
+  SnowflakeSchema,
+  UsernameConstraints,
+  DiscordCdnUrlMaxLength,
+} from "./primitives";
 import type { Snowflake } from "./primitives";
 
 // ============================================================================
@@ -26,14 +30,12 @@ export const MemberBoostCountField = z.number().int().min(0);
  */
 export const MemberNicknameField = z
   .string()
-  .max(DISCORD_FIELD_RULES.username.maxLength);
+  .max(UsernameConstraints.MaxLength);
 
 /**
  * Member's avatar URL for this guild.
  */
-export const MemberAvatarUrlField = z
-  .string()
-  .max(DISCORD_FIELD_RULES.cdnUrl.maxLength);
+export const MemberAvatarUrlField = z.string().max(DiscordCdnUrlMaxLength);
 
 // ============================================================================
 // Member DTOs

@@ -11,7 +11,7 @@ import {
 import { users } from "./users.js";
 import { guilds } from "./guilds.js";
 import { snowflake } from "../schema_types";
-import { DISCORD_FIELD_RULES } from "@realm/common";
+import { UsernameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
 
 /**
  * Member table - represents a user's membership in a specific guild
@@ -38,10 +38,10 @@ export const members = pgTable(
     /** Is this user boosting this guild? */
     boosted: integer().notNull().default(0),
 
-    nickname: varchar({ length: DISCORD_FIELD_RULES.username.maxLength })
+    nickname: varchar({ length: UsernameConstraints.MaxLength })
       .notNull()
       .default(""),
-    avatarUrl: varchar({ length: DISCORD_FIELD_RULES.cdnUrl.maxLength })
+    avatarUrl: varchar({ length: DiscordCdnUrlMaxLength })
       .notNull()
       .default(""),
 

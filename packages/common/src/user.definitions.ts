@@ -5,7 +5,11 @@
  * @packageDocumentation
  */
 import { z } from "zod";
-import { SnowflakeSchema, DISCORD_FIELD_RULES } from "./primitives";
+import {
+  SnowflakeSchema,
+  UsernameConstraints,
+  DiscordCdnUrlMaxLength,
+} from "./primitives";
 import type { Snowflake } from "./primitives";
 
 // ============================================================================
@@ -17,16 +21,16 @@ import type { Snowflake } from "./primitives";
  */
 export const UsernameField = z
   .string()
-  .min(DISCORD_FIELD_RULES.username.minLength)
-  .max(DISCORD_FIELD_RULES.username.maxLength);
+  .min(UsernameConstraints.MinLength)
+  .max(UsernameConstraints.MaxLength);
 
 /**
  * Display name (can differ from username).
  */
 export const DisplayNameField = z
   .string()
-  .min(DISCORD_FIELD_RULES.username.minLength)
-  .max(DISCORD_FIELD_RULES.username.maxLength);
+  .min(UsernameConstraints.MinLength)
+  .max(UsernameConstraints.MaxLength);
 
 /**
  * User email address (optional).
@@ -36,10 +40,7 @@ export const EmailField = z.string().max(100).nullable();
 /**
  * Avatar URL from Discord CDN.
  */
-export const AvatarUrlField = z
-  .string()
-  .max(DISCORD_FIELD_RULES.cdnUrl.maxLength)
-  .optional();
+export const AvatarUrlField = z.string().max(DiscordCdnUrlMaxLength).optional();
 
 /**
  * Whether user has completed registration.
