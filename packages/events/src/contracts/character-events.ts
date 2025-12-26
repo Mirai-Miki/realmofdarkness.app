@@ -37,7 +37,7 @@ import { BaseEventSchema } from "./base-event.js";
 export const CharacterCreatedEventSchema = BaseEventSchema.extend({
   type: z.literal("character:created"),
   data: z.object({
-    characterId: z.number().int().positive(),
+    characterId: z.int().positive(),
     userId: z.string(), // Snowflake type
     guildId: z.string().optional(), // Snowflake type (null for guildless characters)
     name: z.string(),
@@ -86,7 +86,7 @@ export type CharacterCreatedEvent = z.infer<typeof CharacterCreatedEventSchema>;
 export const CharacterUpdatedEventSchema = BaseEventSchema.extend({
   type: z.literal("character:updated"),
   data: z.object({
-    characterId: z.number().int().positive(),
+    characterId: z.int().positive(),
     userId: z.string(),
     guildId: z.string().optional(),
     name: z.string(),
@@ -131,7 +131,7 @@ export type CharacterUpdatedEvent = z.infer<typeof CharacterUpdatedEventSchema>;
 export const CharacterDeletedEventSchema = BaseEventSchema.extend({
   type: z.literal("character:deleted"),
   data: z.object({
-    characterId: z.number().int().positive(),
+    characterId: z.int().positive(),
     userId: z.string(),
     guildId: z.string().optional(),
     name: z.string(),
@@ -185,7 +185,7 @@ export type CharacterDeletedEvent = z.infer<typeof CharacterDeletedEventSchema>;
 export const CharacterGuildChangedEventSchema = BaseEventSchema.extend({
   type: z.literal("character:guildChanged"),
   data: z.object({
-    characterId: z.number().int().positive(),
+    characterId: z.int().positive(),
     userId: z.string(),
     name: z.string(),
     oldGuildId: z.string().optional(),

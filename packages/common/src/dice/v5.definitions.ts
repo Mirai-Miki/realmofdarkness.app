@@ -11,11 +11,11 @@ import { z } from "zod";
 // ============================================================================
 
 export const V5DiceInputSchema = z.object({
-  pool: z.number().int().min(0).max(50),
-  hunger: z.number().int().min(0).max(5).default(0),
-  difficulty: z.number().int().min(1).max(20).default(1),
+  pool: z.int().min(0).max(50),
+  hunger: z.int().min(0).max(5).default(0),
+  difficulty: z.int().min(1).max(20).default(1),
   specialty: z.boolean().default(false),
-  bloodSurge: z.number().int().min(0).max(10).optional(),
+  bloodSurge: z.int().min(0).max(10).optional(),
 });
 export type V5Dice = z.infer<typeof V5DiceInputSchema>;
 
@@ -31,24 +31,24 @@ export const V5DiceResultTypeField = z.enum(V5DiceResultType);
 export type V5DiceResultType = z.infer<typeof V5DiceResultTypeField>;
 
 export const BloodSurgeResultSchema = z.object({
-  diceAdded: z.number().int().min(1).max(6),
-  bloodPotency: z.number().int().min(0).max(10),
+  diceAdded: z.int().min(1).max(6),
+  bloodPotency: z.int().min(0).max(10),
 });
 export type BloodSurgeResult = z.infer<typeof BloodSurgeResultSchema>;
 
 export const V5DiceResultSchema = z.object({
-  pool: z.number().int(),
-  normalDice: z.number().int(),
-  hungerDice: z.number().int(),
-  difficulty: z.number().int(),
+  pool: z.int(),
+  normalDice: z.int(),
+  hungerDice: z.int(),
+  difficulty: z.int(),
 
-  blackDice: z.array(z.number().int().min(1).max(10)),
-  redDice: z.array(z.number().int().min(1).max(10)),
+  blackDice: z.array(z.int().min(1).max(10)),
+  redDice: z.array(z.int().min(1).max(10)),
   rerollHistory: z.array(z.string()).default([]),
 
-  successes: z.number().int().min(0),
-  criticalPairs: z.number().int().min(0),
-  margin: z.number().int(),
+  successes: z.int().min(0),
+  criticalPairs: z.int().min(0),
+  margin: z.int(),
 
   messyCritical: z.boolean(),
   bestialFailure: z.boolean(),
@@ -59,12 +59,12 @@ export const V5DiceResultSchema = z.object({
   bloodSurge: BloodSurgeResultSchema.optional(),
 
   canReroll: z.boolean(),
-  failedDiceIndices: z.array(z.number().int()).default([]),
+  failedDiceIndices: z.array(z.int()).default([]),
 });
 export type V5DiceResult = z.infer<typeof V5DiceResultSchema>;
 
 export const V5RerollDiceSchema = z.object({
-  diceIndices: z.array(z.number().int()).min(1).max(3),
+  diceIndices: z.array(z.int()).min(1).max(3),
   originalRoll: V5DiceResultSchema,
 });
 export type V5RerollDice = z.infer<typeof V5RerollDiceSchema>;
@@ -79,10 +79,10 @@ export const V5RouseDiceSchema = z.object({
 export type V5RouseDice = z.infer<typeof V5RouseDiceSchema>;
 
 export const V5RouseResultSchema = z.object({
-  die: z.number().int().min(1).max(10),
-  rerollDie: z.number().int().min(1).max(10).optional(),
+  die: z.int().min(1).max(10),
+  rerollDie: z.int().min(1).max(10).optional(),
   passed: z.boolean(),
-  hungerGained: z.number().int().min(0).max(1),
+  hungerGained: z.int().min(0).max(1),
 });
 export type V5RouseResult = z.infer<typeof V5RouseResultSchema>;
 
@@ -91,19 +91,19 @@ export type V5RouseResult = z.infer<typeof V5RouseResultSchema>;
 // ============================================================================
 
 export const V5RemorseDiceSchema = z.object({
-  humanity: z.number().int().min(0).max(10),
-  stains: z.number().int().min(0).max(10),
+  humanity: z.int().min(0).max(10),
+  stains: z.int().min(0).max(10),
 });
 export type V5RemorseDice = z.infer<typeof V5RemorseDiceSchema>;
 
 export const V5RemorseResultSchema = z.object({
-  pool: z.number().int().min(0),
-  dice: z.array(z.number().int().min(1).max(10)),
-  successes: z.number().int().min(0),
-  stainsRemoved: z.number().int().min(0),
-  humanityLost: z.number().int().min(0).max(1),
-  newHumanity: z.number().int().min(0).max(10),
-  newStains: z.number().int().min(0).max(10),
+  pool: z.int().min(0),
+  dice: z.array(z.int().min(1).max(10)),
+  successes: z.int().min(0),
+  stainsRemoved: z.int().min(0),
+  humanityLost: z.int().min(0).max(1),
+  newHumanity: z.int().min(0).max(10),
+  newStains: z.int().min(0).max(10),
 });
 export type V5RemorseResult = z.infer<typeof V5RemorseResultSchema>;
 
@@ -146,7 +146,7 @@ export const V5CompulsionDiceSchema = z.object({
 export type V5CompulsionDice = z.infer<typeof V5CompulsionDiceSchema>;
 
 export const V5CompulsionResultSchema = z.object({
-  die: z.number().int().min(1).max(10),
+  die: z.int().min(1).max(10),
   compulsion: z.string(),
   isClanCompulsion: z.boolean(),
 });
@@ -158,15 +158,15 @@ export type V5CompulsionResult = z.infer<typeof V5CompulsionResultSchema>;
 
 export const V5RollActionInputSchema = z.object({
   userId: z.bigint(),
-  characterId: z.number().int().optional(),
+  characterId: z.int().optional(),
   guildId: z.bigint().optional(),
 
-  pool: z.number().int().min(0).max(50),
-  difficulty: z.number().int().min(1).max(20).default(1),
+  pool: z.int().min(0).max(50),
+  difficulty: z.int().min(1).max(20).default(1),
   specialty: z.boolean().default(false),
 
   autoHunger: z.boolean().default(true),
-  hungerOverride: z.number().int().min(0).max(5).optional(),
+  hungerOverride: z.int().min(0).max(5).optional(),
 
   bloodSurge: z.boolean().default(false),
 
@@ -176,26 +176,26 @@ export type V5RollActionInput = z.infer<typeof V5RollActionInputSchema>;
 
 export const V5RollActionResultSchema = z.object({
   roll: V5DiceResultSchema,
-  characterId: z.number().int().optional(),
+  characterId: z.int().optional(),
   characterName: z.string().optional(),
-  hungerBefore: z.number().int().min(0).max(5).optional(),
-  hungerAfter: z.number().int().min(0).max(5).optional(),
+  hungerBefore: z.int().min(0).max(5).optional(),
+  hungerAfter: z.int().min(0).max(5).optional(),
   notes: z.string().optional(),
 });
 export type V5RollActionResult = z.infer<typeof V5RollActionResultSchema>;
 
 export const V5RouseActionInputSchema = z.object({
   userId: z.bigint(),
-  characterId: z.number().int(),
+  characterId: z.int(),
   reroll: z.boolean().default(false),
 });
 export type V5RouseActionInput = z.infer<typeof V5RouseActionInputSchema>;
 
 export const V5RouseActionResultSchema = z.object({
   check: V5RouseResultSchema,
-  characterId: z.number().int(),
+  characterId: z.int(),
   characterName: z.string(),
-  hungerBefore: z.number().int().min(0).max(5),
-  hungerAfter: z.number().int().min(0).max(5),
+  hungerBefore: z.int().min(0).max(5),
+  hungerAfter: z.int().min(0).max(5),
 });
 export type V5RouseActionResult = z.infer<typeof V5RouseActionResultSchema>;

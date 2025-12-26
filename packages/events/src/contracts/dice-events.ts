@@ -40,16 +40,16 @@ export const DiceRollRequestSchema = BaseEventSchema.extend({
     system: z.enum(["V5", "V20", "CoD"]),
 
     /** Number of dice to roll */
-    pool: z.number().int().positive(),
+    pool: z.int().positive(),
 
     /** Difficulty (target number) - system-specific */
-    difficulty: z.number().int().optional(),
+    difficulty: z.int().optional(),
 
     /** V5 only: Number of hunger dice */
-    hungerDice: z.number().int().optional(),
+    hungerDice: z.int().optional(),
 
     /** Optional: Character rolling dice */
-    characterId: z.number().int().optional(),
+    characterId: z.int().optional(),
     characterName: z.string().optional(),
   }),
 });
@@ -96,19 +96,19 @@ export const DiceRollResultSchema = BaseEventSchema.extend({
     system: z.enum(["V5", "V20", "CoD"]),
 
     /** Number of dice rolled */
-    pool: z.number().int(),
+    pool: z.int(),
 
     /** Difficulty (target number) - system-specific */
-    difficulty: z.number().int().optional(),
+    difficulty: z.int().optional(),
 
     /** Individual die results */
-    results: z.array(z.number()),
+    results: z.array(z.int()),
 
     /** Total successes */
-    successes: z.number().int(),
+    successes: z.int(),
 
     /** Number of critical successes (10s) */
-    criticals: z.number().int().optional(),
+    criticals: z.int().optional(),
 
     /** V5: Messy critical (10s with hunger dice) */
     messyCritical: z.boolean().optional(),

@@ -23,7 +23,7 @@ export const MemberRoleIdsField = z.array(SnowflakeSchema);
 /**
  * Number of boosts this user has assigned to this guild.
  */
-export const MemberBoostCountField = z.number().int().min(0);
+export const MemberBoostCountField = z.int().min(0);
 
 /**
  * Member's nickname in this guild.

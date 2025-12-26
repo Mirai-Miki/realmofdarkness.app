@@ -97,11 +97,11 @@ All events extend `BaseEventSchema` with standard metadata:
 export const CharacterUpdatedEventSchema = BaseEventSchema.extend({
   type: z.literal("character:updated"),
   data: z.object({
-    characterId: z.number(),
-    userId: z.string(),
-    guildId: z.string().optional(),
+    characterId: SnowflakeSchema,
+    userId: SnowflakeSchema,
+    guildId: SnowflakeSchema.optional(),
     name: z.string(),
-    splat: z.nativeEnum(Splats),
+    splat: SplatsSchema,
     changedFields: z.array(z.string()).optional(),
   }),
 });

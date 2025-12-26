@@ -63,7 +63,7 @@ export const HealthCheckPongSchema = BaseEventSchema.extend({
     appName: z.string(),
 
     /** Uptime in seconds */
-    uptime: z.number(),
+    uptime: z.int(),
   }),
 });
 
@@ -107,7 +107,7 @@ export const ShutdownEventSchema = BaseEventSchema.extend({
     reason: z.string(),
 
     /** Grace period in seconds before forced shutdown */
-    gracePeriodSeconds: z.number().int(),
+    gracePeriodSeconds: z.int(),
   }),
 });
 

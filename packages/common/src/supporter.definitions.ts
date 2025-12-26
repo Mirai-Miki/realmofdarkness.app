@@ -17,7 +17,7 @@ export const SupporterLevel = {
 export const SupporterLevelField = z.enum(SupporterLevel);
 export type SupporterLevel = z.infer<typeof SupporterLevelField>;
 
-export const BoostsField = z.number().int().min(0);
+export const BoostsField = z.int().min(0);
 export const FirstSupportedField = z.date().nullable();
 
 /**

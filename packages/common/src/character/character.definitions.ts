@@ -8,10 +8,18 @@
  *
  * @packageDocumentation
  */
+import type { Snowflake } from "../primitives";
 
 import { z } from "zod";
 import { SnowflakeSchema } from "primitives";
 
+// ============================================================================
+// Character Constraints
+// ============================================================================
+
+/**
+ * Character-related business rule constraints.
+ */
 export const CharacterConstraints = {
   Name: {
     MinLength: 1,
@@ -108,7 +116,6 @@ export type Splat = z.infer<typeof SplatField>;
  * Current unspent experience points
  */
 export const ExperienceCurrentField = z
-  .number()
   .int()
   .min(CharacterConstraints.Experience.Min)
   .max(CharacterConstraints.Experience.Max);
@@ -117,7 +124,6 @@ export const ExperienceCurrentField = z
  * Total experience points earned
  */
 export const ExperienceTotalField = z
-  .number()
   .int()
   .min(CharacterConstraints.Experience.Min)
   .max(CharacterConstraints.Experience.Max);
@@ -142,7 +148,6 @@ export const ExperienceSpendData = z.object({
     .string()
     .max(CharacterConstraints.ExperienceSpend.DescriptionMaxLength),
   cost: z
-    .number()
     .int()
     .min(CharacterConstraints.ExperienceSpend.CostMin)
     .max(CharacterConstraints.ExperienceSpend.CostMax),
@@ -206,10 +211,27 @@ export const Notes2Field = z
   .max(CharacterConstraints.Notes2.MaxLength);
 
 // ============================================================================
-// Base Character Data Schema
+// Base Character DTO Schema
 // ============================================================================
 
-export const BaseCharacterDataSchema = z.object({
+export const ExperienceFieldSchema = z
+  .object({
+    current: z
+      .int()
+      .min(CharacterConstraints.Experience.Min)
+      .max(CharacterConstraints.Experience.Max),
+    total: z
+      .int()
+      .min(CharacterConstraints.Experience.Min)
+      .max(CharacterConstraints.Experience.Max),
+  })
+  .refine((data) => data.current <= data.total, {
+    message: "Current experience cannot exceed total experience",
+    path: ["current"],
+  });
+export type ExperienceField = z.infer<typeof ExperienceFieldSchema>;
+
+export const BaseCharacterDtoSchema = z.object({
   id: SnowflakeSchema,
   userId: SnowflakeSchema,
   guildId: SnowflakeSchema.nullable(),
@@ -219,4 +241,104 @@ export const BaseCharacterDataSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
 });
-export type BaseCharacterData = z.infer<typeof BaseCharacterDataSchema>;
+export type BaseCharacterDto = z.infer<typeof BaseCharacterDtoSchema>;
+
+// ============================================================================
+// Entity Interfaces
+// ============================================================================
+
+/**
+ * Base character entity interface.
+ * Represents common data and behavior across all character types.
+ */
+export interface ICharacter {
+  // Getters for identity (read-only)
+  get id(): Snowflake;
+  get userId(): Snowflake;
+  get splat(): Splat;
+  get createdAt(): Date;
+  get lastUpdated(): Date;
+
+  // Getters/setters for mutable properties
+  get name(): string;
+  set name(value: string);
+
+  get guildId(): Snowflake | null;
+  set guildId(value: Snowflake | null);
+
+  get isSheet(): boolean;
+  set isSheet(value: boolean);
+
+  get status(): SheetStatus;
+  set status(value: SheetStatus);
+
+  get color(): string;
+  set color(value: string);
+
+  get thumbnail(): string | null;
+  set thumbnail(value: string | null);
+
+  // Experience (value object with immutable updates)
+  get experience(): IExperience;
+
+  // Methods
+  /**
+   * Get a plain object representation suitable for persistence.
+   */
+  toDto(): BaseCharacterDto;
+
+  /**
+   * Validate the character is in a valid state.
+   */
+  validate(): IValidationResult;
+
+  /**
+   * Check if character can afford an experience cost.
+   */
+  canAffordExperience(cost: number): boolean;
+
+  /**
+   * Spend experience points.
+   * Replaces the experience value object with a new instance.
+   */
+  spendExperience(cost: number): void;
+
+  /**
+   * Award experience points.
+   * Replaces the experience value object with a new instance.
+   */
+  awardExperience(amount: number): void;
+
+  /**
+   * Set total experience (for character creation/loading).
+   */
+  setExperienceTotal(total: number): void;
+
+  /**
+   * Set current unspent experience.
+   */
+  setExperienceCurrent(current: number): void;
+}
+
+/**
+ * Experience value object interface.
+ * Immutable - all operations return new instances.
+ */
+export interface IExperience extends ExperienceField {
+  readonly current: number;
+  readonly total: number;
+
+  canAfford(cost: number): boolean;
+  spend(cost: number): IExperience;
+  award(amount: number): IExperience;
+  setTotal(total: number): IExperience;
+  setCurrent(current: number): IExperience;
+}
+
+/**
+ * Validation result interface.
+ */
+export interface IValidationResult {
+  readonly isValid: boolean;
+  readonly errors: readonly string[];
+}

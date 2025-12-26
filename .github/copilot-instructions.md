@@ -23,6 +23,10 @@
 8. **No TypeScript Enums**: Use `as const` objects instead
 9. **Error Hierarchy**: `RealmError` (system) vs `UserError` (client) - NEVER generic `Error`
 10. **Documentation Required**: JSDoc on all public functions, classes, interfaces
+11. **Edition Naming Convention**:
+    - **Standalone/at start**: wod20, wod5, cod (e.g., `wod20-roll.action.ts`, `Wod20RollAction`)
+    - **Game-specific**: v5, v20, h5, w20 (e.g., `Vampire5thData`)
+    - **Edition in middle/end**: 20th, 5th, cod (e.g., `Vampire20th`, `Hunter5th`, not `VampireWod20`)
 
 ---
 

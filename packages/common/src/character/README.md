@@ -80,7 +80,7 @@ export const V5ClanSchema = z.enum(
 export type V5Clan = (typeof V5Clan)[keyof typeof V5Clan];
 
 // 3. Fields (Zod schemas)
-export const V5HungerField = z.number().min(0).max(5);
+export const V5HungerField = z.int().min(0).max(5);
 
 // 4. Data Types (partial structures)
 export interface V5Data {

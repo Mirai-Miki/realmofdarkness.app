@@ -1,4 +1,9 @@
-import { RealmError, DISCORD_FIELD_RULES, type GuildDto } from "@realm/common";
+import {
+  RealmError,
+  GuildNameConstraints,
+  DiscordCdnUrlMaxLength,
+  type GuildDto,
+} from "@realm/common";
 
 /**
  * Domain entity representing a Discord Guild (Server).
@@ -67,9 +72,9 @@ export class Guild {
     if (!name || name.trim().length === 0) {
       throw new RealmError("Guild name cannot be empty");
     }
-    if (name.length > DISCORD_FIELD_RULES.guildName.maxLength) {
+    if (name.length > GuildNameConstraints.MaxLength) {
       throw new RealmError(
-        `Guild name cannot exceed ${DISCORD_FIELD_RULES.guildName.maxLength} characters`
+        `Guild name cannot exceed ${GuildNameConstraints.MaxLength} characters`
       );
     }
     this._dto.name = name;
@@ -81,9 +86,9 @@ export class Guild {
    * @param iconUrl - New icon URL
    */
   public updateIconUrl(iconUrl: string): void {
-    if (iconUrl.length > DISCORD_FIELD_RULES.cdnUrl.maxLength) {
+    if (iconUrl.length > DiscordCdnUrlMaxLength) {
       throw new RealmError(
-        `Icon URL cannot exceed ${DISCORD_FIELD_RULES.cdnUrl.maxLength} characters`
+        `Icon URL cannot exceed ${DiscordCdnUrlMaxLength} characters`
       );
     }
     this._dto.iconUrl = iconUrl;

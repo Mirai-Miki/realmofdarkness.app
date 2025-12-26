@@ -16,7 +16,7 @@ export * from "./w5.definitions.js";
 export * from "./h5.definitions.js";
 
 // WoD 20th - World of Darkness 20th Anniversary Edition
-export * from "./20th.definitions.js";
+export * from "./wod20.definitions.js";
 
 // CoD - Chronicles of Darkness
 export * from "./cod.definitions.js";

@@ -23,32 +23,32 @@ export const GeneralDiceConstraints = {
 // ============================================================================
 
 export const DiceSetSchema = z.object({
-  count: z.number().int().min(1).max(50),
-  sides: z.number().int().min(2).max(500),
+  count: z.int().min(1).max(50),
+  sides: z.int().min(2).max(500),
 });
 export type DiceSet = z.infer<typeof DiceSetSchema>;
 
 export const GeneralDiceSchema = z.object({
   diceSets: z.array(DiceSetSchema).min(1).max(5),
-  modifier: z.number().int().default(0),
-  targetNumber: z.number().int().optional(),
+  modifier: z.int().default(0),
+  targetNumber: z.int().optional(),
 });
 export type GeneralDice = z.infer<typeof GeneralDiceSchema>;
 
 export const DiceSetResultSchema = z.object({
-  count: z.number().int(),
-  sides: z.number().int(),
-  results: z.array(z.number().int()),
-  total: z.number().int(),
+  count: z.int(),
+  sides: z.int(),
+  results: z.array(z.int()),
+  total: z.int(),
 });
 export type DiceSetResult = z.infer<typeof DiceSetResultSchema>;
 
 export const GeneralDiceResultSchema = z.object({
   sets: z.array(DiceSetResultSchema),
-  modifier: z.number().int(),
-  subtotal: z.number().int(),
-  total: z.number().int(),
-  targetNumber: z.number().int().optional(),
+  modifier: z.int(),
+  subtotal: z.int(),
+  total: z.int(),
+  targetNumber: z.int().optional(),
   success: z.boolean().optional(),
 });
 export type GeneralDiceResult = z.infer<typeof GeneralDiceResultSchema>;
@@ -62,8 +62,8 @@ export const GeneralRollActionInputSchema = z.object({
   guildId: z.bigint().optional(),
 
   diceSets: z.array(DiceSetSchema).min(1).max(5),
-  modifier: z.number().int().default(0),
-  targetNumber: z.number().int().optional(),
+  modifier: z.int().default(0),
+  targetNumber: z.int().optional(),
 
   notes: z.string().max(500).optional(),
 });
