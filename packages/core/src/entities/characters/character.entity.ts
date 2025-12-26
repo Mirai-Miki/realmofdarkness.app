@@ -2,7 +2,6 @@ import type {
   BaseCharacterData,
   ICharacter,
   IExperience,
-  IValidationResult,
   Snowflake,
   Splat,
   SheetStatus,
@@ -156,37 +155,12 @@ export abstract class Character implements ICharacter {
   }
 
   // ============================================================================
-  // Validation
-  // ============================================================================
-
-  validate(): IValidationResult {
-    const errors: string[] = [];
-
-    // Validate entire Data with Zod
-    const result = BaseCharacterDataSchema.safeParse(this.data);
-    if (!result.success) {
-      errors.push(...result.error.issues.map((issue) => issue.message));
-    }
-
-    // Validate experience
-    if (this._experience.current > this._experience.total) {
-      errors.push("Current experience cannot exceed total experience");
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
-  }
-
-  // ============================================================================
   // Serialization
   // ============================================================================
 
   toData(): BaseCharacterData {
     return {
       ...this.data,
-      updatedAt: new Date(), // Update timestamp on serialization
     };
   }
 }

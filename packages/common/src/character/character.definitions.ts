@@ -51,23 +51,14 @@ export const CharacterConstraints = {
 /**
  * Character name with business rule validation
  */
-export const NameSchema = z
+export const CharacterNameSchema = z
   .string()
   .min(CharacterConstraints.Name.MinLength)
   .max(CharacterConstraints.Name.MaxLength)
   .regex(CharacterConstraints.Name.Regex, {
     message: `Character name cannot start with '~' as it is reserved for system use`,
   });
-
-/**
- * Whether this character is the active sheet for the user
- */
-export const IsSheetSchema = z.boolean();
-
-/**
- * Storyteller lock flag (prevents player edits)
- */
-export const StorytellerLockSchema = z.boolean();
+export type CharacterName = z.infer<typeof CharacterNameSchema>;
 
 /**
  * Character sheet status.
@@ -214,7 +205,7 @@ export const Notes2Schema = z
 // Base Character DTO Schema
 // ============================================================================
 
-export const ExperienceSchema = z
+export const ExperienceDataSchema = z
   .object({
     current: z
       .int()
@@ -229,15 +220,15 @@ export const ExperienceSchema = z
     message: "Current experience cannot exceed total experience",
     path: ["current"],
   });
-export type Experience = z.infer<typeof ExperienceSchema>;
+export type ExperienceData = z.infer<typeof ExperienceDataSchema>;
 
 export const BaseCharacterDataSchema = z.object({
   id: SnowflakeSchema,
   userId: SnowflakeSchema,
   guildId: SnowflakeSchema.nullable(),
-  name: NameSchema,
+  name: CharacterNameSchema,
   status: SheetStatusSchema,
-  isSheet: IsSheetSchema,
+  isSheet: z.boolean().default(false),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -260,8 +251,8 @@ export interface ICharacter {
   get lastUpdated(): Date;
 
   // Getters/setters for mutable properties
-  get name(): string;
-  set name(value: string);
+  get name(): CharacterName;
+  set name(value: CharacterName);
 
   get guildId(): Snowflake | null;
   set guildId(value: Snowflake | null);
@@ -286,11 +277,6 @@ export interface ICharacter {
    * Get a plain object representation suitable for persistence.
    */
   toData(): BaseCharacterData;
-
-  /**
-   * Validate the character is in a valid state.
-   */
-  validate(): IValidationResult;
 
   /**
    * Check if character can afford an experience cost.
@@ -324,7 +310,7 @@ export interface ICharacter {
  * Experience value object interface.
  * Immutable - all operations return new instances.
  */
-export interface IExperience extends Experience {
+export interface IExperience extends ExperienceData {
   readonly current: number;
   readonly total: number;
 
@@ -333,12 +319,4 @@ export interface IExperience extends Experience {
   award(amount: number): IExperience;
   setTotal(total: number): IExperience;
   setCurrent(current: number): IExperience;
-}
-
-/**
- * Validation result interface.
- */
-export interface IValidationResult {
-  readonly isValid: boolean;
-  readonly errors: readonly string[];
 }

@@ -1,5 +1,5 @@
-import type { IExperience, Experience as ExperienceData } from "@realm/common";
-import { ExperienceSchema, UserError } from "@realm/common";
+import type { IExperience, ExperienceData } from "@realm/common";
+import { ExperienceDataSchema, UserError } from "@realm/common";
 
 /**
  * Experience value object.
@@ -16,7 +16,7 @@ export class Experience implements IExperience {
 
   constructor(data: ExperienceData) {
     // Validate with Zod schema
-    const validated = ExperienceSchema.parse(data);
+    const validated = ExperienceDataSchema.parse(data);
 
     this.current = validated.current;
     this.total = validated.total;
@@ -35,7 +35,7 @@ export class Experience implements IExperience {
     }
     // Validate new values with Zod before creating new instance
     return new Experience(
-      ExperienceSchema.parse({
+      ExperienceDataSchema.parse({
         current: this.current - cost,
         total: this.total,
       })
@@ -50,7 +50,7 @@ export class Experience implements IExperience {
     }
     // Validate new values with Zod before creating new instance
     return new Experience(
-      ExperienceSchema.parse({
+      ExperienceDataSchema.parse({
         current: this.current + amount,
         total: this.total + amount,
       })
@@ -65,7 +65,7 @@ export class Experience implements IExperience {
     }
     // Validate new values with Zod before creating new instance
     return new Experience(
-      ExperienceSchema.parse({
+      ExperienceDataSchema.parse({
         current: Math.min(this.current, total), // Adjust current if needed
         total,
       })
@@ -85,7 +85,7 @@ export class Experience implements IExperience {
     }
     // Validate new values with Zod before creating new instance
     return new Experience(
-      ExperienceSchema.parse({
+      ExperienceDataSchema.parse({
         current,
         total: this.total,
       })
