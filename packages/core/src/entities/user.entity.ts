@@ -1,4 +1,4 @@
-import { RealmError, type UserDto } from "@realm/common";
+import { RealmError, type UserData } from "@realm/common";
 
 /**
  * Domain entity representing a User.
@@ -6,38 +6,38 @@ import { RealmError, type UserDto } from "@realm/common";
  * Handles user identity, profile, and authentication concerns.
  * For subscription/supporter information, use the Supporter entity.
  *
- * This entity wraps a UserDto with business logic and validation.
+ * This entity wraps UserData with business logic and validation.
  */
 export class User {
-  private _dto: UserDto;
+  private _data: UserData;
 
-  constructor(dto: UserDto) {
-    this._dto = { ...dto };
+  constructor(data: UserData) {
+    this._data = { ...data };
   }
 
   // Getters
   public get id(): string {
-    return this._dto.id;
+    return this._data.id;
   }
 
   public get username(): string {
-    return this._dto.username;
+    return this._data.username;
   }
 
   public get displayName(): string {
-    return this._dto.displayName;
+    return this._data.displayName;
   }
 
   public get avatarUrl(): string | undefined {
-    return this._dto.avatarUrl;
+    return this._data.avatarUrl;
   }
 
   public get createdAt(): Date {
-    return this._dto.createdAt;
+    return this._data.createdAt;
   }
 
   public get lastActive(): Date {
-    return this._dto.lastActive;
+    return this._data.lastActive;
   }
 
   // Business methods
@@ -51,7 +51,7 @@ export class User {
     if (!username || username.trim().length === 0) {
       throw new RealmError("Username cannot be empty");
     }
-    this._dto.username = username;
+    this._data.username = username;
   }
 
   /**
@@ -63,7 +63,7 @@ export class User {
     if (!displayName || displayName.trim().length === 0) {
       throw new RealmError("Display name cannot be empty");
     }
-    this._dto.displayName = displayName;
+    this._data.displayName = displayName;
   }
 
   /**
@@ -72,22 +72,22 @@ export class User {
    * @param avatarUrl - New avatar URL
    */
   public updateAvatarUrl(avatarUrl: string): void {
-    this._dto.avatarUrl = avatarUrl;
+    this._data.avatarUrl = avatarUrl;
   }
 
   /**
    * Update the user's last active timestamp.
    */
   public updateLastActive(): void {
-    this._dto.lastActive = new Date();
+    this._data.lastActive = new Date();
   }
 
   /**
-   * Extract the DTO from this entity.
+   * Extract the Data from this entity.
    *
-   * @returns User DTO for persistence
+   * @returns User Data for persistence
    */
-  public toDto(): UserDto {
-    return { ...this._dto };
+  public toData(): UserData {
+    return { ...this._data };
   }
 }

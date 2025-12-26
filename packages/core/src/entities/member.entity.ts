@@ -1,4 +1,4 @@
-import { RealmError, type MemberDto, type Snowflake } from "@realm/common";
+import { RealmError, type MemberData, type Snowflake } from "@realm/common";
 
 /**
  * Domain entity representing a User's membership in a Guild.
@@ -9,7 +9,7 @@ import { RealmError, type MemberDto, type Snowflake } from "@realm/common";
  *
  * Storyteller status is derived from roleIds matching guild.storytellerRoles.
  *
- * This entity wraps a MemberDto with business logic and validation.
+ * This entity wraps MemberData with business logic and validation.
  *
  * @example
  * ```typescript
@@ -30,14 +30,14 @@ import { RealmError, type MemberDto, type Snowflake } from "@realm/common";
  * const isStaff = member.isStaff(guild.storytellerRoles);
  *
  * member.addBoost();
- * const dto = member.toDto();
+ * const data = member.toData();
  * ```
  */
 export class Member {
-  private _dto: MemberDto;
+  private _data: MemberData;
 
-  constructor(dto: MemberDto) {
-    this._dto = { ...dto };
+  constructor(data: MemberData) {
+    this._data = { ...data };
   }
 
   // ============================================================================
@@ -45,39 +45,39 @@ export class Member {
   // ============================================================================
 
   public get guildId(): Snowflake {
-    return this._dto.guildId;
+    return this._data.guildId;
   }
 
   public get userId(): Snowflake {
-    return this._dto.userId;
+    return this._data.userId;
   }
 
   public get admin(): boolean {
-    return this._dto.admin;
+    return this._data.admin;
   }
 
   public get roleIds(): Snowflake[] {
-    return [...this._dto.roleIds];
+    return [...this._data.roleIds];
   }
 
   public get boosted(): number {
-    return this._dto.boosted;
+    return this._data.boosted;
   }
 
   public get nickname(): string {
-    return this._dto.nickname;
+    return this._data.nickname;
   }
 
   public get avatarUrl(): string {
-    return this._dto.avatarUrl;
+    return this._data.avatarUrl;
   }
 
   public get createdAt(): Date {
-    return this._dto.createdAt;
+    return this._data.createdAt;
   }
 
   public get lastUpdated(): Date {
-    return this._dto.lastUpdated;
+    return this._data.lastUpdated;
   }
 
   // ============================================================================
@@ -106,7 +106,7 @@ export class Member {
     // Check for intersection between member roles and storyteller roles
     // Using Set for O(1) lookup instead of O(n) with includes()
     const storytellerRoleSet = new Set(storytellerRoles);
-    return this._dto.roleIds.some((roleId) => storytellerRoleSet.has(roleId));
+    return this._data.roleIds.some((roleId) => storytellerRoleSet.has(roleId));
   }
 
   /**
@@ -129,7 +129,7 @@ export class Member {
    */
   public isStaff(storytellerRoles: Snowflake[]): boolean {
     // Early return for admin (most common fast path)
-    if (this._dto.admin) return true;
+    if (this._data.admin) return true;
 
     // Check storyteller status
     return this.isStoryteller(storytellerRoles);
@@ -139,14 +139,14 @@ export class Member {
    * Grant admin permissions to this member.
    */
   public grantAdmin(): void {
-    this._dto.admin = true;
+    this._data.admin = true;
   }
 
   /**
    * Revoke admin permissions from this member.
    */
   public revokeAdmin(): void {
-    this._dto.admin = false;
+    this._data.admin = false;
   }
 
   // ============================================================================
@@ -159,7 +159,7 @@ export class Member {
    * @param nickname - New nickname
    */
   public setNickname(nickname: string): void {
-    this._dto.nickname = nickname;
+    this._data.nickname = nickname;
   }
 
   /**
@@ -168,7 +168,7 @@ export class Member {
    * @param avatarUrl - New avatar URL
    */
   public setAvatarUrl(avatarUrl: string): void {
-    this._dto.avatarUrl = avatarUrl;
+    this._data.avatarUrl = avatarUrl;
   }
 
   /**
@@ -177,7 +177,7 @@ export class Member {
    * @param roleIds - New array of role IDs
    */
   public setRoleIds(roleIds: Snowflake[]): void {
-    this._dto.roleIds = [...roleIds];
+    this._data.roleIds = [...roleIds];
   }
 
   // ============================================================================
@@ -188,7 +188,7 @@ export class Member {
    * Add a boost to this member's guild.
    */
   public addBoost(): void {
-    this._dto.boosted += 1;
+    this._data.boosted += 1;
   }
 
   /**
@@ -197,17 +197,17 @@ export class Member {
    * @throws {RealmError} If no boosts to remove
    */
   public removeBoost(): void {
-    if (this._dto.boosted <= 0) {
+    if (this._data.boosted <= 0) {
       throw new RealmError("Member has no boosts to remove");
     }
-    this._dto.boosted -= 1;
+    this._data.boosted -= 1;
   }
 
   /**
    * Check if member is boosting this guild.
    */
   public isBoosting(): boolean {
-    return this._dto.boosted > 0;
+    return this._data.boosted > 0;
   }
 
   // ============================================================================
@@ -215,11 +215,11 @@ export class Member {
   // ============================================================================
 
   /**
-   * Extract the DTO from this entity.
+   * Extract the Data from this entity.
    *
-   * @returns Member DTO for persistence
+   * @returns Member Data for persistence
    */
-  public toDto(): MemberDto {
-    return { ...this._dto };
+  public toData(): MemberData {
+    return { ...this._data };
   }
 }

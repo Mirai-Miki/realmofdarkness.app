@@ -1,5 +1,5 @@
 import { db, members, guilds } from "@realm/database";
-import type { IMemberRepository, MemberDto, Snowflake } from "@realm/common";
+import type { IMemberRepository, MemberData, Snowflake } from "@realm/common";
 import { RealmError } from "@realm/common";
 import { eq, and, or, gt, sum, sql } from "drizzle-orm";
 
@@ -9,7 +9,7 @@ import { MemberMapper } from "./mappers/member.mapper.js";
  * Repository implementation for Member entities.
  *
  * Handles persistence operations for guild members using the singleton database connection.
- * Returns Member DTOs that can be hydrated into domain entities.
+ * Returns Member Data that can be hydrated into domain entities.
  * Members have a composite primary key (guildId + userId).
  *
  * @example
@@ -17,11 +17,11 @@ import { MemberMapper } from "./mappers/member.mapper.js";
  * const memberRepo = new MemberRepository();
  *
  * // Find specific member
- * const memberDto = await memberRepo.findByGuildAndUser(guildId, userId);
+ * const memberData = await memberRepo.findByGuildAndUser(guildId, userId);
  *
  * // Create member
- * const newMemberDto = { ... };
- * await memberRepo.create(newMemberDto);
+ * const newMemberData = { ... };
+ * await memberRepo.create(newMemberData);
  * ```
  */
 export class MemberRepository implements IMemberRepository {
@@ -30,12 +30,12 @@ export class MemberRepository implements IMemberRepository {
    *
    * @param guildId - Discord guild ID
    * @param userId - Discord user ID
-   * @returns The member DTO if found, null otherwise
+   * @returns The member Data if found, null otherwise
    */
   async findByGuildAndUser(
     guildId: Snowflake,
     userId: Snowflake
-  ): Promise<MemberDto | null> {
+  ): Promise<MemberData | null> {
     try {
       const result = await db
         .select()
@@ -47,7 +47,7 @@ export class MemberRepository implements IMemberRepository {
         return null;
       }
 
-      return MemberMapper.toDto(result[0]);
+      return MemberMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to find member by guild and user", {
         cause: error,
@@ -62,14 +62,14 @@ export class MemberRepository implements IMemberRepository {
    * @param guildId - Discord guild ID
    * @returns Array of members in the guild (empty if none)
    */
-  async findByGuild(guildId: Snowflake): Promise<MemberDto[]> {
+  async findByGuild(guildId: Snowflake): Promise<MemberData[]> {
     try {
       const result = await db
         .select()
         .from(members)
         .where(eq(members.guildId, guildId));
 
-      return result.map((record) => MemberMapper.toDto(record));
+      return result.map((record) => MemberMapper.toData(record));
     } catch (error) {
       throw new RealmError("Failed to find members by guild", {
         cause: error,
@@ -84,14 +84,14 @@ export class MemberRepository implements IMemberRepository {
    * @param userId - Discord user ID
    * @returns Array of member records for this user (empty if none)
    */
-  async findByUser(userId: Snowflake): Promise<MemberDto[]> {
+  async findByUser(userId: Snowflake): Promise<MemberData[]> {
     try {
       const result = await db
         .select()
         .from(members)
         .where(eq(members.userId, userId));
 
-      return result.map((record) => MemberMapper.toDto(record));
+      return result.map((record) => MemberMapper.toData(record));
     } catch (error) {
       throw new RealmError("Failed to find members by user", {
         cause: error,
@@ -103,17 +103,17 @@ export class MemberRepository implements IMemberRepository {
   /**
    * Create a new member record.
    *
-   * @param member - Member DTO to create
-   * @returns The created member DTO
+   * @param member - Member Data to create
+   * @returns The created member Data
    * @throws {RealmError} If member already exists or database error occurs
    */
-  async create(member: MemberDto): Promise<MemberDto> {
+  async create(member: MemberData): Promise<MemberData> {
     try {
-      const dbRecord = MemberMapper.fromDto(member);
+      const dbRecord = MemberMapper.fromData(member);
 
       const result = await db.insert(members).values(dbRecord).returning();
 
-      return MemberMapper.toDto(result[0]);
+      return MemberMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to create member", {
         cause: error,
@@ -128,13 +128,13 @@ export class MemberRepository implements IMemberRepository {
   /**
    * Update an existing member record.
    *
-   * @param member - Member DTO with updated values
-   * @returns The updated member DTO
+   * @param member - Member Data with updated values
+   * @returns The updated member Data
    * @throws {RealmError} If member does not exist or database error occurs
    */
-  async update(member: MemberDto): Promise<MemberDto> {
+  async update(member: MemberData): Promise<MemberData> {
     try {
-      const dbRecord = MemberMapper.fromDto(member);
+      const dbRecord = MemberMapper.fromData(member);
 
       const result = await db
         .update(members)
@@ -159,7 +159,7 @@ export class MemberRepository implements IMemberRepository {
         });
       }
 
-      return MemberMapper.toDto(result[0]);
+      return MemberMapper.toData(result[0]);
     } catch (error) {
       if (error instanceof RealmError) {
         throw error;
@@ -244,16 +244,16 @@ export class MemberRepository implements IMemberRepository {
    * Find all admin members in a guild.
    *
    * @param guildId - Discord guild ID
-   * @returns Array of admin member DTOs (empty if none)
+   * @returns Array of admin member Data (empty if none)
    */
-  async findAdminsByGuild(guildId: Snowflake): Promise<MemberDto[]> {
+  async findAdminsByGuild(guildId: Snowflake): Promise<MemberData[]> {
     try {
       const result = await db
         .select()
         .from(members)
         .where(and(eq(members.guildId, guildId), eq(members.admin, true)));
 
-      return result.map((record) => MemberMapper.toDto(record));
+      return result.map((record) => MemberMapper.toData(record));
     } catch (error) {
       throw new RealmError("Failed to find admins by guild", {
         cause: error,
@@ -269,9 +269,9 @@ export class MemberRepository implements IMemberRepository {
    * Fetches the guild's storyteller roles from the database and checks for roleIds intersection.
    *
    * @param guildId - Discord guild ID
-   * @returns Array of staff member DTOs (empty if none)
+   * @returns Array of staff member Data (empty if none)
    */
-  async findStaffMembers(guildId: Snowflake): Promise<MemberDto[]> {
+  async findStaffMembers(guildId: Snowflake): Promise<MemberData[]> {
     try {
       // First, get the guild's storyteller role IDs
       const guildResult = await db
@@ -301,7 +301,7 @@ export class MemberRepository implements IMemberRepository {
           )
         );
 
-      return result.map((record) => MemberMapper.toDto(record));
+      return result.map((record) => MemberMapper.toData(record));
     } catch (error) {
       throw new RealmError("Failed to find staff members by guild", {
         cause: error,
@@ -314,16 +314,16 @@ export class MemberRepository implements IMemberRepository {
    * Find all boosting members in a guild.
    *
    * @param guildId - Discord guild ID
-   * @returns Array of boosting member DTOs (empty if none)
+   * @returns Array of boosting member Data (empty if none)
    */
-  async findBoostingMembers(guildId: Snowflake): Promise<MemberDto[]> {
+  async findBoostingMembers(guildId: Snowflake): Promise<MemberData[]> {
     try {
       const result = await db
         .select()
         .from(members)
         .where(and(eq(members.guildId, guildId), gt(members.boosted, 0)));
 
-      return result.map((record) => MemberMapper.toDto(record));
+      return result.map((record) => MemberMapper.toData(record));
     } catch (error) {
       throw new RealmError("Failed to find boosting members by guild", {
         cause: error,

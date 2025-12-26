@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SplatField } from "@realm/common";
+import { Splat } from "@realm/common";
 import { BaseEventSchema } from "./base-event.js";
 
 /**
@@ -41,7 +41,7 @@ export const CharacterCreatedEventSchema = BaseEventSchema.extend({
     userId: z.string(), // Snowflake type
     guildId: z.string().optional(), // Snowflake type (null for guildless characters)
     name: z.string(),
-    splat: SplatField,
+    splat: Splat,
   }),
 });
 
@@ -90,7 +90,7 @@ export const CharacterUpdatedEventSchema = BaseEventSchema.extend({
     userId: z.string(),
     guildId: z.string().optional(),
     name: z.string(),
-    splat: SplatField,
+    splat: Splat,
     /** Optional: specific fields that changed (for partial updates) */
     changedFields: z.array(z.string()).optional(),
   }),

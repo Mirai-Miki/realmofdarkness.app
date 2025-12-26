@@ -51,7 +51,7 @@ export const CharacterConstraints = {
 /**
  * Character name with business rule validation
  */
-export const NameField = z
+export const NameSchema = z
   .string()
   .min(CharacterConstraints.Name.MinLength)
   .max(CharacterConstraints.Name.MaxLength)
@@ -62,12 +62,12 @@ export const NameField = z
 /**
  * Whether this character is the active sheet for the user
  */
-export const IsSheetField = z.boolean();
+export const IsSheetSchema = z.boolean();
 
 /**
  * Storyteller lock flag (prevents player edits)
  */
-export const StorytellerLockField = z.boolean();
+export const StorytellerLockSchema = z.boolean();
 
 /**
  * Character sheet status.
@@ -80,8 +80,8 @@ export const SheetStatus = {
   Dead: "Dead",
   Archive: "Archive",
 } as const;
-export const SheetStatusField = z.enum(SheetStatus);
-export type SheetStatus = z.infer<typeof SheetStatusField>;
+export const SheetStatusSchema = z.enum(SheetStatus);
+export type SheetStatus = z.infer<typeof SheetStatusSchema>;
 
 /**
  * Character splats (types).
@@ -105,8 +105,8 @@ export const Splat = {
   Human20th: "human20th",
   Ghoul20th: "ghoul20th",
 } as const;
-export const SplatField = z.enum(Splat);
-export type Splat = z.infer<typeof SplatField>;
+export const SplatSchema = z.enum(Splat);
+export type Splat = z.infer<typeof SplatSchema>;
 
 // ============================================================================
 // Experience Fields
@@ -115,7 +115,7 @@ export type Splat = z.infer<typeof SplatField>;
 /**
  * Current unspent experience points
  */
-export const ExperienceCurrentField = z
+export const ExperienceCurrentSchema = z
   .int()
   .min(CharacterConstraints.Experience.Min)
   .max(CharacterConstraints.Experience.Max);
@@ -123,17 +123,17 @@ export const ExperienceCurrentField = z
 /**
  * Total experience points earned
  */
-export const ExperienceTotalField = z
+export const ExperienceTotalSchema = z
   .int()
   .min(CharacterConstraints.Experience.Min)
   .max(CharacterConstraints.Experience.Max);
 /**
  * Experience tracker object with validation
  */
-export const ExperienceTrackerField = z
+export const ExperienceTrackerSchema = z
   .object({
-    current: ExperienceCurrentField,
-    total: ExperienceTotalField,
+    current: ExperienceCurrentSchema,
+    total: ExperienceTotalSchema,
   })
   .refine((data) => data.current <= data.total, {
     message: "Current experience cannot exceed total experience",
@@ -156,7 +156,7 @@ export const ExperienceSpendData = z.object({
 /**
  * Collection of experience spends keyed by snowflake ID
  */
-export const ExperienceSpendsField = z.array(ExperienceSpendData);
+export const ExperienceSpendsSchema = z.array(ExperienceSpendData);
 
 // ============================================================================
 // Character Profile Fields
@@ -165,7 +165,7 @@ export const ExperienceSpendsField = z.array(ExperienceSpendData);
 /**
  * Date of birth (freeform text)
  */
-export const DateOfBirthField = z
+export const DateOfBirthSchema = z
   .string()
   .min(CharacterConstraints.DateOfBirth.MinLength)
   .max(CharacterConstraints.DateOfBirth.MaxLength);
@@ -173,7 +173,7 @@ export const DateOfBirthField = z
 /**
  * Character age (freeform text)
  */
-export const AgeField = z
+export const AgeSchema = z
   .string()
   .min(CharacterConstraints.Age.MinLength)
   .max(CharacterConstraints.Age.MaxLength);
@@ -181,7 +181,7 @@ export const AgeField = z
 /**
  * Character history/background
  */
-export const HistoryField = z
+export const HistorySchema = z
   .string()
   .min(CharacterConstraints.History.MinLength)
   .max(CharacterConstraints.History.MaxLength);
@@ -189,7 +189,7 @@ export const HistoryField = z
 /**
  * Appearance description
  */
-export const AppearanceDescriptionField = z
+export const AppearanceDescriptionSchema = z
   .string()
   .min(CharacterConstraints.AppearanceDescription.MinLength)
   .max(CharacterConstraints.AppearanceDescription.MaxLength);
@@ -197,7 +197,7 @@ export const AppearanceDescriptionField = z
 /**
  * Notes field 1
  */
-export const NotesField = z
+export const NotesSchema = z
   .string()
   .min(CharacterConstraints.Notes.MinLength)
   .max(CharacterConstraints.Notes.MaxLength);
@@ -205,7 +205,7 @@ export const NotesField = z
 /**
  * Notes field 2
  */
-export const Notes2Field = z
+export const Notes2Schema = z
   .string()
   .min(CharacterConstraints.Notes2.MinLength)
   .max(CharacterConstraints.Notes2.MaxLength);
@@ -214,7 +214,7 @@ export const Notes2Field = z
 // Base Character DTO Schema
 // ============================================================================
 
-export const ExperienceFieldSchema = z
+export const ExperienceSchema = z
   .object({
     current: z
       .int()
@@ -229,19 +229,19 @@ export const ExperienceFieldSchema = z
     message: "Current experience cannot exceed total experience",
     path: ["current"],
   });
-export type ExperienceField = z.infer<typeof ExperienceFieldSchema>;
+export type Experience = z.infer<typeof ExperienceSchema>;
 
-export const BaseCharacterDtoSchema = z.object({
+export const BaseCharacterDataSchema = z.object({
   id: SnowflakeSchema,
   userId: SnowflakeSchema,
   guildId: SnowflakeSchema.nullable(),
-  name: NameField,
-  status: SheetStatusField,
-  isSheet: IsSheetField,
+  name: NameSchema,
+  status: SheetStatusSchema,
+  isSheet: IsSheetSchema,
   createdAt: z.date(),
   updatedAt: z.date(),
 });
-export type BaseCharacterDto = z.infer<typeof BaseCharacterDtoSchema>;
+export type BaseCharacterData = z.infer<typeof BaseCharacterDataSchema>;
 
 // ============================================================================
 // Entity Interfaces
@@ -285,7 +285,7 @@ export interface ICharacter {
   /**
    * Get a plain object representation suitable for persistence.
    */
-  toDto(): BaseCharacterDto;
+  toData(): BaseCharacterData;
 
   /**
    * Validate the character is in a valid state.
@@ -324,7 +324,7 @@ export interface ICharacter {
  * Experience value object interface.
  * Immutable - all operations return new instances.
  */
-export interface IExperience extends ExperienceField {
+export interface IExperience extends Experience {
   readonly current: number;
   readonly total: number;
 

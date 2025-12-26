@@ -1,7 +1,7 @@
 import type { ICharacter5th } from "./character-5th.definitions.js";
 
 import { z } from "zod";
-import { Character5thSchema } from "./character-5th.definitions";
+import { Character5thDataSchema } from "./character-5th.definitions";
 import { Splat } from "../character.definitions";
 
 // ===========================================================================
@@ -17,11 +17,20 @@ export const Vampire5thConstraints = {
   Generation: { min: 1, max: 18 },
 } as const;
 
-export const Vampire5thDtoSchema = Character5thSchema.extend({
+// Individual field schemas for validation
+export const HungerDataSchema = z
+  .int()
+  .min(Vampire5thConstraints.Hunger.min)
+  .max(Vampire5thConstraints.Hunger.max);
+
+// Schema for validating hunger increase/decrease amounts
+export const HungerAmountSchema = z.int().min(0).max(5);
+
+export const Vampire5thDataSchema = Character5thDataSchema.extend({
   splat: z.literal(Splat.Vampire5th),
-  hunger: z.int().min(0).max(5),
+  hunger: HungerDataSchema,
 });
-export type Vampire5thDto = z.infer<typeof Vampire5thDtoSchema>;
+export type Vampire5thData = z.infer<typeof Vampire5thDataSchema>;
 
 // ============================================================================
 // 5th Edition Vampire Character Entity Interface
@@ -39,5 +48,5 @@ export interface IVampire5th extends ICharacter5th {
   decreaseHunger(amount?: number): number;
   setHunger(value: number): number;
 
-  toDto(): Vampire5thDto;
+  toData(): Vampire5thData;
 }

@@ -5,10 +5,8 @@
  * They encapsulate domain logic and ensure invariants are always maintained.
  */
 
-export { DamageTracker5th } from "./character/damage-tracker-5th.vo.js";
-export { DamageTracker20th } from "./character/damage-tracker-20th.vo.js";
-export { WillpowerTracker20th } from "./character/willpower-tracker-20th.vo.js";
-export { Experience } from "./character/experience.vo.js";
-export { Skill } from "./character/skill.vo.js";
-export { ReferenceItem } from "./reference-item.vo.js";
-export { ActiveEffect } from "./active-effect.vo.js";
+export { Experience } from "../entities/characters/value-objects/experience.vo";
+export { DamageTracker5th } from "../entities/characters/value-objects/damage-tracker-5th.vo";
+export { HealthTracker20th } from "../entities/characters/value-objects/health-tracker-20th.vo";
+export { WillpowerTracker20th } from "../entities/characters/value-objects/willpower-tracker-20th.vo";
+export { BloodTracker } from "../entities/characters/value-objects/blood-tracker.vo";

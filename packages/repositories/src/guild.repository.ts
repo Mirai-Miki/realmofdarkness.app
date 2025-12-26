@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { db, guilds } from "@realm/database";
 import type {
   IGuildRepository,
-  GuildDto,
+  GuildData,
   Snowflake,
   UpsertGuildInput,
 } from "@realm/common";
@@ -13,12 +13,12 @@ import { GuildMapper } from "./mappers/guild.mapper";
  * Repository implementation for Guild entity using Drizzle ORM.
  *
  * Handles all database operations for guilds including CRUD operations
- * and queries. Returns Guild DTOs that can be hydrated into domain entities.
+ * and queries. Returns Guild Data that can be hydrated into domain entities.
  *
  * @example
  * ```typescript
  * const repo = new GuildRepository();
- * const guildDto = await repo.findById("123456789012345678");
+ * const guildData = await repo.findById("123456789012345678");
  * ```
  */
 export class GuildRepository implements IGuildRepository {
@@ -26,9 +26,9 @@ export class GuildRepository implements IGuildRepository {
    * Find a guild by Discord guild ID.
    *
    * @param id - Discord guild snowflake ID
-   * @returns Guild DTO if found, null otherwise
+   * @returns Guild Data if found, null otherwise
    */
-  async findById(id: Snowflake): Promise<GuildDto | null> {
+  async findById(id: Snowflake): Promise<GuildData | null> {
     try {
       const result = await db
         .select()
@@ -40,7 +40,7 @@ export class GuildRepository implements IGuildRepository {
         return null;
       }
 
-      return GuildMapper.toDto(result[0]);
+      return GuildMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to find guild by ID", {
         cause: error,
@@ -52,16 +52,16 @@ export class GuildRepository implements IGuildRepository {
   /**
    * Create a new guild.
    *
-   * @param guild - Guild DTO to create
-   * @returns Created guild DTO
+   * @param guild - Guild Data to create
+   * @returns Created guild Data
    */
-  async create(guild: GuildDto): Promise<GuildDto> {
+  async create(guild: GuildData): Promise<GuildData> {
     try {
-      const dbRecord = GuildMapper.fromDto(guild);
+      const dbRecord = GuildMapper.fromData(guild);
 
       const result = await db.insert(guilds).values(dbRecord).returning();
 
-      return GuildMapper.toDto(result[0]);
+      return GuildMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to create guild", {
         cause: error,
@@ -73,12 +73,12 @@ export class GuildRepository implements IGuildRepository {
   /**
    * Update an existing guild.
    *
-   * @param guild - Guild DTO to update
-   * @returns Updated guild DTO
+   * @param guild - Guild Data to update
+   * @returns Updated guild Data
    */
-  async update(guild: GuildDto): Promise<GuildDto> {
+  async update(guild: GuildData): Promise<GuildData> {
     try {
-      const dbRecord = GuildMapper.fromDto(guild);
+      const dbRecord = GuildMapper.fromData(guild);
 
       const result = await db
         .update(guilds)
@@ -95,7 +95,7 @@ export class GuildRepository implements IGuildRepository {
         });
       }
 
-      return GuildMapper.toDto(result[0]);
+      return GuildMapper.toData(result[0]);
     } catch (error) {
       if (error instanceof RealmError) {
         throw error;
@@ -113,9 +113,9 @@ export class GuildRepository implements IGuildRepository {
    * If guild doesn't exist: creates new guild.
    *
    * @param input - Guild data to upsert
-   * @returns Upserted guild DTO
+   * @returns Upserted guild Data
    */
-  async upsert(input: UpsertGuildInput): Promise<GuildDto> {
+  async upsert(input: UpsertGuildInput): Promise<GuildData> {
     const now = new Date();
 
     // Build the conflict update set dynamically based on provided fields

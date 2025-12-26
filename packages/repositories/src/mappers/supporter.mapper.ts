@@ -1,32 +1,32 @@
 import type { SupporterDb } from "@realm/database";
-import type { SupporterDto } from "@realm/common";
+import type { SupporterData } from "@realm/common";
 import { RealmError, SupporterLevel } from "@realm/common";
 
 /**
- * Mapper for translating between Supporter database records and Supporter DTOs.
+ * Mapper for translating between Supporter database records and Supporter Data.
  *
  * Handles the conversion of:
- * - Database records (SupporterDb) → Data Transfer Objects (SupporterDto)
- * - Data Transfer Objects (SupporterDto) → Database records (SupporterDb)
+ * - Database records (SupporterDb) → Data (SupporterData)
+ * - Data (SupporterData) → Database records (SupporterDb)
  *
  * @example
  * ```typescript
- * // Database → DTO
- * const supporterDto = SupporterMapper.toDto(dbRecord);
+ * // Database → Data
+ * const supporterData = SupporterMapper.toData(dbRecord);
  *
- * // DTO → Database
- * const dbRecord = SupporterMapper.fromDto(supporterDto);
+ * // Data → Database
+ * const dbRecord = SupporterMapper.fromData(supporterData);
  * ```
  */
 export class SupporterMapper {
   /**
-   * Convert database record to Supporter DTO.
+   * Convert database record to Supporter Data.
    *
    * @param db - Supporter database record
-   * @returns Supporter DTO
+   * @returns Supporter Data
    * @throws {RealmError} If mapping fails
    */
-  static toDto(db: SupporterDb): SupporterDto {
+  static toData(db: SupporterDb): SupporterData {
     try {
       return {
         userId: db.userId,
@@ -35,7 +35,7 @@ export class SupporterMapper {
         firstSupported: db.firstSupported,
       };
     } catch (error) {
-      throw new RealmError("Failed to map supporter from database to DTO", {
+      throw new RealmError("Failed to map supporter from database to Data", {
         cause: error,
         fields: { userId: db.userId },
       });
@@ -43,26 +43,26 @@ export class SupporterMapper {
   }
 
   /**
-   * Convert Supporter DTO to database record.
+   * Convert Supporter Data to database record.
    *
-   * @param dto - Supporter DTO
+   * @param data - Supporter Data
    * @returns Database record (without auto-generated timestamps)
    * @throws {RealmError} If mapping fails
    */
-  static fromDto(
-    dto: SupporterDto
+  static fromData(
+    data: SupporterData
   ): Omit<SupporterDb, "createdAt" | "lastUpdated"> {
     try {
       return {
-        userId: dto.userId,
-        level: dto.level,
-        boosts: dto.boosts,
-        firstSupported: dto.firstSupported,
+        userId: data.userId,
+        level: data.level,
+        boosts: data.boosts,
+        firstSupported: data.firstSupported,
       };
     } catch (error) {
-      throw new RealmError("Failed to map supporter from DTO to database", {
+      throw new RealmError("Failed to map supporter from Data to database", {
         cause: error,
-        fields: { userId: dto.userId },
+        fields: { userId: data.userId },
       });
     }
   }

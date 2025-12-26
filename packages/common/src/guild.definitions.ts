@@ -20,7 +20,7 @@ import {
 /**
  * Guild name with length constraints.
  */
-export const GuildNameField = z
+export const GuildNameSchema = z
   .string()
   .min(GuildNameConstraints.MinLength)
   .max(GuildNameConstraints.MaxLength);
@@ -28,12 +28,12 @@ export const GuildNameField = z
 /**
  * Guild icon URL from Discord CDN.
  */
-export const GuildIconUrlField = DiscordUrlSchema;
+export const GuildIconUrlSchema = DiscordUrlSchema;
 
 /**
  * Array of role IDs that have storyteller permissions.
  */
-export const StorytellerRolesField = z.array(SnowflakeSchema);
+export const StorytellerRolesSchema = z.array(SnowflakeSchema);
 
 // ============================================================================
 // Guild DTOs
@@ -45,15 +45,15 @@ export const StorytellerRolesField = z.array(SnowflakeSchema);
  * Represents the full data structure of a Discord guild configuration.
  * Domain `Guild` class wraps this with role management and settings logic.
  */
-export const GuildDtoSchema = z.object({
+export const GuildDataSchema = z.object({
   id: SnowflakeSchema,
-  name: GuildNameField,
-  iconUrl: GuildIconUrlField,
-  storytellerRoleIds: StorytellerRolesField.default([]),
+  name: GuildNameSchema,
+  iconUrl: GuildIconUrlSchema,
+  storytellerRoleIds: StorytellerRolesSchema.default([]),
   createdAt: z.date(),
   lastUpdated: z.date(),
 });
-export type GuildDto = z.infer<typeof GuildDtoSchema>;
+export type GuildData = z.infer<typeof GuildDataSchema>;
 
 /**
  * Input DTO for creating a new guild.
@@ -63,9 +63,9 @@ export type GuildDto = z.infer<typeof GuildDtoSchema>;
  */
 export const CreateGuildInputSchema = z.object({
   id: SnowflakeSchema,
-  name: GuildNameField,
-  iconUrl: GuildIconUrlField,
-  storytellerRoleIds: StorytellerRolesField.default([]),
+  name: GuildNameSchema,
+  iconUrl: GuildIconUrlSchema,
+  storytellerRoleIds: StorytellerRolesSchema.default([]),
 });
 export type CreateGuildInput = z.infer<typeof CreateGuildInputSchema>;
 
@@ -77,9 +77,9 @@ export type CreateGuildInput = z.infer<typeof CreateGuildInputSchema>;
  */
 export const UpdateGuildInputSchema = z.object({
   id: SnowflakeSchema,
-  name: GuildNameField.optional(),
-  iconUrl: GuildIconUrlField.optional(),
-  storytellerRoleIds: StorytellerRolesField.optional(),
+  name: GuildNameSchema.optional(),
+  iconUrl: GuildIconUrlSchema.optional(),
+  storytellerRoleIds: StorytellerRolesSchema.optional(),
 });
 export type UpdateGuildInput = z.infer<typeof UpdateGuildInputSchema>;
 
@@ -91,9 +91,9 @@ export type UpdateGuildInput = z.infer<typeof UpdateGuildInputSchema>;
  */
 export const UpsertGuildInputSchema = z.object({
   id: SnowflakeSchema,
-  name: GuildNameField,
-  iconUrl: GuildIconUrlField,
-  storytellerRoleIds: StorytellerRolesField.optional(),
+  name: GuildNameSchema,
+  iconUrl: GuildIconUrlSchema,
+  storytellerRoleIds: StorytellerRolesSchema.optional(),
 });
 export type UpsertGuildInput = z.infer<typeof UpsertGuildInputSchema>;
 
@@ -140,23 +140,23 @@ export interface IGuildRepository {
    * @param id - Discord guild snowflake ID
    * @returns Guild data if found, null otherwise
    */
-  findById(id: Snowflake): Promise<GuildDto | null>;
+  findById(id: Snowflake): Promise<GuildData | null>;
 
   /**
    * Create a new guild.
    *
-   * @param guild - Guild DTO to create
-   * @returns Created guild DTO
+   * @param guild - Guild data to create
+   * @returns Created guild data
    */
-  create(guild: GuildDto): Promise<GuildDto>;
+  create(guild: GuildData): Promise<GuildData>;
 
   /**
    * Update an existing guild.
    *
-   * @param guild - Guild DTO to update
-   * @returns Updated guild DTO
+   * @param guild - Guild data to update
+   * @returns Updated guild data
    */
-  update(guild: GuildDto): Promise<GuildDto>;
+  update(guild: GuildData): Promise<GuildData>;
 
   /**
    * Upsert a guild.
@@ -164,9 +164,9 @@ export interface IGuildRepository {
    * If guild doesn't exist: creates new guild.
    *
    * @param input - Guild data to upsert
-   * @returns Upserted guild DTO
+   * @returns Upserted guild data
    */
-  upsert(input: UpsertGuildInput): Promise<GuildDto>;
+  upsert(input: UpsertGuildInput): Promise<GuildData>;
 
   /**
    * Delete a guild by ID.

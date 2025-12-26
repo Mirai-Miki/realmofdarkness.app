@@ -1,32 +1,32 @@
 import type { GuildDb } from "@realm/database";
-import type { GuildDto } from "@realm/common";
+import type { GuildData } from "@realm/common";
 import { RealmError } from "@realm/common";
 
 /**
- * Mapper for translating between Guild database records and Guild DTOs.
+ * Mapper for translating between Guild database records and Guild Data.
  *
  * Handles the conversion of:
- * - Database records (GuildDb) → Data Transfer Objects (GuildDto)
- * - Data Transfer Objects (GuildDto) → Database records (GuildDb)
+ * - Database records (GuildDb) → Data (GuildData)
+ * - Data (GuildData) → Database records (GuildDb)
  *
  * @example
  * ```typescript
- * // Database → DTO
- * const guildDto = GuildMapper.toDto(dbRecord);
+ * // Database → Data
+ * const guildData = GuildMapper.toData(dbRecord);
  *
- * // DTO → Database
- * const dbRecord = GuildMapper.fromDto(guildDto);
+ * // Data → Database
+ * const dbRecord = GuildMapper.fromData(guildData);
  * ```
  */
 export class GuildMapper {
   /**
-   * Convert database record to Guild DTO.
+   * Convert database record to Guild Data.
    *
    * @param db - Guild database record
-   * @returns Guild DTO
+   * @returns Guild Data
    * @throws {RealmError} If mapping fails
    */
-  static toDto(db: GuildDb): GuildDto {
+  static toData(db: GuildDb): GuildData {
     try {
       return {
         id: db.id,
@@ -37,7 +37,7 @@ export class GuildMapper {
         lastUpdated: db.lastUpdated,
       };
     } catch (error) {
-      throw new RealmError("Failed to map guild from database to DTO", {
+      throw new RealmError("Failed to map guild from database to Data", {
         cause: error,
         fields: { guildId: db.id },
       });
@@ -45,24 +45,24 @@ export class GuildMapper {
   }
 
   /**
-   * Convert Guild DTO to database record.
+   * Convert Guild Data to database record.
    *
-   * @param dto - Guild DTO
+   * @param data - Guild Data
    * @returns Database record (without auto-generated timestamps)
    * @throws {RealmError} If mapping fails
    */
-  static fromDto(dto: GuildDto): Omit<GuildDb, "createdAt" | "lastUpdated"> {
+  static fromData(data: GuildData): Omit<GuildDb, "createdAt" | "lastUpdated"> {
     try {
       return {
-        id: dto.id,
-        name: dto.name,
-        iconUrl: dto.iconUrl,
-        storytellerRoleIds: dto.storytellerRoleIds,
+        id: data.id,
+        name: data.name,
+        iconUrl: data.iconUrl,
+        storytellerRoleIds: data.storytellerRoleIds,
       };
     } catch (error) {
-      throw new RealmError("Failed to map guild from DTO to database", {
+      throw new RealmError("Failed to map guild from Data to database", {
         cause: error,
-        fields: { guildId: dto.id },
+        fields: { guildId: data.id },
       });
     }
   }

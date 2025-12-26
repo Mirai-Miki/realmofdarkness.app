@@ -70,8 +70,8 @@ export const SheetStatus = {
   Dead: "Dead",
   Archive: "Archive",
 } as const;
-export const SheetStatusField = z.enum(SheetStatus);
-export type SheetStatus = z.infer<typeof SheetStatusField>;
+export const SheetStatusSchema = z.enum(SheetStatus);
+export type SheetStatus = z.infer<typeof SheetStatusSchema>;
 ```
 
 **Note:** Zod 4 supports passing objects directly to `z.enum()` - no Zod 3 workarounds needed.
@@ -102,7 +102,7 @@ export type SheetStatus = z.infer<typeof SheetStatusField>;
 
 **@realm/common** (Shared Kernel):
 
-- DTOs with Zod validation schemas
+- Data types with Zod validation schemas (all use 'Data' suffix)
 - Repository interfaces (contracts)
 - Type definitions and enums
 - Error classes (RealmError, UserError)
@@ -139,19 +139,19 @@ export type SheetStatus = z.infer<typeof SheetStatusField>;
 - Standalone business operations
 - **MAY** call repositories directly
 - **NEVER** call other services
-- Return DTOs (not entities)
+- Return Data types (not entities)
 - Validate inputs with Zod schemas from `@realm/common`
 
 **Example:**
 
 ```typescript
-import type { IUserRepository, UserDto, CreateUserInput } from "@realm/common";
+import type { IUserRepository, UserData, CreateUserInput } from "@realm/common";
 import { User } from "../entities/user.entity";
 
 export class UserService {
   constructor(private userRepo: IUserRepository) {}
 
-  async create(input: CreateUserInput): Promise<UserDto> {
+  async create(input: CreateUserInput): Promise<UserData> {
     // Validate input (Zod schema)
     const validated = CreateUserInputSchema.parse(input);
 
@@ -175,7 +175,7 @@ export class UserService {
 - Complex workflows requiring multiple services
 - Orchestrate between services
 - Handle cross-cutting concerns (transactions, events)
-- Return DTOs
+- Return Data types
 
 **Example:**
 
@@ -206,11 +206,11 @@ export class SyncMemberProfileAction {
 ### Entity Rules
 
 - Pure TypeScript classes with business logic
-- Wrap DTOs from `@realm/common`
+- Wrap Data types from `@realm/common`
 - **NO** framework code (no NestJS, no Discord.js, no Drizzle)
 - **NO** repository calls (entities don't know about persistence)
 - **NO** service calls
-- Expose `toDto()` method to export back to DTO
+- Expose `toData()` method to export back to Data type
 
 ### Timestamp Management
 
@@ -224,17 +224,17 @@ export class SyncMemberProfileAction {
 
 ```typescript
 export class User {
-  constructor(private dto: UserDto) {}
+  constructor(private data: UserData) {}
 
   updateProfile(username: string, avatarUrl: string): void {
     // Domain logic - NO timestamp management
-    this.dto.username = username;
-    this.dto.avatarUrl = avatarUrl;
+    this.data.username = username;
+    this.data.avatarUrl = avatarUrl;
     // Repository will set updatedAt when saving
   }
 
-  toDto(): UserDto {
-    return this.dto; // Repository handles timestamps
+  toData(): UserData {
+    return this.data; // Repository handles timestamps
   }
 }
 ```
@@ -247,32 +247,32 @@ export class User {
 
 - **Only called from services** (never from entities or actions)
 - Implement interfaces from `@realm/common`
-- Handle data mapping (DTO ↔ Database records)
+- Handle data mapping (Data types ↔ Database records)
 - Manage timestamps (`createdAt`, `updatedAt`)
-- Return DTOs (not entities)
+- Return Data types (not entities)
 
 **Example:**
 
 ```typescript
 export class UserRepository implements IUserRepository {
-  async create(dto: UserDto): Promise<UserDto> {
+  async create(data: UserData): Promise<UserData> {
     const now = new Date();
     const result = await db.insert(users).values({
-      ...dto,
+      ...data,
       createdAt: now,
       lastUpdated: now, // Repository sets timestamps
     });
     return result;
   }
 
-  async update(dto: UserDto): Promise<UserDto> {
+  async update(data: UserData): Promise<UserData> {
     const result = await db
       .update(users)
       .set({
-        ...dto,
+        ...data,
         lastUpdated: new Date(), // Repository updates timestamp
       })
-      .where(eq(users.id, dto.id));
+      .where(eq(users.id, data.id));
     return result;
   }
 }
@@ -289,25 +289,26 @@ export class UserRepository implements IUserRepository {
 1. Define Zod schema first
 2. Infer TypeScript type from schema
 3. Export both schema and type
+4. **All schemas use 'DataSchema' suffix, all types use 'Data' suffix**
 
-**Field Schemas:**
+**Reusable Data Schemas:**
 
 ```typescript
-export const UsernameField = z.string().min(1).max(50);
-export const AvatarUrlField = z.string().url().nullable();
+export const UsernameSchema = z.string().min(1).max(50);
+export const AvatarUrlSchema = z.string().url().nullable();
 ```
 
-**DTO Schemas:**
+**Complete Data Schemas:**
 
 ```typescript
-export const UserDtoSchema = z.object({
+export const UserDataSchema = z.object({
   id: SnowflakeSchema,
-  username: UsernameField,
-  avatarUrl: AvatarUrlField,
+  username: UsernameSchema,
+  avatarUrl: AvatarUrlSchema,
   createdAt: z.date(),
   lastUpdated: z.date(),
 });
-export type UserDto = z.infer<typeof UserDtoSchema>;
+export type UserData = z.infer<typeof UserDataSchema>;
 ```
 
 **Input Schemas (no timestamps):**
@@ -315,8 +316,8 @@ export type UserDto = z.infer<typeof UserDtoSchema>;
 ```typescript
 export const CreateUserInputSchema = z.object({
   id: SnowflakeSchema,
-  username: UsernameField,
-  avatarUrl: AvatarUrlField,
+  username: UsernameSchema,
+  avatarUrl: AvatarUrlSchema,
 });
 export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
 ```

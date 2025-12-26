@@ -164,7 +164,7 @@ export class MemberService {
       member.setRoleIds(validatedInput.roleIds);
 
       // Persist changes (repository handles lastUpdated)
-      const updatedDto = await this.memberRepository.update(member.toDto());
+    const updatedDto = await this.memberRepository.update(member.toData());
 
       this.logger.debug("Member profile synced", {
         fields: {
@@ -221,7 +221,7 @@ export class MemberService {
     const member = new Member(dto);
     member.addBoost();
 
-    const updatedDto = await this.memberRepository.update(member.toDto());
+    const updatedDto = await this.memberRepository.update(member.toData());
 
     this.logger.debug("Boost added to member", {
       fields: {
@@ -264,7 +264,7 @@ export class MemberService {
     const member = new Member(dto);
     member.removeBoost(); // Throws if no boosts
 
-    const updatedDto = await this.memberRepository.update(member.toDto());
+    const updatedDto = await this.memberRepository.update(member.toData());
 
     this.logger.debug("Boost removed from member", {
       fields: {

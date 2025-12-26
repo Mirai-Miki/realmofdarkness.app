@@ -19,7 +19,7 @@ import type { Snowflake } from "./primitives";
 /**
  * Discord username.
  */
-export const UsernameField = z
+export const UsernameSchema = z
   .string()
   .min(UsernameConstraints.MinLength)
   .max(UsernameConstraints.MaxLength);
@@ -27,7 +27,7 @@ export const UsernameField = z
 /**
  * Display name (can differ from username).
  */
-export const DisplayNameField = z
+export const DisplayNameSchema = z
   .string()
   .min(UsernameConstraints.MinLength)
   .max(UsernameConstraints.MaxLength);
@@ -35,46 +35,49 @@ export const DisplayNameField = z
 /**
  * User email address (optional).
  */
-export const EmailField = z.string().max(100).nullable();
+export const EmailSchema = z.string().max(100).nullable();
 
 /**
  * Avatar URL from Discord CDN.
  */
-export const AvatarUrlField = z.string().max(DiscordCdnUrlMaxLength).optional();
+export const AvatarUrlSchema = z
+  .string()
+  .max(DiscordCdnUrlMaxLength)
+  .optional();
 
 /**
  * Whether user has completed registration.
  */
-export const RegisteredField = z.boolean();
+export const RegisteredSchema = z.boolean();
 
 /**
  * Whether user is a Realm of Darkness admin.
  */
-export const AdminField = z.boolean();
+export const AdminSchema = z.boolean();
 
 // ============================================================================
-// User DTOs
+// User Data Schemas
 // ============================================================================
 
 /**
- * User entity DTO.
+ * User entity Data schema.
  *
  * Represents the full data structure of a Discord user.
  * Domain `User` class wraps this with validation and business logic.
  */
-export const UserDtoSchema = z.object({
+export const UserDataSchema = z.object({
   id: SnowflakeSchema,
-  username: UsernameField,
-  displayName: DisplayNameField,
+  username: UsernameSchema,
+  displayName: DisplayNameSchema,
   email: z.string().max(100).nullable(),
-  avatarUrl: AvatarUrlField,
+  avatarUrl: AvatarUrlSchema,
   registered: z.boolean(),
   admin: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),
   lastActive: z.date(),
 });
-export type UserDto = z.infer<typeof UserDtoSchema>;
+export type UserData = z.infer<typeof UserDataSchema>;
 
 /**
  * Input DTO for creating a new user.
@@ -84,12 +87,12 @@ export type UserDto = z.infer<typeof UserDtoSchema>;
  */
 export const CreateUserInputSchema = z.object({
   id: SnowflakeSchema,
-  username: UsernameField,
-  displayName: DisplayNameField,
-  email: EmailField.default(null),
-  avatarUrl: AvatarUrlField,
-  registered: RegisteredField.default(false),
-  admin: AdminField.default(false),
+  username: UsernameSchema,
+  displayName: DisplayNameSchema,
+  email: EmailSchema.default(null),
+  avatarUrl: AvatarUrlSchema,
+  registered: RegisteredSchema.default(false),
+  admin: AdminSchema.default(false),
 });
 export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
 
@@ -101,12 +104,12 @@ export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
  */
 export const UpdateUserInputSchema = z.object({
   id: SnowflakeSchema,
-  username: UsernameField.optional(),
-  displayName: DisplayNameField.optional(),
-  email: EmailField.optional(),
-  avatarUrl: AvatarUrlField.optional(),
-  registered: RegisteredField.optional(),
-  admin: AdminField.optional(),
+  username: UsernameSchema.optional(),
+  displayName: DisplayNameSchema.optional(),
+  email: EmailSchema.optional(),
+  avatarUrl: AvatarUrlSchema.optional(),
+  registered: RegisteredSchema.optional(),
+  admin: AdminSchema.optional(),
 });
 export type UpdateUserInput = z.infer<typeof UpdateUserInputSchema>;
 
@@ -144,7 +147,7 @@ export interface IUserRepository {
    * @returns User entity if found, null otherwise
    * @throws {RealmError} If database query fails
    */
-  findById(id: Snowflake): Promise<UserDto | null>;
+  findById(id: Snowflake): Promise<UserData | null>;
 
   /**
    * Find multiple users by their Discord snowflake IDs.
@@ -153,7 +156,7 @@ export interface IUserRepository {
    * @returns Array of User entities found
    * @throws {RealmError} If database query fails
    */
-  findManyByIds(ids: Snowflake[]): Promise<UserDto[]>;
+  findManyByIds(ids: Snowflake[]): Promise<UserData[]>;
 
   /**
    * Find a user by their Discord username.
@@ -162,7 +165,7 @@ export interface IUserRepository {
    * @returns User entity if found, null otherwise
    * @throws {RealmError} If database query fails
    */
-  findByUsername(username: string): Promise<UserDto | null>;
+  findByUsername(username: string): Promise<UserData | null>;
 
   /**
    * Find all users (paginated).
@@ -172,7 +175,7 @@ export interface IUserRepository {
    * @returns Array of User entities
    * @throws {RealmError} If database query fails
    */
-  findAll(limit?: number, offset?: number): Promise<UserDto[]>;
+  findAll(limit?: number, offset?: number): Promise<UserData[]>;
 
   /**
    * Create a new user.
@@ -181,7 +184,7 @@ export interface IUserRepository {
    * @returns Created user state with updated metadata
    * @throws {RealmError} If user creation fails or user already exists
    */
-  create(user: UserDto): Promise<UserDto>;
+  create(user: UserData): Promise<UserData>;
 
   /**
    * Update an existing user.
@@ -190,7 +193,7 @@ export interface IUserRepository {
    * @returns Updated user state with refreshed metadata
    * @throws {RealmError} If update fails or user doesn't exist
    */
-  update(user: UserDto): Promise<UserDto>;
+  update(user: UserData): Promise<UserData>;
 
   /**
    * Update user's last active timestamp.

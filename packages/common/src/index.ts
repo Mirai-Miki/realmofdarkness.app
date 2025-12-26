@@ -43,20 +43,20 @@ export * from "./repository.definitions";
 // Supporter module
 export {
   SupporterLevel,
-  SupporterLevelField,
-  type SupporterDto,
+  SupporterLevelSchema,
+  type SupporterData,
   type ISupporterRepository,
 } from "./supporter.definitions.js";
 
 // Guild module
 export {
   // Field schemas
-  GuildNameField,
-  GuildIconUrlField,
-  StorytellerRolesField,
-  // DTOs
-  GuildDtoSchema,
-  type GuildDto,
+  GuildNameSchema,
+  GuildIconUrlSchema,
+  StorytellerRolesSchema,
+  // Data schemas
+  GuildDataSchema,
+  type GuildData,
   CreateGuildInputSchema,
   type CreateGuildInput,
   UpdateGuildInputSchema,
@@ -74,12 +74,12 @@ export {
 // User module
 export {
   // Field schemas
-  UsernameField,
-  DisplayNameField,
-  AvatarUrlField,
-  // DTOs
-  UserDtoSchema,
-  type UserDto,
+  UsernameSchema,
+  DisplayNameSchema,
+  AvatarUrlSchema,
+  // Data schemas
+  UserDataSchema,
+  type UserData,
   CreateUserInputSchema,
   type CreateUserInput,
   UpdateUserInputSchema,
@@ -91,14 +91,14 @@ export {
 // Member module
 export {
   // Field schemas
-  MemberAdminField,
-  MemberRoleIdsField,
-  MemberBoostCountField,
-  MemberNicknameField,
-  MemberAvatarUrlField,
-  // DTOs
-  MemberDtoSchema,
-  type MemberDto,
+  MemberAdminSchema,
+  MemberRoleIdsSchema,
+  MemberBoostCountSchema,
+  MemberNicknameSchema,
+  MemberAvatarUrlSchema,
+  // Data schemas
+  MemberDataSchema,
+  type MemberData,
   CreateMemberInputSchema,
   type CreateMemberInput,
   SyncMemberInputSchema,

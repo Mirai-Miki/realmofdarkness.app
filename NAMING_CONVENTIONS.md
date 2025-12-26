@@ -16,7 +16,7 @@ This document defines the naming conventions for the Realm of Darkness monorepo.
 ### Package Responsibilities
 
 ```
-@realm/common     - Shared kernel (DTOs, interfaces, contracts, Zod schemas)
+@realm/common     - Shared kernel (Data types, interfaces, contracts, Zod schemas)
 @realm/core       - Business logic (entities, services, actions)
 @realm/repositories - Data access implementations
 @realm/database   - Database schema and connection
@@ -34,14 +34,14 @@ apps/frontend     - React SPA
 - Standalone operations (create character, update character, roll dice)
 - **May** call repositories directly
 - **Do NOT** call other services
-- Return DTOs
+- Return Data types
 
 **Coordinator Services** (`src/actions/`)
 
 - Complex workflows requiring multiple pure services
 - Orchestrate between services
 - Handle cross-cutting concerns
-- Return DTOs
+- Return Data types
 
 **Apps (API, Bot)**
 
@@ -62,17 +62,17 @@ All files use **kebab-case** with descriptive suffixes to indicate their purpose
 **Small Domains** (single file):
 
 ```
-user.definitions.ts          # All user-related: DTO, schemas, repository interface
-guild.definitions.ts          # All guild-related: DTO, schemas, repository interface
-member.definitions.ts         # All member-related: DTO, schemas, repository interface
-supporter.definitions.ts      # All supporter-related: DTO, schemas, repository interface
+user.definitions.ts          # All user-related: Data type, schemas, repository interface
+guild.definitions.ts          # All guild-related: Data type, schemas, repository interface
+member.definitions.ts         # All member-related: Data type, schemas, repository interface
+supporter.definitions.ts      # All supporter-related: Data type, schemas, repository interface
 ```
 
 **Large Domains** (folder with splits):
 
 ```
 character/
-├── character.definitions.ts           # Base character DTO, schemas, repository
+├── character.definitions.ts           # Base character Data type, schemas, repository
 ├── v5.definitions.ts         # Vampire5th specific schemas
 ├── h5.definitions.ts          # Hunter5th specific schemas
 ├── w20.definitions.ts       # Werewolf20th specific schemas
@@ -120,8 +120,8 @@ repository.definitions.ts      # Base repository interfaces
 
 - Pattern: `{name}.entity.ts`
 - Examples: `user.entity.ts`, `member.entity.ts`, `guild.entity.ts`
-- Purpose: Domain models wrapping DTOs with business logic
-- Expose `toDto()` method for persistence
+- Purpose: Domain models wrapping Data types with business logic
+- Expose `toData()` method for persistence
 
 **Value Objects** (`value-objects/`)
 

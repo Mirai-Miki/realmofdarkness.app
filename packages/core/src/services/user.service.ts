@@ -132,7 +132,7 @@ export class UserService {
       }
 
       // Persist changes (repository handles lastActive)
-      const updatedDto = await this.userRepository.update(user.toDto());
+      const updatedDto = await this.userRepository.update(user.toData());
 
       // Hydrate back to entity
       const updated = new User(updatedDto);

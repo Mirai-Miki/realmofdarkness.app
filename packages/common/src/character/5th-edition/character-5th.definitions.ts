@@ -1,7 +1,7 @@
 import type { ICharacter } from "../character.definitions.js";
 
 import { z } from "zod";
-import { BaseCharacterDtoSchema } from "../character.definitions";
+import { BaseCharacterDataSchema } from "../character.definitions";
 
 // ============================================================================
 // 5th Edition Character Constraints & Schema
@@ -14,7 +14,7 @@ export const Character5thConstraints = {
   DamageTotal: { Min: 0, Max: 20 },
 } as const;
 
-export const Skill5thFieldSchema = z.object({
+export const Skill5thDataSchema = z.object({
   rating: z
     .int()
     .min(Character5thConstraints.Skill.Min)
@@ -29,61 +29,61 @@ export const Skill5thFieldSchema = z.object({
     .default([])
     .readonly(),
 });
-export type Skill5thField = z.infer<typeof Skill5thFieldSchema>;
+export type Skill5thData = z.infer<typeof Skill5thDataSchema>;
 
-const Wod5AttributeSchema = z
+const Wod5AttributeDataSchema = z
   .int()
   .min(Character5thConstraints.Attribute.Min)
   .max(Character5thConstraints.Attribute.Max);
 
-export const Wod5AttributesSchema = z.object({
-  strength: Wod5AttributeSchema,
-  dexterity: Wod5AttributeSchema,
-  stamina: Wod5AttributeSchema,
-  charisma: Wod5AttributeSchema,
-  manipulation: Wod5AttributeSchema,
-  composure: Wod5AttributeSchema,
-  intelligence: Wod5AttributeSchema,
-  wits: Wod5AttributeSchema,
-  resolve: Wod5AttributeSchema,
+export const Wod5AttributesDataSchema = z.object({
+  strength: Wod5AttributeDataSchema,
+  dexterity: Wod5AttributeDataSchema,
+  stamina: Wod5AttributeDataSchema,
+  charisma: Wod5AttributeDataSchema,
+  manipulation: Wod5AttributeDataSchema,
+  composure: Wod5AttributeDataSchema,
+  intelligence: Wod5AttributeDataSchema,
+  wits: Wod5AttributeDataSchema,
+  resolve: Wod5AttributeDataSchema,
 });
-export type Wod5Attributes = z.infer<typeof Wod5AttributesSchema>;
+export type Wod5AttributesData = z.infer<typeof Wod5AttributesDataSchema>;
 
-export const Wod5SkillsSchema = z.object({
+export const Wod5SkillsDataSchema = z.object({
   // Physical
-  athletics: Skill5thFieldSchema,
-  brawl: Skill5thFieldSchema,
-  craft: Skill5thFieldSchema,
-  drive: Skill5thFieldSchema,
-  firearms: Skill5thFieldSchema,
-  melee: Skill5thFieldSchema,
-  larceny: Skill5thFieldSchema,
-  stealth: Skill5thFieldSchema,
-  survival: Skill5thFieldSchema,
+  athletics: Skill5thDataSchema,
+  brawl: Skill5thDataSchema,
+  craft: Skill5thDataSchema,
+  drive: Skill5thDataSchema,
+  firearms: Skill5thDataSchema,
+  melee: Skill5thDataSchema,
+  larceny: Skill5thDataSchema,
+  stealth: Skill5thDataSchema,
+  survival: Skill5thDataSchema,
   // Social
-  animalKen: Skill5thFieldSchema,
-  etiquette: Skill5thFieldSchema,
-  insight: Skill5thFieldSchema,
-  intimidation: Skill5thFieldSchema,
-  leadership: Skill5thFieldSchema,
-  performance: Skill5thFieldSchema,
-  persuasion: Skill5thFieldSchema,
-  streetwise: Skill5thFieldSchema,
-  subterfuge: Skill5thFieldSchema,
+  animalKen: Skill5thDataSchema,
+  etiquette: Skill5thDataSchema,
+  insight: Skill5thDataSchema,
+  intimidation: Skill5thDataSchema,
+  leadership: Skill5thDataSchema,
+  performance: Skill5thDataSchema,
+  persuasion: Skill5thDataSchema,
+  streetwise: Skill5thDataSchema,
+  subterfuge: Skill5thDataSchema,
   // Mental
-  academics: Skill5thFieldSchema,
-  awareness: Skill5thFieldSchema,
-  finance: Skill5thFieldSchema,
-  investigation: Skill5thFieldSchema,
-  medicine: Skill5thFieldSchema,
-  occult: Skill5thFieldSchema,
-  politics: Skill5thFieldSchema,
-  science: Skill5thFieldSchema,
-  technology: Skill5thFieldSchema,
+  academics: Skill5thDataSchema,
+  awareness: Skill5thDataSchema,
+  finance: Skill5thDataSchema,
+  investigation: Skill5thDataSchema,
+  medicine: Skill5thDataSchema,
+  occult: Skill5thDataSchema,
+  politics: Skill5thDataSchema,
+  science: Skill5thDataSchema,
+  technology: Skill5thDataSchema,
 });
-export type Wod5Skills = z.infer<typeof Wod5SkillsSchema>;
+export type Wod5SkillsData = z.infer<typeof Wod5SkillsDataSchema>;
 
-export const DamageTracker5thFieldSchema = z
+export const DamageTracker5thDataSchema = z
   .object({
     total: z
       .int()
@@ -95,10 +95,15 @@ export const DamageTracker5thFieldSchema = z
   .refine((data) => data.superficial + data.aggravated <= data.total, {
     message: "Damage cannot exceed total tracker boxes",
   });
-export type DamageTracker5thField = z.infer<typeof DamageTracker5thFieldSchema>;
+export type DamageTracker5thData = z.infer<typeof DamageTracker5thDataSchema>;
 
-export const Character5thSchema = BaseCharacterDtoSchema.extend({});
-export type Character5thDto = z.infer<typeof Character5thSchema>;
+export const Character5thDataSchema = BaseCharacterDataSchema.extend({
+  health: DamageTracker5thDataSchema,
+  willpower: DamageTracker5thDataSchema,
+  attributes: Wod5AttributesDataSchema,
+  skills: Wod5SkillsDataSchema,
+});
+export type Character5thData = z.infer<typeof Character5thDataSchema>;
 
 // ============================================================================
 // 5th Edition Character Entity Interfaces
@@ -113,19 +118,19 @@ export interface ICharacter5th extends ICharacter {
   get health(): IDamageTracker5th;
 
   // Attributes
-  get attributes(): Wod5Attributes;
+  get attributes(): Wod5AttributesData;
 
   // Skills (value objects)
-  get skills(): Wod5Skills;
+  get skills(): Wod5SkillsData;
 
-  toDto(): Character5thDto;
+  toData(): Character5thData;
 }
 
 /**
  * Damage tracker interface for 5th Edition games.
  * Immutable value object - all operations return new instances.
  */
-export interface IDamageTracker5th extends DamageTracker5thField {
+export interface IDamageTracker5th extends DamageTracker5thData {
   readonly total: number;
   readonly superficial: number;
   readonly aggravated: number;
@@ -150,7 +155,7 @@ export interface IDamageTracker5th extends DamageTracker5thField {
  * Skill value object interface for 5th Edition.
  * Immutable - all operations return new instances.
  */
-export interface ISkill5th extends Skill5thField {
+export interface ISkill5th extends Skill5thData {
   readonly rating: number;
   readonly specialties: readonly string[];
 

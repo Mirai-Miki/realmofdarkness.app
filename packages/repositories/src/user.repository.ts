@@ -5,7 +5,7 @@ import type {
   ILogger,
   Snowflake,
   IUserRepository,
-  UserDto,
+  UserData,
 } from "@realm/common";
 import { UserMapper } from "./mappers/user.mapper.js";
 
@@ -38,10 +38,10 @@ export class UserRepository implements IUserRepository {
    * Find a user by their Discord snowflake ID.
    *
    * @param id - Discord user snowflake ID
-   * @returns User DTO if found, null otherwise
+   * @returns User Data if found, null otherwise
    * @throws {RealmError} If database query fails
    */
-  async findById(id: Snowflake): Promise<UserDto | null> {
+  async findById(id: Snowflake): Promise<UserData | null> {
     try {
       const result = await db
         .select()
@@ -53,7 +53,7 @@ export class UserRepository implements IUserRepository {
         return null;
       }
 
-      return UserMapper.toDto(result[0]);
+      return UserMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to find user by ID", {
         cause: error,
@@ -66,10 +66,10 @@ export class UserRepository implements IUserRepository {
    * Find multiple users by their Discord snowflake IDs.
    *
    * @param ids - Array of Discord user snowflake IDs
-   * @returns Array of User DTOs found
+   * @returns Array of User Data found
    * @throws {RealmError} If database query fails
    */
-  async findManyByIds(ids: Snowflake[]): Promise<UserDto[]> {
+  async findManyByIds(ids: Snowflake[]): Promise<UserData[]> {
     if (ids.length === 0) return [];
 
     try {
@@ -78,7 +78,7 @@ export class UserRepository implements IUserRepository {
         .from(users)
         .where(inArray(users.id, ids));
 
-      return results.map((r) => UserMapper.toDto(r));
+      return results.map((r) => UserMapper.toData(r));
     } catch (error) {
       throw new RealmError("Failed to find users by IDs", {
         cause: error,
@@ -91,10 +91,10 @@ export class UserRepository implements IUserRepository {
    * Find a user by their Discord username.
    *
    * @param username - Discord username (unique)
-   * @returns User entity if found, null otherwise
+   * @returns User Data if found, null otherwise
    * @throws {RealmError} If database query fails
    */
-  async findByUsername(username: string): Promise<UserDto | null> {
+  async findByUsername(username: string): Promise<UserData | null> {
     try {
       const result = await db
         .select()
@@ -106,7 +106,7 @@ export class UserRepository implements IUserRepository {
         return null;
       }
 
-      return UserMapper.toDto(result[0]);
+      return UserMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to find user by username", {
         cause: error,
@@ -120,14 +120,14 @@ export class UserRepository implements IUserRepository {
    *
    * @param limit - Maximum number of results (default: 100)
    * @param offset - Number of results to skip (default: 0)
-   * @returns Array of User DTOs
+   * @returns Array of User Data
    * @throws {RealmError} If database query fails
    */
-  async findAll(limit: number = 100, offset: number = 0): Promise<UserDto[]> {
+  async findAll(limit: number = 100, offset: number = 0): Promise<UserData[]> {
     try {
       const results = await db.select().from(users).limit(limit).offset(offset);
 
-      return results.map((db) => UserMapper.toDto(db));
+      return results.map((db) => UserMapper.toData(db));
     } catch (error) {
       throw new RealmError("Failed to find all users", {
         cause: error,
@@ -142,13 +142,13 @@ export class UserRepository implements IUserRepository {
   /**
    * Create a new user.
    *
-   * @param user - User DTO to create
-   * @returns Created user DTO with updated metadata
+   * @param user - User Data to create
+   * @returns Created user Data with updated metadata
    * @throws {RealmError} If user creation fails or user already exists
    */
-  async create(user: UserDto): Promise<UserDto> {
+  async create(user: UserData): Promise<UserData> {
     try {
-      const dbRecord = UserMapper.fromDto(user);
+      const dbRecord = UserMapper.fromData(user);
 
       const result = await db.insert(users).values(dbRecord).returning();
 
@@ -156,7 +156,7 @@ export class UserRepository implements IUserRepository {
         fields: { userId: result[0].id },
       });
 
-      return UserMapper.toDto(result[0]);
+      return UserMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to create user", {
         cause: error,
@@ -168,13 +168,13 @@ export class UserRepository implements IUserRepository {
   /**
    * Update an existing user.
    *
-   * @param user - User DTO to update
-   * @returns Updated user DTO with refreshed metadata
+   * @param user - User Data to update
+   * @returns Updated user Data with refreshed metadata
    * @throws {RealmError} If update fails or user doesn't exist
    */
-  async update(user: UserDto): Promise<UserDto> {
+  async update(user: UserData): Promise<UserData> {
     try {
-      const dbRecord = UserMapper.fromDto(user);
+      const dbRecord = UserMapper.fromData(user);
 
       const result = await db
         .update(users)
@@ -195,7 +195,7 @@ export class UserRepository implements IUserRepository {
         fields: { userId: result[0].id },
       });
 
-      return UserMapper.toDto(result[0]);
+      return UserMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to update user", {
         cause: error,

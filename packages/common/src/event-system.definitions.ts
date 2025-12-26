@@ -74,7 +74,7 @@ export type EventHandler<T> = (event: T) => void | Promise<void>;
  *     await this.events.publish(
  *       'realm:character:updated',
  *       CharacterUpdatedEventSchema,
- *       { type: 'character:updated', data: character.toDTO() },
+ *       { type: 'character:updated', data: character.toData() },
  *       { characterId: character.id },
  *       { publisherId: options.sourceId }
  *     );

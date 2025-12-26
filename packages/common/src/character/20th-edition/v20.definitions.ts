@@ -1,7 +1,7 @@
 import type { ICharacter20th } from "./character-20th.definitions.js";
 
 import { z } from "zod";
-import { Character20thSchema } from "./character-20th.definitions.js";
+import { Character20thDataSchema } from "./character-20th.definitions.js";
 import { Splat } from "../character.definitions.js";
 
 // ===========================================================================
@@ -13,7 +13,7 @@ export const Vampire20thConstraints = {
   BloodPoolTotal: { min: 1, max: 50 },
 } as const;
 
-export const BloodTrackerFieldSchema = z
+export const BloodTrackerDataSchema = z
   .object({
     current: z
       .int()
@@ -28,13 +28,13 @@ export const BloodTrackerFieldSchema = z
     message: "Current blood cannot exceed maximum blood",
     path: ["current"],
   });
-export type BloodTrackerField = z.infer<typeof BloodTrackerFieldSchema>;
+export type BloodTrackerData = z.infer<typeof BloodTrackerDataSchema>;
 
-export const Vampire20thDtoSchema = Character20thSchema.extend({
+export const Vampire20thDataSchema = Character20thDataSchema.extend({
   splat: z.literal(Splat.Vampire20th),
-  bloodPool: BloodTrackerFieldSchema,
+  bloodPool: BloodTrackerDataSchema,
 });
-export type Vampire20thDto = z.infer<typeof Vampire20thDtoSchema>;
+export type Vampire20thData = z.infer<typeof Vampire20thDataSchema>;
 
 // ============================================================================
 // 20th Edition Vampire Character Entity Interface
@@ -54,13 +54,13 @@ export interface IVampire20th extends ICharacter20th {
   setCurrentBlood(amount: number): void;
   setBloodPool(current: number, total: number): void;
 
-  toDto(): Vampire20thDto;
+  toData(): Vampire20thData;
 }
 
 /**
  * Vampire 20th Blood Pool Tracker Value Object
  */
-export interface IBloodTracker extends BloodTrackerField {
+export interface IBloodTracker extends BloodTrackerData {
   readonly current: number;
   readonly total: number;
 

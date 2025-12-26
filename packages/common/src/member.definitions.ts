@@ -13,29 +13,29 @@ import type { Snowflake } from "./primitives";
 /**
  * Whether the member has admin permissions in this guild.
  */
-export const MemberAdminField = z.boolean();
+export const MemberAdminSchema = z.boolean();
 
 /**
  * Array of Discord role IDs the member has in this guild.
  */
-export const MemberRoleIdsField = z.array(SnowflakeSchema);
+export const MemberRoleIdsSchema = z.array(SnowflakeSchema);
 
 /**
  * Number of boosts this user has assigned to this guild.
  */
-export const MemberBoostCountField = z.int().min(0);
+export const MemberBoostCountSchema = z.int().min(0);
 
 /**
  * Member's nickname in this guild.
  */
-export const MemberNicknameField = z
+export const MemberNicknameSchema = z
   .string()
   .max(UsernameConstraints.MaxLength);
 
 /**
  * Member's avatar URL for this guild.
  */
-export const MemberAvatarUrlField = z.string().max(DiscordCdnUrlMaxLength);
+export const MemberAvatarUrlSchema = z.string().max(DiscordCdnUrlMaxLength);
 
 // ============================================================================
 // Member DTOs
@@ -49,18 +49,18 @@ export const MemberAvatarUrlField = z.string().max(DiscordCdnUrlMaxLength);
  *
  * Uses composite key: userId + guildId
  */
-export const MemberDtoSchema = z.object({
+export const MemberDataSchema = z.object({
   userId: SnowflakeSchema,
   guildId: SnowflakeSchema,
-  admin: MemberAdminField,
-  roleIds: MemberRoleIdsField,
-  boosted: MemberBoostCountField,
-  nickname: MemberNicknameField,
-  avatarUrl: MemberAvatarUrlField,
+  admin: MemberAdminSchema,
+  roleIds: MemberRoleIdsSchema,
+  boosted: MemberBoostCountSchema,
+  nickname: MemberNicknameSchema,
+  avatarUrl: MemberAvatarUrlSchema,
   createdAt: z.date(),
   lastUpdated: z.date(),
 });
-export type MemberDto = z.infer<typeof MemberDtoSchema>;
+export type MemberData = z.infer<typeof MemberDataSchema>;
 
 /**
  * Input DTO for creating a new member.
@@ -71,11 +71,11 @@ export type MemberDto = z.infer<typeof MemberDtoSchema>;
 export const CreateMemberInputSchema = z.object({
   userId: SnowflakeSchema,
   guildId: SnowflakeSchema,
-  admin: MemberAdminField.default(false),
-  roleIds: MemberRoleIdsField.default([]),
-  boosted: MemberBoostCountField.default(0),
-  nickname: MemberNicknameField.default(""),
-  avatarUrl: MemberAvatarUrlField.default(""),
+  admin: MemberAdminSchema.default(false),
+  roleIds: MemberRoleIdsSchema.default([]),
+  boosted: MemberBoostCountSchema.default(0),
+  nickname: MemberNicknameSchema.default(""),
+  avatarUrl: MemberAvatarUrlSchema.default(""),
 });
 export type CreateMemberInput = z.infer<typeof CreateMemberInputSchema>;
 
@@ -87,10 +87,10 @@ export type CreateMemberInput = z.infer<typeof CreateMemberInputSchema>;
 export const SyncMemberInputSchema = z.object({
   userId: SnowflakeSchema,
   guildId: SnowflakeSchema,
-  admin: MemberAdminField,
-  roleIds: MemberRoleIdsField,
-  nickname: MemberNicknameField,
-  avatarUrl: MemberAvatarUrlField,
+  admin: MemberAdminSchema,
+  roleIds: MemberRoleIdsSchema,
+  nickname: MemberNicknameSchema,
+  avatarUrl: MemberAvatarUrlSchema,
 });
 export type SyncMemberInput = z.infer<typeof SyncMemberInputSchema>;
 
@@ -171,44 +171,44 @@ export interface IMemberRepository {
    *
    * @param guildId - Discord guild ID
    * @param userId - Discord user ID
-   * @returns The member DTO if found, null otherwise
+   * @returns The member data if found, null otherwise
    */
   findByGuildAndUser(
     guildId: Snowflake,
     userId: Snowflake
-  ): Promise<MemberDto | null>;
+  ): Promise<MemberData | null>;
 
   /**
    * Find all members in a guild.
    *
    * @param guildId - Discord guild ID
-   * @returns Array of member DTOs in the guild (empty if none)
+   * @returns Array of member data in the guild (empty if none)
    */
-  findByGuild(guildId: Snowflake): Promise<MemberDto[]>;
+  findByGuild(guildId: Snowflake): Promise<MemberData[]>;
 
   /**
    * Find all guilds a user is a member of.
    *
    * @param userId - Discord user ID
-   * @returns Array of member DTOs for this user (empty if none)
+   * @returns Array of member data for this user (empty if none)
    */
-  findByUser(userId: Snowflake): Promise<MemberDto[]>;
+  findByUser(userId: Snowflake): Promise<MemberData[]>;
 
   /**
    * Create a new member record.
    *
-   * @param member - Member DTO to create
-   * @returns The created member DTO with timestamps
+   * @param member - Member data to create
+   * @returns The created member data with timestamps
    */
-  create(member: MemberDto): Promise<MemberDto>;
+  create(member: MemberData): Promise<MemberData>;
 
   /**
    * Update an existing member record.
    *
-   * @param member - Member DTO with updated values
-   * @returns The updated member DTO
+   * @param member - Member data with updated values
+   * @returns The updated member data
    */
-  update(member: MemberDto): Promise<MemberDto>;
+  update(member: MemberData): Promise<MemberData>;
 
   /**
    * Delete a member record.
@@ -246,9 +246,9 @@ export interface IMemberRepository {
    * Find all admin members in a guild.
    *
    * @param guildId - Discord guild ID
-   * @returns Array of admin member DTOs (empty if none)
+   * @returns Array of admin member data (empty if none)
    */
-  findAdminsByGuild(guildId: Snowflake): Promise<MemberDto[]>;
+  findAdminsByGuild(guildId: Snowflake): Promise<MemberData[]>;
 
   /**
    * Find all staff members in a guild.
@@ -257,17 +257,17 @@ export interface IMemberRepository {
    * Fetches the guild's storyteller roles automatically and checks for intersection.
    *
    * @param guildId - Discord guild ID
-   * @returns Array of staff member DTOs (empty if none)
+   * @returns Array of staff member data (empty if none)
    */
-  findStaffMembers(guildId: Snowflake): Promise<MemberDto[]>;
+  findStaffMembers(guildId: Snowflake): Promise<MemberData[]>;
 
   /**
    * Find all boosting members in a guild.
    *
    * @param guildId - Discord guild ID
-   * @returns Array of boosting member DTOs (empty if none)
+   * @returns Array of boosting member data (empty if none)
    */
-  findBoostingMembers(guildId: Snowflake): Promise<MemberDto[]>;
+  findBoostingMembers(guildId: Snowflake): Promise<MemberData[]>;
 
   /**
    * Count the total number of boosts a user has assigned across all guilds.

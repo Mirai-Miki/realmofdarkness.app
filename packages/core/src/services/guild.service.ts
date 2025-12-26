@@ -173,10 +173,8 @@ export class GuildService {
       }
 
       // Persist changes (repository handles updatedAt)
-      const updatedDto = await this.guildRepository.update(guild.toDto());
-
-      // Hydrate DTO back to entity
-      const updated = new Guild(updatedDto);
+    const updatedData = await this.guildRepository.update(guild.toData());
+    const updated = new Guild(updatedData);
 
       this.logger.debug(`Guild updated successfully: ${updated.name}`, {
         fields: { guildId: updated.id },
@@ -261,7 +259,7 @@ export class GuildService {
     const guild = new Guild(dto);
     guild.addStorytellerRole(validatedInput.roleId);
 
-    const updatedDto = await this.guildRepository.update(guild.toDto());
+    const updatedDto = await this.guildRepository.update(guild.toData());
     return new Guild(updatedDto);
   }
 
@@ -291,7 +289,7 @@ export class GuildService {
     const guild = new Guild(dto);
     guild.removeStorytellerRole(validatedInput.roleId);
 
-    const updatedDto = await this.guildRepository.update(guild.toDto());
+    const updatedDto = await this.guildRepository.update(guild.toData());
     return new Guild(updatedDto);
   }
 

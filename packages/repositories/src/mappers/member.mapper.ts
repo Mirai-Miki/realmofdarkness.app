@@ -1,32 +1,32 @@
 import type { MemberDb } from "@realm/database";
-import type { MemberDto } from "@realm/common";
+import type { MemberData } from "@realm/common";
 import { RealmError } from "@realm/common";
 
 /**
- * Mapper for translating between Member database records and Member DTOs.
+ * Mapper for translating between Member database records and Member Data.
  *
  * Handles the conversion of:
- * - Database records (MemberDb) → Data Transfer Objects (MemberDto)
- * - Data Transfer Objects (MemberDto) → Database records (MemberDb)
+ * - Database records (MemberDb) → Data (MemberData)
+ * - Data (MemberData) → Database records (MemberDb)
  *
  * @example
  * ```typescript
- * // Database → DTO
- * const memberDto = MemberMapper.toDto(dbRecord);
+ * // Database → Data
+ * const memberData = MemberMapper.toData(dbRecord);
  *
- * // DTO → Database
- * const dbRecord = MemberMapper.fromDto(memberDto);
+ * // Data → Database
+ * const dbRecord = MemberMapper.fromData(memberData);
  * ```
  */
 export class MemberMapper {
   /**
-   * Convert database record to Member DTO.
+   * Convert database record to Member Data.
    *
    * @param db - Member database record
-   * @returns Member DTO
+   * @returns Member Data
    * @throws {RealmError} If mapping fails
    */
-  static toDto(db: MemberDb): MemberDto {
+  static toData(db: MemberDb): MemberData {
     try {
       return {
         guildId: db.guildId,
@@ -40,7 +40,7 @@ export class MemberMapper {
         lastUpdated: db.lastUpdated,
       };
     } catch (error) {
-      throw new RealmError("Failed to map member from database to DTO", {
+      throw new RealmError("Failed to map member from database to Data", {
         cause: error,
         fields: {
           guildId: db.guildId,
@@ -51,29 +51,29 @@ export class MemberMapper {
   }
 
   /**
-   * Convert Member DTO to database record.
+   * Convert Member Data to database record.
    *
-   * @param dto - Member DTO
+   * @param data - Member Data
    * @returns Database record (without auto-generated timestamps)
    * @throws {RealmError} If mapping fails
    */
-  static fromDto(dto: MemberDto): Omit<MemberDb, "createdAt" | "lastUpdated"> {
+  static fromData(data: MemberData): Omit<MemberDb, "createdAt" | "lastUpdated"> {
     try {
       return {
-        guildId: dto.guildId,
-        userId: dto.userId,
-        admin: dto.admin,
-        roleIds: dto.roleIds,
-        boosted: dto.boosted,
-        nickname: dto.nickname,
-        avatarUrl: dto.avatarUrl,
+        guildId: data.guildId,
+        userId: data.userId,
+        admin: data.admin,
+        roleIds: data.roleIds,
+        boosted: data.boosted,
+        nickname: data.nickname,
+        avatarUrl: data.avatarUrl,
       };
     } catch (error) {
-      throw new RealmError("Failed to map member from DTO to database", {
+      throw new RealmError("Failed to map member from Data to database", {
         cause: error,
         fields: {
-          guildId: dto.guildId,
-          userId: dto.userId,
+          guildId: data.guildId,
+          userId: data.userId,
         },
       });
     }

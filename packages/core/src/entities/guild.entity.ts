@@ -2,7 +2,7 @@ import {
   RealmError,
   GuildNameConstraints,
   DiscordCdnUrlMaxLength,
-  type GuildDto,
+  type GuildData,
 } from "@realm/common";
 
 /**
@@ -11,7 +11,7 @@ import {
  * A Guild represents a Discord server that uses the bot. It manages
  * bot configuration, character tracking, and member permissions for that server.
  *
- * This entity wraps a GuildDto with business logic and validation.
+ * This entity wraps GuildData with business logic and validation.
  *
  * @example
  * ```typescript
@@ -26,39 +26,39 @@ import {
  * });
  *
  * guild.updateTrackerChannel("111222333444555666");
- * const dto = guild.toDto();
+ * const data = guild.toData();
  * ```
  */
 export class Guild {
-  private _dto: GuildDto;
+  private _data: GuildData;
 
-  constructor(dto: GuildDto) {
-    this._dto = { ...dto };
+  constructor(data: GuildData) {
+    this._data = { ...data };
   }
 
   // Getters
   public get id(): string {
-    return this._dto.id;
+    return this._data.id;
   }
 
   public get name(): string {
-    return this._dto.name;
+    return this._data.name;
   }
 
   public get iconUrl(): string | undefined {
-    return this._dto.iconUrl;
+    return this._data.iconUrl;
   }
 
   public get storytellerRoles(): string[] {
-    return this._dto.storytellerRoleIds;
+    return this._data.storytellerRoleIds;
   }
 
   public get createdAt(): Date {
-    return this._dto.createdAt;
+    return this._data.createdAt;
   }
 
   public get updatedAt(): Date {
-    return this._dto.lastUpdated;
+    return this._data.lastUpdated;
   }
 
   // Business methods
@@ -77,7 +77,7 @@ export class Guild {
         `Guild name cannot exceed ${GuildNameConstraints.MaxLength} characters`
       );
     }
-    this._dto.name = name;
+    this._data.name = name;
   }
 
   /**
@@ -91,7 +91,7 @@ export class Guild {
         `Icon URL cannot exceed ${DiscordCdnUrlMaxLength} characters`
       );
     }
-    this._dto.iconUrl = iconUrl;
+    this._data.iconUrl = iconUrl;
   }
 
   /**
@@ -100,8 +100,8 @@ export class Guild {
    * @param roleId - Discord role snowflake ID
    */
   public addStorytellerRole(roleId: string): void {
-    if (!this._dto.storytellerRoleIds.includes(roleId)) {
-      this._dto.storytellerRoleIds.push(roleId);
+    if (!this._data.storytellerRoleIds.includes(roleId)) {
+      this._data.storytellerRoleIds.push(roleId);
     }
   }
 
@@ -111,18 +111,18 @@ export class Guild {
    * @param roleId - Discord role snowflake ID
    */
   public removeStorytellerRole(roleId: string): void {
-    const index = this._dto.storytellerRoleIds.indexOf(roleId);
+    const index = this._data.storytellerRoleIds.indexOf(roleId);
     if (index > -1) {
-      this._dto.storytellerRoleIds.splice(index, 1);
+      this._data.storytellerRoleIds.splice(index, 1);
     }
   }
 
   /**
-   * Extract the DTO from this entity.
+   * Extract the Data from this entity.
    *
-   * @returns Guild DTO for persistence
+   * @returns Guild Data for persistence
    */
-  public toDto(): GuildDto {
-    return { ...this._dto };
+  public toData(): GuildData {
+    return { ...this._data };
   }
 }

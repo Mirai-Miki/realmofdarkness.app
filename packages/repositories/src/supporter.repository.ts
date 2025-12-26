@@ -5,7 +5,7 @@ import type {
   ILogger,
   Snowflake,
   ISupporterRepository,
-  SupporterDto,
+  SupporterData,
 } from "@realm/common";
 import { SupporterMapper } from "./mappers/supporter.mapper.js";
 
@@ -40,10 +40,10 @@ export class SupporterRepository implements ISupporterRepository {
    * This ensures consistency - all users have supporter limits even if not subscribed.
    *
    * @param userId - Discord user snowflake ID
-   * @returns Supporter entity (never null - defaults to Base tier)
+   * @returns Supporter Data (never null - defaults to Base tier)
    * @throws {RealmError} If database query fails
    */
-  async findByUserId(userId: Snowflake): Promise<SupporterDto> {
+  async findByUserId(userId: Snowflake): Promise<SupporterData> {
     try {
       const result = await db
         .select()
@@ -61,7 +61,7 @@ export class SupporterRepository implements ISupporterRepository {
         };
       }
 
-      return SupporterMapper.toDto(result[0]);
+      return SupporterMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to find supporter by user ID", {
         cause: error,
@@ -75,13 +75,13 @@ export class SupporterRepository implements ISupporterRepository {
    *
    * @param limit - Maximum number of results (default: 100)
    * @param offset - Number of results to skip (default: 0)
-   * @returns Array of Supporter entities
+   * @returns Array of Supporter Data
    * @throws {RealmError} If database query fails
    */
   async findAll(
     limit: number = 100,
     offset: number = 0
-  ): Promise<SupporterDto[]> {
+  ): Promise<SupporterData[]> {
     try {
       const results = await db
         .select()
@@ -89,7 +89,7 @@ export class SupporterRepository implements ISupporterRepository {
         .limit(limit)
         .offset(offset);
 
-      return results.map((db) => SupporterMapper.toDto(db));
+      return results.map((db) => SupporterMapper.toData(db));
     } catch (error) {
       throw new RealmError("Failed to find all supporters", {
         cause: error,
@@ -107,14 +107,14 @@ export class SupporterRepository implements ISupporterRepository {
    * @param level - Supporter tier level
    * @param limit - Maximum number of results (default: 100)
    * @param offset - Number of results to skip (default: 0)
-   * @returns Array of Supporter entities
+   * @returns Array of Supporter Data
    * @throws {RealmError} If database query fails
    */
   async findByLevel(
     level: SupporterLevel,
     limit: number = 100,
     offset: number = 0
-  ): Promise<SupporterDto[]> {
+  ): Promise<SupporterData[]> {
     try {
       const results = await db
         .select()
@@ -123,7 +123,7 @@ export class SupporterRepository implements ISupporterRepository {
         .limit(limit)
         .offset(offset);
 
-      return results.map((db) => SupporterMapper.toDto(db));
+      return results.map((db) => SupporterMapper.toData(db));
     } catch (error) {
       throw new RealmError("Failed to find supporters by level", {
         cause: error,
@@ -141,13 +141,13 @@ export class SupporterRepository implements ISupporterRepository {
    *
    * @param limit - Maximum number of results (default: 100)
    * @param offset - Number of results to skip (default: 0)
-   * @returns Array of Supporter entities with totalBoosts > 0
+   * @returns Array of Supporter Data with totalBoosts > 0
    * @throws {RealmError} If database query fails
    */
   async findWithAvailableBoosts(
     limit: number = 100,
     offset: number = 0
-  ): Promise<SupporterDto[]> {
+  ): Promise<SupporterData[]> {
     try {
       const results = await db
         .select()
@@ -156,7 +156,7 @@ export class SupporterRepository implements ISupporterRepository {
         .limit(limit)
         .offset(offset);
 
-      return results.map((db) => SupporterMapper.toDto(db));
+      return results.map((db) => SupporterMapper.toData(db));
     } catch (error) {
       throw new RealmError("Failed to find supporters with available boosts", {
         cause: error,
@@ -171,13 +171,13 @@ export class SupporterRepository implements ISupporterRepository {
   /**
    * Create a new supporter subscription.
    *
-   * @param supporter - Supporter entity to create
-   * @returns Created supporter entity with updated metadata
+   * @param supporter - Supporter Data to create
+   * @returns Created supporter Data with updated metadata
    * @throws {RealmError} If creation fails or supporter already exists
    */
-  async create(supporter: SupporterDto): Promise<SupporterDto> {
+  async create(supporter: SupporterData): Promise<SupporterData> {
     try {
-      const dbRecord = SupporterMapper.fromDto(supporter);
+      const dbRecord = SupporterMapper.fromData(supporter);
 
       const result = await db.insert(supporters).values(dbRecord).returning();
 
@@ -188,7 +188,7 @@ export class SupporterRepository implements ISupporterRepository {
         },
       });
 
-      return SupporterMapper.toDto(result[0]);
+      return SupporterMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to create supporter", {
         cause: error,
@@ -202,13 +202,13 @@ export class SupporterRepository implements ISupporterRepository {
   /**
    * Update an existing supporter subscription.
    *
-   * @param supporter - Supporter entity to update
-   * @returns Updated supporter entity with refreshed metadata
+   * @param supporter - Supporter Data to update
+   * @returns Updated supporter Data with refreshed metadata
    * @throws {RealmError} If update fails or supporter doesn't exist
    */
-  async update(supporter: SupporterDto): Promise<SupporterDto> {
+  async update(supporter: SupporterData): Promise<SupporterData> {
     try {
-      const dbRecord = SupporterMapper.fromDto(supporter);
+      const dbRecord = SupporterMapper.fromData(supporter);
 
       const result = await db
         .update(supporters)
@@ -231,7 +231,7 @@ export class SupporterRepository implements ISupporterRepository {
         },
       });
 
-      return SupporterMapper.toDto(result[0]);
+      return SupporterMapper.toData(result[0]);
     } catch (error) {
       throw new RealmError("Failed to update supporter", {
         cause: error,

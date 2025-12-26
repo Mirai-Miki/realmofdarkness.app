@@ -1,4 +1,4 @@
-import { RealmError, SupporterLevel, type SupporterDto } from "@realm/common";
+import { RealmError, SupporterLevel, type SupporterData } from "@realm/common";
 
 /**
  * Character sheet limits per supporter tier.
@@ -51,7 +51,7 @@ export const SUPPORTER_LEVEL_VALUES: Record<SupporterLevel, number> = {
  * Handles subscription level, boost allocation, and billing concerns.
  * This is separate from User to maintain single responsibility.
  *
- * This entity wraps a SupporterDto with business logic and validation.
+ * This entity wraps SupporterData with business logic and validation.
  *
  * @example
  * ```typescript
@@ -66,30 +66,30 @@ export const SUPPORTER_LEVEL_VALUES: Record<SupporterLevel, number> = {
  * });
  *
  * const maxSheets = supporter.getSheetLimit();
- * const dto = supporter.toDto();
+ * const data = supporter.toData();
  * ```
  */
 export class Supporter {
-  private _dto: SupporterDto;
+  private _data: SupporterData;
 
-  constructor(dto: SupporterDto) {
-    this._dto = { ...dto };
+  constructor(data: SupporterData) {
+    this._data = { ...data };
   }
-  // Getters - access DTO properties
+  // Getters - access Data properties
   public get userId(): string {
-    return this._dto.userId;
+    return this._data.userId;
   }
 
   public get level(): SupporterLevel {
-    return this._dto.level;
+    return this._data.level;
   }
 
   public get boosts(): number {
-    return this._dto.boosts;
+    return this._data.boosts;
   }
 
   public get firstSupported(): Date | null {
-    return this._dto.firstSupported;
+    return this._data.firstSupported;
   }
 
   // Business methods
@@ -98,28 +98,28 @@ export class Supporter {
    * Check if the user is an active supporter (not Base tier).
    */
   public isActive(): boolean {
-    return this._dto.level !== SupporterLevel.Base;
+    return this._data.level !== SupporterLevel.Base;
   }
 
   /**
    * Get the supporter's tier level.
    */
   public getLevel(): SupporterLevel {
-    return this._dto.level;
+    return this._data.level;
   }
 
   /**
    * Check if the supporter has used any boosts.
    */
   public hasUsedBoosts(): boolean {
-    return this._dto.boosts > 0;
+    return this._data.boosts > 0;
   }
 
   /**
    * Get the number of boosts currently used.
    */
   public getBoostsUsed(): number {
-    return this._dto.boosts;
+    return this._data.boosts;
   }
 
   /**
@@ -128,22 +128,22 @@ export class Supporter {
    * @param newLevel - New supporter tier
    */
   public updateLevel(newLevel: SupporterLevel): void {
-    this._dto.level = newLevel;
+    this._data.level = newLevel;
   }
 
   /**
    * Allocate a server boost.
    */
   public allocateBoost(): void {
-    this._dto.boosts += 1;
+    this._data.boosts += 1;
   }
 
   /**
    * Deallocate a server boost.
    */
   public deallocateBoost(): void {
-    if (this._dto.boosts > 0) {
-      this._dto.boosts -= 1;
+    if (this._data.boosts > 0) {
+      this._data.boosts -= 1;
     }
   }
 
@@ -154,11 +154,11 @@ export class Supporter {
    * @returns True if supporter has been active for at least this long
    */
   public hasSupportedForMonths(months: number): boolean {
-    if (!this._dto.firstSupported) return false;
+    if (!this._data.firstSupported) return false;
 
     const now = new Date();
     const monthsDiff =
-      (now.getTime() - this._dto.firstSupported.getTime()) /
+      (now.getTime() - this._data.firstSupported.getTime()) /
       (1000 * 60 * 60 * 24 * 30);
 
     return monthsDiff >= months;
@@ -168,14 +168,14 @@ export class Supporter {
    * Get the character sheet limit for this supporter tier.
    */
   public getSheetLimit(): number {
-    return SUPPORTER_SHEET_LIMITS[this._dto.level];
+    return SUPPORTER_SHEET_LIMITS[this._data.level];
   }
 
   /**
    * Get the tracker limit for this supporter tier.
    */
   public getTrackerLimit(): number {
-    return SUPPORTER_TRACKER_LIMITS[this._dto.level];
+    return SUPPORTER_TRACKER_LIMITS[this._data.level];
   }
 
   /**
@@ -183,7 +183,7 @@ export class Supporter {
    * Useful for comparisons.
    */
   public getLevelValue(): number {
-    return SUPPORTER_LEVEL_VALUES[this._dto.level];
+    return SUPPORTER_LEVEL_VALUES[this._data.level];
   }
 
   /**
@@ -197,11 +197,11 @@ export class Supporter {
   }
 
   /**
-   * Extract the DTO from this entity.
+   * Extract the Data from this entity.
    * Returns a copy to prevent external mutation.
    */
-  public toDto(): SupporterDto {
-    return { ...this._dto };
+  public toData(): SupporterData {
+    return { ...this._data };
   }
 }
 

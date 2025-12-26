@@ -1,32 +1,32 @@
 import type { UserDb } from "@realm/database";
-import type { UserDto } from "@realm/common";
+import type { UserData } from "@realm/common";
 import { RealmError } from "@realm/common";
 
 /**
- * Mapper for translating between User database records and User DTOs.
+ * Mapper for translating between User database records and User Data.
  *
  * Handles the conversion of:
- * - Database records (UserDb) → DTOs (UserDto)
- * - DTOs (UserDto) → Database records (UserDb)
+ * - Database records (UserDb) → Data (UserData)
+ * - Data (UserData) → Database records (UserDb)
  *
  * @example
  * ```typescript
- * // Database → DTO
- * const userDto = UserMapper.toDto(dbRecord);
+ * // Database → Data
+ * const userData = UserMapper.toData(dbRecord);
  *
- * // DTO → Database
- * const dbRecord = UserMapper.fromDto(userDto);
+ * // Data → Database
+ * const dbRecord = UserMapper.fromData(userData);
  * ```
  */
 export class UserMapper {
   /**
-   * Convert database record to User DTO.
+   * Convert database record to User Data.
    *
    * @param db - User database record
-   * @returns User DTO
+   * @returns User Data
    * @throws {RealmError} If mapping fails
    */
-  static toDto(db: UserDb): UserDto {
+  static toData(db: UserDb): UserData {
     try {
       return {
         id: db.id,
@@ -41,7 +41,7 @@ export class UserMapper {
         lastActive: db.lastActive,
       };
     } catch (error) {
-      throw new RealmError("Failed to map user from database to DTO", {
+      throw new RealmError("Failed to map user from database to Data", {
         cause: error,
         fields: { userId: db.id },
       });
@@ -49,27 +49,27 @@ export class UserMapper {
   }
 
   /**
-   * Convert User DTO to database record.
+   * Convert User Data to database record.
    *
-   * @param dto - User DTO
+   * @param data - User Data
    * @returns User database record (without timestamps for insert)
    * @throws {RealmError} If mapping fails
    */
-  static fromDto(
-    dto: UserDto
+  static fromData(
+    data: UserData
   ): Omit<UserDb, "createdAt" | "updatedAt" | "lastActive"> {
     try {
       return {
-        id: dto.id,
-        username: dto.username,
-        displayName: dto.displayName,
-        email: "", // Not in DTO, set by auth system
-        avatarUrl: dto.avatarUrl || "",
-        registered: true, // Implied by existence of DTO
+        id: data.id,
+        username: data.username,
+        displayName: data.displayName,
+        email: "", // Not in Data, set by auth system
+        avatarUrl: data.avatarUrl || "",
+        registered: true, // Implied by existence of Data
         admin: false, // Set by separate admin management
       };
     } catch (error) {
-      throw new RealmError("Failed to map user from DTO to database", {
+      throw new RealmError("Failed to map user from Data to database", {
         cause: error,
       });
     }
