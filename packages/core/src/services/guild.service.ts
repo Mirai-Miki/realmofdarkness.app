@@ -173,8 +173,8 @@ export class GuildService {
       }
 
       // Persist changes (repository handles updatedAt)
-    const updatedData = await this.guildRepository.update(guild.toData());
-    const updated = new Guild(updatedData);
+      const updatedData = await this.guildRepository.update(guild.toData());
+      const updated = new Guild(updatedData);
 
       this.logger.debug(`Guild updated successfully: ${updated.name}`, {
         fields: { guildId: updated.id },

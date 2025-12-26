@@ -57,7 +57,9 @@ export class MemberMapper {
    * @returns Database record (without auto-generated timestamps)
    * @throws {RealmError} If mapping fails
    */
-  static fromData(data: MemberData): Omit<MemberDb, "createdAt" | "lastUpdated"> {
+  static fromData(
+    data: MemberData
+  ): Omit<MemberDb, "createdAt" | "lastUpdated"> {
     try {
       return {
         guildId: data.guildId,

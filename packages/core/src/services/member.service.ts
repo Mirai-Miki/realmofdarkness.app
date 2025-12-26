@@ -164,7 +164,7 @@ export class MemberService {
       member.setRoleIds(validatedInput.roleIds);
 
       // Persist changes (repository handles lastUpdated)
-    const updatedDto = await this.memberRepository.update(member.toData());
+      const updatedDto = await this.memberRepository.update(member.toData());
 
       this.logger.debug("Member profile synced", {
         fields: {
