@@ -8,6 +8,7 @@ import {
   integer,
   primaryKey,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { users } from "./users";
 import { guilds } from "./guilds";
 import { snowflake } from "../schema_types";
@@ -50,6 +51,18 @@ export const members = pgTable(
   },
   (table) => [primaryKey({ columns: [table.guildId, table.userId] })]
 );
+
+// Define relations
+export const membersRelations = relations(members, ({ one }) => ({
+  user: one(users, {
+    fields: [members.userId],
+    references: [users.id],
+  }),
+  guild: one(guilds, {
+    fields: [members.guildId],
+    references: [guilds.id],
+  }),
+}));
 
 // Type exports for use in other parts of the application
 export type MemberDb = InferSelectModel<typeof members>;

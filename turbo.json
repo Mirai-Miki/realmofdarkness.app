@@ -7,7 +7,18 @@
     "ENABLE_DISCORD_LOGGING",
     "LOGGER_TOKEN",
     "LOGGER_CHANNEL_ID",
-    "LOG_FILE_PATH"
+    "LOG_FILE_PATH",
+    "CLIENT_ID_5TH",
+    "CLIENT_ID_20TH",
+    "CLIENT_ID_COD",
+    "TOKEN_5TH",
+    "TOKEN_20TH",
+    "TOKEN_COD",
+    "DEV_SERVER_ID",
+    "ERROR_CHANNEL_ID",
+    "EMOJI_SCRIPT_TOKEN",
+    "API_PORT",
+    "API_KEY"
   ],
   "tasks": {
     "build": {
@@ -40,6 +51,19 @@
         "LOGGER_CHANNEL_ID",
         "LOG_FILE_PATH"
       ]
+    },
+    "migrate": {
+      "cache": false,
+      "env": ["DATABASE_URL", "NODE_ENV"]
+    },
+    "generate": {
+      "cache": false,
+      "env": ["DATABASE_URL", "NODE_ENV"]
+    },
+    "studio": {
+      "cache": false,
+      "persistent": true,
+      "env": ["DATABASE_URL", "NODE_ENV"]
     }
   }
 }

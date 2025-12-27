@@ -1,70 +1,60 @@
 # Environment Variables Setup
 
-This monorepo uses a **hierarchical environment variable system** where root-level variables are automatically shared across all packages via Turbo.
+This monorepo uses a **single root `.env` file** for all environment configuration.
 
 ## 📁 File Structure
 
 ```
 realm-of-darkness/
-├── .env                          # Root environment (shared across all packages)
-├── .env.example                  # Root template
-├── apps/
-│   ├── api/
-│   │   ├── .env                  # API-specific overrides (optional)
-│   │   └── .env.example          # API template
-│   ├── bot/
-│   │   ├── .env                  # Bot-specific variables
-│   │   └── .env.example          # Bot template
-│   └── frontend/
-│       ├── .env                  # Frontend-specific variables
-│       └── .env.example          # Frontend template
-└── packages/
-    └── database/
-        ├── .env                  # Usually not needed (inherits from root)
-        └── .env.example          # Database template
+├── .env                          # ALL environment variables (single source of truth)
+└── .env.example                  # Template for all variables
 ```
 
 ## 🔄 How It Works
 
-### 1. **Root `.env` File** (Shared Variables)
+### Single Root `.env` File
 
-The root `.env` file contains variables that are **automatically available** to all packages:
+All environment variables live in the **root `.env` file**. Each app/package loads this file at startup:
 
-- `NODE_ENV` - Environment mode (development/production/preprod)
+```typescript
+// At the top of each app's entry point
+import { config } from "dotenv";
+import { resolve } from "path";
+
+// Load root .env
+config({ path: resolve(__dirname, "../../../.env") });
+```
+
+### Variables in Root `.env`
+
+- `NODE_ENV` - Environment mode (development/production)
 - `DATABASE_URL` - PostgreSQL connection string
 - `ENABLE_CONSOLE_LOGGING` - Logger console output
 - `ENABLE_DISCORD_LOGGING` - Logger Discord integration
 - `LOGGER_TOKEN` - Discord bot token for logging
 - `LOGGER_CHANNEL_ID` - Discord channel for logs
 - `LOG_FILE_PATH` - Custom log file location
+- `CLIENT_ID_*` - Discord bot client IDs
+- `TOKEN_*` - Discord bot tokens
+- `DEV_SERVER_ID` - Development Discord server
+- `ERROR_CHANNEL_ID` - Error logging channel
+- `API_PORT` - API server port
+- `API_KEY` - API authentication key
 
-These are configured in `turbo.json` under `globalEnv` and automatically passed to all tasks.
+### Turborepo Cache Invalidation
 
-### 2. **Package-Specific `.env` Files** (Overrides & Additions)
-
-Each package can have its own `.env` file for:
-
-- **Package-specific variables** (e.g., Discord bot tokens, API keys)
-- **Overriding root variables** (if needed for testing)
-
-**Priority:** Package `.env` > Root `.env`
+The `turbo.json` `globalEnv` array tells Turbo which environment variables to watch for cache invalidation. When these change, Turbo rebuilds affected packages.
 
 ## 🚀 Quick Setup
 
 ### First Time Setup
 
 ```bash
-# 1. Copy all example files to create your .env files
+# 1. Copy example file to create your .env
 cp .env.example .env
-cp apps/bot/.env.example apps/bot/.env
-cp apps/api/.env.example apps/api/.env
-cp apps/frontend/.env.example apps/frontend/.env
 
-# 2. Edit the root .env file with your shared configuration
-# Set NODE_ENV, DATABASE_URL, and logging preferences
-
-# 3. Edit package-specific .env files
-# Add Discord tokens, API keys, etc.
+# 2. Edit .env with your configuration
+# Set DATABASE_URL, Discord tokens, API keys, etc.
 ```
 
 ### Changing Environment (dev → preprod → prod)
@@ -168,11 +158,13 @@ NODE_ENV=development  # Overrides root NODE_ENV for API only
 
 ## ✅ Checklist for New Developers
 
-- [ ] Copy all `.env.example` files to `.env`
+- [ ] Copy `.env.example` to `.env`
 - [ ] Set `NODE_ENV=development` in root `.env`
 - [ ] Configure `DATABASE_URL` in root `.env`
-- [ ] Add Discord bot tokens to `apps/bot/.env`
-- [ ] Set API key in `apps/api/.env` (must match bot's API_KEY)
+- [ ] Add Discord bot client IDs (`CLIENT_ID_*`)
+- [ ] Add Discord bot tokens (`TOKEN_*`)
+- [ ] Set `DEV_SERVER_ID` to your test Discord server
+- [ ] Set `API_KEY` (must match between API and bot)
 - [ ] Test with `pnpm dev`
 - [ ] Verify environment variables are loading correctly
 

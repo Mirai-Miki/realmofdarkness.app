@@ -17,7 +17,8 @@
     "typecheck": "tsc --noEmit",
     "generate": "drizzle-kit generate --config=src/drizzle.config.ts",
     "migrate": "drizzle-kit migrate --config=src/drizzle.config.ts",
-    "studio": "drizzle-kit studio --config=src/drizzle.config.ts"
+    "studio": "drizzle-kit studio --config=src/drizzle.config.ts",
+    "reset": "tsx scripts/reset-db.ts"
   },
   "dependencies": {
     "@realm/common": "workspace:*",

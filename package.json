@@ -11,9 +11,10 @@
     "clean": "node scripts/clean.mjs",
     "clean:dist": "turbo run clean",
     "clean-build": "pnpm clean && pnpm install && pnpm build",
-    "db:migrate": "pnpm --filter database exec drizzle-kit migrate",
+    "db:migrate": "pnpm --filter database run migrate",
     "db:generate": "pnpm --filter database run generate",
     "db:studio": "pnpm --filter database run studio",
+    "db:reset": "pnpm --filter database run reset",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\""
   },

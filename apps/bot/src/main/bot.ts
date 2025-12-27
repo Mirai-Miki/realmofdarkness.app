@@ -40,8 +40,8 @@ import {
   BotEventSchema,
 } from "../types/bot.definitions";
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from root .env file
+dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
 
 /**
  * Type-safe dynamic import helper for bot commands using Zod validation

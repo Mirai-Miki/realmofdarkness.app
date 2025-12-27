@@ -652,8 +652,8 @@ realm-of-darkness/
    ```
 
 3. **Environment variables**: See [ENV_SETUP.md](../ENV_SETUP.md)
-   - Root `.env` for shared variables (DATABASE_URL, logging config)
-   - App-specific `.env` files for app secrets (Discord tokens, API keys)
+   - Single root `.env` file contains ALL environment variables
+   - No package/app-specific `.env` files needed
 
 ### Development Commands
 

@@ -1,3 +1,5 @@
+CREATE TYPE "public"."character_splats" AS ENUM('vampire5th', 'hunter5th', 'werewolf5th', 'human5th', 'ghoul5th', 'vampire20th', 'werewolf20th', 'changeling20th', 'mage20th', 'demon20th', 'wraith20th', 'human20th', 'ghoul20th');--> statement-breakpoint
+CREATE TYPE "public"."supporter_level" AS ENUM('base', 'mortal', 'fledgling', 'neonate', 'ancilla', 'elder', 'methuselah', 'antediluvian');--> statement-breakpoint
 CREATE TABLE "characters" (
 	"id" bigint PRIMARY KEY NOT NULL,
 	"name" varchar(50) NOT NULL,

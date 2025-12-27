@@ -1,8 +1,10 @@
 import type { InferSelectModel } from "drizzle-orm";
 
 import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { GuildNameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
 import { snowflake } from "../schema_types";
+import { members } from "./members";
 
 /**
  * Guild table - represents a Discord Guild/Server that uses the bot
@@ -24,6 +26,11 @@ export const guilds = pgTable("guilds", {
   createdAt: timestamp().defaultNow().notNull(),
   lastUpdated: timestamp().defaultNow().notNull(),
 });
+
+// Define relations
+export const guildsRelations = relations(guilds, ({ many }) => ({
+  members: many(members),
+}));
 
 // Type exports for use in other parts of the application
 export type GuildDb = InferSelectModel<typeof guilds>;

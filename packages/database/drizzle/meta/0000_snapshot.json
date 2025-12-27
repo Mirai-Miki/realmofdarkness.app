@@ -1,5 +1,5 @@
 {
-  "id": "3b308ae0-9bf4-4540-a1b6-7f94fbc24d41",
+  "id": "37dcc630-2dcc-4c52-bac5-070139342626",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -602,7 +602,41 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.character_splats": {
+      "name": "character_splats",
+      "schema": "public",
+      "values": [
+        "vampire5th",
+        "hunter5th",
+        "werewolf5th",
+        "human5th",
+        "ghoul5th",
+        "vampire20th",
+        "werewolf20th",
+        "changeling20th",
+        "mage20th",
+        "demon20th",
+        "wraith20th",
+        "human20th",
+        "ghoul20th"
+      ]
+    },
+    "public.supporter_level": {
+      "name": "supporter_level",
+      "schema": "public",
+      "values": [
+        "base",
+        "mortal",
+        "fledgling",
+        "neonate",
+        "ancilla",
+        "elder",
+        "methuselah",
+        "antediluvian"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},

@@ -26,7 +26,7 @@ export interface CharacterJsonbData {
  * Character Splat types Enum
  */
 const splatValues = Object.values(Splat) as [string, ...string[]];
-const characterSplats = pgEnum("character_splats", splatValues);
+export const characterSplats = pgEnum("character_splats", splatValues);
 
 /**
  * Base Character table - contains all common character data
