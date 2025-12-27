@@ -7,7 +7,7 @@ import type {
   SheetStatus,
 } from "@realm/common";
 
-import { UserError, NameSchema, BaseCharacterDataSchema } from "@realm/common";
+import { RealmError } from "@realm/common";
 import { Experience } from "./value-objects/experience.vo";
 
 /**
@@ -20,15 +20,18 @@ import { Experience } from "./value-objects/experience.vo";
  *
  * All character-specific behavior is implemented in subclasses (Character5th,
  * Character20th, Vampire5th, etc.).
+ *
+ * This entity trusts that data passed to constructor is already validated at
+ * boundaries (API/Bot edge, Repository edge). It only prevents internal
+ * mutations that would violate business rules.
  */
 export abstract class Character implements ICharacter {
   protected data: BaseCharacterData;
   protected _experience: IExperience;
 
   constructor(data: BaseCharacterData) {
-    // Validate Data with Zod schema
-    const validated = BaseCharacterDataSchema.parse(data);
-    this.data = validated;
+    // Trust the data - already validated at boundary
+    this.data = data;
 
     // Initialize experience value object
     this._experience = new Experience({
@@ -68,9 +71,7 @@ export abstract class Character implements ICharacter {
   }
 
   set name(value: string) {
-    // Use Zod for validation
-    const validated = NameSchema.parse(value);
-    this.data.name = validated;
+    this.data.name = value;
   }
 
   get guildId(): Snowflake | null {
@@ -129,8 +130,8 @@ export abstract class Character implements ICharacter {
 
   spendExperience(cost: number): void {
     if (!this.canAffordExperience(cost)) {
-      throw new UserError(
-        `Insufficient experience. Need ${cost}, have ${this._experience.current}`,
+      throw new RealmError(
+        "Attempted to spend more experience than available",
         {
           fields: {
             cost: cost.toString(),

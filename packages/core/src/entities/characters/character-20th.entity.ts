@@ -7,7 +7,6 @@ import type {
   Wod20SkillsData,
 } from "@realm/common";
 
-import { Character20thDataSchema } from "@realm/common";
 import { Character } from "./character.entity";
 import { HealthTracker20th } from "./value-objects/health-tracker-20th.vo";
 import { WillpowerTracker20th } from "./value-objects/willpower-tracker-20th.vo";
@@ -29,6 +28,10 @@ import { WillpowerTracker20th } from "./value-objects/willpower-tracker-20th.vo"
  * - 9 Attributes with specialties
  * - Skills (Talents/Skills/Knowledges) with specialties
  * - Willpower (current/total)
+ *
+ * This entity trusts that data passed to constructor is already validated at
+ * boundaries (API/Bot edge, Repository edge). It only prevents internal
+ * mutations that would violate business rules.
  */
 export abstract class Character20th
   extends Character
@@ -40,15 +43,14 @@ export abstract class Character20th
   protected _skills: Wod20SkillsData;
 
   constructor(data: Character20thData) {
-    // Validate with Zod schema
-    const validated = Character20thDataSchema.parse(data);
-    super(validated);
+    // Trust the data - already validated at boundary
+    super(data);
 
     // Initialize from actual Data
-    this._health = new HealthTracker20th(validated.health);
-    this._willpower = new WillpowerTracker20th(validated.willpower);
-    this._attributes = validated.attributes;
-    this._skills = validated.skills;
+    this._health = new HealthTracker20th(data.health);
+    this._willpower = new WillpowerTracker20th(data.willpower);
+    this._attributes = data.attributes;
+    this._skills = data.skills;
   }
 
   // ============================================================================

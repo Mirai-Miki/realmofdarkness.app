@@ -1,6 +1,6 @@
 import type { Vampire20thData, IBloodTracker } from "@realm/common";
 import type { IVampire20th } from "@realm/common";
-import { Splat, Vampire20thDataSchema } from "@realm/common";
+import { Splat } from "@realm/common";
 
 import { Character20th } from "./character-20th.entity";
 import { BloodTracker } from "./value-objects/blood-tracker.vo";
@@ -19,17 +19,20 @@ import { BloodTracker } from "./value-objects/blood-tracker.vo";
  * - Disciplines: Vampiric powers
  * - Clan: Vampire bloodline
  * - Humanity/Path rating
+ *
+ * This entity trusts that data passed to constructor is already validated at
+ * boundaries (API/Bot edge, Repository edge). It only prevents internal
+ * mutations that would violate business rules.
  */
 export class Vampire20th extends Character20th implements IVampire20th {
   private _bloodPool: IBloodTracker;
 
   constructor(data: Vampire20thData) {
-    // Validate with Zod schema
-    const validated = Vampire20thDataSchema.parse(data);
-    super(validated);
+    // Trust the data - already validated at boundary
+    super(data);
 
     // Initialize from actual Data
-    this._bloodPool = new BloodTracker(validated.bloodPool);
+    this._bloodPool = new BloodTracker(data.bloodPool);
   }
 
   // ============================================================================

@@ -1,5 +1,5 @@
 import type { IBloodTracker, BloodTrackerData } from "@realm/common";
-import { BloodTrackerDataSchema, UserError } from "@realm/common";
+import { RealmError } from "@realm/common";
 
 /**
  * Vampire 20th Anniversary blood pool tracker value object.
@@ -17,36 +17,35 @@ import { BloodTrackerDataSchema, UserError } from "@realm/common";
  * - Increase physical attributes
  * - Power disciplines
  * - Stay awake during the day
+ *
+ * This VO trusts that data passed to constructor is already validated at
+ * boundaries (API/Bot edge, Repository edge). It only prevents internal
+ * mutations that would violate business rules.
  */
 export class BloodTracker implements IBloodTracker {
   readonly current: number;
   readonly total: number;
 
   constructor(data: BloodTrackerData) {
-    // Validate with Zod schema
-    const validated = BloodTrackerDataSchema.parse(data);
-
-    this.current = validated.current;
-    this.total = validated.total;
+    // Trust the data - already validated at boundary
+    this.current = data.current;
+    this.total = data.total;
   }
 
   spend(amount: number): IBloodTracker {
     if (amount < 0) {
-      throw new UserError("Cannot spend negative blood", {
+      throw new RealmError("Attempted to spend negative blood", {
         fields: { amount: amount.toString() },
       });
     }
 
     if (amount > this.current) {
-      throw new UserError(
-        `Insufficient blood. Need ${amount}, have ${this.current}`,
-        {
-          fields: {
-            amount: amount.toString(),
-            current: this.current.toString(),
-          },
-        }
-      );
+      throw new RealmError("Attempted to spend more blood than available", {
+        fields: {
+          amount: amount.toString(),
+          current: this.current.toString(),
+        },
+      });
     }
 
     return new BloodTracker({
@@ -57,7 +56,7 @@ export class BloodTracker implements IBloodTracker {
 
   slake(amount: number): IBloodTracker {
     if (amount < 0) {
-      throw new UserError("Cannot slake negative blood", {
+      throw new RealmError("Attempted to slake negative blood", {
         fields: { amount: amount.toString() },
       });
     }
@@ -70,13 +69,13 @@ export class BloodTracker implements IBloodTracker {
 
   setCurrent(amount: number): IBloodTracker {
     if (amount < 0) {
-      throw new UserError("Current blood cannot be negative", {
+      throw new RealmError("Attempted to set negative current blood", {
         fields: { amount: amount.toString() },
       });
     }
 
     if (amount > this.total) {
-      throw new UserError("Current blood cannot exceed total", {
+      throw new RealmError("Attempted to set current blood exceeding total", {
         fields: { amount: amount.toString(), total: this.total.toString() },
       });
     }
@@ -89,7 +88,7 @@ export class BloodTracker implements IBloodTracker {
 
   setMax(amount: number): IBloodTracker {
     if (amount < 1 || amount > 50) {
-      throw new UserError("Blood pool total must be between 1 and 50", {
+      throw new RealmError("Blood pool total must be between 1 and 50", {
         fields: { amount: amount.toString() },
       });
     }

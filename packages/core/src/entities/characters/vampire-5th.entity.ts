@@ -1,12 +1,7 @@
 import type { Vampire5thData } from "@realm/common";
 import type { IVampire5th } from "@realm/common";
 
-import {
-  Splat,
-  Vampire5thDataSchema,
-  HungerDataSchema,
-  HungerAmountSchema,
-} from "@realm/common";
+import { Splat, RealmError } from "@realm/common";
 import { Character5th } from "./character-5th.entity";
 
 /**
@@ -23,17 +18,20 @@ import { Character5th } from "./character-5th.entity";
  * - Disciplines: Vampiric powers
  * - Clan: Vampire bloodline
  * - Generation: Distance from Caine
+ *
+ * This entity trusts that data passed to constructor is already validated at
+ * boundaries (API/Bot edge, Repository edge). It only prevents internal
+ * mutations that would violate business rules.
  */
 export class Vampire5th extends Character5th implements IVampire5th {
   private _hunger: number;
 
   constructor(data: Vampire5thData) {
-    // Validate with Zod schema
-    const validated = Vampire5thDataSchema.parse(data);
-    super(validated);
+    // Trust the data - already validated at boundary
+    super(data);
 
     // Initialize from actual Data
-    this._hunger = validated.hunger;
+    this._hunger = data.hunger;
   }
 
   // ============================================================================
@@ -53,16 +51,26 @@ export class Vampire5th extends Character5th implements IVampire5th {
   }
 
   increaseHunger(amount: number = 1): number {
-    // Validate with Zod
-    HungerAmountSchema.parse(amount);
+    // Trust the data - already validated at boundary
+    // Only check for impossible internal states
+    if (amount < 0) {
+      throw new RealmError("Cannot increase hunger by negative amount", {
+        fields: { amount: amount.toString() },
+      });
+    }
 
     this._hunger = Math.min(5, this._hunger + amount);
     return this._hunger;
   }
 
   decreaseHunger(amount: number = 1): number {
-    // Validate with Zod
-    HungerAmountSchema.parse(amount);
+    // Trust the data - already validated at boundary
+    // Only check for impossible internal states
+    if (amount < 0) {
+      throw new RealmError("Cannot decrease hunger by negative amount", {
+        fields: { amount: amount.toString() },
+      });
+    }
 
     // Vampires can never reach Hunger 0 (always at least 1)
     this._hunger = Math.max(1, this._hunger - amount);
@@ -70,10 +78,15 @@ export class Vampire5th extends Character5th implements IVampire5th {
   }
 
   setHunger(value: number): number {
-    // Validate with Zod
-    const validated = HungerDataSchema.parse(value);
+    // Trust the data - already validated at boundary
+    // Only check for impossible internal states
+    if (value < 0 || value > 5) {
+      throw new RealmError("Hunger must be between 0 and 5", {
+        fields: { value: value.toString() },
+      });
+    }
 
-    this._hunger = validated;
+    this._hunger = value;
     return this._hunger;
   }
 

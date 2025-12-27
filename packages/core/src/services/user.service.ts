@@ -1,9 +1,6 @@
 import type { ILogger, IUserRepository, Snowflake } from "@realm/common";
 import {
   RealmError,
-  UserError,
-  CreateUserInputSchema,
-  UpdateUserInputSchema,
   type CreateUserInput,
   type UpdateUserInput,
 } from "@realm/common";
@@ -49,11 +46,10 @@ export class UserService {
   /**
    * Create a new user.
    *
-   * Validates input, creates entity, and persists via repository.
+   * Creates entity and persists via repository.
    *
-   * @param input - User creation input data
+   * @param input - User creation input data (already validated at API/Bot edge)
    * @returns Created user entity
-   * @throws {UserError} If input validation fails
    * @throws {RealmError} If creation fails
    */
   async create(input: CreateUserInput): Promise<User> {
@@ -62,12 +58,12 @@ export class UserService {
     });
 
     try {
-      // Validate input DTO
-      const validatedInput = CreateUserInputSchema.parse(input);
+      // Trust input - already validated at boundary
+      // NO Zod validation here
 
       // Repository will add date fields
       const createdDto = await this.userRepository.create({
-        ...validatedInput,
+        ...input,
         createdAt: new Date(), // Repository may override
         updatedAt: new Date(), // Repository may override
         lastActive: new Date(), // Repository may override
@@ -82,7 +78,7 @@ export class UserService {
 
       return user;
     } catch (error) {
-      if (error instanceof UserError || error instanceof RealmError) {
+      if (error instanceof RealmError) {
         throw error;
       }
       throw new RealmError(`Failed to create user: ${input.username}`, {
@@ -97,7 +93,7 @@ export class UserService {
    *
    * Retrieves the user, applies updates, and persists changes.
    *
-   * @param input - Complete user update data including user ID
+   * @param input - Complete user update data including user ID (already validated at API/Bot edge)
    * @returns Updated user entity
    * @throws {RealmError} If user not found or update fails
    */
@@ -107,28 +103,28 @@ export class UserService {
     });
 
     try {
-      // Validate input DTO
-      const validatedInput = UpdateUserInputSchema.parse(input);
+      // Trust input - already validated at boundary
+      // NO Zod validation here
 
       // Get existing user
-      const dto = await this.userRepository.findById(validatedInput.id);
+      const dto = await this.userRepository.findById(input.id);
       if (!dto) {
         throw new RealmError("User not found", {
-          fields: { userId: validatedInput.id },
+          fields: { userId: input.id },
         });
       }
 
       // Hydrate entity and apply changes
       const user = new User(dto);
 
-      if (validatedInput.username !== undefined) {
-        user.updateUsername(validatedInput.username);
+      if (input.username !== undefined) {
+        user.updateUsername(input.username);
       }
-      if (validatedInput.displayName !== undefined) {
-        user.updateDisplayName(validatedInput.displayName);
+      if (input.displayName !== undefined) {
+        user.updateDisplayName(input.displayName);
       }
-      if (validatedInput.avatarUrl !== undefined) {
-        user.updateAvatarUrl(validatedInput.avatarUrl);
+      if (input.avatarUrl !== undefined) {
+        user.updateAvatarUrl(input.avatarUrl);
       }
 
       // Persist changes (repository handles lastActive)
@@ -143,7 +139,7 @@ export class UserService {
 
       return updated;
     } catch (error) {
-      if (error instanceof UserError || error instanceof RealmError) {
+      if (error instanceof RealmError) {
         throw error;
       }
       throw new RealmError(`Failed to update user`, {

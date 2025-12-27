@@ -2,7 +2,7 @@
  * World of Darkness 20th Anniversary Roll Action
  *
  * Coordinates dice rolling for WoD 20th Anniversary system.
- * Validates input, executes dice roll via service, and returns formatted result.
+ * Executes dice roll via service and returns formatted result.
  *
  * @packageDocumentation
  */
@@ -11,7 +11,6 @@ import type {
   Wod20RollActionInput,
   Wod20RollActionResult,
 } from "@realm/common";
-import { Wod20RollActionInputSchema, UserError } from "@realm/common";
 import { DiceService } from "../../services/dice.service.js";
 
 export class Wod20RollAction {
@@ -24,7 +23,7 @@ export class Wod20RollAction {
   /**
    * Execute a WoD 20th Anniversary dice roll.
    *
-   * @param input - Roll parameters including pool, difficulty, modifiers
+   * @param input - Roll parameters including pool, difficulty, modifiers (already validated at API/Bot edge)
    * @returns Roll result with dice outcomes and metadata
    *
    * @example
@@ -42,33 +41,24 @@ export class Wod20RollAction {
    * ```
    */
   execute(input: Wod20RollActionInput): Wod20RollActionResult {
-    // Validate input at convergence point
-    const validationResult = Wod20RollActionInputSchema.safeParse(input);
-    if (!validationResult.success) {
-      throw new UserError("Invalid roll input", {
-        fields: {
-          validationErrors: JSON.stringify(validationResult.error.issues),
-        },
-      });
-    }
-    const validated = validationResult.data;
+    // Trust input - already validated at API/Bot edge
 
     // Execute dice roll via service
     const rollResult = this.diceService.Wod20({
-      pool: validated.pool,
-      difficulty: validated.difficulty,
-      specialty: validated.specialty,
-      willpower: validated.willpower,
-      modifier: validated.modifier,
-      nightmareDice: validated.nightmareDice,
-      cancelOnes: validated.cancelOnes,
+      pool: input.pool,
+      difficulty: input.difficulty,
+      specialty: input.specialty,
+      willpower: input.willpower,
+      modifier: input.modifier,
+      nightmareDice: input.nightmareDice,
+      cancelOnes: input.cancelOnes,
     });
 
     // Build action result
     const result: Wod20RollActionResult = {
       roll: rollResult,
-      characterId: validated.characterId,
-      notes: validated.notes,
+      characterId: input.characterId,
+      notes: input.notes,
     };
 
     return result;

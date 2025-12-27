@@ -1,5 +1,5 @@
 import type { IHealthTracker20th, HealthTracker20thData } from "@realm/common";
-import { HealthTracker20thDataSchema, UserError } from "@realm/common";
+import { RealmError } from "@realm/common";
 
 /**
  * 20th Anniversary health tracker value object.
@@ -13,6 +13,10 @@ import { HealthTracker20thDataSchema, UserError } from "@realm/common";
  * - Lethal damage: Mortal wounds (swords, bullets)
  * - Aggravated damage: Supernatural harm (fire, sunlight, vampire claws)
  * - Damage fills left to right, aggravated converts lethal to aggravated
+ *
+ * This VO trusts that data passed to constructor is already validated at
+ * boundaries (API/Bot edge, Repository edge). It only prevents internal
+ * mutations that would violate business rules.
  */
 export class HealthTracker20th implements IHealthTracker20th {
   readonly total: number;
@@ -21,13 +25,11 @@ export class HealthTracker20th implements IHealthTracker20th {
   readonly aggravated: number;
 
   constructor(data: HealthTracker20thData) {
-    // Validate with Zod schema
-    const validated = HealthTracker20thDataSchema.parse(data);
-
-    this.total = validated.total;
-    this.bashing = validated.bashing ?? 0;
-    this.lethal = validated.lethal ?? 0;
-    this.aggravated = validated.aggravated ?? 0;
+    // Trust the data - already validated at boundary
+    this.total = data.total;
+    this.bashing = data.bashing ?? 0;
+    this.lethal = data.lethal ?? 0;
+    this.aggravated = data.aggravated ?? 0;
   }
 
   takeDamage(damage: {
@@ -40,7 +42,13 @@ export class HealthTracker20th implements IHealthTracker20th {
     const aggravatedDamage = damage.aggravated ?? 0;
 
     if (bashingDamage < 0 || lethalDamage < 0 || aggravatedDamage < 0) {
-      throw new UserError("Cannot take negative damage");
+      throw new RealmError("Attempted to take negative damage", {
+        fields: {
+          bashing: bashingDamage.toString(),
+          lethal: lethalDamage.toString(),
+          aggravated: aggravatedDamage.toString(),
+        },
+      });
     }
 
     const newBashing = Math.min(
@@ -78,7 +86,13 @@ export class HealthTracker20th implements IHealthTracker20th {
     const aggravatedHeal = damage.aggravated ?? 0;
 
     if (bashingHeal < 0 || lethalHeal < 0 || aggravatedHeal < 0) {
-      throw new UserError("Cannot heal negative damage");
+      throw new RealmError("Attempted to heal negative damage", {
+        fields: {
+          bashing: bashingHeal.toString(),
+          lethal: lethalHeal.toString(),
+          aggravated: aggravatedHeal.toString(),
+        },
+      });
     }
 
     return new HealthTracker20th({
@@ -104,7 +118,7 @@ export class HealthTracker20th implements IHealthTracker20th {
 
   setTotal(value: number): IHealthTracker20th {
     if (value < 7 || value > 15) {
-      throw new UserError("Health total must be between 7 and 15", {
+      throw new RealmError("Internal error: health total must be between 7 and 15", {
         fields: { total: value.toString() },
       });
     }

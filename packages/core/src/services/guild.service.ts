@@ -1,12 +1,6 @@
 import type { ILogger, Snowflake, IGuildRepository } from "@realm/common";
 import {
   RealmError,
-  UserError,
-  CreateGuildInputSchema,
-  UpdateGuildInputSchema,
-  UpsertGuildInputSchema,
-  AddStorytellerRoleInputSchema,
-  RemoveStorytellerRoleInputSchema,
   type CreateGuildInput,
   type UpdateGuildInput,
   type UpsertGuildInput,
@@ -85,11 +79,10 @@ export class GuildService {
   /**
    * Create a new guild.
    *
-   * Validates input, creates entity, and persists via repository.
+   * Input data should already be validated at the API/Bot edge.
    *
-   * @param input - Guild creation input data
+   * @param input - Guild creation input data (already validated)
    * @returns Created guild entity
-   * @throws {UserError} If input validation fails
    * @throws {RealmError} If creation fails due to system error
    */
   async create(input: CreateGuildInput): Promise<Guild> {
@@ -98,12 +91,11 @@ export class GuildService {
     });
 
     try {
-      // Validate input DTO
-      const validatedInput = CreateGuildInputSchema.parse(input);
+      // Trust input - already validated at API/Bot edge
 
       // Repository will add date fields
       const createdDto = await this.guildRepository.create({
-        ...validatedInput,
+        ...input,
         createdAt: new Date(), // Repository may override
         lastUpdated: new Date(), // Repository may override
       });
@@ -117,7 +109,7 @@ export class GuildService {
 
       return created;
     } catch (error) {
-      if (error instanceof UserError || error instanceof RealmError) {
+      if (error instanceof RealmError) {
         throw error;
       }
       throw new RealmError(`Failed to create guild: ${input.name}`, {
@@ -142,32 +134,31 @@ export class GuildService {
     });
 
     try {
-      // Validate input DTO
-      const validatedInput = UpdateGuildInputSchema.parse(input);
+      // Trust input - already validated at API/Bot edge
 
       // Get existing guild
-      const dto = await this.guildRepository.findById(validatedInput.id);
+      const dto = await this.guildRepository.findById(input.id);
       if (!dto) {
         throw new RealmError("Guild not found", {
-          fields: { guildId: validatedInput.id },
+          fields: { guildId: input.id },
         });
       }
 
       // Hydrate entity and apply changes
       const guild = new Guild(dto);
 
-      if (validatedInput.name !== undefined) {
-        guild.updateName(validatedInput.name);
+      if (input.name !== undefined) {
+        guild.updateName(input.name);
       }
-      if (validatedInput.iconUrl !== undefined) {
-        guild.updateIconUrl(validatedInput.iconUrl);
+      if (input.iconUrl !== undefined) {
+        guild.updateIconUrl(input.iconUrl);
       }
-      if (validatedInput.storytellerRoleIds !== undefined) {
+      if (input.storytellerRoleIds !== undefined) {
         // Clear and re-add all roles
         for (const roleId of guild.storytellerRoles) {
           guild.removeStorytellerRole(roleId);
         }
-        for (const roleId of validatedInput.storytellerRoleIds) {
+        for (const roleId of input.storytellerRoleIds) {
           guild.addStorytellerRole(roleId);
         }
       }
@@ -182,7 +173,7 @@ export class GuildService {
 
       return updated;
     } catch (error) {
-      if (error instanceof UserError || error instanceof RealmError) {
+      if (error instanceof RealmError) {
         throw error;
       }
       throw new RealmError(`Failed to update guild`, {
@@ -199,9 +190,8 @@ export class GuildService {
    *
    * This is the preferred method for syncing guilds from Discord.
    *
-   * @param input - Guild data (id, name, iconUrl required; storytellerRoleIds optional)
+   * @param input - Guild data (id, name, iconUrl required; storytellerRoleIds optional, already validated)
    * @returns Upserted guild entity
-   * @throws {UserError} If input validation fails
    * @throws {RealmError} If upsert fails
    */
   async upsert(input: UpsertGuildInput): Promise<Guild> {
@@ -210,11 +200,10 @@ export class GuildService {
     });
 
     try {
-      // Validate input DTO
-      const validatedInput = UpsertGuildInputSchema.parse(input);
+      // Trust input - already validated at API/Bot edge
 
       // Repository handles upsert logic
-      const upsertedDto = await this.guildRepository.upsert(validatedInput);
+      const upsertedDto = await this.guildRepository.upsert(input);
 
       // Hydrate DTO back to entity
       const upserted = new Guild(upsertedDto);
@@ -225,7 +214,7 @@ export class GuildService {
 
       return upserted;
     } catch (error) {
-      if (error instanceof UserError || error instanceof RealmError) {
+      if (error instanceof RealmError) {
         throw error;
       }
       throw new RealmError(`Failed to upsert guild: ${input.name}`, {
@@ -247,17 +236,17 @@ export class GuildService {
       fields: { guildId: input.guildId, roleId: input.roleId },
     });
 
-    const validatedInput = AddStorytellerRoleInputSchema.parse(input);
+    // Trust input - already validated at API/Bot edge
 
-    const dto = await this.guildRepository.findById(validatedInput.guildId);
+    const dto = await this.guildRepository.findById(input.guildId);
     if (!dto) {
       throw new RealmError("Guild not found", {
-        fields: { guildId: validatedInput.guildId },
+        fields: { guildId: input.guildId },
       });
     }
 
     const guild = new Guild(dto);
-    guild.addStorytellerRole(validatedInput.roleId);
+    guild.addStorytellerRole(input.roleId);
 
     const updatedDto = await this.guildRepository.update(guild.toData());
     return new Guild(updatedDto);
@@ -277,17 +266,17 @@ export class GuildService {
       fields: { guildId: input.guildId, roleId: input.roleId },
     });
 
-    const validatedInput = RemoveStorytellerRoleInputSchema.parse(input);
+    // Trust input - already validated at API/Bot edge
 
-    const dto = await this.guildRepository.findById(validatedInput.guildId);
+    const dto = await this.guildRepository.findById(input.guildId);
     if (!dto) {
       throw new RealmError("Guild not found", {
-        fields: { guildId: validatedInput.guildId },
+        fields: { guildId: input.guildId },
       });
     }
 
     const guild = new Guild(dto);
-    guild.removeStorytellerRole(validatedInput.roleId);
+    guild.removeStorytellerRole(input.roleId);
 
     const updatedDto = await this.guildRepository.update(guild.toData());
     return new Guild(updatedDto);

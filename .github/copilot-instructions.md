@@ -152,18 +152,18 @@ export class UserService {
   constructor(private userRepo: IUserRepository) {}
 
   async create(input: CreateUserInput): Promise<UserData> {
-    // Validate input (Zod schema)
-    const validated = CreateUserInputSchema.parse(input);
+    // Trust input - already validated at API edge
+    // NO Zod validation here
 
     // Create entity
     const user = new User({
-      ...validated,
+      ...input,
       createdAt: new Date(),
       lastUpdated: new Date(),
     });
 
-    // Save via repository
-    return await this.userRepo.create(user.toDto());
+    // Save via repository (repository validates at DB edge)
+    return await this.userRepo.create(user.toData());
   }
 }
 ```
@@ -280,7 +280,60 @@ export class UserRepository implements IUserRepository {
 
 ---
 
-## 6️⃣ Zod Validation Pattern
+## 6️⃣ Validation Strategy
+
+### Validate at Boundaries Only
+
+**Validation happens at two edges:**
+
+1. **External → Internal (API/Bot)**: Validate with Zod, throw `UserError`
+2. **Internal → External (Repository → DB)**: Validate with Zod, throw `RealmError`
+3. **Internal Logic (Core)**: Trust TypeScript, throw `RealmError` for impossible states
+
+**Single Source of Truth**: All constraints defined once in Zod schemas (`@realm/common`).
+
+**Error Types:**
+
+- **`UserError`**: User provided invalid data (edge validation failure)
+- **`RealmError`**: Internal logic error or impossible state (our bug)
+
+**Example Flow:**
+
+```typescript
+// 1. API Edge - Validate with Zod, throw UserError
+const result = CreateCharacterInputSchema.safeParse(body);
+if (!result.success) {
+  throw new UserError("Invalid character data", {
+    fields: { errors: result.error.message },
+  });
+}
+
+// 2. Service - Trust the data, use RealmError for logic errors
+const entity = new Character(result.data);
+if (!entity) {
+  throw new RealmError("Failed to create entity"); // Our bug
+}
+
+// 3. Repository - Validate at DB edge, throw RealmError if invalid
+const validated = CharacterDataSchema.safeParse(data);
+if (!validated.success) {
+  throw new RealmError("Invalid data reached repository"); // Our bug
+}
+```
+
+**Rules:**
+
+- ✅ Services: NO Zod validation (trust input)
+- ✅ Actions: NO Zod validation (trust input)
+- ✅ Entities: NO Zod validation (trust input)
+- ✅ Value Objects: NO Zod validation (trust input)
+- ✅ Entities/VOs: Use `RealmError` to prevent invalid internal mutations
+- ✅ API/Bot: Validate with Zod, throw `UserError`
+- ✅ Repositories: Validate with Zod before DB save, throw `RealmError`
+
+---
+
+## 7️⃣ Zod Validation Pattern
 
 ### Schema-First Design (in `@realm/common`)
 
@@ -324,7 +377,7 @@ export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
 
 ---
 
-## 7️⃣ Error Handling (MANDATORY)
+## 8️⃣ Error Handling (MANDATORY)
 
 ### Two-Tier Error System
 
@@ -332,39 +385,49 @@ export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
 
 - Database failures
 - Unexpected states
-- Logic errors
+- Internal logic errors (our bugs)
 - Infrastructure issues
+- **Used in**: Services, Actions, Entities, Repositories
 
 **UserError** (Client Errors - NOT Logged):
 
-- Invalid input
-- Validation failures
-- Business rule violations
-- Expected user mistakes
+- Invalid input at API/Bot edge
+- Validation failures from user data
+- **Used in**: API controllers, Bot command handlers
 
-**Example:**
+**Golden Rule**: If data came from a user and failed validation → `UserError`. If data came from our code and is wrong → `RealmError`.
+
+**Examples:**
 
 ```typescript
 import { RealmError, UserError } from "@realm/common";
 
-// User provided invalid input
-if (name.startsWith("~")) {
-  throw new UserError(
-    "Character name cannot start with ~ (reserved character)"
-  );
+// API Edge - User provided invalid input
+const result = CharacterNameSchema.safeParse(body.name);
+if (!result.success) {
+  throw new UserError("Invalid character name", {
+    fields: { errors: result.error.message },
+  });
 }
 
-// System error
-if (!dbConnection) {
-  throw new RealmError("Database connection failed", {
-    fields: { connectionString: "***" },
+// Entity - Prevent invalid internal mutation
+if (current > this.total) {
+  throw new RealmError("Internal error: current XP exceeds total", {
+    fields: { current: current.toString(), total: this.total.toString() },
+  });
+}
+
+// Repository - Data integrity check failed
+if (!validated.success) {
+  throw new RealmError("Invalid data reached repository", {
+    fields: { errors: validated.error.message },
   });
 }
 ```
 
 ---
 
-## 8️⃣ File Naming Conventions
+## 9️⃣ File Naming Conventions
 
 **Pattern:** `{name}.{suffix}.ts`
 
@@ -381,7 +444,7 @@ if (!dbConnection) {
 
 ---
 
-## 9️⃣ Documentation (MANDATORY)
+## 1️⃣1️⃣ Documentation (MANDATORY)
 
 ### JSDoc Requirements
 
@@ -404,7 +467,7 @@ if (!dbConnection) {
 
 ---
 
-## 🔟 Import Organization
+## 1️⃣1️⃣ Import Organization
 
 **Order:**
 

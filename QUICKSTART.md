@@ -299,20 +299,41 @@ console.log("something happened"); // Bad!
 ### Validation
 
 ```typescript
-import { Vampire5thDataSchema } from "@realm/core";
+import { Vampire5thDataSchema, UserError, RealmError } from "@realm/common";
 
-// ✅ DO: Validate at boundaries (API, WebSocket, etc.)
+// ✅ DO: Validate at API/Bot edge with Zod (throw UserError)
 const result = Vampire5thDataSchema.safeParse(inputData);
 if (!result.success) {
   throw new UserError("Invalid character data", {
     fields: { errors: result.error.message },
-  });
+  }); // User provided bad data
 }
 
-// ✅ DO: Trust types internally
+// ✅ DO: Trust types in services/entities (NO Zod validation)
 function updateHunger(char: Vampire5th, amount: number): void {
-  // No need to validate - TypeScript ensures correct types
-  char.hunger = Math.max(0, Math.min(5, char.hunger + amount));
+  // Trust TypeScript types - no Zod validation needed
+  const newHunger = char.hunger + amount;
+
+  // Only check for impossible internal states
+  if (newHunger < 0 || newHunger > 5) {
+    throw new RealmError("Internal error: hunger out of range", {
+      fields: { hunger: newHunger.toString() },
+    }); // Our bug
+  }
+
+  char.hunger = newHunger;
+}
+
+// ✅ DO: Validate at repository/DB edge (throw RealmError)
+async function saveCharacter(data: CharacterData): Promise<void> {
+  const validated = CharacterDataSchema.safeParse(data);
+  if (!validated.success) {
+    throw new RealmError("Invalid data reached repository", {
+      fields: { errors: validated.error.message },
+    }); // Our bug
+  }
+
+  await db.insert(characters).values(validated.data);
 }
 ```
 

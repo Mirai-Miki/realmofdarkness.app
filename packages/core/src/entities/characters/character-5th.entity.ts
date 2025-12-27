@@ -6,7 +6,6 @@ import type {
   Wod5SkillsData,
 } from "@realm/common";
 
-import { Character5thDataSchema } from "@realm/common";
 import { Character } from "./character.entity";
 import { DamageTracker5th } from "./value-objects/damage-tracker-5th.vo";
 
@@ -24,6 +23,10 @@ import { DamageTracker5th } from "./value-objects/damage-tracker-5th.vo";
  * - Superficial/Aggravated damage tracking
  * - 9 Attributes (Strength, Dexterity, Stamina, Charisma, Manipulation, Composure, Intelligence, Wits, Resolve)
  * - Skills with specialties
+ *
+ * This entity trusts that data passed to constructor is already validated at
+ * boundaries (API/Bot edge, Repository edge). It only prevents internal
+ * mutations that would violate business rules.
  */
 export abstract class Character5th extends Character implements ICharacter5th {
   protected _health: IDamageTracker5th;
@@ -32,15 +35,14 @@ export abstract class Character5th extends Character implements ICharacter5th {
   protected _skills: Wod5SkillsData;
 
   constructor(data: Character5thData) {
-    // Validate with Zod schema
-    const validated = Character5thDataSchema.parse(data);
-    super(validated);
+    // Trust the data - already validated at boundary
+    super(data);
 
     // Initialize from actual Data
-    this._health = new DamageTracker5th(validated.health);
-    this._willpower = new DamageTracker5th(validated.willpower);
-    this._attributes = validated.attributes;
-    this._skills = validated.skills;
+    this._health = new DamageTracker5th(data.health);
+    this._willpower = new DamageTracker5th(data.willpower);
+    this._attributes = data.attributes;
+    this._skills = data.skills;
   }
 
   // ============================================================================

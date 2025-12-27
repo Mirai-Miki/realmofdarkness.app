@@ -1,13 +1,6 @@
 import type { ILogger, IMemberRepository, Snowflake } from "@realm/common";
 import {
   RealmError,
-  UserError,
-  CreateMemberInputSchema,
-  SyncMemberInputSchema,
-  AddBoostInputSchema,
-  RemoveBoostInputSchema,
-  DeleteMemberInputSchema,
-  MemberExistsInputSchema,
   type CreateMemberInput,
   type SyncMemberInput,
   type AddBoostInput,
@@ -61,11 +54,10 @@ export class MemberService {
   /**
    * Create a new member.
    *
-   * Validates input, creates entity, and persists via repository.
+   * Input data should already be validated at the API/Bot edge.
    *
-   * @param input - Member creation input data
+   * @param input - Member creation input data (already validated)
    * @returns Created member entity
-   * @throws {UserError} If input validation fails
    * @throws {RealmError} If creation fails
    */
   async create(input: CreateMemberInput): Promise<Member> {
@@ -74,19 +66,18 @@ export class MemberService {
     });
 
     try {
-      // Validate input DTO
-      const validatedInput = CreateMemberInputSchema.parse(input);
+      // Trust input - already validated at API/Bot edge
 
       // Check if member already exists (idempotency)
       const existing = await this.memberRepository.findByGuildAndUser(
-        validatedInput.guildId,
-        validatedInput.userId
+        input.guildId,
+        input.userId
       );
       if (existing) {
         this.logger.debug("Member already exists, returning existing", {
           fields: {
-            guildId: validatedInput.guildId,
-            userId: validatedInput.userId,
+            guildId: input.guildId,
+            userId: input.userId,
           },
         });
         return new Member(existing);
@@ -94,7 +85,7 @@ export class MemberService {
 
       // Repository will add date fields
       const createdDto = await this.memberRepository.create({
-        ...validatedInput,
+        ...input,
         createdAt: new Date(), // Repository may override
         lastUpdated: new Date(), // Repository may override
       });
@@ -108,7 +99,7 @@ export class MemberService {
 
       return new Member(createdDto);
     } catch (error) {
-      if (error instanceof UserError || error instanceof RealmError) {
+      if (error instanceof RealmError) {
         throw error;
       }
       throw new RealmError("Failed to create member", {
@@ -130,19 +121,18 @@ export class MemberService {
    */
   async syncProfile(input: SyncMemberInput): Promise<Member | null> {
     try {
-      // Validate input
-      const validatedInput = SyncMemberInputSchema.parse(input);
+      // Trust input - already validated at API/Bot edge
 
       // Get existing member
       const dto = await this.memberRepository.findByGuildAndUser(
-        validatedInput.guildId,
-        validatedInput.userId
+        input.guildId,
+        input.userId
       );
       if (!dto) {
         this.logger.debug("Member not found for sync", {
           fields: {
-            guildId: validatedInput.guildId,
-            userId: validatedInput.userId,
+            guildId: input.guildId,
+            userId: input.userId,
           },
         });
         return null;
@@ -152,30 +142,30 @@ export class MemberService {
       const member = new Member(dto);
 
       // Update admin status
-      if (validatedInput.admin) {
+      if (input.admin) {
         member.grantAdmin();
       } else {
         member.revokeAdmin();
       }
 
       // Update profile fields
-      member.setNickname(validatedInput.nickname);
-      member.setAvatarUrl(validatedInput.avatarUrl);
-      member.setRoleIds(validatedInput.roleIds);
+      member.setNickname(input.nickname);
+      member.setAvatarUrl(input.avatarUrl);
+      member.setRoleIds(input.roleIds);
 
       // Persist changes (repository handles lastUpdated)
       const updatedDto = await this.memberRepository.update(member.toData());
 
       this.logger.debug("Member profile synced", {
         fields: {
-          guildId: validatedInput.guildId,
-          userId: validatedInput.userId,
+          guildId: input.guildId,
+          userId: input.userId,
         },
       });
 
       return new Member(updatedDto);
     } catch (error) {
-      if (error instanceof UserError || error instanceof RealmError) {
+      if (error instanceof RealmError) {
         throw error;
       }
       throw new RealmError("Failed to sync member profile", {
@@ -203,17 +193,17 @@ export class MemberService {
       fields: { guildId: input.guildId, userId: input.userId },
     });
 
-    const validatedInput = AddBoostInputSchema.parse(input);
+    // Trust input - already validated at API/Bot edge
 
     const dto = await this.memberRepository.findByGuildAndUser(
-      validatedInput.guildId,
-      validatedInput.userId
+      input.guildId,
+      input.userId
     );
     if (!dto) {
       throw new RealmError("Member not found", {
         fields: {
-          guildId: validatedInput.guildId,
-          userId: validatedInput.userId,
+          guildId: input.guildId,
+          userId: input.userId,
         },
       });
     }
@@ -225,8 +215,8 @@ export class MemberService {
 
     this.logger.debug("Boost added to member", {
       fields: {
-        guildId: validatedInput.guildId,
-        userId: validatedInput.userId,
+        guildId: input.guildId,
+        userId: input.userId,
         boosted: String(member.boosted),
       },
     });
@@ -246,17 +236,17 @@ export class MemberService {
       fields: { guildId: input.guildId, userId: input.userId },
     });
 
-    const validatedInput = RemoveBoostInputSchema.parse(input);
+    // Trust input - already validated at API/Bot edge
 
     const dto = await this.memberRepository.findByGuildAndUser(
-      validatedInput.guildId,
-      validatedInput.userId
+      input.guildId,
+      input.userId
     );
     if (!dto) {
       throw new RealmError("Member not found", {
         fields: {
-          guildId: validatedInput.guildId,
-          userId: validatedInput.userId,
+          guildId: input.guildId,
+          userId: input.userId,
         },
       });
     }
@@ -268,8 +258,8 @@ export class MemberService {
 
     this.logger.debug("Boost removed from member", {
       fields: {
-        guildId: validatedInput.guildId,
-        userId: validatedInput.userId,
+        guildId: input.guildId,
+        userId: input.userId,
         boosted: String(member.boosted),
       },
     });
@@ -287,17 +277,17 @@ export class MemberService {
       fields: { guildId: input.guildId, userId: input.userId },
     });
 
-    const validatedInput = DeleteMemberInputSchema.parse(input);
+    // Trust input - already validated at API/Bot edge
 
     await this.memberRepository.delete(
-      validatedInput.guildId,
-      validatedInput.userId
+      input.guildId,
+      input.userId
     );
 
     this.logger.debug("Member deleted", {
       fields: {
-        guildId: validatedInput.guildId,
-        userId: validatedInput.userId,
+        guildId: input.guildId,
+        userId: input.userId,
       },
     });
   }
@@ -326,10 +316,10 @@ export class MemberService {
    * @returns True if member exists
    */
   async exists(input: MemberExistsInput): Promise<boolean> {
-    const validatedInput = MemberExistsInputSchema.parse(input);
+    // Trust input - already validated at API/Bot edge
     return this.memberRepository.exists(
-      validatedInput.guildId,
-      validatedInput.userId
+      input.guildId,
+      input.userId
     );
   }
 

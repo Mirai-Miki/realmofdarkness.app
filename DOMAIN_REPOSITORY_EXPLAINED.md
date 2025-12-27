@@ -250,44 +250,40 @@ export class Vampire5th extends Character5th {
   }
 
   /**
-   * Validation: Ensure vampire is in valid state
+   * Validate internal state consistency.
+   * Note: This is NOT Zod validation - data is already validated at edges.
+   * This only checks for impossible internal states (our bugs).
    */
-  validate(): ValidationResult {
-    const errors: string[] = [];
-
+  private validateInternalState(): void {
+    // These checks should never fail - they indicate bugs in our code
     if (this._hunger < 0 || this._hunger > 5) {
-      errors.push("Hunger must be between 0 and 5");
-    }
-
-    if (this._humanity < 0 || this._humanity > 10) {
-      errors.push("Humanity must be between 0 and 10");
+      throw new RealmError("Invalid hunger state", {
+        fields: { hunger: this._hunger.toString() },
+      });
     }
 
     if (this._stains > this._humanity) {
-      errors.push("Stains cannot exceed humanity");
+      throw new RealmError("Invalid stains/humanity state", {
+        fields: {
+          stains: this._stains.toString(),
+          humanity: this._humanity.toString(),
+        },
+      });
     }
-
-    if (this._bloodPotency < 0 || this._bloodPotency > 10) {
-      errors.push("Blood Potency must be between 0 and 10");
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
   }
 
   /**
-   * Serialization: Convert to plain object for storage
+   * Convert to Data type for persistence.
+   * Note: Repository will validate with Zod before saving to DB.
    */
-  serialize(): Vampire5thData {
+  toData(): Vampire5thData {
     return {
       hunger: this._hunger,
       humanity: this._humanity,
       stains: this._stains,
       bloodPotency: this._bloodPotency,
       disciplines: Array.from(this._disciplines.values()).map((d) =>
-        d.serialize()
+        d.toData()
       ),
       // ... all other vampire data
     };
@@ -915,10 +911,46 @@ export class DiceService {
 
 ### Q: Where does validation happen?
 
-**A:** In two places:
+**A:** **At boundaries only** - we validate once at each trust border:
 
-- **Zod schemas** (common package) - validate data at boundaries (API requests, WebSocket messages)
-- **Domain models** - validate business rules (hunger 0-5, humanity 0-10, etc.)
+1. **External → Internal (API/Bot edge)**: Validate with Zod schemas, throw `UserError` if invalid
+2. **Internal → External (Repository → DB edge)**: Validate with Zod before saving, throw `RealmError` if invalid
+3. **Internal logic (Services, Entities, Actions)**: Trust TypeScript types, use `RealmError` only to prevent impossible states
+
+**Single Source of Truth**: All constraints (min/max values, string patterns, etc.) are defined **once** in Zod schemas in `@realm/common`.
+
+**Example validation flow:**
+
+```typescript
+// 1. API Edge - User input validation
+const result = CreateCharacterInputSchema.safeParse(body);
+if (!result.success) {
+  throw new UserError("Invalid character data", {
+    fields: { errors: result.error.message },
+  }); // User's fault
+}
+
+// 2. Service - Trust the data, NO Zod validation
+const entity = new Character(result.data); // Data is already validated
+
+// 3. Entity - Only check for internal logic errors
+if (this.current > this.total) {
+  throw new RealmError("Internal error: current > total"); // Our bug
+}
+
+// 4. Repository - Validate before DB save
+const validated = CharacterDataSchema.safeParse(data);
+if (!validated.success) {
+  throw new RealmError("Invalid data reached repository"); // Our bug
+}
+```
+
+**Why this approach?**
+
+- ✅ No redundant validation (validate once per request, not in every layer)
+- ✅ Clear error ownership (`UserError` = their mistake, `RealmError` = our bug)
+- ✅ Better performance (no repeated Zod parsing)
+- ✅ Single source of truth (all constraints in Zod schemas)
 
 ### Q: Can I query the database directly?
 

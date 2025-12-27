@@ -1,5 +1,5 @@
 import type { IDamageTracker5th, DamageTracker5thData } from "@realm/common";
-import { DamageTracker5thDataSchema, UserError } from "@realm/common";
+import { RealmError } from "@realm/common";
 
 /**
  * 5th Edition damage tracker value object.
@@ -14,6 +14,10 @@ import { DamageTracker5thDataSchema, UserError } from "@realm/common";
  * - Aggravated damage fills from right to left
  * - When superficial + aggravated = total, character is impaired
  * - When aggravated = total, character is incapacitated
+ *
+ * This VO trusts that data passed to constructor is already validated at
+ * boundaries (API/Bot edge, Repository edge). It only prevents internal
+ * mutations that would violate business rules.
  */
 export class DamageTracker5th implements IDamageTracker5th {
   readonly total: number;
@@ -21,12 +25,10 @@ export class DamageTracker5th implements IDamageTracker5th {
   readonly aggravated: number;
 
   constructor(data: DamageTracker5thData) {
-    // Validate with Zod schema
-    const validated = DamageTracker5thDataSchema.parse(data);
-
-    this.total = validated.total;
-    this.superficial = validated.superficial ?? 0;
-    this.aggravated = validated.aggravated ?? 0;
+    // Trust the data - already validated at boundary
+    this.total = data.total;
+    this.superficial = data.superficial ?? 0;
+    this.aggravated = data.aggravated ?? 0;
   }
 
   totalDamage(): number {
@@ -47,7 +49,7 @@ export class DamageTracker5th implements IDamageTracker5th {
 
   takeSuperficial(amount: number): IDamageTracker5th {
     if (amount < 0) {
-      throw new UserError("Cannot take negative damage", {
+      throw new RealmError("Attempted to take negative damage", {
         fields: { amount: amount.toString() },
       });
     }
@@ -66,7 +68,7 @@ export class DamageTracker5th implements IDamageTracker5th {
 
   takeAggravated(amount: number): IDamageTracker5th {
     if (amount < 0) {
-      throw new UserError("Cannot take negative damage", {
+      throw new RealmError("Attempted to take negative damage", {
         fields: { amount: amount.toString() },
       });
     }
@@ -86,7 +88,7 @@ export class DamageTracker5th implements IDamageTracker5th {
 
   healSuperficial(amount: number): IDamageTracker5th {
     if (amount < 0) {
-      throw new UserError("Cannot heal negative damage", {
+      throw new RealmError("Attempted to heal negative damage", {
         fields: { amount: amount.toString() },
       });
     }
@@ -100,7 +102,7 @@ export class DamageTracker5th implements IDamageTracker5th {
 
   healAggravated(amount: number): IDamageTracker5th {
     if (amount < 0) {
-      throw new UserError("Cannot heal negative damage", {
+      throw new RealmError("Attempted to heal negative damage", {
         fields: { amount: amount.toString() },
       });
     }
@@ -125,7 +127,7 @@ export class DamageTracker5th implements IDamageTracker5th {
 
   setTotal(total: number): IDamageTracker5th {
     if (total < 0) {
-      throw new UserError("Total boxes cannot be negative", {
+      throw new RealmError("Internal error: total boxes cannot be negative", {
         fields: { total: total.toString() },
       });
     }
