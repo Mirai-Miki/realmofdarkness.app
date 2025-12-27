@@ -98,24 +98,6 @@ export abstract class Character implements ICharacter {
     this.data.status = value;
   }
 
-  get color(): string {
-    // Default color - subclasses can override
-    return "#000000";
-  }
-
-  set color(_value: string) {
-    // Base implementation does nothing - subclasses can override
-  }
-
-  get thumbnail(): string | null {
-    // Default no thumbnail - subclasses can override
-    return null;
-  }
-
-  set thumbnail(_value: string | null) {
-    // Base implementation does nothing - subclasses can override
-  }
-
   // ============================================================================
   // Experience (Value Object)
   // ============================================================================

@@ -51,29 +51,71 @@ export class Vampire20th extends Character20th implements IVampire20th {
     return this._bloodPool;
   }
 
+  /**
+   * Spend blood points from the pool.
+   *
+   * Reduces current blood pool by the specified amount.
+   *
+   * @param amount - Number of blood points to spend
+   * @throws {RealmError} If amount is negative or exceeds current blood
+   *
+   * @example
+   * ```typescript
+   * vampire.spendBlood(3); // Spend 3 blood points
+   * ```
+   */
   spendBlood(amount: number): void {
     this._bloodPool = this._bloodPool.spend(amount);
   }
 
+  /**
+   * Restore blood points by feeding.
+   *
+   * Increases current blood pool by the specified amount (capped at maximum).
+   *
+   * @param amount - Number of blood points to restore
+   * @throws {RealmError} If amount is negative
+   *
+   * @example
+   * ```typescript
+   * vampire.slakeBlood(5); // Restore 5 blood points from feeding
+   * ```
+   */
   slakeBlood(amount: number): void {
     this._bloodPool = this._bloodPool.slake(amount);
   }
 
+  /**
+   * Set current blood pool to a specific value.
+   *
+   * @param amount - New current blood value (0 <= amount <= max blood pool)
+   * @throws {RealmError} If amount is negative or exceeds maximum
+   *
+   * @example
+   * ```typescript
+   * vampire.setCurrentBlood(10); // Set current blood to 10
+   * ```
+   */
   setCurrentBlood(amount: number): void {
     this._bloodPool = this._bloodPool.setCurrent(amount);
   }
 
+  /**
+   * Set both current and maximum blood pool values.
+   *
+   * Useful for character creation or generation changes.
+   *
+   * @param current - New current blood value
+   * @param total - New maximum blood pool value
+   * @throws {RealmError} If values are invalid
+   *
+   * @example
+   * ```typescript
+   * vampire.setBloodPool(10, 15); // Set current to 10, max to 15
+   * ```
+   */
   setBloodPool(current: number, total: number): void {
     this._bloodPool = new BloodTracker({ current, total });
-  }
-
-  // ============================================================================
-  // Presentation
-  // ============================================================================
-
-  override get color(): string {
-    // Vampire dark red
-    return "#8B0000";
   }
 
   // ============================================================================

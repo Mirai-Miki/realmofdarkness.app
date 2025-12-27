@@ -263,12 +263,6 @@ export interface ICharacter {
   get status(): SheetStatus;
   set status(value: SheetStatus);
 
-  get color(): string;
-  set color(value: string);
-
-  get thumbnail(): string | null;
-  set thumbnail(value: string | null);
-
   // Experience (value object with immutable updates)
   get experience(): IExperience;
 

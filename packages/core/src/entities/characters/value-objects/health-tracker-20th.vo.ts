@@ -32,6 +32,22 @@ export class HealthTracker20th implements IHealthTracker20th {
     this.aggravated = data.aggravated ?? 0;
   }
 
+  /**
+   * Take damage of one or more types.
+   *
+   * Returns a new tracker with increased damage.
+   * Damage fills health boxes from left to right, with aggravated taking priority.
+   *
+   * @param damage - Object with optional bashing, lethal, and/or aggravated damage amounts
+   * @returns New tracker with increased damage
+   * @throws {RealmError} If any damage amount is negative
+   *
+   * @example
+   * ```typescript
+   * const tracker = new HealthTracker20th({ total: 7, bashing: 1, lethal: 0, aggravated: 0 });
+   * const hurt = tracker.takeDamage({ bashing: 2, lethal: 1 }); // { bashing: 3, lethal: 1 }
+   * ```
+   */
   takeDamage(damage: {
     bashing?: number;
     lethal?: number;
@@ -76,6 +92,21 @@ export class HealthTracker20th implements IHealthTracker20th {
     });
   }
 
+  /**
+   * Heal damage of one or more types.
+   *
+   * Returns a new tracker with reduced damage.
+   *
+   * @param damage - Object with optional bashing, lethal, and/or aggravated heal amounts
+   * @returns New tracker with reduced damage (minimum 0 for each type)
+   * @throws {RealmError} If any heal amount is negative
+   *
+   * @example
+   * ```typescript
+   * const tracker = new HealthTracker20th({ total: 7, bashing: 3, lethal: 2, aggravated: 1 });
+   * const healed = tracker.heal({ bashing: 2, lethal: 1 }); // { bashing: 1, lethal: 1, aggravated: 1 }
+   * ```
+   */
   heal(damage: {
     bashing?: number;
     lethal?: number;
@@ -103,6 +134,21 @@ export class HealthTracker20th implements IHealthTracker20th {
     });
   }
 
+  /**
+   * Set damage values directly.
+   *
+   * Returns a new tracker with updated damage values.
+   * Omitted values remain unchanged.
+   *
+   * @param damage - Object with optional bashing, lethal, and/or aggravated damage
+   * @returns New tracker with updated damage
+   *
+   * @example
+   * ```typescript
+   * const tracker = new HealthTracker20th({ total: 7, bashing: 1, lethal: 1, aggravated: 0 });
+   * const updated = tracker.setCurrent({ bashing: 3 }); // { bashing: 3, lethal: 1, aggravated: 0 }
+   * ```
+   */
   setCurrent(damage: {
     bashing?: number;
     lethal?: number;
@@ -116,11 +162,30 @@ export class HealthTracker20th implements IHealthTracker20th {
     });
   }
 
+  /**
+   * Set the total health level.
+   *
+   * Returns a new tracker with updated total.
+   * If new total is less than current damage, damage is capped.
+   *
+   * @param value - New total health level (must be 7-15)
+   * @returns New tracker with updated total
+   * @throws {RealmError} If value is outside valid range (7-15)
+   *
+   * @example
+   * ```typescript
+   * const tracker = new HealthTracker20th({ total: 10, bashing: 5, lethal: 2, aggravated: 0 });
+   * const smaller = tracker.setTotal(7); // Damage capped to fit in 7 boxes
+   * ```
+   */
   setTotal(value: number): IHealthTracker20th {
     if (value < 7 || value > 15) {
-      throw new RealmError("Internal error: health total must be between 7 and 15", {
-        fields: { total: value.toString() },
-      });
+      throw new RealmError(
+        "Internal error: health total must be between 7 and 15",
+        {
+          fields: { total: value.toString() },
+        }
+      );
     }
 
     // Adjust damage if new total is smaller
@@ -140,10 +205,41 @@ export class HealthTracker20th implements IHealthTracker20th {
     });
   }
 
+  /**
+   * Increase total health level.
+   *
+   * Returns a new tracker with total increased by amount.
+   *
+   * @param amount - Amount to add to total (result must be 7-15)
+   * @returns New tracker with increased total
+   * @throws {RealmError} If resulting total is outside valid range
+   *
+   * @example
+   * ```typescript
+   * const tracker = new HealthTracker20th({ total: 7, bashing: 0, lethal: 0, aggravated: 0 });
+   * const fortitude = tracker.addTotal(2); // { total: 9 }
+   * ```
+   */
   addTotal(amount: number): IHealthTracker20th {
     return this.setTotal(this.total + amount);
   }
 
+  /**
+   * Decrease total health level.
+   *
+   * Returns a new tracker with total decreased by amount.
+   * Any damage exceeding new total is capped.
+   *
+   * @param amount - Amount to remove from total (result must be 7-15)
+   * @returns New tracker with decreased total
+   * @throws {RealmError} If resulting total is outside valid range
+   *
+   * @example
+   * ```typescript
+   * const tracker = new HealthTracker20th({ total: 10, bashing: 2, lethal: 0, aggravated: 0 });
+   * const aged = tracker.removeTotal(3); // { total: 7 }
+   * ```
+   */
   removeTotal(amount: number): IHealthTracker20th {
     return this.setTotal(this.total - amount);
   }

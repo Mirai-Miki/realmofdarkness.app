@@ -279,10 +279,7 @@ export class MemberService {
 
     // Trust input - already validated at API/Bot edge
 
-    await this.memberRepository.delete(
-      input.guildId,
-      input.userId
-    );
+    await this.memberRepository.delete(input.guildId, input.userId);
 
     this.logger.debug("Member deleted", {
       fields: {
@@ -317,10 +314,7 @@ export class MemberService {
    */
   async exists(input: MemberExistsInput): Promise<boolean> {
     // Trust input - already validated at API/Bot edge
-    return this.memberRepository.exists(
-      input.guildId,
-      input.userId
-    );
+    return this.memberRepository.exists(input.guildId, input.userId);
   }
 
   /**

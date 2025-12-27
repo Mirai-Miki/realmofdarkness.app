@@ -50,6 +50,22 @@ export class Vampire5th extends Character5th implements IVampire5th {
     return this._hunger;
   }
 
+  /**
+   * Increase the vampire's Hunger.
+   *
+   * Hunger represents the Beast's need for blood.
+   * Maximum Hunger is 5 (cannot exceed).
+   *
+   * @param amount - Amount to increase Hunger by (default: 1, must be >= 0)
+   * @returns New Hunger value after increase
+   * @throws {RealmError} If amount is negative
+   *
+   * @example
+   * ```typescript
+   * vampire.increaseHunger(); // Increase by 1
+   * vampire.increaseHunger(2); // Increase by 2
+   * ```
+   */
   increaseHunger(amount: number = 1): number {
     // Trust the data - already validated at boundary
     // Only check for impossible internal states
@@ -63,6 +79,22 @@ export class Vampire5th extends Character5th implements IVampire5th {
     return this._hunger;
   }
 
+  /**
+   * Decrease the vampire's Hunger.
+   *
+   * Reduces Hunger by feeding.
+   * Minimum Hunger is 1 (vampires can never reach Hunger 0).
+   *
+   * @param amount - Amount to decrease Hunger by (default: 1, must be >= 0)
+   * @returns New Hunger value after decrease
+   * @throws {RealmError} If amount is negative
+   *
+   * @example
+   * ```typescript
+   * vampire.decreaseHunger(); // Decrease by 1
+   * vampire.decreaseHunger(2); // Decrease by 2
+   * ```
+   */
   decreaseHunger(amount: number = 1): number {
     // Trust the data - already validated at boundary
     // Only check for impossible internal states
@@ -77,6 +109,18 @@ export class Vampire5th extends Character5th implements IVampire5th {
     return this._hunger;
   }
 
+  /**
+   * Set the vampire's Hunger to a specific value.
+   *
+   * @param value - New Hunger value (0-5)
+   * @returns New Hunger value
+   * @throws {RealmError} If value is outside valid range (0-5)
+   *
+   * @example
+   * ```typescript
+   * vampire.setHunger(3); // Set Hunger to 3
+   * ```
+   */
   setHunger(value: number): number {
     // Trust the data - already validated at boundary
     // Only check for impossible internal states
@@ -88,15 +132,6 @@ export class Vampire5th extends Character5th implements IVampire5th {
 
     this._hunger = value;
     return this._hunger;
-  }
-
-  // ============================================================================
-  // Presentation
-  // ============================================================================
-
-  override get color(): string {
-    // Vampire red
-    return "#8B0000";
   }
 
   // ============================================================================
