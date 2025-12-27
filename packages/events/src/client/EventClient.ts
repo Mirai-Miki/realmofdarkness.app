@@ -176,7 +176,7 @@ export class EventClient {
   /**
    * Connect to Redis.
    */
-  async connect(): Promise<void> {
+  public async connect(): Promise<void> {
     await Promise.all([this.redis.connect(), this.redisSub.connect()]);
     this.logger.info("RedisEventClient connected", {
       fields: { publisherId: this.publisherId },
@@ -229,7 +229,7 @@ export class EventClient {
    * );
    * ```
    */
-  async publish<T>(
+  public async publish<T>(
     baseChannel: ChannelName,
     schema: z.ZodSchema<T>,
     event: Omit<T, "metadata">,
@@ -310,7 +310,7 @@ export class EventClient {
    * );
    * ```
    */
-  subscribe<T>(
+  public subscribe<T>(
     channel: string,
     schema: z.ZodSchema<T>,
     handler: EventHandler<T>
@@ -359,7 +359,7 @@ export class EventClient {
    * );
    * ```
    */
-  subscribePattern<T>(
+  public subscribePattern<T>(
     pattern: string,
     schema: z.ZodSchema<T>,
     handler: EventHandler<T>
@@ -389,7 +389,7 @@ export class EventClient {
    *
    * @param channelOrPattern - Channel name or pattern to unsubscribe from
    */
-  async unsubscribe(channelOrPattern: string): Promise<void> {
+  public async unsubscribe(channelOrPattern: string): Promise<void> {
     const subscriptions = this.subscriptions.get(channelOrPattern);
     if (!subscriptions || subscriptions.length === 0) return;
 
@@ -412,7 +412,7 @@ export class EventClient {
   /**
    * Disconnect from Redis and clean up resources.
    */
-  async disconnect(): Promise<void> {
+  public async disconnect(): Promise<void> {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
     }

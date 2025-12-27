@@ -1,6 +1,6 @@
 import type { SupporterDb } from "@realm/database";
-import type { SupporterData } from "@realm/common";
-import { RealmError, SupporterLevel } from "@realm/common";
+import type { SupporterData, SupporterLevel } from "@realm/common";
+import { RealmError } from "@realm/common";
 
 /**
  * Mapper for translating between Supporter database records and Supporter Data.
@@ -26,7 +26,7 @@ export class SupporterMapper {
    * @returns Supporter Data
    * @throws {RealmError} If mapping fails
    */
-  static toData(db: SupporterDb): SupporterData {
+  public static toData(db: SupporterDb): SupporterData {
     try {
       return {
         userId: db.userId,
@@ -49,7 +49,7 @@ export class SupporterMapper {
    * @returns Database record (without auto-generated timestamps)
    * @throws {RealmError} If mapping fails
    */
-  static fromData(
+  public static fromData(
     data: SupporterData
   ): Omit<SupporterDb, "createdAt" | "lastUpdated"> {
     try {

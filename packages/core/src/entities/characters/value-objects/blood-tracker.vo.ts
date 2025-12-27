@@ -48,7 +48,7 @@ export class BloodTracker implements IBloodTracker {
    * const newBlood = blood.spend(3); // { current: 7, total: 15 }
    * ```
    */
-  spend(amount: number): IBloodTracker {
+  public spend(amount: number): IBloodTracker {
     if (amount < 0) {
       throw new RealmError("Attempted to spend negative blood", {
         fields: { amount: amount.toString() },
@@ -87,7 +87,7 @@ export class BloodTracker implements IBloodTracker {
    * const overfed = blood.slake(20); // { current: 15, total: 15 } - capped
    * ```
    */
-  slake(amount: number): IBloodTracker {
+  public slake(amount: number): IBloodTracker {
     if (amount < 0) {
       throw new RealmError("Attempted to slake negative blood", {
         fields: { amount: amount.toString() },
@@ -115,7 +115,7 @@ export class BloodTracker implements IBloodTracker {
    * const updated = blood.setCurrent(10); // { current: 10, total: 15 }
    * ```
    */
-  setCurrent(amount: number): IBloodTracker {
+  public setCurrent(amount: number): IBloodTracker {
     if (amount < 0) {
       throw new RealmError("Attempted to set negative current blood", {
         fields: { amount: amount.toString() },
@@ -151,7 +151,7 @@ export class BloodTracker implements IBloodTracker {
    * const decreased = blood.setMax(8); // { current: 8, total: 8 } - current capped
    * ```
    */
-  setMax(amount: number): IBloodTracker {
+  public setMax(amount: number): IBloodTracker {
     if (amount < 1 || amount > 50) {
       throw new RealmError("Blood pool total must be between 1 and 50", {
         fields: { amount: amount.toString() },

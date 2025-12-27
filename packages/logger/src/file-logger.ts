@@ -26,7 +26,7 @@ export class FileLogger {
    * @returns Promise that resolves when the log is written
    * @throws Error if the file write operation fails
    */
-  async writeLog(logEntry: LogEntry): Promise<void> {
+  public async writeLog(logEntry: LogEntry): Promise<void> {
     const logLine = this.formatLogEntry(logEntry);
 
     try {

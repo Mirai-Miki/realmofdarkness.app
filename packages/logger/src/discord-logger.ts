@@ -52,7 +52,7 @@ export class DiscordLogger {
    * @returns Promise that resolves when the message is sent
    * @throws Error if the Discord API request fails
    */
-  async sendLog(logEntry: LogEntry): Promise<void> {
+  public async sendLog(logEntry: LogEntry): Promise<void> {
     const embed = this.createEmbed(logEntry);
 
     try {

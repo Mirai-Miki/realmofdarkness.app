@@ -30,7 +30,7 @@ export class UserService {
    * @param userId - Discord user snowflake ID
    * @returns User entity if found, null otherwise
    */
-  async getById(userId: Snowflake): Promise<User | null> {
+  public async getById(userId: Snowflake): Promise<User | null> {
     this.logger.debug("Getting user by ID", {
       fields: { userId },
     });
@@ -52,7 +52,7 @@ export class UserService {
    * @returns Created user entity
    * @throws {RealmError} If creation fails
    */
-  async create(input: CreateUserInput): Promise<User> {
+  public async create(input: CreateUserInput): Promise<User> {
     this.logger.info(`Creating user: ${input.username}`, {
       fields: { userId: input.id },
     });
@@ -97,7 +97,7 @@ export class UserService {
    * @returns Updated user entity
    * @throws {RealmError} If user not found or update fails
    */
-  async update(input: UpdateUserInput): Promise<User> {
+  public async update(input: UpdateUserInput): Promise<User> {
     this.logger.debug(`Updating user`, {
       fields: { userId: input.id },
     });
@@ -154,7 +154,7 @@ export class UserService {
    *
    * @param userId - Discord user snowflake ID
    */
-  async exists(userId: Snowflake): Promise<boolean> {
+  public async exists(userId: Snowflake): Promise<boolean> {
     return this.userRepository.exists(userId);
   }
 
@@ -163,7 +163,7 @@ export class UserService {
    *
    * @param userId - Discord user snowflake ID
    */
-  async updateLastActive(userId: Snowflake): Promise<void> {
+  public async updateLastActive(userId: Snowflake): Promise<void> {
     this.logger.debug("Updating user last active", {
       fields: { userId },
     });
@@ -176,7 +176,7 @@ export class UserService {
    *
    * @param userId - Discord user snowflake ID
    */
-  async delete(userId: Snowflake): Promise<void> {
+  public async delete(userId: Snowflake): Promise<void> {
     this.logger.info("Deleting user", {
       fields: { userId },
     });
@@ -194,7 +194,7 @@ export class UserService {
    * @param username - Discord username
    * @returns User entity if found, null otherwise
    */
-  async getByUsername(username: string): Promise<User | null> {
+  public async getByUsername(username: string): Promise<User | null> {
     const dto = await this.userRepository.findByUsername(username);
     if (!dto) {
       return null;
@@ -207,7 +207,7 @@ export class UserService {
    *
    * @returns Total number of users
    */
-  async count(): Promise<number> {
+  public async count(): Promise<number> {
     return this.userRepository.count();
   }
 }

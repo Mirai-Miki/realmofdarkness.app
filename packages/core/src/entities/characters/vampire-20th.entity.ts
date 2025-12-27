@@ -64,7 +64,7 @@ export class Vampire20th extends Character20th implements IVampire20th {
    * vampire.spendBlood(3); // Spend 3 blood points
    * ```
    */
-  spendBlood(amount: number): void {
+  public spendBlood(amount: number): void {
     this._bloodPool = this._bloodPool.spend(amount);
   }
 
@@ -81,7 +81,7 @@ export class Vampire20th extends Character20th implements IVampire20th {
    * vampire.slakeBlood(5); // Restore 5 blood points from feeding
    * ```
    */
-  slakeBlood(amount: number): void {
+  public slakeBlood(amount: number): void {
     this._bloodPool = this._bloodPool.slake(amount);
   }
 
@@ -96,7 +96,7 @@ export class Vampire20th extends Character20th implements IVampire20th {
    * vampire.setCurrentBlood(10); // Set current blood to 10
    * ```
    */
-  setCurrentBlood(amount: number): void {
+  public setCurrentBlood(amount: number): void {
     this._bloodPool = this._bloodPool.setCurrent(amount);
   }
 
@@ -114,7 +114,7 @@ export class Vampire20th extends Character20th implements IVampire20th {
    * vampire.setBloodPool(10, 15); // Set current to 10, max to 15
    * ```
    */
-  setBloodPool(current: number, total: number): void {
+  public setBloodPool(current: number, total: number): void {
     this._bloodPool = new BloodTracker({ current, total });
   }
 

@@ -48,7 +48,7 @@ export class HealthTracker20th implements IHealthTracker20th {
    * const hurt = tracker.takeDamage({ bashing: 2, lethal: 1 }); // { bashing: 3, lethal: 1 }
    * ```
    */
-  takeDamage(damage: {
+  public takeDamage(damage: {
     bashing?: number;
     lethal?: number;
     aggravated?: number;
@@ -107,7 +107,7 @@ export class HealthTracker20th implements IHealthTracker20th {
    * const healed = tracker.heal({ bashing: 2, lethal: 1 }); // { bashing: 1, lethal: 1, aggravated: 1 }
    * ```
    */
-  heal(damage: {
+  public heal(damage: {
     bashing?: number;
     lethal?: number;
     aggravated?: number;
@@ -149,7 +149,7 @@ export class HealthTracker20th implements IHealthTracker20th {
    * const updated = tracker.setCurrent({ bashing: 3 }); // { bashing: 3, lethal: 1, aggravated: 0 }
    * ```
    */
-  setCurrent(damage: {
+  public setCurrent(damage: {
     bashing?: number;
     lethal?: number;
     aggravated?: number;
@@ -178,7 +178,7 @@ export class HealthTracker20th implements IHealthTracker20th {
    * const smaller = tracker.setTotal(7); // Damage capped to fit in 7 boxes
    * ```
    */
-  setTotal(value: number): IHealthTracker20th {
+  public setTotal(value: number): IHealthTracker20th {
     if (value < 7 || value > 15) {
       throw new RealmError(
         "Internal error: health total must be between 7 and 15",
@@ -220,7 +220,7 @@ export class HealthTracker20th implements IHealthTracker20th {
    * const fortitude = tracker.addTotal(2); // { total: 9 }
    * ```
    */
-  addTotal(amount: number): IHealthTracker20th {
+  public addTotal(amount: number): IHealthTracker20th {
     return this.setTotal(this.total + amount);
   }
 
@@ -240,7 +240,7 @@ export class HealthTracker20th implements IHealthTracker20th {
    * const aged = tracker.removeTotal(3); // { total: 7 }
    * ```
    */
-  removeTotal(amount: number): IHealthTracker20th {
+  public removeTotal(amount: number): IHealthTracker20th {
     return this.setTotal(this.total - amount);
   }
 }

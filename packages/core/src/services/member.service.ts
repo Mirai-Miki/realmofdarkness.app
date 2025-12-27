@@ -35,7 +35,7 @@ export class MemberService {
    * @param userId - Discord user ID
    * @returns Member entity if found, null otherwise
    */
-  async getByGuildAndUser(
+  public async getByGuildAndUser(
     guildId: Snowflake,
     userId: Snowflake
   ): Promise<Member | null> {
@@ -60,7 +60,7 @@ export class MemberService {
    * @returns Created member entity
    * @throws {RealmError} If creation fails
    */
-  async create(input: CreateMemberInput): Promise<Member> {
+  public async create(input: CreateMemberInput): Promise<Member> {
     this.logger.info("Creating member", {
       fields: { guildId: input.guildId, userId: input.userId },
     });
@@ -119,7 +119,7 @@ export class MemberService {
    * @param input - Profile data from Discord
    * @returns Updated member entity, or null if member not found
    */
-  async syncProfile(input: SyncMemberInput): Promise<Member | null> {
+  public async syncProfile(input: SyncMemberInput): Promise<Member | null> {
     try {
       // Trust input - already validated at API/Bot edge
 
@@ -188,7 +188,7 @@ export class MemberService {
    * @returns Updated member entity
    * @throws {RealmError} If member not found
    */
-  async addBoost(input: AddBoostInput): Promise<Member> {
+  public async addBoost(input: AddBoostInput): Promise<Member> {
     this.logger.info("Adding boost to member", {
       fields: { guildId: input.guildId, userId: input.userId },
     });
@@ -231,7 +231,7 @@ export class MemberService {
    * @returns Updated member entity
    * @throws {RealmError} If member not found or has no boosts
    */
-  async removeBoost(input: RemoveBoostInput): Promise<Member> {
+  public async removeBoost(input: RemoveBoostInput): Promise<Member> {
     this.logger.info("Removing boost from member", {
       fields: { guildId: input.guildId, userId: input.userId },
     });
@@ -272,7 +272,7 @@ export class MemberService {
    *
    * @param input - Complete input with guild ID and user ID
    */
-  async delete(input: DeleteMemberInput): Promise<void> {
+  public async delete(input: DeleteMemberInput): Promise<void> {
     this.logger.info("Deleting member", {
       fields: { guildId: input.guildId, userId: input.userId },
     });
@@ -294,7 +294,7 @@ export class MemberService {
    *
    * @param guildId - Discord guild ID
    */
-  async deleteByGuild(guildId: Snowflake): Promise<void> {
+  public async deleteByGuild(guildId: Snowflake): Promise<void> {
     this.logger.info("Deleting all members from guild", {
       fields: { guildId },
     });
@@ -312,7 +312,7 @@ export class MemberService {
    * @param input - Complete input with guild ID and user ID
    * @returns True if member exists
    */
-  async exists(input: MemberExistsInput): Promise<boolean> {
+  public async exists(input: MemberExistsInput): Promise<boolean> {
     // Trust input - already validated at API/Bot edge
     return this.memberRepository.exists(input.guildId, input.userId);
   }
@@ -323,7 +323,7 @@ export class MemberService {
    * @param guildId - Discord guild ID
    * @returns Array of member entities
    */
-  async getByGuild(guildId: Snowflake): Promise<Member[]> {
+  public async getByGuild(guildId: Snowflake): Promise<Member[]> {
     const dtos = await this.memberRepository.findByGuild(guildId);
     return dtos.map((dto) => new Member(dto));
   }
@@ -334,7 +334,7 @@ export class MemberService {
    * @param userId - Discord user ID
    * @returns Array of member entities
    */
-  async getByUser(userId: Snowflake): Promise<Member[]> {
+  public async getByUser(userId: Snowflake): Promise<Member[]> {
     const dtos = await this.memberRepository.findByUser(userId);
     return dtos.map((dto) => new Member(dto));
   }
@@ -345,7 +345,7 @@ export class MemberService {
    * @param guildId - Discord guild ID
    * @returns Array of staff member entities
    */
-  async getStaffMembers(guildId: Snowflake): Promise<Member[]> {
+  public async getStaffMembers(guildId: Snowflake): Promise<Member[]> {
     const dtos = await this.memberRepository.findStaffMembers(guildId);
     return dtos.map((dto) => new Member(dto));
   }

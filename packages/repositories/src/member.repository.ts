@@ -32,7 +32,7 @@ export class MemberRepository implements IMemberRepository {
    * @param userId - Discord user ID
    * @returns The member Data if found, null otherwise
    */
-  async findByGuildAndUser(
+  public async findByGuildAndUser(
     guildId: Snowflake,
     userId: Snowflake
   ): Promise<MemberData | null> {
@@ -62,7 +62,7 @@ export class MemberRepository implements IMemberRepository {
    * @param guildId - Discord guild ID
    * @returns Array of members in the guild (empty if none)
    */
-  async findByGuild(guildId: Snowflake): Promise<MemberData[]> {
+  public async findByGuild(guildId: Snowflake): Promise<MemberData[]> {
     try {
       const result = await db
         .select()
@@ -84,7 +84,7 @@ export class MemberRepository implements IMemberRepository {
    * @param userId - Discord user ID
    * @returns Array of member records for this user (empty if none)
    */
-  async findByUser(userId: Snowflake): Promise<MemberData[]> {
+  public async findByUser(userId: Snowflake): Promise<MemberData[]> {
     try {
       const result = await db
         .select()
@@ -107,7 +107,7 @@ export class MemberRepository implements IMemberRepository {
    * @returns The created member Data
    * @throws {RealmError} If member already exists or database error occurs
    */
-  async create(member: MemberData): Promise<MemberData> {
+  public async create(member: MemberData): Promise<MemberData> {
     try {
       const dbRecord = MemberMapper.fromData(member);
 
@@ -132,7 +132,7 @@ export class MemberRepository implements IMemberRepository {
    * @returns The updated member Data
    * @throws {RealmError} If member does not exist or database error occurs
    */
-  async update(member: MemberData): Promise<MemberData> {
+  public async update(member: MemberData): Promise<MemberData> {
     try {
       const dbRecord = MemberMapper.fromData(member);
 
@@ -181,7 +181,7 @@ export class MemberRepository implements IMemberRepository {
    * @param userId - Discord user ID
    * @throws {RealmError} If database error occurs
    */
-  async delete(guildId: Snowflake, userId: Snowflake): Promise<void> {
+  public async delete(guildId: Snowflake, userId: Snowflake): Promise<void> {
     try {
       await db
         .delete(members)
@@ -201,7 +201,7 @@ export class MemberRepository implements IMemberRepository {
    * @param userId - Discord user ID
    * @returns True if member exists, false otherwise
    */
-  async exists(guildId: Snowflake, userId: Snowflake): Promise<boolean> {
+  public async exists(guildId: Snowflake, userId: Snowflake): Promise<boolean> {
     try {
       const result = await db
         .select({ guildId: members.guildId })
@@ -224,7 +224,7 @@ export class MemberRepository implements IMemberRepository {
    * @param guildId - Discord guild ID
    * @returns Number of members in the guild
    */
-  async countByGuild(guildId: Snowflake): Promise<number> {
+  public async countByGuild(guildId: Snowflake): Promise<number> {
     try {
       const result = await db
         .select()
@@ -246,7 +246,7 @@ export class MemberRepository implements IMemberRepository {
    * @param guildId - Discord guild ID
    * @returns Array of admin member Data (empty if none)
    */
-  async findAdminsByGuild(guildId: Snowflake): Promise<MemberData[]> {
+  public async findAdminsByGuild(guildId: Snowflake): Promise<MemberData[]> {
     try {
       const result = await db
         .select()
@@ -271,7 +271,7 @@ export class MemberRepository implements IMemberRepository {
    * @param guildId - Discord guild ID
    * @returns Array of staff member Data (empty if none)
    */
-  async findStaffMembers(guildId: Snowflake): Promise<MemberData[]> {
+  public async findStaffMembers(guildId: Snowflake): Promise<MemberData[]> {
     try {
       // First, get the guild's storyteller role IDs
       const guildResult = await db
@@ -316,7 +316,7 @@ export class MemberRepository implements IMemberRepository {
    * @param guildId - Discord guild ID
    * @returns Array of boosting member Data (empty if none)
    */
-  async findBoostingMembers(guildId: Snowflake): Promise<MemberData[]> {
+  public async findBoostingMembers(guildId: Snowflake): Promise<MemberData[]> {
     try {
       const result = await db
         .select()
@@ -338,7 +338,7 @@ export class MemberRepository implements IMemberRepository {
    * @param userId - Discord user ID
    * @returns Total number of boosts
    */
-  async countTotalBoostsByUser(userId: Snowflake): Promise<number> {
+  public async countTotalBoostsByUser(userId: Snowflake): Promise<number> {
     try {
       const result = await db
         .select({ total: sum(members.boosted) })
@@ -361,7 +361,7 @@ export class MemberRepository implements IMemberRepository {
    * @param guildId - Discord guild ID
    * @throws {RealmError} If database error occurs
    */
-  async deleteByGuild(guildId: Snowflake): Promise<void> {
+  public async deleteByGuild(guildId: Snowflake): Promise<void> {
     try {
       await db.delete(members).where(eq(members.guildId, guildId));
     } catch (error) {

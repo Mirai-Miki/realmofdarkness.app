@@ -47,7 +47,7 @@ export class WillpowerTracker20th implements IWillpowerTracker20th {
    * const spent = wp.spend(2); // { total: 8, current: 4 }
    * ```
    */
-  spend(amount: number): IWillpowerTracker20th {
+  public spend(amount: number): IWillpowerTracker20th {
     if (amount < 0) {
       throw new RealmError("Attempted to spend negative willpower", {
         fields: { amount: amount.toString() },
@@ -86,7 +86,7 @@ export class WillpowerTracker20th implements IWillpowerTracker20th {
    * const full = wp.restore(10); // { total: 8, current: 8 } - capped
    * ```
    */
-  restore(amount: number): IWillpowerTracker20th {
+  public restore(amount: number): IWillpowerTracker20th {
     if (amount < 0) {
       throw new RealmError("Attempted to restore negative willpower", {
         fields: { amount: amount.toString() },
@@ -114,7 +114,7 @@ export class WillpowerTracker20th implements IWillpowerTracker20th {
    * const set = wp.setCurrent(5); // { total: 8, current: 5 }
    * ```
    */
-  setCurrent(value: number): IWillpowerTracker20th {
+  public setCurrent(value: number): IWillpowerTracker20th {
     if (value < 0) {
       throw new RealmError("Attempted to set negative current willpower", {
         fields: { value: value.toString() },
@@ -153,7 +153,7 @@ export class WillpowerTracker20th implements IWillpowerTracker20th {
    * const decreased = wp.setTotal(3); // { total: 3, current: 3 } - current capped
    * ```
    */
-  setTotal(value: number): IWillpowerTracker20th {
+  public setTotal(value: number): IWillpowerTracker20th {
     if (value < 1 || value > 10) {
       throw new RealmError("Willpower total must be between 1 and 10", {
         fields: { value: value.toString() },
@@ -181,7 +181,7 @@ export class WillpowerTracker20th implements IWillpowerTracker20th {
    * const improved = wp.addTotal(2); // { total: 8, current: 4 }
    * ```
    */
-  addTotal(amount: number): IWillpowerTracker20th {
+  public addTotal(amount: number): IWillpowerTracker20th {
     return this.setTotal(this.total + amount);
   }
 
@@ -201,7 +201,7 @@ export class WillpowerTracker20th implements IWillpowerTracker20th {
    * const damaged = wp.removeTotal(2); // { total: 6, current: 6 }
    * ```
    */
-  removeTotal(amount: number): IWillpowerTracker20th {
+  public removeTotal(amount: number): IWillpowerTracker20th {
     return this.setTotal(this.total - amount);
   }
 }

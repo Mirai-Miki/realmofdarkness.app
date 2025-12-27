@@ -43,7 +43,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Supporter Data (never null - defaults to Base tier)
    * @throws {RealmError} If database query fails
    */
-  async findByUserId(userId: Snowflake): Promise<SupporterData> {
+  public async findByUserId(userId: Snowflake): Promise<SupporterData> {
     try {
       const result = await db
         .select()
@@ -78,7 +78,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Array of Supporter Data
    * @throws {RealmError} If database query fails
    */
-  async findAll(
+  public async findAll(
     limit: number = 100,
     offset: number = 0
   ): Promise<SupporterData[]> {
@@ -110,7 +110,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Array of Supporter Data
    * @throws {RealmError} If database query fails
    */
-  async findByLevel(
+  public async findByLevel(
     level: SupporterLevel,
     limit: number = 100,
     offset: number = 0
@@ -144,7 +144,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Array of Supporter Data with totalBoosts > 0
    * @throws {RealmError} If database query fails
    */
-  async findWithAvailableBoosts(
+  public async findWithAvailableBoosts(
     limit: number = 100,
     offset: number = 0
   ): Promise<SupporterData[]> {
@@ -175,7 +175,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Created supporter Data with updated metadata
    * @throws {RealmError} If creation fails or supporter already exists
    */
-  async create(supporter: SupporterData): Promise<SupporterData> {
+  public async create(supporter: SupporterData): Promise<SupporterData> {
     try {
       const dbRecord = SupporterMapper.fromData(supporter);
 
@@ -206,7 +206,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Updated supporter Data with refreshed metadata
    * @throws {RealmError} If update fails or supporter doesn't exist
    */
-  async update(supporter: SupporterData): Promise<SupporterData> {
+  public async update(supporter: SupporterData): Promise<SupporterData> {
     try {
       const dbRecord = SupporterMapper.fromData(supporter);
 
@@ -248,7 +248,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @param userId - Discord user snowflake ID
    * @throws {RealmError} If deletion fails
    */
-  async delete(userId: Snowflake): Promise<void> {
+  public async delete(userId: Snowflake): Promise<void> {
     try {
       await db.delete(supporters).where(eq(supporters.userId, userId));
 
@@ -270,7 +270,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns True if user has a supporter record
    * @throws {RealmError} If query fails
    */
-  async exists(userId: Snowflake): Promise<boolean> {
+  public async exists(userId: Snowflake): Promise<boolean> {
     try {
       const result = await db
         .select({ userId: supporters.userId })
@@ -293,7 +293,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Total supporter count
    * @throws {RealmError} If query fails
    */
-  async count(): Promise<number> {
+  public async count(): Promise<number> {
     try {
       const result = await db
         .select({ userId: supporters.userId })
@@ -314,7 +314,7 @@ export class SupporterRepository implements ISupporterRepository {
    * @returns Count of supporters at this level
    * @throws {RealmError} If query fails
    */
-  async countByLevel(level: SupporterLevel): Promise<number> {
+  public async countByLevel(level: SupporterLevel): Promise<number> {
     try {
       const result = await db
         .select({ userId: supporters.userId })

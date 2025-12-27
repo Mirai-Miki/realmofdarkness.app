@@ -40,7 +40,7 @@ export class Wod20RollAction {
    * console.log(result.roll.successes); // Number of successes rolled
    * ```
    */
-  execute(input: Wod20RollActionInput): Wod20RollActionResult {
+  public execute(input: Wod20RollActionInput): Wod20RollActionResult {
     // Execute dice roll via service
     const rollResult = this.diceService.roll({
       pool: input.pool,

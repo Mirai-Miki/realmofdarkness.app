@@ -66,7 +66,7 @@ export class Vampire5th extends Character5th implements IVampire5th {
    * vampire.increaseHunger(2); // Increase by 2
    * ```
    */
-  increaseHunger(amount: number = 1): number {
+  public increaseHunger(amount: number = 1): number {
     // Trust the data - already validated at boundary
     // Only check for impossible internal states
     if (amount < 0) {
@@ -95,7 +95,7 @@ export class Vampire5th extends Character5th implements IVampire5th {
    * vampire.decreaseHunger(2); // Decrease by 2
    * ```
    */
-  decreaseHunger(amount: number = 1): number {
+  public decreaseHunger(amount: number = 1): number {
     // Trust the data - already validated at boundary
     // Only check for impossible internal states
     if (amount < 0) {
@@ -121,7 +121,7 @@ export class Vampire5th extends Character5th implements IVampire5th {
    * vampire.setHunger(3); // Set Hunger to 3
    * ```
    */
-  setHunger(value: number): number {
+  public setHunger(value: number): number {
     // Trust the data - already validated at boundary
     // Only check for impossible internal states
     if (value < 0 || value > 5) {

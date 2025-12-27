@@ -45,7 +45,7 @@ export class GuildService {
    * @returns Guild entity
    * @throws {RealmError} If guild not found or retrieval fails
    */
-  async getById(guildId: Snowflake): Promise<Guild> {
+  public async getById(guildId: Snowflake): Promise<Guild> {
     this.logger.debug("Retrieving guild by ID", {
       fields: { guildId },
     });
@@ -85,7 +85,7 @@ export class GuildService {
    * @returns Created guild entity
    * @throws {RealmError} If creation fails due to system error
    */
-  async create(input: CreateGuildInput): Promise<Guild> {
+  public async create(input: CreateGuildInput): Promise<Guild> {
     this.logger.info(`Creating guild: ${input.name}`, {
       fields: { guildId: input.id, name: input.name },
     });
@@ -128,7 +128,7 @@ export class GuildService {
    * @returns Updated guild entity
    * @throws {RealmError} If guild not found or update fails
    */
-  async update(input: UpdateGuildInput): Promise<Guild> {
+  public async update(input: UpdateGuildInput): Promise<Guild> {
     this.logger.info(`Updating guild`, {
       fields: { guildId: input.id },
     });
@@ -194,7 +194,7 @@ export class GuildService {
    * @returns Upserted guild entity
    * @throws {RealmError} If upsert fails
    */
-  async upsert(input: UpsertGuildInput): Promise<Guild> {
+  public async upsert(input: UpsertGuildInput): Promise<Guild> {
     this.logger.info(`Upserting guild: ${input.name}`, {
       fields: { guildId: input.id },
     });
@@ -231,7 +231,9 @@ export class GuildService {
    * @returns Updated guild entity
    * @throws {RealmError} If guild not found or update fails
    */
-  async addStorytellerRole(input: AddStorytellerRoleInput): Promise<Guild> {
+  public async addStorytellerRole(
+    input: AddStorytellerRoleInput
+  ): Promise<Guild> {
     this.logger.info(`Adding storyteller role to guild`, {
       fields: { guildId: input.guildId, roleId: input.roleId },
     });
@@ -259,7 +261,7 @@ export class GuildService {
    * @returns Updated guild entity
    * @throws {RealmError} If guild not found or update fails
    */
-  async removeStorytellerRole(
+  public async removeStorytellerRole(
     input: RemoveStorytellerRoleInput
   ): Promise<Guild> {
     this.logger.info(`Removing storyteller role from guild`, {
@@ -295,7 +297,7 @@ export class GuildService {
    * // Guild is deleted (or didn't exist)
    * ```
    */
-  async delete(guildId: Snowflake): Promise<void> {
+  public async delete(guildId: Snowflake): Promise<void> {
     this.logger.info(`Deleting guild`, {
       fields: { guildId },
     });
@@ -325,7 +327,7 @@ export class GuildService {
    * @returns True if guild exists
    * @throws {RealmError} If check fails due to system error
    */
-  async exists(guildId: Snowflake): Promise<boolean> {
+  public async exists(guildId: Snowflake): Promise<boolean> {
     this.logger.debug("Checking if guild exists", {
       fields: { guildId },
     });

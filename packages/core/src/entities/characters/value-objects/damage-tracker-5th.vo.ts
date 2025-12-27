@@ -42,7 +42,7 @@ export class DamageTracker5th implements IDamageTracker5th {
    * tracker.totalDamage(); // Returns 5
    * ```
    */
-  totalDamage(): number {
+  public totalDamage(): number {
     return this.superficial + this.aggravated;
   }
 
@@ -59,7 +59,7 @@ export class DamageTracker5th implements IDamageTracker5th {
    * tracker.isImpaired(); // Returns true (3 + 2 = 5)
    * ```
    */
-  isImpaired(): boolean {
+  public isImpaired(): boolean {
     return this.totalDamage() === this.total;
   }
 
@@ -74,7 +74,7 @@ export class DamageTracker5th implements IDamageTracker5th {
    * tracker.isUndamaged(); // Returns true
    * ```
    */
-  isUndamaged(): boolean {
+  public isUndamaged(): boolean {
     return this.totalDamage() === 0;
   }
 
@@ -91,7 +91,7 @@ export class DamageTracker5th implements IDamageTracker5th {
    * tracker.isIncapacitated(); // Returns true
    * ```
    */
-  isIncapacitated(): boolean {
+  public isIncapacitated(): boolean {
     return this.aggravated === this.total;
   }
 
@@ -111,7 +111,7 @@ export class DamageTracker5th implements IDamageTracker5th {
    * const damaged = tracker.takeSuperficial(3); // { superficial: 5, aggravated: 1 }
    * ```
    */
-  takeSuperficial(amount: number): IDamageTracker5th {
+  public takeSuperficial(amount: number): IDamageTracker5th {
     if (amount < 0) {
       throw new RealmError("Attempted to take negative damage", {
         fields: { amount: amount.toString() },
@@ -147,7 +147,7 @@ export class DamageTracker5th implements IDamageTracker5th {
    * const more = agg.takeAggravated(2); // { superficial: 1, aggravated: 4 } - pushes out superficial
    * ```
    */
-  takeAggravated(amount: number): IDamageTracker5th {
+  public takeAggravated(amount: number): IDamageTracker5th {
     if (amount < 0) {
       throw new RealmError("Attempted to take negative damage", {
         fields: { amount: amount.toString() },
@@ -182,7 +182,7 @@ export class DamageTracker5th implements IDamageTracker5th {
    * const healed = tracker.healSuperficial(3); // { superficial: 2, aggravated: 2 }
    * ```
    */
-  healSuperficial(amount: number): IDamageTracker5th {
+  public healSuperficial(amount: number): IDamageTracker5th {
     if (amount < 0) {
       throw new RealmError("Attempted to heal negative damage", {
         fields: { amount: amount.toString() },
@@ -211,7 +211,7 @@ export class DamageTracker5th implements IDamageTracker5th {
    * const healed = tracker.healAggravated(2); // { superficial: 3, aggravated: 2 }
    * ```
    */
-  healAggravated(amount: number): IDamageTracker5th {
+  public healAggravated(amount: number): IDamageTracker5th {
     if (amount < 0) {
       throw new RealmError("Attempted to heal negative damage", {
         fields: { amount: amount.toString() },
@@ -241,7 +241,7 @@ export class DamageTracker5th implements IDamageTracker5th {
    * const both = tracker.setDamage({ superficial: 1, aggravated: 3 }); // { superficial: 1, aggravated: 3 }
    * ```
    */
-  setDamage(damage: {
+  public setDamage(damage: {
     superficial?: number;
     aggravated?: number;
   }): IDamageTracker5th {
@@ -268,7 +268,7 @@ export class DamageTracker5th implements IDamageTracker5th {
    * const smaller = tracker.setTotal(5); // { total: 5, superficial: 5, aggravated: 0 } - damage capped
    * ```
    */
-  setTotal(total: number): IDamageTracker5th {
+  public setTotal(total: number): IDamageTracker5th {
     if (total < 0) {
       throw new RealmError("Internal error: total boxes cannot be negative", {
         fields: { total: total.toString() },

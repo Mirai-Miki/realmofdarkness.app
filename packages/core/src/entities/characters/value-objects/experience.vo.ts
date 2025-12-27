@@ -37,7 +37,7 @@ export class Experience implements IExperience {
    * }
    * ```
    */
-  canAfford(cost: number): boolean {
+  public canAfford(cost: number): boolean {
     return this.current >= cost;
   }
 
@@ -57,7 +57,7 @@ export class Experience implements IExperience {
    * const newXp = xp.spend(5); // { current: 5, total: 50 }
    * ```
    */
-  spend(cost: number): IExperience {
+  public spend(cost: number): IExperience {
     if (!this.canAfford(cost)) {
       // This should never happen if caller checks canAfford first
       throw new RealmError(
@@ -93,7 +93,7 @@ export class Experience implements IExperience {
    * const newXp = xp.award(5); // { current: 15, total: 55 }
    * ```
    */
-  award(amount: number): IExperience {
+  public award(amount: number): IExperience {
     if (amount < 0) {
       throw new RealmError("Attempted to award negative experience", {
         fields: { amount: amount.toString() },
@@ -123,7 +123,7 @@ export class Experience implements IExperience {
    * const cappedXp = xp.setTotal(5); // { current: 5, total: 5 } - current capped
    * ```
    */
-  setTotal(total: number): IExperience {
+  public setTotal(total: number): IExperience {
     if (total < 0) {
       throw new RealmError("Attempted to set negative total experience", {
         fields: { total: total.toString() },
@@ -152,7 +152,7 @@ export class Experience implements IExperience {
    * const newXp = xp.setCurrent(20); // { current: 20, total: 50 }
    * ```
    */
-  setCurrent(current: number): IExperience {
+  public setCurrent(current: number): IExperience {
     if (current < 0 || current > this.total) {
       throw new RealmError(
         "Attempted to set current experience to invalid value",
@@ -182,7 +182,7 @@ export class Experience implements IExperience {
    * const data = xp.toData(); // { current: 10, total: 50 }
    * ```
    */
-  toData(): ExperienceData {
+  public toData(): ExperienceData {
     return {
       current: this.current,
       total: this.total,

@@ -119,7 +119,7 @@ export abstract class Character implements ICharacter {
    * }
    * ```
    */
-  canAffordExperience(cost: number): boolean {
+  public canAffordExperience(cost: number): boolean {
     return this._experience.canAfford(cost);
   }
 
@@ -136,7 +136,7 @@ export abstract class Character implements ICharacter {
    * character.spendExperience(5); // Buy a trait costing 5 XP
    * ```
    */
-  spendExperience(cost: number): void {
+  public spendExperience(cost: number): void {
     if (!this.canAffordExperience(cost)) {
       throw new RealmError(
         "Attempted to spend more experience than available",
@@ -165,7 +165,7 @@ export abstract class Character implements ICharacter {
    * character.awardExperience(3); // Award 3 XP for session attendance
    * ```
    */
-  awardExperience(amount: number): void {
+  public awardExperience(amount: number): void {
     this._experience = this._experience.award(amount);
   }
 
@@ -183,7 +183,7 @@ export abstract class Character implements ICharacter {
    * character.setExperienceTotal(100); // Set total XP to 100
    * ```
    */
-  setExperienceTotal(total: number): void {
+  public setExperienceTotal(total: number): void {
     this._experience = this._experience.setTotal(total);
   }
 
@@ -201,7 +201,7 @@ export abstract class Character implements ICharacter {
    * character.setExperienceCurrent(15); // Set unspent XP to 15
    * ```
    */
-  setExperienceCurrent(current: number): void {
+  public setExperienceCurrent(current: number): void {
     this._experience = this._experience.setCurrent(current);
   }
 
@@ -220,7 +220,7 @@ export abstract class Character implements ICharacter {
    * await repository.update(data);
    * ```
    */
-  toData(): BaseCharacterData {
+  public toData(): BaseCharacterData {
     return {
       ...this.data,
     };

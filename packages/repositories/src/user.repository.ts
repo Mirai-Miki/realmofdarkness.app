@@ -41,7 +41,7 @@ export class UserRepository implements IUserRepository {
    * @returns User Data if found, null otherwise
    * @throws {RealmError} If database query fails
    */
-  async findById(id: Snowflake): Promise<UserData | null> {
+  public async findById(id: Snowflake): Promise<UserData | null> {
     try {
       const result = await db
         .select()
@@ -69,7 +69,7 @@ export class UserRepository implements IUserRepository {
    * @returns Array of User Data found
    * @throws {RealmError} If database query fails
    */
-  async findManyByIds(ids: Snowflake[]): Promise<UserData[]> {
+  public async findManyByIds(ids: Snowflake[]): Promise<UserData[]> {
     if (ids.length === 0) return [];
 
     try {
@@ -94,7 +94,7 @@ export class UserRepository implements IUserRepository {
    * @returns User Data if found, null otherwise
    * @throws {RealmError} If database query fails
    */
-  async findByUsername(username: string): Promise<UserData | null> {
+  public async findByUsername(username: string): Promise<UserData | null> {
     try {
       const result = await db
         .select()
@@ -123,7 +123,10 @@ export class UserRepository implements IUserRepository {
    * @returns Array of User Data
    * @throws {RealmError} If database query fails
    */
-  async findAll(limit: number = 100, offset: number = 0): Promise<UserData[]> {
+  public async findAll(
+    limit: number = 100,
+    offset: number = 0
+  ): Promise<UserData[]> {
     try {
       const results = await db.select().from(users).limit(limit).offset(offset);
 
@@ -146,7 +149,7 @@ export class UserRepository implements IUserRepository {
    * @returns Created user Data with updated metadata
    * @throws {RealmError} If user creation fails or user already exists
    */
-  async create(user: UserData): Promise<UserData> {
+  public async create(user: UserData): Promise<UserData> {
     try {
       const dbRecord = UserMapper.fromData(user);
 
@@ -172,7 +175,7 @@ export class UserRepository implements IUserRepository {
    * @returns Updated user Data with refreshed metadata
    * @throws {RealmError} If update fails or user doesn't exist
    */
-  async update(user: UserData): Promise<UserData> {
+  public async update(user: UserData): Promise<UserData> {
     try {
       const dbRecord = UserMapper.fromData(user);
 
@@ -210,7 +213,7 @@ export class UserRepository implements IUserRepository {
    * @param id - Discord user snowflake ID
    * @throws {RealmError} If update fails
    */
-  async updateLastActive(id: Snowflake): Promise<void> {
+  public async updateLastActive(id: Snowflake): Promise<void> {
     try {
       await db
         .update(users)
@@ -234,7 +237,7 @@ export class UserRepository implements IUserRepository {
    * @param id - Discord user snowflake ID
    * @throws {RealmError} If deletion fails
    */
-  async delete(id: Snowflake): Promise<void> {
+  public async delete(id: Snowflake): Promise<void> {
     try {
       await db.delete(users).where(eq(users.id, id));
 
@@ -256,7 +259,7 @@ export class UserRepository implements IUserRepository {
    * @returns True if user exists, false otherwise
    * @throws {RealmError} If query fails
    */
-  async exists(id: Snowflake): Promise<boolean> {
+  public async exists(id: Snowflake): Promise<boolean> {
     try {
       const result = await db
         .select({ id: users.id })
@@ -279,7 +282,7 @@ export class UserRepository implements IUserRepository {
    * @returns Total user count
    * @throws {RealmError} If query fails
    */
-  async count(): Promise<number> {
+  public async count(): Promise<number> {
     try {
       const result = await db.select({ count: users.id }).from(users);
 

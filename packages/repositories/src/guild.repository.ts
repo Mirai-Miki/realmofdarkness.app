@@ -28,7 +28,7 @@ export class GuildRepository implements IGuildRepository {
    * @param id - Discord guild snowflake ID
    * @returns Guild Data if found, null otherwise
    */
-  async findById(id: Snowflake): Promise<GuildData | null> {
+  public async findById(id: Snowflake): Promise<GuildData | null> {
     try {
       const result = await db
         .select()
@@ -55,7 +55,7 @@ export class GuildRepository implements IGuildRepository {
    * @param guild - Guild Data to create
    * @returns Created guild Data
    */
-  async create(guild: GuildData): Promise<GuildData> {
+  public async create(guild: GuildData): Promise<GuildData> {
     try {
       const dbRecord = GuildMapper.fromData(guild);
 
@@ -76,7 +76,7 @@ export class GuildRepository implements IGuildRepository {
    * @param guild - Guild Data to update
    * @returns Updated guild Data
    */
-  async update(guild: GuildData): Promise<GuildData> {
+  public async update(guild: GuildData): Promise<GuildData> {
     try {
       const dbRecord = GuildMapper.fromData(guild);
 
@@ -115,7 +115,7 @@ export class GuildRepository implements IGuildRepository {
    * @param input - Guild data to upsert
    * @returns Upserted guild Data
    */
-  async upsert(input: UpsertGuildInput): Promise<GuildData> {
+  public async upsert(input: UpsertGuildInput): Promise<GuildData> {
     const now = new Date();
 
     // Build the conflict update set dynamically based on provided fields
@@ -159,7 +159,7 @@ export class GuildRepository implements IGuildRepository {
    *
    * @param id - Discord guild snowflake ID
    */
-  async delete(id: Snowflake): Promise<void> {
+  public async delete(id: Snowflake): Promise<void> {
     try {
       await db.delete(guilds).where(eq(guilds.id, id));
     } catch (error) {
@@ -176,7 +176,7 @@ export class GuildRepository implements IGuildRepository {
    * @param id - Discord guild snowflake ID
    * @returns True if guild exists
    */
-  async exists(id: Snowflake): Promise<boolean> {
+  public async exists(id: Snowflake): Promise<boolean> {
     try {
       const result = await db
         .select({ id: guilds.id })

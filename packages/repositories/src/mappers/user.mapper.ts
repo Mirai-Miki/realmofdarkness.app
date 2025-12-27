@@ -26,7 +26,7 @@ export class UserMapper {
    * @returns User Data
    * @throws {RealmError} If mapping fails
    */
-  static toData(db: UserDb): UserData {
+  public static toData(db: UserDb): UserData {
     try {
       return {
         id: db.id,
@@ -55,7 +55,7 @@ export class UserMapper {
    * @returns User database record (without timestamps for insert)
    * @throws {RealmError} If mapping fails
    */
-  static fromData(
+  public static fromData(
     data: UserData
   ): Omit<UserDb, "createdAt" | "updatedAt" | "lastActive"> {
     try {
