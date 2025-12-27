@@ -5,7 +5,7 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module.js";
 
 // Load environment variables from root .env file
-config({ path: resolve(__dirname, "../../../.env") });
+config({ path: resolve(__dirname, "../../../.env"), quiet: true });
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

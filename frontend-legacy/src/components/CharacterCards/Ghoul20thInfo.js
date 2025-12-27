@@ -1,14 +1,14 @@
 import { CardActionArea, CardContent, CardMedia } from "@mui/material";
 import { Typography, Divider } from "@mui/material";
 import V20HealthTracker from "../Trackers/V20HealthTracker";
-import ExpBar from "../CharacterCards/ExpBar";
+import ExpBar from "./ExpBar";
 import ResponsiveRating from "../Trackers/ResponsiveRating";
 import OverflowRating from "../Trackers/OverflowRating";
 
 const defaultImage =
-  "https://res.cloudinary.com/dze64d7cr/image/upload/v1708659987/Logo/werewolf_20th_logo.webp";
+  "https://res.cloudinary.com/dze64d7cr/image/upload/v1708656411/Logo/wod_logo_optimized.webp";
 
-export default function Werewolf20thInfo(props) {
+export default function Ghoul20thInfo(props) {
   const { character, chronicle } = props;
 
   return (
@@ -27,7 +27,7 @@ export default function Werewolf20thInfo(props) {
             mb: 2,
           }}
         />
-        <Typography>Werewolf - 20th Edition</Typography>
+        <Typography>Ghoul - 20th Edition</Typography>
         <Typography>Server: {chronicle?.name ?? "None"}</Typography>
         <Divider sx={{ my: 1 }} />
         <Typography>
@@ -41,23 +41,22 @@ export default function Werewolf20thInfo(props) {
           }}
         />
         <Divider sx={{ my: 1 }} />
-        <Typography>
-          Rage {`${character.rage_current} / ${character.rage_total}`}
-        </Typography>
+        <Typography>Blood {`${character.blood} / 10`}</Typography>
+        <ResponsiveRating tracker={{ current: character.blood, total: 10 }} />
+        <Divider sx={{ my: 1 }} />
+        <Typography>Vitae {`${character.vitae} / 1`}</Typography>
         <OverflowRating
           tracker={{
-            current: character.rage_current,
-            total: character.rage_total,
+            current: character.vitae,
+            total: 1,
           }}
         />
         <Divider sx={{ my: 1 }} />
-        <Typography>
-          Gnosis {`${character.gnosis_current} / ${character.gnosis_total}`}
-        </Typography>
+        <Typography>Humanity {character.humanity}</Typography>
         <ResponsiveRating
           tracker={{
-            current: character.gnosis_current,
-            total: character.gnosis_total,
+            current: character.humanity,
+            total: 10,
           }}
         />
         <Divider sx={{ my: 1 }} />

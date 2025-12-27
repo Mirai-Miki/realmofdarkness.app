@@ -1,8 +1,5 @@
 import type { LoggerConfig, LogEntry, LogOptions } from "./logger.types";
 
-// Initialize source map support for better stack traces
-import "source-map-support/register";
-
 import * as dotenv from "dotenv";
 import * as path from "path";
 import { HTTPError } from "discord.js";

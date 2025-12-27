@@ -4,17 +4,29 @@
   "packageManager": "pnpm@10.25.0",
   "scripts": {
     "dev": "turbo run dev --parallel",
-    "build": "turbo run build",
+    "dev:bot": "turbo run dev --filter=@realm/bot",
+    "dev:bot:5th": "turbo run dev:5th --filter=@realm/bot",
+    "dev:bot:20th": "turbo run dev:20th --filter=@realm/bot",
+    "dev:bot:cod": "turbo run dev:cod --filter=@realm/bot",
+    "dev:api": "turbo run dev --filter=@realm/api",
+
+    "build": "turbo run build deploy emoji:sync",
+    "build:bot": "turbo run build deploy emoji:sync --filter=@realm/bot",
+    "build:api": "turbo run build --filter=@realm/api",
     "build:types": "tsc -b",
+
+    "bot:emoji:sync": "turbo run emoji:sync --filter=@realm/bot",
+
+    "db:migrate": "turbo run migrate --filter=@realm/database",
+    "db:generate": "turbo run generate --filter=@realm/database",
+    "db:studio": "turbo run studio --filter=@realm/database",
+    "db:reset": "turbo run reset --filter=@realm/database",
+
     "lint": "turbo run lint",
     "test": "turbo run test",
     "clean": "node scripts/clean.mjs",
     "clean:dist": "turbo run clean",
     "clean-build": "pnpm clean && pnpm install && pnpm build",
-    "db:migrate": "pnpm --filter database run migrate",
-    "db:generate": "pnpm --filter database run generate",
-    "db:studio": "pnpm --filter database run studio",
-    "db:reset": "pnpm --filter database run reset",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\""
   },

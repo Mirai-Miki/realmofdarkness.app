@@ -1,13 +1,14 @@
 import { CardActionArea, CardContent, CardMedia } from "@mui/material";
 import { Typography, Divider } from "@mui/material";
 import V20HealthTracker from "../Trackers/V20HealthTracker";
-import ExpBar from "../CharacterCards/ExpBar";
+import ExpBar from "./ExpBar";
 import ResponsiveRating from "../Trackers/ResponsiveRating";
+import MageQuintTracker from "../Trackers/MageQuintTracker";
 
 const defaultImage =
-  "https://res.cloudinary.com/dze64d7cr/image/upload/v1708656411/Logo/wod_logo_optimized.webp";
+  "https://res.cloudinary.com/dze64d7cr/image/upload/v1708659120/Logo/mage_20th_logo.webp";
 
-export default function Human20thInfo(props) {
+export default function Mage20thInfo(props) {
   const { character, chronicle } = props;
 
   return (
@@ -26,7 +27,7 @@ export default function Human20thInfo(props) {
             mb: 2,
           }}
         />
-        <Typography>Human - 20th Edition</Typography>
+        <Typography>Mage - 20th Edition</Typography>
         <Typography>Server: {chronicle?.name ?? "None"}</Typography>
         <Divider sx={{ my: 1 }} />
         <Typography>
@@ -40,12 +41,16 @@ export default function Human20thInfo(props) {
           }}
         />
         <Divider sx={{ my: 1 }} />
-        <Typography>Blood {`${character.blood} / 10`}</Typography>
-        <ResponsiveRating tracker={{ current: character.blood, total: 10 }} />
+        <Typography>Arete {`${character.arete}`}</Typography>
+        <ResponsiveRating tracker={{ current: character.arete, total: 10 }} />
         <Divider sx={{ my: 1 }} />
-        <Typography>Humanity {character.humanity}</Typography>
-        <ResponsiveRating
-          tracker={{ current: character.humanity, total: 10 }}
+        <Typography>
+          Quintessence {`${character.quintessence} `}& Paradox{" "}
+          {character.paradox}
+        </Typography>
+        <MageQuintTracker
+          quintessence={character.quintessence}
+          paradox={character.paradox}
         />
         <Divider sx={{ my: 1 }} />
         <Typography>Health</Typography>

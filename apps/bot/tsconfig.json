@@ -2,6 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
+    "rootDir": "src",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "experimentalDecorators": true,
     "typeRoots": ["node_modules/@types", "./src/types"],
     "baseUrl": "./src",
@@ -15,7 +18,7 @@
       "validations": ["./validations.ts"]
     }
   },
-  "include": ["src/**/*", "tsup.config.ts", "test/**/*, scripts/**/*"],
+  "include": ["src/**/*", "test/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../../packages/common" },

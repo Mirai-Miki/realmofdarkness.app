@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc -b tsconfig.build.json",
+    "build": "tsup",
     "clean": "rimraf dist coverage .turbo",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
@@ -14,6 +14,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@realm/common": "workspace:*"
+    "@realm/common": "workspace:*",
+    "tsup": "^8.5.1"
   }
 }

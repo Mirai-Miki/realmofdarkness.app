@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -b tsconfig.build.json",
+    "build": "tsup",
     "clean": "rimraf dist .turbo",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
@@ -20,6 +20,7 @@
   "dependencies": {
     "@realm/database": "workspace:*",
     "@realm/common": "workspace:*",
-    "drizzle-orm": "^0.44.7"
+    "drizzle-orm": "^0.44.7",
+    "tsup": "^8.5.1"
   }
 }

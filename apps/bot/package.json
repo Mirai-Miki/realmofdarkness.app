@@ -1,39 +1,23 @@
 {
-  "name": "bot",
+  "name": "@realm/bot",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "./scripts/run.sh",
-    "typecheck": "tsc --noEmit",
-    "build": "pnpm run generate-emoji-types && pnpm run typecheck && tsup",
+    "build": "tsc",
     "clean": "rimraf dist .turbo",
-    "build:watch": "tsup --watch",
-    "dev": "tsup --watch",
-    "dev:5th": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js 5th dev && pnpm run emoji:sync:5th && nodemon src/main/shardLauncher.ts 5th",
-    "dev:20th": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js 20th dev && pnpm run emoji:sync:20th && nodemon src/main/shardLauncher.ts 20th",
-    "dev:cod": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js cod dev && pnpm run emoji:sync:cod && nodemon src/main/shardLauncher.ts cod",
-    "dev:5th:global": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js 5th dev-global && pnpm run emoji:sync:5th && nodemon src/main/shardLauncher.ts 5th",
-    "dev:20th:global": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js 20th dev-global && pnpm run emoji:sync:20th && nodemon src/main/shardLauncher.ts 20th",
-    "dev:cod:global": "pnpm run format && pnpm run generate-types && node scripts/deployCommands.js cod dev-global && pnpm run emoji:sync:cod && nodemon src/main/shardLauncher.ts cod",
-    "deploy:5th": "node scripts/deployCommands.js 5th prod && node scripts/syncEmojis.js 5th",
-    "deploy:20th": "node scripts/deployCommands.js 20th prod && node scripts/syncEmojis.js 20th",
-    "deploy:cod": "node scripts/deployCommands.js cod prod && node scripts/syncEmojis.js cod",
-    "deploy:all": "npm run deploy:commands:all && npm run emoji:sync:all",
-    "deploy:commands:all": "node scripts/deployCommands.js 5th prod && node scripts/deployCommands.js 20th prod && node scripts/deployCommands.js cod prod",
-    "clear:5th:dev": "node scripts/deployCommands.js 5th clear-dev",
-    "clear:20th:dev": "node scripts/deployCommands.js 20th clear-dev",
-    "clear:cod:dev": "node scripts/deployCommands.js cod clear-dev",
-    "clear:all:dev": "node scripts/deployCommands.js 5th clear-dev && node scripts/deployCommands.js 20th clear-dev && node scripts/deployCommands.js cod clear-dev",
-    "clear:5th:global": "node scripts/deployCommands.js 5th clear-global",
-    "clear:20th:global": "node scripts/deployCommands.js 20th clear-global",
-    "clear:cod:global": "node scripts/deployCommands.js cod clear-global",
-    "clear:all:global": "node scripts/deployCommands.js 5th clear-global && node scripts/deployCommands.js 20th clear-global && node scripts/deployCommands.js cod clear-global",
-    "emoji:sync:5th": "node scripts/syncEmojis.js 5th",
-    "emoji:sync:20th": "node scripts/syncEmojis.js 20th",
-    "emoji:sync:cod": "node scripts/syncEmojis.js cod",
-    "emoji:sync:all": "node scripts/syncEmojis.js 5th && node scripts/syncEmojis.js 20th && node scripts/syncEmojis.js cod",
+    "typecheck": "tsc --noEmit",
+
+    "dev": "tsx --watch src/main/shard-launcher.ts",
+    "dev:5th": "tsx --watch src/main/shard-launcher.ts 5th",
+    "dev:20th": "tsx --watch src/main/shard-launcher.ts 20th",
+    "dev:cod": "tsx --watch src/main/shard-launcher.ts cod",
+
+    "start": "node dist/main/shard-launcher.js",
+
+    "deploy": "tsx scripts/deploy.ts",
+    "emoji:sync": "tsx scripts/sync-emojis.ts",
     "generate-emoji-types": "node scripts/generate-emoji-types.js",
-    "generate-types": "node scripts/generateEmojiTypes.js",
+
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,ts,json}\"",
     "lint": "eslint . --ext .js,.ts"
@@ -43,16 +27,15 @@
     "@realm/logger": "workspace:*",
     "@realm/repositories": "workspace:*",
     "@realm/common": "workspace:*",
-    "tsup": "^8.5.1",
     "discord.js": "^14.25.0",
     "dotenv": "^17.2.3",
     "zod": "^4.1.12",
     "yaml": "^2.4.2"
   },
   "devDependencies": {
+    "@types/node": "^22.14.0",
+    "tsx": "^4.19.2",
     "fs-extra": "^11.3.2",
-    "glob": "^11.1.0",
-    "nodemon": "^3.1.11",
-    "tsup": "^8.5.1"
+    "glob": "^11.1.0"
   }
 }

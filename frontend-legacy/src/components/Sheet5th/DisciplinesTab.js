@@ -5,7 +5,7 @@ import NewDisciplineDialog from "./Vampire/CustomDisciplineDialog";
 import { PowerDialogue, PowerDialogueView } from "./DisciplinePower";
 import Header from "../Sheet/Header";
 import { useSheetContext } from "../../routes/Character/Vampire5thSheet";
-import { useAlertContext } from "../../components/AlertProvider";
+import { useAlertContext } from "../AlertProvider";
 import { useState } from "react";
 
 const powerTemplate = {

@@ -1,7 +1,7 @@
 import { CardActionArea, CardContent, CardMedia } from "@mui/material";
 import { Typography, Divider } from "@mui/material";
 import V5DamageTracker from "../Trackers/V5DamageTracker";
-import ExpBar from "../CharacterCards/ExpBar";
+import ExpBar from "./ExpBar";
 import ResponsiveRating from "../Trackers/ResponsiveRating";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";

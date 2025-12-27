@@ -1,7 +1,7 @@
 import { Box, Grid2, Typography } from "@mui/material";
 import { Button, ButtonGroup } from "@mui/material";
 import { Link } from "react-router-dom";
-import Slideshow from "../components/Slideshow";
+import Slideshow from "./Slideshow";
 
 const large_logo =
   "https://res.cloudinary.com/dze64d7cr/image/upload/v1701410603/Logo/banner_bg_index.webp";

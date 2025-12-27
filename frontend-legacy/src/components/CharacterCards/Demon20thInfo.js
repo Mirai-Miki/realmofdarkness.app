@@ -1,7 +1,7 @@
 import { CardActionArea, CardContent, CardMedia } from "@mui/material";
 import { Typography, Divider } from "@mui/material";
 import V20HealthTracker from "../Trackers/V20HealthTracker";
-import ExpBar from "../CharacterCards/ExpBar";
+import ExpBar from "./ExpBar";
 import ResponsiveRating from "../Trackers/ResponsiveRating";
 
 const defaultImage =

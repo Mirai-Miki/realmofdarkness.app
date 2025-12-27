@@ -11,7 +11,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -b tsconfig.build.json",
+    "build": "tsup",
     "clean": "rimraf dist .turbo",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
@@ -24,7 +24,8 @@
     "@realm/common": "workspace:*",
     "drizzle-orm": "^0.44.7",
     "pg": "^8.16.3",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "tsup": "^8.5.1"
   },
   "devDependencies": {
     "@types/pg": "^8.15.6",

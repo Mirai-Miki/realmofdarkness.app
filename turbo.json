@@ -17,14 +17,49 @@
     "DEV_SERVER_ID",
     "ERROR_CHANNEL_ID",
     "EMOJI_SCRIPT_TOKEN",
-    "API_PORT",
-    "API_KEY"
+    "API_PORT"
   ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", "!dist/**/*.map"],
-      "env": ["NODE_ENV"]
+      "dependsOn": ["^build", "generate-emoji-types"],
+      "outputs": ["dist/**", "!dist/**/*.map"]
+    },
+    "generate-emoji-types": {
+      "cache": true,
+      "inputs": ["emojis/**/*", "scripts/generate-emoji-types.js"],
+      "outputs": ["src/types/emoji.ts"]
+    },
+    "deploy": {
+      "dependsOn": ["build"],
+      "cache": true,
+      "inputs": [
+        "scripts/deploy.ts",
+        "src/interactions/commands/**/*.ts",
+        "src/interactions/commands/**/*.js"
+      ],
+      "outputs": [".turbo/deploy.log"],
+      "env": [
+        "CLIENT_ID_5TH",
+        "CLIENT_ID_20TH",
+        "CLIENT_ID_COD",
+        "TOKEN_5TH",
+        "TOKEN_20TH",
+        "TOKEN_COD"
+      ]
+    },
+    "emoji:sync": {
+      "dependsOn": ["build"],
+      "cache": true,
+      "inputs": ["scripts/sync-emojis.ts", "emojis/**/*"],
+      "outputs": [".turbo/emoji-sync.log"],
+      "env": [
+        "CLIENT_ID_5TH",
+        "CLIENT_ID_20TH",
+        "CLIENT_ID_COD",
+        "TOKEN_5TH",
+        "TOKEN_20TH",
+        "TOKEN_COD"
+      ]
     },
     "lint": {
       "outputs": [],
@@ -40,17 +75,24 @@
       "cache": false
     },
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
-      "persistent": true,
-      "env": [
-        "NODE_ENV",
-        "DATABASE_URL",
-        "ENABLE_CONSOLE_LOGGING",
-        "ENABLE_DISCORD_LOGGING",
-        "LOGGER_TOKEN",
-        "LOGGER_CHANNEL_ID",
-        "LOG_FILE_PATH"
-      ]
+      "persistent": true
+    },
+    "dev:5th": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "dev:20th": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "dev:cod": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
     },
     "migrate": {
       "cache": false,
@@ -63,6 +105,10 @@
     "studio": {
       "cache": false,
       "persistent": true,
+      "env": ["DATABASE_URL", "NODE_ENV"]
+    },
+    "reset": {
+      "cache": false,
       "env": ["DATABASE_URL", "NODE_ENV"]
     }
   }

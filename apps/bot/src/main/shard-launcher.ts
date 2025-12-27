@@ -1,35 +1,41 @@
 /**
  * Unified Shard Launcher
  *
- * Launches Discord bot shards for any of the three bot types:
+ * Launches Discord bot shards for one or more bot types:
  * - Chronicles of Darkness (cod)
  * - World of Darkness 5th Edition (5th)
  * - World of Darkness 20th Anniversary Edition (20th)
  *
  * @remarks
- * This launcher uses Discord.js ShardingManager to automatically spawn
- * and manage multiple bot shards for horizontal scaling. Shards are
- * automatically distributed based on Discord's recommended shard count.
+ * This launcher can spawn multiple ShardingManagers in a single process.
+ * Each manager handles shards for one bot type. Pass bot types as arguments:
+ * - `node shard-launcher.js cod 5th 20th` - Start all three bots
+ * - `node shard-launcher.js 5th` - Start only 5th edition bot
+ * - `node shard-launcher.js` - Start all bots (default)
  */
 import * as path from "path";
 import { ShardingManager } from "discord.js";
-import * as dotenv from "dotenv";
+import { config } from "dotenv";
+import { resolve } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 import { logger } from "@realm/logger";
+import { BotTypes } from "../types/bot.definitions.js";
+import type { BotType } from "../types/bot.definitions.js";
 
-// Load environment variables
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-/**
- * Supported bot types for the World of Darkness platform.
- * Each bot type corresponds to a different game system.
- */
-type BotType = "cod" | "5th" | "20th";
+// Load root .env
+config({ path: resolve(__dirname, "../../../../.env"), quiet: true });
 
 /**
  * Configuration for a specific bot instance.
  */
 interface BotConfig {
+  /** Bot type identifier */
+  type: BotType;
   /** Discord bot token from environment variables */
   token: string;
   /** Human-readable name for logging */
@@ -40,96 +46,173 @@ interface BotConfig {
  * Configuration mapping for all bot types.
  * Each bot type has its own Discord token and display name.
  */
-const BOT_CONFIG: Record<BotType, BotConfig> = {
-  cod: {
+const BOT_CONFIGS: BotConfig[] = [
+  {
+    type: BotTypes.Cod,
     token: process.env.TOKEN_COD!,
     name: "Chronicles of Darkness",
   },
-  "5th": {
+  {
+    type: BotTypes.Wod5,
     token: process.env.TOKEN_5TH!,
-    name: "5th Edition",
+    name: "World of Darkness 5th Edition",
   },
-  "20th": {
+  {
+    type: BotTypes.Wod20,
     token: process.env.TOKEN_20TH!,
-    name: "20th Anniversary Edition",
+    name: "World of Darkness 20th Anniversary",
   },
-};
+];
 
-// Get bot type from command line arguments
 /**
- * Parses and validates the bot type from command line arguments.
+ * Parses and validates bot types from command line arguments.
  *
- * @returns The validated bot type ("cod", "5th", or "20th")
- * @throws Exits the process with code 1 if no argument is provided or invalid bot type
+ * @returns Array of validated bot types to launch
+ * @remarks If no arguments provided, returns all bot types
  */
-function getBotType(): BotType {
+function getBotTypes(): BotType[] {
   const args = process.argv.slice(2);
+
+  // No arguments = launch all bots
   if (args.length === 0) {
-    console.error("Bot type must be specified as command line argument");
-    console.error("Usage: node shardLauncher.js <cod|5th|20th>");
+    logger.info("No bot types specified, launching all bots");
+    return [BotTypes.Cod, BotTypes.Wod5, BotTypes.Wod20];
+  }
+
+  // Validate each argument
+  const validTypes = [BotTypes.Cod, BotTypes.Wod5, BotTypes.Wod20];
+  const requestedTypes: BotType[] = [];
+
+  for (const arg of args) {
+    if (!validTypes.includes(arg as BotType)) {
+      logger.error(`Invalid bot type: ${arg}`);
+      logger.info("Valid bot types: cod, 5th, 20th");
+      process.exit(1);
+    }
+    requestedTypes.push(arg as BotType);
+  }
+
+  return requestedTypes;
+}
+
+/**
+ * Creates and configures a ShardingManager for a specific bot type.
+ *
+ * @param config - Bot configuration (type, token, name)
+ * @returns Configured ShardingManager instance
+ */
+function createShardManager(config: BotConfig): ShardingManager {
+  const isDev = process.env.NODE_ENV === "development";
+  const fileExtension = isDev ? "ts" : "js";
+  const botFile = path.join(__dirname, `bot.${fileExtension}`);
+
+  logger.info(`Creating shard manager for ${config.name}...`);
+
+  const manager = new ShardingManager(botFile, {
+    token: config.token,
+    totalShards: "auto",
+    shardArgs: [config.type], // Pass bot type to each shard
+    execArgv: isDev ? ["-r", "ts-node/register"] : [],
+  });
+
+  // Set up event handlers
+  manager.on("shardCreate", (shard) => {
+    logger.info(`[${config.name}] Launched shard ${shard.id}`);
+
+    shard.on("error", (error) => {
+      logger.exception(`[${config.name}] Error in shard ${shard.id}:`, error);
+    });
+
+    shard.on("ready", () => {
+      logger.info(`[${config.name}] Shard ${shard.id} is ready`);
+    });
+
+    shard.on("disconnect", () => {
+      logger.warning(`[${config.name}] Shard ${shard.id} disconnected`);
+    });
+
+    shard.on("reconnecting", () => {
+      logger.info(`[${config.name}] Shard ${shard.id} reconnecting`);
+    });
+
+    shard.on("death", () => {
+      logger.error(`[${config.name}] Shard ${shard.id} died`);
+    });
+  });
+
+  return manager;
+}
+
+/**
+ * Main launcher function.
+ * Creates and spawns ShardingManagers for all requested bot types.
+ */
+async function main(): Promise<void> {
+  const requestedTypes = getBotTypes();
+  const managers: ShardingManager[] = [];
+
+  logger.info(`Starting ${requestedTypes.length} bot(s)...`);
+
+  // Create managers for requested bot types
+  for (const botType of requestedTypes) {
+    const config = BOT_CONFIGS.find((c) => c.type === botType);
+
+    if (!config) {
+      logger.error(`Configuration not found for bot type: ${botType}`);
+      continue;
+    }
+
+    // Validate token exists
+    if (!config.token) {
+      logger.error(
+        `Missing token for ${config.name} (TOKEN_${botType.toUpperCase()})`
+      );
+      logger.error(`Skipping ${config.name}...`);
+      continue;
+    }
+
+    const manager = createShardManager(config);
+    managers.push(manager);
+  }
+
+  // Spawn all managers
+  if (managers.length === 0) {
+    logger.error("No valid bot configurations found. Exiting.");
     process.exit(1);
   }
 
-  const botType = args[0] as BotType;
-  if (!["cod", "5th", "20th"].includes(botType)) {
-    console.error(`Invalid bot type: ${botType}`);
-    console.error("Valid bot types: cod, 5th, 20th");
+  try {
+    await Promise.all(managers.map((manager) => manager.spawn()));
+    logger.info(`Successfully launched ${managers.length} bot manager(s)`);
+  } catch (error) {
+    logger.exception("Error while spawning shard managers:", error);
     process.exit(1);
   }
 
-  return botType;
+  // Handle graceful shutdown
+  process.on("SIGINT", () => {
+    logger.info("Received SIGINT, shutting down gracefully...");
+    for (const manager of managers) {
+      for (const shard of manager.shards.values()) {
+        shard.kill();
+      }
+    }
+    process.exit(0);
+  });
+
+  process.on("SIGTERM", () => {
+    logger.info("Received SIGTERM, shutting down gracefully...");
+    for (const manager of managers) {
+      for (const shard of manager.shards.values()) {
+        shard.kill();
+      }
+    }
+    process.exit(0);
+  });
 }
 
-// Determine environment and file extension
-const isDev: boolean = process.env.NODE_ENV === "development";
-const fileExtension: string = isDev ? "ts" : "js";
-const botType = getBotType();
-const config = BOT_CONFIG[botType];
-
-// Validate token exists
-if (!config.token) {
-  logger.error(
-    `Missing token for ${config.name} (TOKEN_${botType.toUpperCase()})`
-  );
-  process.exit(1);
-}
-
-logger.info(`Starting ${config.name} shard manager...`);
-
-// Path to the unified bot file
-const botFile: string = path.join(__dirname, `bot.${fileExtension}`);
-
-// Create shard manager
-const manager = new ShardingManager(botFile, {
-  token: config.token,
-  totalShards: "auto",
-  shardArgs: [botType], // Pass bot type as argument to the bot
-  execArgv: isDev ? ["--require", "ts-node/register"] : [],
-});
-
-// Event handlers
-manager.on("shardCreate", (shard) => {
-  logger.info(`Launched ${config.name} shard ${shard.id}`);
-
-  shard.on("error", (error) => {
-    logger.exception(`Error in ${config.name} shard ${shard.id}:`, error);
-  });
-
-  shard.on("ready", () => {
-    logger.info(`${config.name} shard ${shard.id} is ready`);
-  });
-
-  shard.on("disconnect", () => {
-    logger.info(`${config.name} shard ${shard.id} disconnected`);
-  });
-
-  shard.on("reconnecting", () => {
-    logger.info(`${config.name} shard ${shard.id} reconnecting`);
-  });
-});
-
-// Start the shards
-manager.spawn().catch((error) => {
-  console.error(`Error while spawning ${config.name} shards:`, error);
+// Start the launcher
+main().catch((error) => {
+  logger.exception("Fatal error in shard launcher:", error);
   process.exit(1);
 });

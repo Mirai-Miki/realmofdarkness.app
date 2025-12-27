@@ -41,7 +41,10 @@ import {
 } from "../types/bot.definitions";
 
 // Load environment variables from root .env file
-dotenv.config({ path: path.resolve(__dirname, "../../../../.env") });
+dotenv.config({
+  path: path.resolve(__dirname, "../../../../.env"),
+  quiet: true,
+});
 
 /**
  * Type-safe dynamic import helper for bot commands using Zod validation

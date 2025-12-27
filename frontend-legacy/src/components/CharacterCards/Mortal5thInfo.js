@@ -1,25 +1,18 @@
 import { CardActionArea, CardContent, CardMedia } from "@mui/material";
 import { Typography, Divider } from "@mui/material";
 import V5DamageTracker from "../Trackers/V5DamageTracker";
-import ExpBar from "../CharacterCards/ExpBar";
-import ResponsiveRating from "../Trackers/ResponsiveRating";
-import { useNavigate } from "react-router-dom";
-import HaranoAndHauglosk from "../Trackers/HaranoAndHauglosk";
+import V5Humanity from "../Trackers/V5Humanity";
+import ExpBar from "./ExpBar";
 
 const defaultImage =
-  "https://res.cloudinary.com/dze64d7cr/image/upload/v1708656268/Logo/vampire_logo_optimized.webp";
+  "https://res.cloudinary.com/dze64d7cr/image/upload/v1708656411/Logo/wod_logo_optimized.webp";
 
-export default function Werewolf5thInfo(props) {
+export default function Mortal5thInfo(props) {
   const { character, chronicle } = props;
-  const isSheet = character.is_sheet;
-  const navigate = useNavigate();
-
-  function redirect(isSheet) {
-    if (isSheet) navigate(`/character/w5/${character.id}`);
-  }
+  const splat = character.splat.slug === "ghoul5th" ? "Ghoul" : "Human";
 
   return (
-    <CardActionArea disabled={!isSheet} onClick={redirect}>
+    <CardActionArea disabled>
       <CardContent>
         <CardMedia
           component="img"
@@ -34,22 +27,14 @@ export default function Werewolf5thInfo(props) {
             mb: 2,
           }}
         />
-        <Typography>Werewolf - 5th Edition</Typography>
+        <Typography>{splat} - 5th Edition</Typography>
         <Typography>Server: {chronicle?.name ?? "None"}</Typography>
         <Divider sx={{ my: 1 }} />
         <V5DamageTracker label="Willpower" tracker={character.willpower} />
         <Divider sx={{ my: 1 }} />
         <V5DamageTracker label="Health" tracker={character.health} />
         <Divider sx={{ my: 1 }} />
-        <Typography>{`Form - ${character.form}`}</Typography>
-        <Divider sx={{ my: 1 }} />
-        <HaranoAndHauglosk
-          harano={character.harano}
-          hauglosk={character.hauglosk}
-        />
-        <Divider sx={{ my: 1 }} />
-        <Typography>Rage {character.rage}</Typography>
-        <ResponsiveRating tracker={{ current: character.rage, total: 5 }} />
+        <V5Humanity humanity={character.humanity} stains={character.stains} />
         <ExpBar exp={character.exp} />
       </CardContent>
     </CardActionArea>

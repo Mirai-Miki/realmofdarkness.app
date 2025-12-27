@@ -1,13 +1,13 @@
 import { CardActionArea, CardContent, CardMedia } from "@mui/material";
 import { Typography, Divider } from "@mui/material";
 import V20HealthTracker from "../Trackers/V20HealthTracker";
-import ExpBar from "../CharacterCards/ExpBar";
+import ExpBar from "./ExpBar";
 import ResponsiveRating from "../Trackers/ResponsiveRating";
 
 const defaultImage =
-  "https://res.cloudinary.com/dze64d7cr/image/upload/v1708659836/Logo/vtm_20th_logo.webp";
+  "https://res.cloudinary.com/dze64d7cr/image/upload/v1708656411/Logo/wod_logo_optimized.webp";
 
-export default function Vampire20thInfo(props) {
+export default function Human20thInfo(props) {
   const { character, chronicle } = props;
 
   return (
@@ -26,7 +26,7 @@ export default function Vampire20thInfo(props) {
             mb: 2,
           }}
         />
-        <Typography>Vampire - 20th Edition</Typography>
+        <Typography>Human - 20th Edition</Typography>
         <Typography>Server: {chronicle?.name ?? "None"}</Typography>
         <Divider sx={{ my: 1 }} />
         <Typography>
@@ -40,24 +40,12 @@ export default function Vampire20thInfo(props) {
           }}
         />
         <Divider sx={{ my: 1 }} />
-        <Typography>
-          Blood {`${character.blood_current} / ${character.blood_total}`}
-        </Typography>
-        <ResponsiveRating
-          tracker={{
-            current: character.blood_current,
-            total: character.blood_total,
-          }}
-        />
+        <Typography>Blood {`${character.blood} / 10`}</Typography>
+        <ResponsiveRating tracker={{ current: character.blood, total: 10 }} />
         <Divider sx={{ my: 1 }} />
-        <Typography>
-          {character.morality_name} - {character.morality_value}
-        </Typography>
+        <Typography>Humanity {character.humanity}</Typography>
         <ResponsiveRating
-          tracker={{
-            current: character.morality_value,
-            total: 10,
-          }}
+          tracker={{ current: character.humanity, total: 10 }}
         />
         <Divider sx={{ my: 1 }} />
         <Typography>Health</Typography>

@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "@realm/api",
   "private": true,
   "type": "module",
   "description": "Realm of Darkness API (NestJS Fastify)",
@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nest build",
     "clean": "rimraf dist .turbo",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "dev": "nest start --watch",
