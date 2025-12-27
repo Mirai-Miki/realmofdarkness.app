@@ -106,10 +106,36 @@ export abstract class Character implements ICharacter {
     return this._experience;
   }
 
+  /**
+   * Check if character has enough unspent experience for a purchase.
+   *
+   * @param cost - Experience cost of the purchase
+   * @returns True if character has enough unspent XP
+   *
+   * @example
+   * ```typescript
+   * if (character.canAffordExperience(10)) {
+   *   character.spendExperience(10);
+   * }
+   * ```
+   */
   canAffordExperience(cost: number): boolean {
     return this._experience.canAfford(cost);
   }
 
+  /**
+   * Spend experience points on character improvements.
+   *
+   * Reduces current (unspent) experience. Total experience remains unchanged.
+   *
+   * @param cost - Amount of experience to spend
+   * @throws {RealmError} If character doesn't have enough unspent XP
+   *
+   * @example
+   * ```typescript
+   * character.spendExperience(5); // Buy a trait costing 5 XP
+   * ```
+   */
   spendExperience(cost: number): void {
     if (!this.canAffordExperience(cost)) {
       throw new RealmError(
@@ -125,14 +151,56 @@ export abstract class Character implements ICharacter {
     this._experience = this._experience.spend(cost);
   }
 
+  /**
+   * Award experience points to the character.
+   *
+   * Increases both current (unspent) and total experience.
+   * Called when character earns XP from gameplay.
+   *
+   * @param amount - Amount of experience to award
+   * @throws {RealmError} If amount is negative
+   *
+   * @example
+   * ```typescript
+   * character.awardExperience(3); // Award 3 XP for session attendance
+   * ```
+   */
   awardExperience(amount: number): void {
     this._experience = this._experience.award(amount);
   }
 
+  /**
+   * Set the total experience for the character.
+   *
+   * Used for character creation or adjustments.
+   * If new total is less than current, current is capped to new total.
+   *
+   * @param total - New total experience value
+   * @throws {RealmError} If total is negative
+   *
+   * @example
+   * ```typescript
+   * character.setExperienceTotal(100); // Set total XP to 100
+   * ```
+   */
   setExperienceTotal(total: number): void {
     this._experience = this._experience.setTotal(total);
   }
 
+  /**
+   * Set the current (unspent) experience for the character.
+   *
+   * Used for adjustments or corrections.
+   * Total experience remains unchanged.
+   *
+   * @param current - New current experience value (must be 0 <= current <= total)
+   * @throws {RealmError} If current is negative or exceeds total
+   *
+   * @example
+   * ```typescript
+   * character.setExperienceCurrent(15); // Set unspent XP to 15
+   * ```
+   */
   setExperienceCurrent(current: number): void {
     this._experience = this._experience.setCurrent(current);
   }
@@ -141,6 +209,17 @@ export abstract class Character implements ICharacter {
   // Serialization
   // ============================================================================
 
+  /**
+   * Convert entity to plain data object for persistence.
+   *
+   * @returns Plain BaseCharacterData object
+   *
+   * @example
+   * ```typescript
+   * const data = character.toData();
+   * await repository.update(data);
+   * ```
+   */
   toData(): BaseCharacterData {
     return {
       ...this.data,
