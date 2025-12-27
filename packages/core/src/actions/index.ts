@@ -3,4 +3,4 @@
  * Actions coordinate multiple services for complex workflows.
  */
 
-export * from "./wod20/wod20-roll.action.js";
+export * from "./20th-edition/wod20-roll.action.js";
