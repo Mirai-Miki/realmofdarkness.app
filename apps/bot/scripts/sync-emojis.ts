@@ -1,15 +1,12 @@
 import { REST } from "discord.js";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
+import { join } from "path";
 import { readdir, readFile, writeFile, mkdir } from "fs/promises";
 import { config } from "dotenv";
 import { resolve } from "path";
 import { BotTypes } from "../src/types";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // Load root .env
-config({ path: resolve(__dirname, "../../../.env"), quiet: true });
+config({ path: resolve(process.cwd(), "../../.env"), quiet: true });
 
 interface BotConfig {
   name: string;
@@ -62,7 +59,7 @@ async function syncEmojis(): Promise<void> {
   console.log("║            Discord Application Emoji Sync                ║");
   console.log("╚══════════════════════════════════════════════════════════╝\n");
 
-  const emojisPath = join(__dirname, "../emojis");
+  const emojisPath = join(process.cwd(), "emojis");
 
   let emojiFiles: EmojiFile[];
   try {
@@ -77,7 +74,7 @@ async function syncEmojis(): Promise<void> {
     console.log("⚠️  No emojis folder found, skipping emoji sync\n");
 
     // Write empty output file for Turbo cache
-    const turboDir = join(__dirname, "../.turbo");
+    const turboDir = join(process.cwd(), ".turbo");
     await mkdir(turboDir, { recursive: true });
     await writeFile(
       join(turboDir, "emoji-sync.log"),
@@ -156,7 +153,7 @@ async function syncEmojis(): Promise<void> {
   }
 
   // Write output file for Turbo cache
-  const turboDir = join(__dirname, "../.turbo");
+  const turboDir = join(process.cwd(), ".turbo");
   await mkdir(turboDir, { recursive: true });
   await writeFile(
     join(turboDir, "emoji-sync.log"),

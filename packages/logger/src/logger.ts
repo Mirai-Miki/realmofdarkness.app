@@ -1,7 +1,7 @@
 import type { LoggerConfig, LogEntry, LogOptions } from "./logger.types";
 
-import * as dotenv from "dotenv";
-import * as path from "path";
+import dotenv from "dotenv";
+import path from "path";
 import { HTTPError } from "discord.js";
 import { RealmError, type ILogger } from "@realm/common";
 import { DiscordLogger } from "./discord-logger";
@@ -43,7 +43,10 @@ class Logger implements ILogger {
    */
   constructor() {
     // Load environment variables
-    dotenv.config();
+    dotenv.config({
+      path: path.join(process.cwd(), "../../.env"),
+      quiet: true,
+    });
     this.initializeFromEnv();
     this.setupGlobalErrorHandlers();
   }
@@ -133,7 +136,7 @@ class Logger implements ILogger {
    */
   private initializeFromEnv(): void {
     // Determine environment
-    const nodeEnv = process.env.NODE_ENV?.toLowerCase();
+    const nodeEnv = process.env.NODE_ENV;
     switch (nodeEnv) {
       case Environment.Production:
         this.environment = Environment.Production;

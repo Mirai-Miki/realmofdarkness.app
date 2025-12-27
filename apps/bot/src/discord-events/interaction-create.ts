@@ -6,13 +6,12 @@ import type {
   AutocompleteInteraction,
 } from "discord.js";
 import { logger } from "@realm/logger";
-import type { BotEvent } from "types";
 
 /**
  * Discord InteractionCreate event handler.
  * Routes all interactions to appropriate handlers and provides centralized error handling.
  */
-export const interactionCreate: BotEvent<"interactionCreate"> = {
+module.exports = {
   name: Events.InteractionCreate,
   once: false,
   async execute(interaction: Interaction): Promise<void> {
@@ -25,9 +24,7 @@ export const interactionCreate: BotEvent<"interactionCreate"> = {
         await handleAutocomplete(interaction);
       }
     } catch (error) {
-      logger.exception("Error handling interaction", {
-        error: error,
-      });
+      logger.exception("Error handling interaction", error);
     }
   },
 };

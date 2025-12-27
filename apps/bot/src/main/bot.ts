@@ -19,6 +19,7 @@ import type { BotType, BotCommand, BotComponent, BotEvent } from "../types";
 import * as fs from "fs";
 import * as path from "path";
 import * as dotenv from "dotenv";
+import { pathToFileURL } from "url";
 import { logger } from "@realm/logger";
 import { RealmError } from "@realm/common";
 import type {
@@ -38,7 +39,7 @@ import { BotCommandSchema, BotComponentSchema, BotEventSchema } from "types";
 
 // Load environment variables from root .env file
 dotenv.config({
-  path: path.resolve(__dirname, "../../../../.env"),
+  path: path.join(process.cwd(), "../../.env"),
   quiet: true,
 });
 
@@ -55,10 +56,9 @@ dotenv.config({
  */
 async function loadCommand(filePath: string): Promise<BotCommand | null> {
   try {
-    const module = (await import(filePath)) as { default?: unknown } & Record<
-      string,
-      unknown
-    >;
+    const module = (await import(pathToFileURL(filePath).href)) as {
+      default?: unknown;
+    } & Record<string, unknown>;
     const command = module.default ?? module;
 
     const result = BotCommandSchema.safeParse(command);
@@ -87,10 +87,9 @@ async function loadCommand(filePath: string): Promise<BotCommand | null> {
  */
 async function loadComponent(filePath: string): Promise<BotComponent | null> {
   try {
-    const module = (await import(filePath)) as { default?: unknown } & Record<
-      string,
-      unknown
-    >;
+    const module = (await import(pathToFileURL(filePath).href)) as {
+      default?: unknown;
+    } & Record<string, unknown>;
     const component = module.default ?? module;
 
     const result = BotComponentSchema.safeParse(component);
@@ -120,10 +119,9 @@ async function loadComponent(filePath: string): Promise<BotComponent | null> {
  */
 async function loadEvent(filePath: string): Promise<BotEvent | null> {
   try {
-    const module = (await import(filePath)) as { default?: unknown } & Record<
-      string,
-      unknown
-    >;
+    const module = (await import(pathToFileURL(filePath).href)) as {
+      default?: unknown;
+    } & Record<string, unknown>;
     const event = module.default ?? module;
 
     const result = BotEventSchema.safeParse(event);
@@ -203,16 +201,16 @@ const BOT_CONFIG: Record<BotType, BotConfig> = {
     token: process.env.TOKEN_5TH!,
     name: "5th Edition Bot",
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
-    commandsPath: "commands/5th",
-    componentsPath: "components/5th",
+    commandsPath: "interactions/commands/5th",
+    componentsPath: "interactions/components/5th",
     hasComponents: true,
   },
   "20th": {
     token: process.env.TOKEN_20TH!,
     name: "20th Anniversary Edition Bot",
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
-    commandsPath: "commands/20th",
-    componentsPath: "components/20th",
+    commandsPath: "interactions/commands/20th",
+    componentsPath: "interactions/components/20th",
     hasComponents: true,
   },
 } as const;

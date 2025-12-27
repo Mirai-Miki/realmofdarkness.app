@@ -6,7 +6,6 @@ import type {
   ChatInputCommandInteraction,
   AutocompleteInteraction,
 } from "discord.js";
-import type { BotCommand } from "types";
 
 import { SlashCommandBuilder } from "discord.js";
 import {
@@ -17,7 +16,7 @@ import {
   CommandNotesMaxLength,
 } from "@realm/common";
 
-export const dice20thCommand: BotCommand = {
+module.exports = {
   data: getCommand(),
 
   async execute(interaction: ChatInputCommandInteraction): Promise<void> {

@@ -7,14 +7,14 @@
     "clean": "rimraf dist .turbo",
     "typecheck": "tsc --noEmit",
 
-    "dev": "tsx --watch src/main/shard-launcher.ts",
-    "dev:5th": "tsx --watch src/main/shard-launcher.ts 5th",
-    "dev:20th": "tsx --watch src/main/shard-launcher.ts 20th",
-    "dev:cod": "tsx --watch src/main/shard-launcher.ts cod",
+    "dev": "nodemon --exec tsx src/main/shard-launcher.ts",
+    "dev:5th": "nodemon --exec tsx src/main/shard-launcher.ts 5th",
+    "dev:20th": "nodemon --exec tsx src/main/shard-launcher.ts 20th",
+    "dev:cod": "nodemon --exec tsx src/main/shard-launcher.ts cod",
 
     "start": "node dist/main/shard-launcher.js",
 
-    "deploy": "tsx scripts/deploy.ts",
+    "deploy-commands": "tsx scripts/deploy-commands.ts",
     "emoji:sync": "tsx scripts/sync-emojis.ts",
     "generate-emoji-types": "tsx scripts/generate-emoji-types.ts",
 
@@ -36,6 +36,7 @@
     "@types/node": "^22.14.0",
     "tsx": "^4.19.2",
     "fs-extra": "^11.3.2",
-    "glob": "^11.1.0"
+    "glob": "^11.1.0",
+    "nodemon": "^3.1.9"
   }
 }

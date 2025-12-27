@@ -18,11 +18,11 @@ All environment variables live in the **root `.env` file**. Each app/package loa
 
 ```typescript
 // At the top of each app's entry point
-import { config } from "dotenv";
-import { resolve } from "path";
+import dotenv from "dotenv";
+import path from "path";
 
 // Load root .env
-config({ path: resolve(__dirname, "../../../.env") });
+dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
 ```
 
 ### Variables in Root `.env`

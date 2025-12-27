@@ -15,6 +15,8 @@ export default defineConfig({
     "@discordjs/rest",
     "source-map-support",
     "dotenv",
+    "path",
+    "url",
   ],
   tsconfig: "./tsconfig.build.json",
 });

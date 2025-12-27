@@ -1,17 +1,13 @@
 #!/usr/bin/env node
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 /**
  * Generate TypeScript types for emojis based on files in the emojis directory
  */
 function generateEmojiTypes(): void {
-  const emojisDir: string = path.join(__dirname, "..", "emojis");
-  const typesDir: string = path.join(__dirname, "..", "src", "types");
+  const emojisDir: string = path.join(process.cwd(), "emojis");
+  const typesDir: string = path.join(process.cwd(), "src", "types");
   const outputFile: string = path.join(typesDir, "emoji-types.d.ts");
 
   // Supported image formats

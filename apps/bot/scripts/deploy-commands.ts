@@ -1,16 +1,13 @@
 import { REST, Routes } from "discord.js";
-import { fileURLToPath, pathToFileURL } from "url";
-import { dirname, join } from "path";
+import { pathToFileURL } from "url";
+import { join } from "path";
 import { readdir, writeFile, mkdir } from "fs/promises";
 import { config } from "dotenv";
 import { resolve } from "path";
 import { BotTypes } from "types";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 // Load root .env
-config({ path: resolve(__dirname, "../../../.env"), quiet: true });
+config({ path: resolve(process.cwd(), "../../.env"), quiet: true });
 
 interface BotConfig {
   name: string;
@@ -23,6 +20,11 @@ interface DeployResult {
   success: boolean;
   count?: number;
   error?: string;
+}
+
+interface CommandWithPath {
+  data: any;
+  filePath: string;
 }
 
 const BOT_CONFIGS: BotConfig[] = [
@@ -43,22 +45,42 @@ const BOT_CONFIGS: BotConfig[] = [
   },
 ];
 
+/**
+ * Get folder names for a bot type
+ * Each bot should only load commands from its specific folder and common folder
+ */
+function getBotFolders(botType: string): string[] {
+  const commonFolder = "common";
+
+  switch (botType) {
+    case BotTypes.Wod5:
+      return [BotTypes.Wod5, commonFolder];
+    case BotTypes.Wod20:
+      return [BotTypes.Wod20, commonFolder];
+    case BotTypes.Cod:
+      return [BotTypes.Cod, commonFolder];
+    default:
+      return [commonFolder];
+  }
+}
+
 async function deployCommands(): Promise<void> {
   console.log("\n╔══════════════════════════════════════════════════════════╗");
   console.log("║         Discord Command Deployment (Global)              ║");
   console.log("╚══════════════════════════════════════════════════════════╝\n");
 
-  const commandsPath = join(__dirname, "../src/interactions/commands");
+  const commandsPath = join(process.cwd(), "./src/interactions/commands");
   const commandFiles = await getCommandFiles(commandsPath);
 
-  const commands: unknown[] = [];
+  // Load all commands with their file paths
+  const allCommands: CommandWithPath[] = [];
   for (const file of commandFiles) {
     try {
       const commandModule = await import(pathToFileURL(file).href);
 
       // Check for CommonJS style (module.exports = { data, execute })
       if ("data" in commandModule && "execute" in commandModule) {
-        commands.push(commandModule.data.toJSON());
+        allCommands.push({ data: commandModule.data.toJSON(), filePath: file });
         continue;
       }
 
@@ -71,7 +93,10 @@ async function deployCommands(): Promise<void> {
           "data" in value &&
           "execute" in value
         ) {
-          commands.push((value as any).data.toJSON());
+          allCommands.push({
+            data: (value as any).data.toJSON(),
+            filePath: file,
+          });
           break; // Only take the first valid command from each file
         }
       }
@@ -80,7 +105,7 @@ async function deployCommands(): Promise<void> {
     }
   }
 
-  console.log(`📋 Found ${commands.length} commands to deploy\n`);
+  console.log(`📋 Found ${allCommands.length} total commands\n`);
 
   const results: DeployResult[] = [];
 
@@ -91,16 +116,34 @@ async function deployCommands(): Promise<void> {
       continue;
     }
 
-    try {
-      console.log(`🚀 Deploying commands for ${name}...`);
-      const rest = new REST().setToken(token);
+    // Filter commands for this bot based on folder
+    const botFolders = getBotFolders(name);
+    const botCommands = allCommands.filter((cmd) => {
+      // Normalize path separators for cross-platform compatibility
+      const normalizedPath = cmd.filePath.replace(/\\/g, "/");
 
-      await rest.put(Routes.applicationCommands(clientId), { body: commands });
+      // Check if command is in any of this bot's folders
+      return botFolders.some((folder) =>
+        normalizedPath.includes(`/commands/${folder}/`)
+      );
+    });
+
+    console.log(
+      `🤖 ${name}: Deploying ${botCommands.length} commands (folders: ${botFolders.join(", ")})`
+    );
+
+    try {
+      const rest = new REST().setToken(token);
+      const commandData = botCommands.map((cmd) => cmd.data);
+
+      await rest.put(Routes.applicationCommands(clientId), {
+        body: commandData,
+      });
 
       console.log(
-        `✅ Successfully deployed ${commands.length} commands for ${name}\n`
+        `✅ Successfully deployed ${botCommands.length} commands for ${name}\n`
       );
-      results.push({ bot: name, success: true, count: commands.length });
+      results.push({ bot: name, success: true, count: botCommands.length });
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -110,7 +153,7 @@ async function deployCommands(): Promise<void> {
   }
 
   // Write output file for Turbo cache
-  const turboDir = join(__dirname, "../.turbo");
+  const turboDir = join(process.cwd(), ".turbo");
   await mkdir(turboDir, { recursive: true });
   await writeFile(
     join(turboDir, "deploy.log"),

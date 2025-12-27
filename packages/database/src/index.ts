@@ -1,15 +1,10 @@
 import { config } from "dotenv";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
+import { resolve } from "path";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 // Load environment variables from root .env file
-config({ path: resolve(__dirname, "../../../.env"), quiet: true });
+config({ path: resolve(process.cwd(), "../../.env"), quiet: true });
 
 // Schema imports - import only tables, relations, and enums for Drizzle schema
 import { users, usersRelations } from "./schema/users";

@@ -15,20 +15,23 @@
  */
 import * as path from "path";
 import { ShardingManager } from "discord.js";
-import { config } from "dotenv";
-import { resolve } from "path";
+import dotenv from "dotenv";
 import { fileURLToPath } from "url";
-import { dirname } from "path";
 
 import { logger } from "@realm/logger";
 import { BotTypes } from "../types/bot.definitions.js";
 import type { BotType } from "../types/bot.definitions.js";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 // Load root .env
-config({ path: resolve(__dirname, "../../../../.env"), quiet: true });
+dotenv.config({
+  path: path.join(process.cwd(), "../../.env"),
+  quiet: true,
+});
+
+logger.setAppName("shard-launcher");
 
 /**
  * Configuration for a specific bot instance.
@@ -112,7 +115,7 @@ function createShardManager(config: BotConfig): ShardingManager {
     token: config.token,
     totalShards: "auto",
     shardArgs: [config.type], // Pass bot type to each shard
-    execArgv: isDev ? ["-r", "ts-node/register"] : [],
+    execArgv: isDev ? ["--import", "tsx"] : ["ts-node/register"],
   });
 
   // Set up event handlers
