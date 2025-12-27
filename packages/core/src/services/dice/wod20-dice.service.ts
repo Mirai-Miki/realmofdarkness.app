@@ -1,22 +1,43 @@
 /**
- * Dice Rolling Service
+ * World of Darkness 20th Anniversary Dice Service
  *
- * Handles dice rolling mechanics for all World of Darkness game systems.
- * Uses cryptographically secure random number generation.
+ * Implements V20/W20 dice mechanics:
+ * - Roll d10s, count successes (>= difficulty)
+ * - 10s with specialty count as 2 successes
+ * - 1s can cancel successes (unless cancelOnes is true)
+ * - Botch = no successes + at least one 1
+ * - Supports nightmare/paradox dice tracking
  */
 import type { Wod20DiceInput, Wod20DiceResult } from "@realm/common";
 
-import { randomInt } from "crypto";
 import { RealmError } from "@realm/common";
+import { DiceService } from "./base-dice.service.js";
 
-export class DiceService {
+export class Wod20DiceService extends DiceService {
   /**
    * Roll WoD 20th Anniversary dice pool.
    *
    * @param input - Dice pool configuration
    * @returns Roll result with successes, dice values, and outcome type
+   *
+   * @example
+   * ```typescript
+   * const service = new Wod20DiceService();
+   * const result = service.roll({
+   *   pool: 6,
+   *   difficulty: 7,
+   *   specialty: true,
+   *   willpower: true,
+   *   modifier: 0,
+   *   nightmareDice: 2,
+   *   cancelOnes: false
+   * });
+   * // Rolls 4 normal dice + 2 nightmare dice
+   * // 10s count as 2 successes (specialty)
+   * // +1 auto-success from willpower
+   * ```
    */
-  Wod20(input: Wod20DiceInput): Wod20DiceResult {
+  public roll(input: Wod20DiceInput): Wod20DiceResult {
     let successes = 0;
     let ones = 0;
     let tens = 0;
@@ -84,32 +105,10 @@ export class DiceService {
     }
 
     return {
-      pool: input.pool,
-      difficulty: input.difficulty,
       dice: normalDice,
       nightmareDice,
       successes,
-      willpowerSpent,
-      modifierApplied,
-      botch,
       resultType,
     };
-  }
-
-  /**
-   * Generate multiple dice using cryptographically secure RNG.
-   *
-   * @param amount - Number of dice to roll (default: 1)
-   * @param sides - Number of sides per die (default: 10)
-   * @returns Array of random integers from 1 to sides (inclusive)
-   * @private
-   */
-  private generateDice(amount: number = 1, sides: number = 10): number[] {
-    const results: number[] = [];
-    for (let i = 0; i < amount; i++) {
-      // randomInt upper bound is exclusive, so sides + 1 gives us 1 to sides
-      results.push(randomInt(1, sides + 1));
-    }
-    return results;
   }
 }

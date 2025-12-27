@@ -23,7 +23,7 @@ export const GeneralDiceConstraints = {
 // ============================================================================
 
 export const DiceSetSchema = z.object({
-  count: z.int().min(1).max(50),
+  amount: z.int().min(1).max(50),
   sides: z.int().min(2).max(500),
 });
 export type DiceSet = z.infer<typeof DiceSetSchema>;
@@ -36,7 +36,7 @@ export const GeneralDiceSchema = z.object({
 export type GeneralDice = z.infer<typeof GeneralDiceSchema>;
 
 export const DiceSetResultSchema = z.object({
-  count: z.int(),
+  amount: z.int(),
   sides: z.int(),
   results: z.array(z.int()),
   total: z.int(),

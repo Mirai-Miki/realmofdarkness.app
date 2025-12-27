@@ -79,14 +79,9 @@ export const Wod20DiceResultTypeField = z.enum(Wod20DiceResultType);
 export type Wod20DiceResultType = z.infer<typeof Wod20DiceResultTypeField>;
 
 export const Wod20DiceResultSchema = z.object({
-  pool: z.int(),
-  difficulty: z.int(),
   dice: z.array(Wod20DieResultField),
   nightmareDice: z.array(Wod20DieResultField),
   successes: z.int(),
-  willpowerSpent: z.boolean(),
-  modifierApplied: z.int(),
-  botch: z.boolean(),
   resultType: Wod20DiceResultTypeField,
 });
 export type Wod20DiceResult = z.infer<typeof Wod20DiceResultSchema>;

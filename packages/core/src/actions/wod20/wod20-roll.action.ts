@@ -11,13 +11,13 @@ import type {
   Wod20RollActionInput,
   Wod20RollActionResult,
 } from "@realm/common";
-import { DiceService } from "../../services/dice/dice.service.js";
+import { Wod20DiceService } from "../../services/dice/index.js";
 
 export class Wod20RollAction {
-  private diceService: DiceService;
+  private diceService: Wod20DiceService;
 
   constructor() {
-    this.diceService = new DiceService();
+    this.diceService = new Wod20DiceService();
   }
 
   /**
@@ -44,7 +44,7 @@ export class Wod20RollAction {
     // Trust input - already validated at API/Bot edge
 
     // Execute dice roll via service
-    const rollResult = this.diceService.Wod20({
+    const rollResult = this.diceService.roll({
       pool: input.pool,
       difficulty: input.difficulty,
       specialty: input.specialty,
