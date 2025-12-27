@@ -14,16 +14,17 @@
 ## 🎯 Quick Reference: Core Principles
 
 1. **Type Safety First**: Explicit types everywhere, NEVER use `any`, use `import type` for types
-2. **Package Dependencies**: All packages depend ONLY on `@realm/common` (never on each other)
-3. **Service Layer**: Pure services (services/) don't call other services; coordinator actions (actions/) orchestrate
-4. **Repository Access**: ONLY services call repositories (never entities, never actions directly)
-5. **Domain Purity**: Entities are pure logic - NO database code, NO framework code, NO repository calls
-6. **Timestamp Ownership**: Repositories manage `createdAt`/`updatedAt`, NOT entities
-7. **Zod-First Design**: Define Zod schema, infer TypeScript type (in `@realm/common`)
-8. **No TypeScript Enums**: Use `as const` objects instead
-9. **Error Hierarchy**: `RealmError` (system) vs `UserError` (client) - NEVER generic `Error`
-10. **Documentation Required**: JSDoc on all public functions, classes, interfaces
-11. **Edition Naming Convention**:
+2. **🚨 NEVER USE .JS EXTENSIONS IN IMPORTS**: This will break the build - no exceptions
+3. **Package Dependencies**: All packages depend ONLY on `@realm/common` (never on each other)
+4. **Service Layer**: Pure services (services/) don't call other services; coordinator actions (actions/) orchestrate
+5. **Repository Access**: ONLY services call repositories (never entities, never actions directly)
+6. **Domain Purity**: Entities are pure logic - NO database code, NO framework code, NO repository calls
+7. **Timestamp Ownership**: Repositories manage `createdAt`/`updatedAt`, NOT entities
+8. **Zod-First Design**: Define Zod schema, infer TypeScript type (in `@realm/common`)
+9. **No TypeScript Enums**: Use `as const` objects instead
+10. **Error Hierarchy**: `RealmError` (system) vs `UserError` (client) - NEVER generic `Error`
+11. **Documentation Required**: JSDoc on all public functions, classes, interfaces
+12. **Edition Naming Convention**:
     - **Standalone/at start**: wod20, wod5, cod (e.g., `wod20-roll.action.ts`, `Wod20RollAction`)
     - **Game-specific**: v5, v20, h5, w20 (e.g., `Vampire5thData`)
     - **Edition in middle/end**: 20th, 5th, cod (e.g., `Vampire20th`, `Hunter5th`, not `VampireWod20`)
@@ -469,6 +470,10 @@ if (!validated.success) {
 ---
 
 ## 1️⃣1️⃣ Import Organization
+
+## 🚨 **CRITICAL WARNING: NEVER USE .JS EXTENSIONS IN IMPORTS**
+
+**This is a hard rule with ZERO exceptions. If you use .js extensions, the code will break.**
 
 **Order:**
 

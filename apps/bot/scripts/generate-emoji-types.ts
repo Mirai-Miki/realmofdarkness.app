@@ -9,13 +9,19 @@ const __dirname = path.dirname(__filename);
 /**
  * Generate TypeScript types for emojis based on files in the emojis directory
  */
-function generateEmojiTypes() {
-  const emojisDir = path.join(__dirname, "..", "emojis");
-  const typesDir = path.join(__dirname, "..", "src", "types");
-  const outputFile = path.join(typesDir, "emoji-types.d.ts");
+function generateEmojiTypes(): void {
+  const emojisDir: string = path.join(__dirname, "..", "emojis");
+  const typesDir: string = path.join(__dirname, "..", "src", "types");
+  const outputFile: string = path.join(typesDir, "emoji-types.d.ts");
 
   // Supported image formats
-  const supportedExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp"];
+  const supportedExtensions: string[] = [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+  ];
 
   try {
     // Ensure types directory exists
@@ -24,15 +30,15 @@ function generateEmojiTypes() {
     }
 
     // Read emoji files
-    const files = fs.readdirSync(emojisDir);
+    const files: string[] = fs.readdirSync(emojisDir);
 
     // Filter for supported image formats and extract names
-    const emojiNames = files
-      .filter((file) => {
-        const ext = path.extname(file).toLowerCase();
+    const emojiNames: string[] = files
+      .filter((file: string) => {
+        const ext: string = path.extname(file).toLowerCase();
         return supportedExtensions.includes(ext);
       })
-      .map((file) => path.parse(file).name)
+      .map((file: string) => path.parse(file).name)
       .sort(); // Sort for consistent output
 
     if (emojiNames.length === 0) {
@@ -41,7 +47,7 @@ function generateEmojiTypes() {
     }
 
     // Generate TypeScript type definition
-    const typeContent = `// Auto-generated file. Do not edit manually.
+    const typeContent: string = `// Auto-generated file. Do not edit manually.
 // Generated from emoji files in the emojis/ directory
 // Run 'npm run generate-emoji-types' to regenerate
 
@@ -51,13 +57,13 @@ import type { ApplicationEmoji } from "discord.js";
  * Union type of all available emoji names
  */
 export type EmojiName =
-${emojiNames.map((name) => `  | "${name}"`).join("\n")};
+${emojiNames.map((name: string) => `  | "${name}"`).join("\n")};
 
 /**
  * Interface representing the Emoji object with all available emojis
  */
 export interface EmojiObject {
-${emojiNames.map((name) => `  readonly ${name}: ApplicationEmoji;`).join("\n")}
+${emojiNames.map((name: string) => `  readonly ${name}: ApplicationEmoji;`).join("\n")}
 }
 
 /**
@@ -74,7 +80,10 @@ export declare const Emoji: EmojiObject;
       `📁 Types written to: ${path.relative(process.cwd(), outputFile)}`
     );
   } catch (error) {
-    console.error("❌ Failed to generate emoji types:", error.message);
+    console.error(
+      "❌ Failed to generate emoji types:",
+      (error as Error).message
+    );
     process.exit(1);
   }
 }

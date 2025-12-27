@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
+    "rootDir": ".",
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
@@ -17,7 +18,7 @@
       "validations/*": ["./validations/*"]
     }
   },
-  "include": ["src/**/*", "test/**/*"],
-  "exclude": ["dist", "node_modules", "tsup.config.ts"],
+  "include": ["src/**/*", "test/**/*", "tsup.config.ts"],
+  "exclude": ["dist", "node_modules"],
   "references": [{ "path": "../../packages/common" }]
 }

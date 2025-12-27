@@ -4,7 +4,7 @@ import { dirname, join } from "path";
 import { readdir, readFile, writeFile, mkdir } from "fs/promises";
 import { config } from "dotenv";
 import { resolve } from "path";
-import { BotTypes } from "../src/types/bot.definitions.js";
+import { BotTypes } from "../src/types";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 

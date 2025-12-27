@@ -15,16 +15,16 @@
  */
 
 // Export repositories
-export { UserRepository } from "./user.repository.js";
-export { SupporterRepository } from "./supporter.repository.js";
-export { GuildRepository } from "./guild.repository.js";
-export { MemberRepository } from "./member.repository.js";
+export { UserRepository } from "./user.repository";
+export { SupporterRepository } from "./supporter.repository";
+export { GuildRepository } from "./guild.repository";
+export { MemberRepository } from "./member.repository";
 
 // Export mappers
-export { UserMapper } from "./mappers/user.mapper.js";
-export { SupporterMapper } from "./mappers/supporter.mapper.js";
-export { GuildMapper } from "./mappers/guild.mapper.js";
-export { MemberMapper } from "./mappers/member.mapper.js";
+export { UserMapper } from "./mappers/user.mapper";
+export { SupporterMapper } from "./mappers/supporter.mapper";
+export { GuildMapper } from "./mappers/guild.mapper";
+export { MemberMapper } from "./mappers/member.mapper";
 
 // TODO: Export when implemented
-// export { CharacterRepository } from "./character.repository.js";
+// export { CharacterRepository } from "./character.repository";

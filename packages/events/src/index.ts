@@ -36,10 +36,10 @@
  */
 
 // Export client
-export * from "./client/index.js";
+export * from "./client/index";
 
 // Export channels
-export * from "./channels/index.js";
+export * from "./channels/index";
 
 // Export contracts (includes event metadata)
-export * from "./contracts/index.js";
+export * from "./contracts/index";

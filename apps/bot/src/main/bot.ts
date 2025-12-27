@@ -14,7 +14,7 @@
  *
  * @see {@link https://discord.js.org/docs/packages/discord.js/14.25.1/Client:Class#options | Discord.js Client Options}
  */
-import type { BotType, BotCommand, BotComponent, BotEvent } from "types";
+import type { BotType, BotCommand, BotComponent, BotEvent } from "../types";
 
 import * as fs from "fs";
 import * as path from "path";
@@ -34,11 +34,7 @@ import {
   Partials,
   Options,
 } from "discord.js";
-import {
-  BotCommandSchema,
-  BotComponentSchema,
-  BotEventSchema,
-} from "../types/bot.definitions";
+import { BotCommandSchema, BotComponentSchema, BotEventSchema } from "types";
 
 // Load environment variables from root .env file
 dotenv.config({

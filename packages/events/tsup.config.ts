@@ -8,6 +8,6 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: ["@realm/common"],
+  external: ["@realm/common", "ioredis", "uuid", "zod"],
   tsconfig: "./tsconfig.build.json",
 });

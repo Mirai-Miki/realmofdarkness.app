@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Discord Emoji Downloader Script
  *
@@ -7,12 +6,12 @@
  *
  * Setup:
  * 1. Add EMOJI_SCRIPT_TOKEN to your .env file (any bot token that can access the message)
- * 2. Run with: node getEmojis.js <channelId> <messageId>
+ * 2. Run with: node getEmojis.ts <channelId> <messageId>
  *
  * Examples:
- *   node getEmojis.js 719420620701564968 1399195229797744661
+ *   node getEmojis.ts 719420620701564968 1399195229797744661
  */
-import { Client, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits, type GuildEmoji } from "discord.js";
 import fs from "fs";
 import path from "path";
 import https from "https";
@@ -22,8 +21,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Get configuration from environment and command line arguments
-const token = process.env.EMOJI_SCRIPT_TOKEN;
-const args = process.argv.slice(2);
+const token: string | undefined = process.env.EMOJI_SCRIPT_TOKEN;
+const args: string[] = process.argv.slice(2);
 
 // Validate arguments
 if (!token) {
@@ -34,22 +33,22 @@ if (!token) {
 
 if (args.length < 2) {
   console.error("❌ Missing required arguments!");
-  console.log("Usage: node getEmojis.js <channelId> <messageId>");
+  console.log("Usage: node getEmojis.ts <channelId> <messageId>");
   console.log("Examples:");
-  console.log("  node getEmojis.js 719420620701564968 1399195229797744661");
+  console.log("  node getEmojis.ts 719420620701564968 1399195229797744661");
   process.exit(1);
 }
 
-const channelId = args[0];
-const messageId = args[1];
+const channelId: string = args[0];
+const messageId: string = args[1];
 
 /**
  * Download an image from a URL and save it to a file
- * @param {string} url - The URL to download from
- * @param {string} filepath - The local file path to save to
- * @returns {Promise<void>}
+ * @param url - The URL to download from
+ * @param filepath - The local file path to save to
+ * @returns Promise that resolves when download is complete
  */
-function downloadImage(url, filepath) {
+function downloadImage(url: string, filepath: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(filepath);
 
@@ -82,14 +81,14 @@ function downloadImage(url, filepath) {
 
 /**
  * Parse emoji IDs from a message content string
- * @param {string} content - The message content containing emoji strings
- * @returns {string[]} - Array of emoji IDs
+ * @param content - The message content containing emoji strings
+ * @returns Array of emoji IDs
  */
-function parseEmojiIds(content) {
+function parseEmojiIds(content: string): string[] {
   // Regular expression to match Discord emoji format: <:name:id> or <a:name:id>
   const emojiRegex = /<a?:[^:]+:(\d+)>/g;
-  const ids = [];
-  let match;
+  const ids: string[] = [];
+  let match: RegExpExecArray | null;
 
   while ((match = emojiRegex.exec(content)) !== null) {
     ids.push(match[1]);
@@ -100,11 +99,11 @@ function parseEmojiIds(content) {
 
 /**
  * Downloads all emojis from a specified Discord message.
- * Usage: node getEmojis.js <channelId> <messageId>
+ * Usage: node getEmojis.ts <channelId> <messageId>
  */
-async function main() {
+async function main(): Promise<void> {
   // Create tempEmojis directory if it doesn't exist
-  const tempEmojisDir = path.join(process.cwd(), "tempEmojis");
+  const tempEmojisDir: string = path.join(process.cwd(), "tempEmojis");
   if (!fs.existsSync(tempEmojisDir)) {
     fs.mkdirSync(tempEmojisDir, { recursive: true });
     console.log(`Created directory: ${tempEmojisDir}`);
@@ -116,17 +115,21 @@ async function main() {
   });
 
   client.once("ready", async () => {
-    console.log(`Logged in as ${client.user.tag}`);
+    console.log(`Logged in as ${client.user?.tag}`);
     console.log(`Channel ID: ${channelId}`);
     console.log(`Message ID: ${messageId}`);
 
     try {
       const channel = await client.channels.fetch(channelId);
+      if (!channel?.isTextBased()) {
+        throw new Error("Channel is not a text-based channel");
+      }
+
       const message = await channel.messages.fetch(messageId);
       console.log("\n" + "=".repeat(50));
 
       // Parse emoji IDs from the message content
-      const emojiIds = parseEmojiIds(message.content);
+      const emojiIds: string[] = parseEmojiIds(message.content);
       console.log(`Found ${emojiIds.length} emojis to download`);
 
       if (emojiIds.length === 0) {
@@ -143,7 +146,8 @@ async function main() {
       for (const emojiId of emojiIds) {
         try {
           // Resolve the emoji using the client
-          const guildEmoji = await client.emojis.resolve(emojiId);
+          const guildEmoji: GuildEmoji | null =
+            await client.emojis.resolve(emojiId);
 
           if (!guildEmoji) {
             console.log(`❌ Could not resolve emoji with ID: ${emojiId}`);
@@ -151,21 +155,19 @@ async function main() {
             continue;
           }
 
-          // console.log(`📥 Processing: ${guildEmoji.name} (${emojiId})`);
-
           // Always use webp for both animated and static emojis
-          const isAnimated = guildEmoji.animated;
-          const extension = "webp";
+          const isAnimated: boolean = guildEmoji.animated;
+          const extension: string = "webp";
 
           // Get the emoji image URL with webp format
-          const imageUrl = guildEmoji.imageURL({
-            extension: extension,
+          const imageUrl: string = guildEmoji.imageURL({
+            extension: extension as "webp",
             size: 128,
           });
 
           // Create filename with .webp extension
-          const filename = `${guildEmoji.name}.${extension}`;
-          const filepath = path.join(tempEmojisDir, filename);
+          const filename: string = `${guildEmoji.name}.${extension}`;
+          const filepath: string = path.join(tempEmojisDir, filename);
 
           // Download the image
           await downloadImage(imageUrl, filepath);
@@ -184,7 +186,10 @@ async function main() {
           // Add a small delay to avoid rate limits
           await new Promise((resolve) => setTimeout(resolve, 100));
         } catch (error) {
-          console.error(`❌ Error processing emoji ${emojiId}:`, error.message);
+          console.error(
+            `❌ Error processing emoji ${emojiId}:`,
+            (error as Error).message
+          );
           errorCount++;
         }
       }
@@ -197,17 +202,17 @@ async function main() {
       console.log(`   ❌ Errors: ${errorCount}`);
       console.log(`   📁 Files saved to: ${tempEmojisDir}`);
     } catch (error) {
-      console.error("❌ Error fetching message:", error.message);
+      console.error("❌ Error fetching message:", (error as Error).message);
 
-      if (error.code === 50001) {
+      if ((error as any).code === 50001) {
         console.log(
           "💡 This might be a permissions issue. Make sure the bot has access to the channel/guild."
         );
-      } else if (error.code === 10008) {
+      } else if ((error as any).code === 10008) {
         console.log(
           "💡 Message not found. Check the message ID and make sure it exists."
         );
-      } else if (error.code === 10003) {
+      } else if ((error as any).code === 10003) {
         console.log(
           "💡 Channel not found. Check the channel ID and guild ID (if specified)."
         );

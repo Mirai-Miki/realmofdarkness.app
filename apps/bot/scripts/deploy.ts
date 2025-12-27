@@ -4,7 +4,7 @@ import { dirname, join } from "path";
 import { readdir, writeFile, mkdir } from "fs/promises";
 import { config } from "dotenv";
 import { resolve } from "path";
-import { BotTypes } from "../src/types/bot.definitions.js";
+import { BotTypes } from "types";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -64,7 +64,7 @@ async function deployCommands(): Promise<void> {
 
       // Check for ES module named exports (export const commandName = { data, execute })
       // Look for any property that has data and execute
-      for (const [key, value] of Object.entries(commandModule)) {
+      for (const [_key, value] of Object.entries(commandModule)) {
         if (
           typeof value === "object" &&
           value !== null &&

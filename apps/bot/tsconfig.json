@@ -3,8 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "experimentalDecorators": true,
     "typeRoots": ["node_modules/@types", "./src/types"],
     "baseUrl": "./src",
@@ -13,7 +13,7 @@
       "services/*": ["./services/*"],
       "utilities": ["./utilities/index.ts"],
       "utilities/*": ["./utilities/*"],
-      "types": ["./types/index.js"],
+      "types": ["./types/index.ts"],
       "types/*": ["./types/*"],
       "validations": ["./validations.ts"]
     }

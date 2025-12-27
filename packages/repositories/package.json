@@ -1,6 +1,5 @@
 {
   "name": "@realm/repositories",
-  "version": "1.0.0",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -18,9 +17,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@realm/database": "workspace:*",
     "@realm/common": "workspace:*",
-    "drizzle-orm": "^0.44.7",
+    "@realm/core": "workspace:*",
+    "@realm/database": "workspace:*",
     "tsup": "^8.5.1"
   }
 }

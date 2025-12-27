@@ -16,7 +16,7 @@
 
     "deploy": "tsx scripts/deploy.ts",
     "emoji:sync": "tsx scripts/sync-emojis.ts",
-    "generate-emoji-types": "node scripts/generate-emoji-types.js",
+    "generate-emoji-types": "tsx scripts/generate-emoji-types.ts",
 
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,ts,json}\"",
