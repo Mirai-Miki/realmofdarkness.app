@@ -38,7 +38,7 @@ import {
   BotCommandSchema,
   BotComponentSchema,
   BotEventSchema,
-} from "validations";
+} from "../types/bot.definitions";
 
 // Load environment variables
 dotenv.config();
@@ -64,7 +64,7 @@ async function loadCommand(filePath: string): Promise<BotCommand | null> {
 
     const result = BotCommandSchema.safeParse(command);
     if (result.success) {
-      return result.data as BotCommand;
+      return command as BotCommand;
     } else {
       logger.warning(
         `Invalid command structure in ${filePath}: ${result.error.message}`
@@ -96,7 +96,7 @@ async function loadComponent(filePath: string): Promise<BotComponent | null> {
 
     const result = BotComponentSchema.safeParse(component);
     if (result.success) {
-      return result.data as BotComponent;
+      return component as BotComponent;
     } else {
       logger.warning(
         `Invalid component structure in ${filePath}: ${result.error.message}`
@@ -129,7 +129,7 @@ async function loadEvent(filePath: string): Promise<BotEvent | null> {
 
     const result = BotEventSchema.safeParse(event);
     if (result.success) {
-      return result.data as BotEvent;
+      return event as BotEvent;
     } else {
       logger.warning(
         `Invalid event structure in ${filePath}: ${result.error.message}`

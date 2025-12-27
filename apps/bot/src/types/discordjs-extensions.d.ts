@@ -1,6 +1,6 @@
 import type { Client, Collection } from "discord.js";
 
-import type { BotCommand, BotComponent } from "./bot";
+import type { BotCommand, BotComponent } from "./bot.definitions";
 
 // Global module augmentation to override Discord.js types
 declare module "discord.js" {

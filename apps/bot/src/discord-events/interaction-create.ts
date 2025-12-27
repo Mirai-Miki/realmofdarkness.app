@@ -6,7 +6,7 @@ import type {
   AutocompleteInteraction,
 } from "discord.js";
 import { logger } from "@realm/logger";
-import type { BotEvent } from "../types/bot.js";
+import type { BotEvent } from "../types/bot.definitions.js";
 
 /**
  * Discord InteractionCreate event handler.
