@@ -112,10 +112,8 @@ export const Wod20RollActionInputSchema = z
   });
 export type Wod20RollActionInput = z.infer<typeof Wod20RollActionInputSchema>;
 
-export const Wod20RollActionResultSchema = z.object({
-  roll: Wod20DiceResultSchema,
-  characterId: z.int().optional(),
-  characterName: z.string().optional(),
-  notes: z.string().optional(),
-});
-export type Wod20RollActionResult = z.infer<typeof Wod20RollActionResultSchema>;
+export interface Wod20RollActionResult {
+  roll: Wod20DiceResult;
+  characterId?: number;
+  characterName?: string;
+}

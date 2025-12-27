@@ -41,8 +41,6 @@ export class Wod20RollAction {
    * ```
    */
   execute(input: Wod20RollActionInput): Wod20RollActionResult {
-    // Trust input - already validated at API/Bot edge
-
     // Execute dice roll via service
     const rollResult = this.diceService.roll({
       pool: input.pool,
@@ -58,7 +56,6 @@ export class Wod20RollAction {
     const result: Wod20RollActionResult = {
       roll: rollResult,
       characterId: input.characterId,
-      notes: input.notes,
     };
 
     return result;
