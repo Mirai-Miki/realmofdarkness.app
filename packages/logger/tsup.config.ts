@@ -18,4 +18,5 @@ export default defineConfig({
     "source-map-support",
     "dotenv",
   ],
+  tsconfig: "./tsconfig.build.json",
 });

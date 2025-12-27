@@ -10,8 +10,8 @@
     "dev:bot:cod": "turbo run dev:cod --filter=@realm/bot",
     "dev:api": "turbo run dev --filter=@realm/api",
 
-    "build": "turbo run build deploy emoji:sync",
-    "build:bot": "turbo run build deploy emoji:sync --filter=@realm/bot",
+    "build": "turbo run build",
+    "build:bot": "turbo run build --filter=@realm/bot",
     "build:api": "turbo run build --filter=@realm/api",
     "build:types": "tsc -b",
 
@@ -49,7 +49,6 @@
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "tsx": "^4.20.6",
     "turbo": "^2.6.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.47.0"

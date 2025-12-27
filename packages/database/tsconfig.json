@@ -4,7 +4,7 @@
     "outDir": "dist",
     "baseUrl": "./src"
   },
-  "include": ["src/**/*", "test/**/*", "scripts"],
-  "exclude": ["node_modules", "dist"],
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "dist", "scripts", "tsup.config.ts"],
   "references": [{ "path": "../common" }]
 }

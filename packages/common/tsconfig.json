@@ -2,14 +2,15 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": "./src",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "experimentalDecorators": true,
     "paths": {
       "types": ["./types.ts"]
     }
   },
   "include": ["src/**/*", "test/**/*"],
-  "exclude": ["node_modules", "dist"],
-  "dependencies": {
-    "tsup": "^8.5.1"
-  }
+  "exclude": ["node_modules", "dist", "tsup.config.ts"]
 }

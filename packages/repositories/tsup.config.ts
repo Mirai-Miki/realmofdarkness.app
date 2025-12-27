@@ -8,9 +8,6 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: [
-    "@realm/common",
-    "@realm/core",
-    "@realm/database",
-  ],
+  external: ["@realm/common", "@realm/core", "@realm/database"],
+  tsconfig: "./tsconfig.build.json",
 });

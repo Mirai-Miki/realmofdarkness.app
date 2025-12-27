@@ -9,4 +9,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   external: ["@realm/common"],
+  tsconfig: "./tsconfig.build.json",
 });

@@ -8,10 +8,6 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   clean: true,
-  external: [
-    "@realm/common",
-    "drizzle-orm",
-    "pg",
-    "dotenv",
-  ],
+  external: ["@realm/common", "drizzle-orm", "pg", "dotenv"],
+  tsconfig: "./tsconfig.build.json",
 });

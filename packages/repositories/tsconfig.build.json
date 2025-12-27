@@ -2,13 +2,21 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "composite": false,
+    "incremental": false
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts", "**/*.test.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "tsup.config.ts"
+  ],
   "references": [
     { "path": "../database/tsconfig.build.json" },
     { "path": "../common/tsconfig.build.json" }
