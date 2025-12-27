@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { Snowflake } from "./primitives/index.js";
+import type { Snowflake } from "./primitives/";
 
 /**
  * Event client interface for the Realm of Darkness application.

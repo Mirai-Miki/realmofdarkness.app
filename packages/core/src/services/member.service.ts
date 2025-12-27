@@ -8,7 +8,7 @@ import {
   type DeleteMemberInput,
   type MemberExistsInput,
 } from "@realm/common";
-import { Member } from "../entities/member.entity.js";
+import { Member } from "../entities/member.entity";
 
 /**
  * Pure application service for member operations.

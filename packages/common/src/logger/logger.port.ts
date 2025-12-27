@@ -10,7 +10,7 @@
  * @packageDocumentation
  */
 
-import type { LoggerConfig, LogOptions } from "./logger.types.js";
+import type { LoggerConfig, LogOptions } from "./logger.types";
 
 /**
  * Logger interface contract.

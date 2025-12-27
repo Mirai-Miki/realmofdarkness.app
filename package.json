@@ -11,7 +11,7 @@
     "clean": "node scripts/clean.mjs",
     "clean:dist": "turbo run clean",
     "clean-build": "pnpm clean && pnpm install && pnpm build",
-    "migrate": "pnpm --filter database exec drizzle-kit migrate",
+    "db:migrate": "pnpm --filter database exec drizzle-kit migrate",
     "db:generate": "pnpm --filter database run generate",
     "db:studio": "pnpm --filter database run studio",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\"",

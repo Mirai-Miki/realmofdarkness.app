@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BaseEventSchema } from "./base-event.js";
+import { BaseEventSchema } from "./base-event";
 
 /**
  * Request to perform a dice roll.

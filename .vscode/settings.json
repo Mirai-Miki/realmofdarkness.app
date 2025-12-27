@@ -137,5 +137,17 @@
   },
 
   // Monorepo-specific settings
-  "npm.packageManager": "pnpm"
+  "npm.packageManager": "pnpm",
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "Realm of Darkness",
+      "database": "realm_of_darkness",
+      "username": "rod"
+    }
+  ]
 }

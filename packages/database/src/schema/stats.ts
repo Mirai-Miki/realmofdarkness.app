@@ -7,7 +7,7 @@ import {
   timestamp,
   unique,
 } from "drizzle-orm/pg-core";
-import { users } from "./users.js";
+import { users } from "./users";
 import { snowflake } from "../schema_types";
 
 /**

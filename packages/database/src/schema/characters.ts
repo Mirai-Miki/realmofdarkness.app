@@ -12,10 +12,10 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { Splat, CharacterConstraints } from "@realm/common";
-import { users } from "./users.js";
-import { guilds } from "./guilds.js";
-import { members } from "./members.js";
-import { snowflake } from "../schema_types.js";
+import { users } from "./users";
+import { guilds } from "./guilds";
+import { members } from "./members";
+import { snowflake } from "../schema_types";
 
 // Placeholder for CharacterJsonbData
 export interface CharacterJsonbData {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BaseEventSchema } from "./base-event.js";
+import { BaseEventSchema } from "./base-event";
 
 /**
  * Request bot to post a message to Discord.

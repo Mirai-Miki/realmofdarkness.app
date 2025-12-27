@@ -1,8 +1,8 @@
-import type { ICharacter20th } from "./character-20th.definitions.js";
+import type { ICharacter20th } from "./character-20th.definitions";
 
 import { z } from "zod";
-import { Character20thDataSchema } from "./character-20th.definitions.js";
-import { Splat } from "../character.definitions.js";
+import { Character20thDataSchema } from "./character-20th.definitions";
+import { Splat } from "../character.definitions";
 
 // ===========================================================================
 // 20th Edition Vampire Character Constraints & Schema

@@ -5,7 +5,7 @@
  */
 
 import { z } from "zod";
-import { SnowflakeSchema } from "../primitives/index.js";
+import { SnowflakeSchema } from "../primitives/";
 
 // ============================================================================
 // Constants

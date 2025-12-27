@@ -2,7 +2,7 @@
  * Log level enumeration.
  */
 
-import type { Environment } from "../primitives/index.js";
+import type { Environment } from "../primitives/";
 
 export const LogLevel = {
   Debug: "debug",

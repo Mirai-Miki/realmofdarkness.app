@@ -3,7 +3,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import { pgTable, pgEnum, timestamp, integer } from "drizzle-orm/pg-core";
 import { SupporterLevel } from "@realm/common";
 import { snowflake } from "../schema_types";
-import { users } from "./users.js";
+import { users } from "./users";
 
 const supporterLevelValues = Object.values(SupporterLevel) as [
   string,

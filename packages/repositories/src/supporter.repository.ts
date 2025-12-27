@@ -7,7 +7,7 @@ import type {
   ISupporterRepository,
   SupporterData,
 } from "@realm/common";
-import { SupporterMapper } from "./mappers/supporter.mapper.js";
+import { SupporterMapper } from "./mappers/supporter.mapper";
 
 /**
  * Repository for Supporter entity persistence operations.

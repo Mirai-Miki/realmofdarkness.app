@@ -4,7 +4,7 @@ import { pgTable, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { snowflake } from "../schema_types";
 import { UsernameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
-import { supporters } from "./supporters.js";
+import { supporters } from "./supporters";
 
 export const users = pgTable("users", {
   id: snowflake().primaryKey(), // Discord Snowflake

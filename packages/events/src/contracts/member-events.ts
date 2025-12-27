@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BaseEventSchema } from "./base-event.js";
+import { BaseEventSchema } from "./base-event";
 
 /**
  * Published when a member joins a guild (user-guild relationship created).

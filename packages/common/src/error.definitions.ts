@@ -1,4 +1,4 @@
-import { HttpStatus } from "./primitives/http-status.enum.js";
+import { HttpStatus } from "./primitives/http-status.enum";
 
 /**
  * Custom error class for the Realm of Darkness application.

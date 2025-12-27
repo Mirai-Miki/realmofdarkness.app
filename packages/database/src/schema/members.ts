@@ -8,8 +8,8 @@ import {
   integer,
   primaryKey,
 } from "drizzle-orm/pg-core";
-import { users } from "./users.js";
-import { guilds } from "./guilds.js";
+import { users } from "./users";
+import { guilds } from "./guilds";
 import { snowflake } from "../schema_types";
 import { UsernameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
 

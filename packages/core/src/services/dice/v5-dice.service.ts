@@ -12,7 +12,7 @@
 import type { V5Dice, V5DiceResult, V5DiceResultType } from "@realm/common";
 
 import { RealmError } from "@realm/common";
-import { DiceService } from "./base-dice.service.js";
+import { DiceService } from "./base-dice.service";
 
 export class V5DiceService extends DiceService {
   /**

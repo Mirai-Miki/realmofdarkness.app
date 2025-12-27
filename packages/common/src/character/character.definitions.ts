@@ -11,7 +11,7 @@
 import type { Snowflake } from "../primitives";
 
 import { z } from "zod";
-import { SnowflakeSchema } from "primitives";
+import { SnowflakeSchema } from "../primitives";
 
 // ============================================================================
 // Character Constraints

@@ -44,6 +44,7 @@
 - Always use explicit types for function parameters, return types, and variables
 - Use type-only imports: `import type { ... }` when importing only types
 - **Discord IDs**: Always use the `Snowflake` type (from `@realm/common`)
+- **Method Visibility**: ALL class methods MUST explicitly declare `public`, `private`, or `protected` - no implicit public methods
 
 ### Enum Pattern (NEVER use TypeScript `enum`)
 
@@ -476,6 +477,15 @@ if (!validated.success) {
 3. Relative imports
 4. Type-only imports
 
+**CRITICAL Import Rules:**
+
+- **NEVER include file extensions** (`.ts`, `.js`, `.mts`, etc.) in import paths
+- **NEVER explicitly import from `index`** files - import from the directory instead
+  - ✅ Correct: `import { User } from "./entities"`
+  - ❌ Wrong: `import { User } from "./entities/index"`
+  - ✅ Correct: `import { users } from "./schema/users"`
+  - ❌ Wrong: `import { users } from "./schema/users.js"`
+
 **Example:**
 
 ```typescript
@@ -487,8 +497,9 @@ import { v4 as uuidv4 } from "uuid";
 import { Character } from "@realm/core";
 import { GameSystem } from "@realm/common";
 
-// 3. Relative imports
-import { CharacterMapper } from "./character.mapper";
+// 3. Relative imports (NO extensions, NO /index)
+import { CharacterMapper } from "./mappers/character.mapper";
+import { users } from "./schema/users";
 
 // 4. Type-only imports
 import type { ICharacterRepository } from "@realm/common";

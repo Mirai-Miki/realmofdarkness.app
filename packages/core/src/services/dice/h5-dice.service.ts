@@ -13,7 +13,7 @@
 import type { H5Dice, H5DiceResult, H5ResultType } from "@realm/common";
 
 import { RealmError } from "@realm/common";
-import { DiceService } from "./base-dice.service.js";
+import { DiceService } from "./base-dice.service";
 
 export class H5DiceService extends DiceService {
   /**

@@ -1,4 +1,4 @@
-import type { ICharacter } from "../character.definitions.js";
+import type { ICharacter } from "../character.definitions";
 
 import { z } from "zod";
 import { BaseCharacterDataSchema } from "../character.definitions";

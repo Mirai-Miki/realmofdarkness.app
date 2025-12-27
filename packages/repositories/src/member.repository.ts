@@ -3,7 +3,7 @@ import type { IMemberRepository, MemberData, Snowflake } from "@realm/common";
 import { RealmError } from "@realm/common";
 import { eq, and, or, gt, sum, sql } from "drizzle-orm";
 
-import { MemberMapper } from "./mappers/member.mapper.js";
+import { MemberMapper } from "./mappers/member.mapper";
 
 /**
  * Repository implementation for Member entities.

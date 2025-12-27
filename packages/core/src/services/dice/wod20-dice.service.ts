@@ -11,7 +11,7 @@
 import type { Wod20DiceInput, Wod20DiceResult } from "@realm/common";
 
 import { RealmError } from "@realm/common";
-import { DiceService } from "./base-dice.service.js";
+import { DiceService } from "./base-dice.service";
 
 export class Wod20DiceService extends DiceService {
   /**

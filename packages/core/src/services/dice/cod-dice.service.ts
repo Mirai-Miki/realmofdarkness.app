@@ -10,7 +10,7 @@
  */
 import type { CodDice, CodDiceResult, CodResultType } from "@realm/common";
 
-import { DiceService } from "./base-dice.service.js";
+import { DiceService } from "./base-dice.service";
 
 export class CodDiceService extends DiceService {
   /**

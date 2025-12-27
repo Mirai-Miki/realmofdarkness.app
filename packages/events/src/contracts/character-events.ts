@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Splat } from "@realm/common";
-import { BaseEventSchema } from "./base-event.js";
+import { BaseEventSchema } from "./base-event";
 
 /**
  * Published when a character is created.

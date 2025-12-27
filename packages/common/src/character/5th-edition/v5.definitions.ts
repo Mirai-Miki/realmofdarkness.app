@@ -1,4 +1,4 @@
-import type { ICharacter5th } from "./character-5th.definitions.js";
+import type { ICharacter5th } from "./character-5th.definitions";
 
 import { z } from "zod";
 import { Character5thDataSchema } from "./character-5th.definitions";

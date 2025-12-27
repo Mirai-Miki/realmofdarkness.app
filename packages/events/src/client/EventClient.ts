@@ -3,14 +3,14 @@ import { v4 as uuidv4, v7 as uuidv7 } from "uuid";
 import type { z } from "zod";
 import type { ILogger, Snowflake } from "@realm/common";
 import { RealmError } from "@realm/common";
-import type { ChannelName } from "../channels/index.js";
+import type { ChannelName } from "../channels";
 import {
   buildCharacterChannel,
   buildGuildChannel,
   buildMemberChannel,
   buildUserChannel,
 } from "../channels/index.js";
-import { EventMetadataSchema } from "../contracts/base-event.js";
+import { EventMetadataSchema } from "../contracts/base-event";
 
 /**
  * Scope information for determining which hierarchical channels to publish to.

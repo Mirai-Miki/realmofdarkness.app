@@ -1,7 +1,7 @@
 import type { InferSelectModel } from "drizzle-orm";
 
 import { pgTable, timestamp, jsonb } from "drizzle-orm/pg-core";
-import { guilds } from "./guilds.js";
+import { guilds } from "./guilds";
 import { snowflake } from "../schema_types";
 
 /**

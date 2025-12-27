@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BaseEventSchema } from "./base-event.js";
+import { BaseEventSchema } from "./base-event";
 
 /**
  * Published when a guild is created (bot joins a new Discord server).

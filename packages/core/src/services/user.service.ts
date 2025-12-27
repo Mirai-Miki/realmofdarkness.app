@@ -4,7 +4,7 @@ import {
   type CreateUserInput,
   type UpdateUserInput,
 } from "@realm/common";
-import { User } from "../entities/user.entity.js";
+import { User } from "../entities/user.entity";
 
 /**
  * Pure application service for user operations.

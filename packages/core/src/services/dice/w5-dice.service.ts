@@ -16,7 +16,7 @@ import type {
 } from "@realm/common";
 
 import { RealmError } from "@realm/common";
-import { DiceService } from "./base-dice.service.js";
+import { DiceService } from "./base-dice.service";
 
 export class W5DiceService extends DiceService {
   /**

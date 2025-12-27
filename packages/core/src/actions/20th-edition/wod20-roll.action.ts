@@ -11,7 +11,7 @@ import type {
   Wod20RollActionInput,
   Wod20RollActionResult,
 } from "@realm/common";
-import { Wod20DiceService } from "../../services/dice/index.js";
+import { Wod20DiceService } from "../../services/dice/index";
 
 export class Wod20RollAction {
   private diceService: Wod20DiceService;

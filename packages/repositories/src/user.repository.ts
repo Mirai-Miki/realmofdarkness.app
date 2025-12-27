@@ -7,7 +7,7 @@ import type {
   IUserRepository,
   UserData,
 } from "@realm/common";
-import { UserMapper } from "./mappers/user.mapper.js";
+import { UserMapper } from "./mappers/user.mapper";
 
 /**
  * Repository for User entity persistence operations.
