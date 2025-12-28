@@ -36,7 +36,7 @@ export default {
   // Ignore setup files when looking for tests
   testPathIgnorePatterns: ["/node_modules/", "/dist/", "/test/setup.ts"],
 
-  // Transform @realm packages
+  // Transform workspace packages (don't ignore @realm packages)
   transformIgnorePatterns: ["node_modules/(?!(@realm)/)"],
 
   // Coverage configuration
@@ -45,6 +45,7 @@ export default {
     "!src/**/*.d.ts",
     "!src/**/*.stories.{ts,tsx}",
     "!src/**/index.ts",
+    "!src/drizzle.config.ts",
   ],
 
   // Coverage thresholds (optional)
@@ -67,8 +68,6 @@ export default {
     // Map workspace packages to their TypeScript source (fixes ESM import issues)
     "^@realm/common$": "<rootDir>/../common/src/index.ts",
     "^@realm/common/(.*)$": "<rootDir>/../common/src/$1",
-    "^@realm/errors$": "<rootDir>/../errors/src/index.ts",
-    "^@realm/logger$": "<rootDir>/../logger/src/index.ts",
   },
 
   // Clear mocks automatically between tests

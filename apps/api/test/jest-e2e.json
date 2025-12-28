@@ -4,6 +4,29 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.(t|j)s$": [
+      "ts-jest",
+      {
+        "tsconfig": {
+          "outDir": "./dist",
+          "esModuleInterop": true,
+          "allowSyntheticDefaultImports": true
+        }
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^@realm/common$": "<rootDir>/../../../packages/common/src/index.ts",
+    "^@realm/common/(.*)$": "<rootDir>/../../../packages/common/src/$1",
+    "^@realm/core$": "<rootDir>/../../../packages/core/src/index.ts",
+    "^@realm/core/(.*)$": "<rootDir>/../../../packages/core/src/$1",
+    "^@realm/logger$": "<rootDir>/../../../packages/logger/src/index.ts",
+    "^@realm/logger/(.*)$": "<rootDir>/../../../packages/logger/src/$1",
+    "^@realm/database$": "<rootDir>/../../../packages/database/src/index.ts",
+    "^@realm/database/(.*)$": "<rootDir>/../../../packages/database/src/$1",
+    "^@realm/repositories$": "<rootDir>/../../../packages/repositories/src/index.ts",
+    "^@realm/repositories/(.*)$": "<rootDir>/../../../packages/repositories/src/$1",
+    "^@realm/events$": "<rootDir>/../../../packages/events/src/index.ts",
+    "^@realm/events/(.*)$": "<rootDir>/../../../packages/events/src/$1"
   }
 }

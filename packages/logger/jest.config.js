@@ -1,13 +1,10 @@
 /** @type {import('jest').Config} */
 export default {
   // Use ts-jest preset for TypeScript support
-  preset: "ts-jest/presets/default-esm",
+  preset: "ts-jest",
 
   // Set test environment to Node.js
   testEnvironment: "node",
-
-  // Support for ES modules
-  extensionsToTreatAsEsm: [".ts"],
 
   // Module file extensions Jest should recognize
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
@@ -20,11 +17,10 @@ export default {
     "^.+\\.tsx?$": [
       "ts-jest",
       {
-        useESM: true,
         tsconfig: {
-          module: "esnext",
-          target: "es2022",
-          moduleResolution: "node",
+          outDir: "./dist",
+          esModuleInterop: true,
+          allowSyntheticDefaultImports: true,
         },
       },
     ],
@@ -68,7 +64,9 @@ export default {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
     "^(\\.{1,2}/.*)\\.js$": "$1",
-    // Map workspace packages to their TypeScript source
+    // Map workspace packages to their TypeScript source (fixes ESM import issues)
+    "^@realm/common$": "<rootDir>/../common/src/index.ts",
+    "^@realm/common/(.*)$": "<rootDir>/../common/src/$1",
     "^@realm/errors$": "<rootDir>/../errors/src/index.ts",
     "^@realm/core$": "<rootDir>/../core/src/index.ts",
   },

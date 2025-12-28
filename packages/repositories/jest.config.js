@@ -36,7 +36,7 @@ export default {
   // Ignore setup files when looking for tests
   testPathIgnorePatterns: ["/node_modules/", "/dist/", "/test/setup.ts"],
 
-  // Transform @realm packages
+  // Transform workspace packages (don't ignore @realm packages)
   transformIgnorePatterns: ["node_modules/(?!(@realm)/)"],
 
   // Coverage configuration
@@ -67,8 +67,10 @@ export default {
     // Map workspace packages to their TypeScript source (fixes ESM import issues)
     "^@realm/common$": "<rootDir>/../common/src/index.ts",
     "^@realm/common/(.*)$": "<rootDir>/../common/src/$1",
-    "^@realm/errors$": "<rootDir>/../errors/src/index.ts",
-    "^@realm/logger$": "<rootDir>/../logger/src/index.ts",
+    "^@realm/core$": "<rootDir>/../core/src/index.ts",
+    "^@realm/core/(.*)$": "<rootDir>/../core/src/$1",
+    "^@realm/database$": "<rootDir>/../database/src/index.ts",
+    "^@realm/database/(.*)$": "<rootDir>/../database/src/$1",
   },
 
   // Clear mocks automatically between tests

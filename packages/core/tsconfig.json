@@ -4,6 +4,7 @@
     "outDir": "dist",
     "rootDir": ".",
     "baseUrl": "./src",
+    "isolatedModules": true,
     "paths": {
       "@/*": ["./*"],
       "domain": ["./domain"],

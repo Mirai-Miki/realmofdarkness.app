@@ -3,8 +3,8 @@
  * Tests core logging functionality, configuration, and error handling.
  */
 
-import { logger, Environment } from "../src/index";
-import { RealmError, UserError } from "@realm/common";
+import { logger } from "../src/index";
+import { RealmError, UserError, Environment } from "@realm/common";
 
 describe("Logging", () => {
   beforeEach(() => {

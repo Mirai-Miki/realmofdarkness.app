@@ -11,10 +11,13 @@
     }
   },
   "scripts": {
-    "build": "tsup",
+    "build": "pnpm typecheck && tsup",
     "clean": "rimraf dist .turbo",
     "lint": "eslint src --ext .ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@realm/common": "workspace:*",
