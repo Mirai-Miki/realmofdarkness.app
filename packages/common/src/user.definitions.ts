@@ -33,22 +33,12 @@ export const DisplayNameSchema = z
   .max(UsernameConstraints.MaxLength);
 
 /**
- * User email address (optional).
- */
-export const EmailSchema = z.string().max(100).nullable();
-
-/**
  * Avatar URL from Discord CDN.
  */
 export const AvatarUrlSchema = z
   .string()
   .max(DiscordCdnUrlMaxLength)
   .optional();
-
-/**
- * Whether user has completed registration.
- */
-export const RegisteredSchema = z.boolean();
 
 /**
  * Whether user is a Realm of Darkness admin.
@@ -69,13 +59,10 @@ export const UserDataSchema = z.object({
   id: SnowflakeSchema,
   username: UsernameSchema,
   displayName: DisplayNameSchema,
-  email: z.string().max(100).nullable(),
   avatarUrl: AvatarUrlSchema,
-  registered: z.boolean(),
   admin: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  lastActive: z.date(),
 });
 export type UserData = z.infer<typeof UserDataSchema>;
 
@@ -89,9 +76,7 @@ export const CreateUserInputSchema = z.object({
   id: SnowflakeSchema,
   username: UsernameSchema,
   displayName: DisplayNameSchema,
-  email: EmailSchema.default(null),
   avatarUrl: AvatarUrlSchema,
-  registered: RegisteredSchema.default(false),
   admin: AdminSchema.default(false),
 });
 export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
@@ -106,9 +91,7 @@ export const UpdateUserInputSchema = z.object({
   id: SnowflakeSchema,
   username: UsernameSchema.optional(),
   displayName: DisplayNameSchema.optional(),
-  email: EmailSchema.optional(),
   avatarUrl: AvatarUrlSchema.optional(),
-  registered: RegisteredSchema.optional(),
   admin: AdminSchema.optional(),
 });
 export type UpdateUserInput = z.infer<typeof UpdateUserInputSchema>;
@@ -184,7 +167,7 @@ export interface IUserRepository {
    * @returns Created user state with updated metadata
    * @throws {RealmError} If user creation fails or user already exists
    */
-  create(user: UserData): Promise<UserData>;
+  create(user: CreateUserInput): Promise<UserData>;
 
   /**
    * Update an existing user.
@@ -194,14 +177,6 @@ export interface IUserRepository {
    * @throws {RealmError} If update fails or user doesn't exist
    */
   update(user: UserData): Promise<UserData>;
-
-  /**
-   * Update user's last active timestamp.
-   *
-   * @param id - Discord user snowflake ID
-   * @throws {RealmError} If update fails
-   */
-  updateLastActive(id: Snowflake): Promise<void>;
 
   /**
    * Delete a user and all associated data (cascade).

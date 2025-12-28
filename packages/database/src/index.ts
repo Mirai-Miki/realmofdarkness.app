@@ -11,4 +11,4 @@
 export * from "./schema/";
 
 // Re-export database singleton and type
-export { db, type Database } from "./db";
+export { db, type Database, closeDatabase } from "./db";

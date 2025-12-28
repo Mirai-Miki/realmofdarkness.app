@@ -5,6 +5,7 @@ import type {
   IGuildRepository,
   GuildData,
   Snowflake,
+  CreateGuildInput,
   UpsertGuildInput,
 } from "@realm/common";
 import { RealmError, SnowflakeSchema } from "@realm/common";
@@ -68,6 +69,9 @@ export class GuildRepository implements IGuildRepository {
 
       return GuildMapper.toData(result[0]);
     } catch (error) {
+      if (error instanceof RealmError) {
+        throw error;
+      }
       throw new RealmError("Failed to find guild by ID", {
         cause: error,
         fields: { guildId: id },
@@ -78,16 +82,16 @@ export class GuildRepository implements IGuildRepository {
   /**
    * Create a new guild.
    *
-   * @param guild - Guild Data to create
+   * @param input - Create guild input (without timestamps)
    * @throws {RealmError} If creation fails or guild already exists
    * @returns Created guild Data
    */
-  public async create(guild: GuildData): Promise<GuildData> {
+  public async create(input: CreateGuildInput): Promise<GuildData> {
     try {
       // Validate snowflake format first
-      SnowflakeSchema.parse(guild.id);
+      SnowflakeSchema.parse(input.id);
 
-      const dbRecord = GuildMapper.fromData(guild);
+      const dbRecord = GuildMapper.fromCreateInput(input);
 
       // Validate with Zod schema before inserting
       const validated = insertGuildSchema.parse(dbRecord);
@@ -96,9 +100,12 @@ export class GuildRepository implements IGuildRepository {
 
       return GuildMapper.toData(result[0]);
     } catch (error) {
+      if (error instanceof RealmError) {
+        throw error;
+      }
       throw new RealmError("Failed to create guild", {
         cause: error,
-        fields: { guildId: guild.id },
+        fields: { guildId: input.id },
       });
     }
   }
@@ -239,6 +246,9 @@ export class GuildRepository implements IGuildRepository {
 
       return GuildMapper.toData(result);
     } catch (error) {
+      if (error instanceof RealmError) {
+        throw error;
+      }
       throw new RealmError("Failed to upsert guild", {
         cause: error,
         fields: { guildId: input.id, guildName: input.name },

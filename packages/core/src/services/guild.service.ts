@@ -92,15 +92,10 @@ export class GuildService {
 
     try {
       // Trust input - already validated at API/Bot edge
+      // Repository will add createdAt and lastUpdated timestamps
+      const createdDto = await this.guildRepository.create(input);
 
-      // Repository will add date fields
-      const createdDto = await this.guildRepository.create({
-        ...input,
-        createdAt: new Date(), // Repository may override
-        lastUpdated: new Date(), // Repository may override
-      });
-
-      // Hydrate DTO back to entity
+      // Hydrate DTO to entity
       const created = new Guild(createdDto);
 
       this.logger.debug(`Guild created successfully: ${created.name}`, {

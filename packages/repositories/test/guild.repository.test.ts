@@ -1,6 +1,9 @@
-import { db, guilds, insertGuildSchema } from "@realm/database";
-import { eq } from "drizzle-orm";
-import type { GuildData, UpsertGuildInput } from "@realm/common";
+import { db, guilds, insertGuildSchema, closeDatabase } from "@realm/database";
+import type {
+  GuildData,
+  CreateGuildInput,
+  UpsertGuildInput,
+} from "@realm/common";
 import { GuildNameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
 import { GuildRepository } from "../src/guild.repository";
 
@@ -22,43 +25,41 @@ describe("GuildRepository", () => {
   afterAll(async () => {
     // Final cleanup
     await db.delete(guilds);
+    // Close database connection to allow Jest to exit cleanly
+    await closeDatabase();
   });
 
   describe("create", () => {
     it("should create a new guild", async () => {
-      const guildData: GuildData = {
+      const guildInput: CreateGuildInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://cdn.discordapp.com/icons/123/abc.png",
         storytellerRoleIds: ["111222333444555666"],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
 
-      const created = await repository.create(guildData);
+      const created = await repository.create(guildInput);
 
       expect(created).toBeDefined();
       expect(created.id).toBe(testGuildId);
       expect(created.name).toBe("Test Guild");
-      expect(created.iconUrl).toBe(guildData.iconUrl);
-      expect(created.storytellerRoleIds).toEqual(guildData.storytellerRoleIds);
+      expect(created.iconUrl).toBe(guildInput.iconUrl);
+      expect(created.storytellerRoleIds).toEqual(guildInput.storytellerRoleIds);
     });
 
     it("should throw error when creating duplicate guild", async () => {
-      const guildData: GuildData = {
+      const guildInput: CreateGuildInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://cdn.discordapp.com/icons/123/abc.png",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
 
       // Create first time
-      await repository.create(guildData);
+      await repository.create(guildInput);
 
       // Try to create again - should fail
-      await expect(repository.create(guildData)).rejects.toThrow();
+      await expect(repository.create(guildInput)).rejects.toThrow();
     });
 
     it("should validate guild data before creating", async () => {
@@ -67,9 +68,7 @@ describe("GuildRepository", () => {
         name: "A".repeat(101), // Exceeds max length
         iconUrl: "https://example.com",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
-      } as GuildData;
+      } as CreateGuildInput;
 
       await expect(repository.create(invalidGuild)).rejects.toThrow();
     });
@@ -78,15 +77,13 @@ describe("GuildRepository", () => {
   describe("findById", () => {
     it("should find an existing guild", async () => {
       // First create a guild
-      const guildData: GuildData = {
+      const guildInput: CreateGuildInput = {
         id: testGuildId,
         name: "Find Me Guild",
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
-      await repository.create(guildData);
+      await repository.create(guildInput);
 
       // Then find it
       const found = await repository.findById(testGuildId);
@@ -111,19 +108,17 @@ describe("GuildRepository", () => {
   describe("update", () => {
     it("should update an existing guild", async () => {
       // Create initial guild
-      const guildData: GuildData = {
+      const guildInput: CreateGuildInput = {
         id: testGuildId,
         name: "Original Name",
         iconUrl: "https://example.com/original.png",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
-      await repository.create(guildData);
+      const created = await repository.create(guildInput);
 
       // Update it
       const updateData: GuildData = {
-        ...guildData,
+        ...created,
         name: "Updated Name",
         iconUrl: "https://example.com/updated.png",
       };
@@ -135,15 +130,13 @@ describe("GuildRepository", () => {
 
     it("should not update database when nothing has changed", async () => {
       // Create initial guild
-      const guildData: GuildData = {
+      const guildInput: CreateGuildInput = {
         id: testGuildId,
         name: "Unchanged Guild",
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: ["123456789012345678"],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
-      const created = await repository.create(guildData);
+      const created = await repository.create(guildInput);
       const originalLastUpdated = created.lastUpdated;
 
       // Wait a moment to ensure timestamp would change if update occurred
@@ -165,15 +158,13 @@ describe("GuildRepository", () => {
 
     it("should update when storytellerRoleIds change", async () => {
       // Create initial guild
-      const guildData: GuildData = {
+      const guildInput: CreateGuildInput = {
         id: testGuildId,
         name: "Role Test Guild",
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: ["111111111111111111"],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
-      const created = await repository.create(guildData);
+      const created = await repository.create(guildInput);
 
       // Wait a moment to ensure timestamp would change
       await new Promise((resolve) => setTimeout(resolve, 50));
@@ -226,19 +217,17 @@ describe("GuildRepository", () => {
 
     it("should validate name length in update", async () => {
       // First create a valid guild
-      const guildData: GuildData = {
+      const guildInput: CreateGuildInput = {
         id: testGuildId,
         name: "Valid Name",
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
-      await repository.create(guildData);
+      const created = await repository.create(guildInput);
 
       // Try to update with invalid name
       const invalidUpdate: GuildData = {
-        ...guildData,
+        ...created,
         name: "A".repeat(GuildNameConstraints.MaxLength + 10),
       };
 
@@ -247,19 +236,17 @@ describe("GuildRepository", () => {
 
     it("should validate iconUrl length in update", async () => {
       // First create a valid guild
-      const guildData: GuildData = {
+      const guildInput: CreateGuildInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
-      await repository.create(guildData);
+      const created = await repository.create(guildInput);
 
       // Try to update with invalid iconUrl
       const invalidUpdate: GuildData = {
-        ...guildData,
+        ...created,
         iconUrl: "https://example.com/" + "A".repeat(DiscordCdnUrlMaxLength),
       };
 
@@ -423,15 +410,13 @@ describe("GuildRepository", () => {
   describe("delete", () => {
     it("should delete an existing guild", async () => {
       // Create a guild
-      const guildData: GuildData = {
+      const guildInput: CreateGuildInput = {
         id: testGuildId,
         name: "Delete Me",
         iconUrl: "",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
-      await repository.create(guildData);
+      await repository.create(guildInput);
 
       // Delete it
       await repository.delete(testGuildId);
@@ -449,15 +434,13 @@ describe("GuildRepository", () => {
 
   describe("exists", () => {
     it("should return true for existing guild", async () => {
-      const guildData: GuildData = {
+      const guildInput: CreateGuildInput = {
         id: testGuildId,
         name: "Exists Test",
         iconUrl: "",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
-      await repository.create(guildData);
+      await repository.create(guildInput);
 
       const exists = await repository.exists(testGuildId);
       expect(exists).toBe(true);
@@ -486,26 +469,22 @@ describe("GuildRepository", () => {
     });
 
     it("should reject name exceeding max length", async () => {
-      const invalidGuild: GuildData = {
+      const invalidGuild: CreateGuildInput = {
         id: testGuildId,
         name: "A".repeat(GuildNameConstraints.MaxLength + 10),
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
 
       await expect(repository.create(invalidGuild)).rejects.toThrow();
     });
 
     it("should accept name at exact max length", async () => {
-      const validGuild: GuildData = {
+      const validGuild: CreateGuildInput = {
         id: testGuildId,
         name: "A".repeat(GuildNameConstraints.MaxLength),
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
 
       const created = await repository.create(validGuild);
@@ -514,13 +493,11 @@ describe("GuildRepository", () => {
     });
 
     it("should reject iconUrl exceeding max length", async () => {
-      const invalidGuild: GuildData = {
+      const invalidGuild: CreateGuildInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://example.com/" + "A".repeat(DiscordCdnUrlMaxLength),
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
 
       await expect(repository.create(invalidGuild)).rejects.toThrow();
@@ -528,13 +505,11 @@ describe("GuildRepository", () => {
 
     it("should accept iconUrl at exact max length", async () => {
       const validIconUrl = "A".repeat(DiscordCdnUrlMaxLength);
-      const validGuild: GuildData = {
+      const validGuild: CreateGuildInput = {
         id: testGuildId2,
         name: "Test Guild",
         iconUrl: validIconUrl,
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
 
       const created = await repository.create(validGuild);
@@ -543,39 +518,33 @@ describe("GuildRepository", () => {
     });
 
     it("should validate storytellerRoleIds are valid snowflakes", async () => {
-      const invalidGuild: GuildData = {
+      const invalidGuild: CreateGuildInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: ["invalid-role-id"] as any,
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
 
       await expect(repository.create(invalidGuild)).rejects.toThrow();
     });
 
     it("should reject empty snowflake strings", async () => {
-      const invalidGuild: GuildData = {
+      const invalidGuild: CreateGuildInput = {
         id: "",
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
 
       await expect(repository.create(invalidGuild)).rejects.toThrow();
     });
 
     it("should reject snowflakes that are too short", async () => {
-      const invalidGuild: GuildData = {
+      const invalidGuild: CreateGuildInput = {
         id: "123456", // Too short
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: [],
-        createdAt: new Date(),
-        lastUpdated: new Date(),
       };
 
       await expect(repository.create(invalidGuild)).rejects.toThrow();

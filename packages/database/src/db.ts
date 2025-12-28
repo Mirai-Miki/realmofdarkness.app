@@ -68,3 +68,11 @@ export const db = drizzle(pool, {
  * Provides full type safety for Drizzle queries.
  */
 export type Database = typeof db;
+
+/**
+ * Close the database connection pool.
+ * Should be called when shutting down the application or in test cleanup.
+ */
+export async function closeDatabase(): Promise<void> {
+  await pool.end();
+}

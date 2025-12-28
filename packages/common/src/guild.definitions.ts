@@ -145,10 +145,10 @@ export interface IGuildRepository {
   /**
    * Create a new guild.
    *
-   * @param guild - Guild data to create
+   * @param input - Guild input data (without timestamps)
    * @returns Created guild data
    */
-  create(guild: GuildData): Promise<GuildData>;
+  create(input: CreateGuildInput): Promise<GuildData>;
 
   /**
    * Update an existing guild.

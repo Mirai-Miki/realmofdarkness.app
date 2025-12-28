@@ -32,13 +32,10 @@ export class UserMapper {
         id: db.id,
         username: db.username,
         displayName: db.displayName,
-        email: db.email,
-        registered: db.registered,
         admin: db.admin,
         avatarUrl: db.avatarUrl,
         createdAt: db.createdAt,
         updatedAt: db.updatedAt,
-        lastActive: db.lastActive,
       };
     } catch (error) {
       throw new RealmError("Failed to map user from database to Data", {
@@ -63,9 +60,7 @@ export class UserMapper {
         id: data.id,
         username: data.username,
         displayName: data.displayName,
-        email: "", // Not in Data, set by auth system
         avatarUrl: data.avatarUrl || "",
-        registered: true, // Implied by existence of Data
         admin: false, // Set by separate admin management
       };
     } catch (error) {

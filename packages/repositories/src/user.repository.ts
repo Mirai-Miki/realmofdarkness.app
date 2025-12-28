@@ -6,6 +6,7 @@ import type {
   Snowflake,
   IUserRepository,
   UserData,
+  CreateUserInput,
 } from "@realm/common";
 import { UserMapper } from "./mappers/user.mapper";
 
@@ -149,8 +150,10 @@ export class UserRepository implements IUserRepository {
    * @returns Created user Data with updated metadata
    * @throws {RealmError} If user creation fails or user already exists
    */
-  public async create(user: UserData): Promise<UserData> {
+  public create(user: CreateUserInput): Promise<UserData> {
     try {
+      throw new Error("Method not implemented.");
+      /**
       const dbRecord = UserMapper.fromData(user);
 
       const result = await db.insert(users).values(dbRecord).returning();
@@ -160,6 +163,7 @@ export class UserRepository implements IUserRepository {
       });
 
       return UserMapper.toData(result[0]);
+      */
     } catch (error) {
       throw new RealmError("Failed to create user", {
         cause: error,
@@ -203,30 +207,6 @@ export class UserRepository implements IUserRepository {
       throw new RealmError("Failed to update user", {
         cause: error,
         fields: { userId: user.id },
-      });
-    }
-  }
-
-  /**
-   * Update user's last active timestamp.
-   *
-   * @param id - Discord user snowflake ID
-   * @throws {RealmError} If update fails
-   */
-  public async updateLastActive(id: Snowflake): Promise<void> {
-    try {
-      await db
-        .update(users)
-        .set({ lastActive: new Date() })
-        .where(eq(users.id, id));
-
-      this.logger.debug("User last active updated", {
-        fields: { userId: id },
-      });
-    } catch (error) {
-      throw new RealmError("Failed to update user last active", {
-        cause: error,
-        fields: { userId: id },
       });
     }
   }

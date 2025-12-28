@@ -62,12 +62,7 @@ export class UserService {
       // NO Zod validation here
 
       // Repository will add date fields
-      const createdDto = await this.userRepository.create({
-        ...input,
-        createdAt: new Date(), // Repository may override
-        updatedAt: new Date(), // Repository may override
-        lastActive: new Date(), // Repository may override
-      });
+      const createdDto = await this.userRepository.create(input);
 
       // Hydrate back to entity
       const user = new User(createdDto);
@@ -156,19 +151,6 @@ export class UserService {
    */
   public async exists(userId: Snowflake): Promise<boolean> {
     return this.userRepository.exists(userId);
-  }
-
-  /**
-   * Update user's last active timestamp.
-   *
-   * @param userId - Discord user snowflake ID
-   */
-  public async updateLastActive(userId: Snowflake): Promise<void> {
-    this.logger.debug("Updating user last active", {
-      fields: { userId },
-    });
-
-    await this.userRepository.updateLastActive(userId);
   }
 
   /**

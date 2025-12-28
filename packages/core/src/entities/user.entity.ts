@@ -36,10 +36,6 @@ export class User {
     return this._data.createdAt;
   }
 
-  public get lastActive(): Date {
-    return this._data.lastActive;
-  }
-
   // Business methods
 
   /**
@@ -73,13 +69,6 @@ export class User {
    */
   public updateAvatarUrl(avatarUrl: string): void {
     this._data.avatarUrl = avatarUrl;
-  }
-
-  /**
-   * Update the user's last active timestamp.
-   */
-  public updateLastActive(): void {
-    this._data.lastActive = new Date();
   }
 
   /**

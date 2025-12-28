@@ -1,5 +1,5 @@
 import type { GuildDb } from "@realm/database";
-import type { GuildData } from "@realm/common";
+import type { GuildData, CreateGuildInput } from "@realm/common";
 import { RealmError } from "@realm/common";
 
 /**
@@ -66,6 +66,35 @@ export class GuildMapper {
         cause: error,
         fields: { guildId: data.id },
       });
+    }
+  }
+
+  /**
+   * Convert CreateGuildInput to database record.
+   * Used when creating new guilds from API/Bot input.
+   *
+   * @param input - Create guild input (validated user input)
+   * @returns Database record (without auto-generated timestamps)
+   * @throws {RealmError} If mapping fails
+   */
+  public static fromCreateInput(
+    input: CreateGuildInput
+  ): Omit<GuildDb, "createdAt" | "lastUpdated"> {
+    try {
+      return {
+        id: input.id,
+        name: input.name,
+        iconUrl: input.iconUrl,
+        storytellerRoleIds: input.storytellerRoleIds || [],
+      };
+    } catch (error) {
+      throw new RealmError(
+        "Failed to map CreateGuildInput to database record",
+        {
+          cause: error,
+          fields: { guildId: input.id },
+        }
+      );
     }
   }
 }
