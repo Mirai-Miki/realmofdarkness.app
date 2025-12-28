@@ -6,37 +6,30 @@
     "build": "tsc",
     "clean": "rimraf dist .turbo",
     "typecheck": "tsc --noEmit",
-
     "dev": "nodemon --exec \"turbo run build --filter=@realm/bot... && tsx src/main/shard-launcher.ts\"",
     "dev:5th": "nodemon --exec \"turbo run build --filter=@realm/bot... && tsx src/main/shard-launcher.ts 5th\"",
     "dev:20th": "nodemon --exec \"turbo run build --filter=@realm/bot... && tsx src/main/shard-launcher.ts 20th\"",
     "dev:cod": "nodemon --exec \"turbo run build --filter=@realm/bot... && tsx src/main/shard-launcher.ts cod\"",
-
     "start": "node dist/main/shard-launcher.js",
-
     "deploy-commands": "tsx scripts/deploy-commands.ts",
     "emoji:sync": "tsx scripts/sync-emojis.ts",
     "generate-emoji-types": "tsx scripts/generate-emoji-types.ts",
-
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,ts,json}\"",
     "lint": "eslint . --ext .js,.ts"
   },
   "dependencies": {
+    "@realm/common": "workspace:*",
     "@realm/core": "workspace:*",
     "@realm/logger": "workspace:*",
     "@realm/repositories": "workspace:*",
-    "@realm/common": "workspace:*",
-    "discord.js": "^14.25.0",
-    "dotenv": "^17.2.3",
-    "zod": "^4.1.12",
-    "yaml": "^2.4.2"
+    "zod": "workspace:*",
+    "dotenv": "workspace:*",
+    "discord.js": "^14.25.1"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "tsx": "^4.19.2",
-    "fs-extra": "^11.3.2",
-    "glob": "^11.1.0",
-    "nodemon": "^3.1.9"
+    "fs-extra": "^11.3.3",
+    "nodemon": "^3.1.11",
+    "tsx": "^4.21.0"
   }
 }

@@ -106,8 +106,8 @@ export function getColor(color: Color): string {
  * @returns The ANSI color code for the log level
  */
 export function getLogLevelColor(level: LogLevel): string {
-  const LogLevelColors: Record<LogLevel, Color> = {
-    [LogLevel.Debug]: "\x1b[37m", // Gray
+  const LogLevelColors: Record<LogLevel, string> = {
+    [LogLevel.Debug]: "\x1b[38;2;180;95;201m", // Custom purple #b45fc9
     [LogLevel.Info]: "\x1b[34m", // Blue
     [LogLevel.Warn]: "\x1b[33m", // Yellow
     [LogLevel.Error]: "\x1b[31m", // Red

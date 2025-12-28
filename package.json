@@ -9,19 +9,15 @@
     "dev:bot:20th": "pnpm --filter @realm/bot dev:20th",
     "dev:bot:cod": "pnpm --filter @realm/bot dev:cod",
     "dev:api": "turbo run dev --filter=@realm/api",
-
     "build": "turbo run build",
     "build:bot": "turbo run build --filter=@realm/bot",
     "build:api": "turbo run build --filter=@realm/api",
     "build:types": "tsc -b",
-
     "bot:emoji:sync": "turbo run emoji:sync --filter=@realm/bot",
-
     "db:migrate": "turbo run migrate --filter=@realm/database",
     "db:generate": "turbo run generate --filter=@realm/database",
     "db:studio": "turbo run studio --filter=@realm/database",
     "db:reset": "turbo run reset --filter=@realm/database",
-
     "lint": "turbo run lint",
     "test": "turbo run test",
     "clean": "node scripts/clean.mjs",
@@ -31,26 +27,27 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml,css,scss}\""
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^9.39.2",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.10.1",
-    "@typescript-eslint/eslint-plugin": "^8.47.0",
-    "@typescript-eslint/parser": "^8.47.0",
-    "eslint": "^9.39.1",
+    "@types/node": "^25.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.50.1",
+    "@typescript-eslint/parser": "^8.50.1",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-unused-imports": "^4.3.0",
-    "glob": "^11.1.0",
+    "glob": "^13.0.0",
     "globals": "^16.5.0",
     "jest": "^30.2.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.4",
     "rimraf": "^6.1.2",
-    "ts-jest": "^29.4.5",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "turbo": "^2.6.1",
+    "turbo": "^2.7.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.47.0"
-  }
+    "typescript-eslint": "^8.50.1"
+  },
+  "resolutions": {"drizzle-orm": "0.45.1", "dotenv": "17.2.3", "tsup": "8.5.1", "zod": "4.1.12"}
 }

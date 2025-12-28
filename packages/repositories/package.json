@@ -20,7 +20,7 @@
     "@realm/common": "workspace:*",
     "@realm/core": "workspace:*",
     "@realm/database": "workspace:*",
-    "drizzle-orm": "^0.44.7",
-    "tsup": "^8.5.1"
+    "drizzle-orm": "workspace:*",
+    "tsup": "workspace:*"
   }
 }

@@ -20,16 +20,16 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@discordjs/builders": "^1.13.0",
+    "dotenv": "workspace:*",
+    "tsup": "workspace:*",
+    "@discordjs/builders": "^1.13.1",
     "@discordjs/rest": "^2.6.0",
     "@realm/common": "workspace:*",
     "discord.js": "^14.25.0",
-    "dotenv": "^17.2.3",
-    "source-map-support": "^0.5.21",
-    "tsup": "^8.5.1"
+    "source-map-support": "^0.5.21"
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.10",
-    "discord-api-types": "^0.38.34"
+    "discord-api-types": "^0.38.37"
   }
 }

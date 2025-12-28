@@ -21,6 +21,6 @@
   },
   "dependencies": {
     "@realm/common": "workspace:*",
-    "tsup": "^8.5.1"
+    "tsup": "workspace:*"
   }
 }

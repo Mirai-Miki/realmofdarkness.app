@@ -17,22 +17,22 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.9",
-    "@nestjs/core": "^11.1.9",
-    "@nestjs/platform-fastify": "^11.1.9",
+    "@nestjs/common": "^11.1.10",
+    "@nestjs/core": "^11.1.10",
+    "@nestjs/platform-fastify": "^11.1.10",
     "@realm/core": "workspace:*",
-    "@realm/logger": "workspace:*",
     "@realm/database": "workspace:*",
+    "@realm/logger": "workspace:*",
+    "dotenv": "workspace:*",
     "fastify": "^5.6.2",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2",
-    "dotenv": "^17.2.3"
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.12",
+    "@nestjs/cli": "^11.0.14",
     "@nestjs/schematics": "^11.0.9",
-    "@nestjs/testing": "^11.1.9",
-    "@types/express": "^5.0.5",
+    "@nestjs/testing": "^11.1.10",
+    "@types/express": "^5.0.6",
     "@types/supertest": "^6.0.3",
     "supertest": "^7.1.4",
     "ts-loader": "^9.5.4"
