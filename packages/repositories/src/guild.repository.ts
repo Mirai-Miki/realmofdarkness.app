@@ -1,12 +1,13 @@
 import { eq } from "drizzle-orm";
 import { db, guilds, insertGuildSchema } from "@realm/database";
+import type { GuildDb } from "@realm/database";
 import type {
   IGuildRepository,
   GuildData,
   Snowflake,
   UpsertGuildInput,
 } from "@realm/common";
-import { RealmError } from "@realm/common";
+import { RealmError, SnowflakeSchema } from "@realm/common";
 import { GuildMapper } from "./mappers/guild.mapper";
 
 /**
@@ -23,6 +24,28 @@ import { GuildMapper } from "./mappers/guild.mapper";
  */
 export class GuildRepository implements IGuildRepository {
   /**
+   * Check if guild database record has actually changed by comparing relevant fields.
+   * Excludes id and timestamps from comparison.
+   *
+   * @param current - Current guild record from database
+   * @param incoming - New guild record to compare
+   * @returns True if data has changed, false otherwise
+   */
+  private hasChanges(current: GuildDb, incoming: Partial<GuildDb>): boolean {
+    const keysToCompare = Object.keys(incoming).filter(
+      (key) => !["id", "createdAt", "lastUpdated"].includes(key)
+    ) as (keyof GuildDb)[];
+
+    for (const key of keysToCompare) {
+      if (JSON.stringify(current[key]) !== JSON.stringify(incoming[key])) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Find a guild by Discord guild ID.
    *
    * @param id - Discord guild snowflake ID
@@ -30,10 +53,13 @@ export class GuildRepository implements IGuildRepository {
    */
   public async findById(id: Snowflake): Promise<GuildData | null> {
     try {
+      // Validate snowflake format
+      const validatedId = SnowflakeSchema.parse(id);
+
       const result = await db
         .select()
         .from(guilds)
-        .where(eq(guilds.id, id))
+        .where(eq(guilds.id, validatedId))
         .limit(1);
 
       if (result.length === 0) {
@@ -53,10 +79,14 @@ export class GuildRepository implements IGuildRepository {
    * Create a new guild.
    *
    * @param guild - Guild Data to create
+   * @throws {RealmError} If creation fails or guild already exists
    * @returns Created guild Data
    */
   public async create(guild: GuildData): Promise<GuildData> {
     try {
+      // Validate snowflake format first
+      SnowflakeSchema.parse(guild.id);
+
       const dbRecord = GuildMapper.fromData(guild);
 
       // Validate with Zod schema before inserting
@@ -75,17 +105,41 @@ export class GuildRepository implements IGuildRepository {
 
   /**
    * Update an existing guild.
+   * Only performs database update if data has actually changed.
    *
    * @param guild - Guild Data to update
-   * @returns Updated guild Data
+   * @returns Updated guild Data (or current data if no changes)
    */
   public async update(guild: GuildData): Promise<GuildData> {
     try {
-      const dbRecord = GuildMapper.fromData(guild);
+      // Validate snowflake format first
+      SnowflakeSchema.parse(guild.id);
 
-      // Validate update data with Zod schema
+      // Fetch current guild to check for changes
+      const currentResult = await db
+        .select()
+        .from(guilds)
+        .where(eq(guilds.id, guild.id))
+        .limit(1);
+
+      if (currentResult.length === 0) {
+        throw new RealmError("Guild not found for update", {
+          fields: { guildId: guild.id },
+        });
+      }
+
+      const currentDb = currentResult[0];
+      const incomingDb = GuildMapper.fromData(guild);
+
+      // Check if anything actually changed
+      if (!this.hasChanges(currentDb, incomingDb)) {
+        // No changes detected - return current data without updating
+        return GuildMapper.toData(currentDb);
+      }
+
+      // Data has changed - proceed with update
       const validated = insertGuildSchema.partial().parse({
-        ...dbRecord,
+        ...incomingDb,
         lastUpdated: new Date(),
       });
 
@@ -94,12 +148,6 @@ export class GuildRepository implements IGuildRepository {
         .set(validated)
         .where(eq(guilds.id, guild.id))
         .returning();
-
-      if (result.length === 0) {
-        throw new RealmError("Guild not found for update", {
-          fields: { guildId: guild.id },
-        });
-      }
 
       return GuildMapper.toData(result[0]);
     } catch (error) {
@@ -115,7 +163,7 @@ export class GuildRepository implements IGuildRepository {
 
   /**
    * Upsert a guild.
-   * If guild exists: updates provided fields (name, iconUrl, and storytellerRoleIds if provided).
+   * If guild exists: updates provided fields only if data has changed.
    * If guild doesn't exist: creates new guild.
    *
    * @param input - Guild data to upsert
@@ -123,11 +171,43 @@ export class GuildRepository implements IGuildRepository {
    */
   public async upsert(input: UpsertGuildInput): Promise<GuildData> {
     try {
+      // Validate snowflake format first
+      SnowflakeSchema.parse(input.id);
+
+      // Validate snowflake format
+      const validatedId = SnowflakeSchema.parse(input.id);
+
+      // Check if guild exists
+      const existingResult = await db
+        .select()
+        .from(guilds)
+        .where(eq(guilds.id, validatedId))
+        .limit(1);
+
+      if (existingResult.length > 0) {
+        // Guild exists - check if data has changed
+        const currentDb = existingResult[0];
+        const incomingDb: Partial<GuildDb> = {
+          name: input.name,
+          iconUrl: input.iconUrl,
+        };
+
+        if (input.storytellerRoleIds !== undefined) {
+          incomingDb.storytellerRoleIds = input.storytellerRoleIds;
+        }
+
+        if (!this.hasChanges(currentDb, incomingDb)) {
+          // No changes - return existing data without updating
+          return GuildMapper.toData(currentDb);
+        }
+      }
+
+      // Either guild doesn't exist, or data has changed - proceed with upsert
       const now = new Date();
 
-      // Build insert values - validate with Zod schema
+      // Build insert values
       const insertValues = insertGuildSchema.parse({
-        id: input.id,
+        id: validatedId,
         name: input.name,
         iconUrl: input.iconUrl,
         storytellerRoleIds: input.storytellerRoleIds || [],
@@ -135,20 +215,17 @@ export class GuildRepository implements IGuildRepository {
         lastUpdated: now,
       });
 
-      // Build conflict update set using Drizzle's inferred type
-      // Only include fields that should be updated on conflict
+      // Build conflict update set
       const conflictUpdate: Partial<typeof guilds.$inferInsert> = {
         name: input.name,
         iconUrl: input.iconUrl,
         lastUpdated: now,
       };
 
-      // Add storytellerRoleIds only if provided
       if (input.storytellerRoleIds !== undefined) {
         conflictUpdate.storytellerRoleIds = input.storytellerRoleIds;
       }
 
-      // Validate conflict update set with partial schema
       const validatedUpdate = insertGuildSchema.partial().parse(conflictUpdate);
 
       const [result] = await db
@@ -176,7 +253,10 @@ export class GuildRepository implements IGuildRepository {
    */
   public async delete(id: Snowflake): Promise<void> {
     try {
-      await db.delete(guilds).where(eq(guilds.id, id));
+      // Validate snowflake format
+      const validatedId = SnowflakeSchema.parse(id);
+
+      await db.delete(guilds).where(eq(guilds.id, validatedId));
     } catch (error) {
       throw new RealmError("Failed to delete guild", {
         cause: error,
@@ -193,10 +273,13 @@ export class GuildRepository implements IGuildRepository {
    */
   public async exists(id: Snowflake): Promise<boolean> {
     try {
+      // Validate snowflake format
+      const validatedId = SnowflakeSchema.parse(id);
+
       const result = await db
         .select({ id: guilds.id })
         .from(guilds)
-        .where(eq(guilds.id, id))
+        .where(eq(guilds.id, validatedId))
         .limit(1);
 
       return result.length > 0;

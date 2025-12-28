@@ -51,14 +51,14 @@ export class GuildService {
     });
 
     try {
-      const dto = await this.guildRepository.findById(guildId);
-      if (!dto) {
+      const data = await this.guildRepository.findById(guildId);
+      if (!data) {
         throw new RealmError("Guild not found", {
           fields: { guildId },
         });
       }
 
-      const guild = new Guild(dto);
+      const guild = new Guild(data);
 
       this.logger.debug("Guild retrieved successfully", {
         fields: { guildId, name: guild.name },
@@ -137,15 +137,15 @@ export class GuildService {
       // Trust input - already validated at API/Bot edge
 
       // Get existing guild
-      const dto = await this.guildRepository.findById(input.id);
-      if (!dto) {
+      const data = await this.guildRepository.findById(input.id);
+      if (!data) {
         throw new RealmError("Guild not found", {
           fields: { guildId: input.id },
         });
       }
 
       // Hydrate entity and apply changes
-      const guild = new Guild(dto);
+      const guild = new Guild(data);
 
       if (input.name !== undefined) {
         guild.updateName(input.name);
@@ -240,14 +240,14 @@ export class GuildService {
 
     // Trust input - already validated at API/Bot edge
 
-    const dto = await this.guildRepository.findById(input.guildId);
-    if (!dto) {
+    const data = await this.guildRepository.findById(input.guildId);
+    if (!data) {
       throw new RealmError("Guild not found", {
         fields: { guildId: input.guildId },
       });
     }
 
-    const guild = new Guild(dto);
+    const guild = new Guild(data);
     guild.addStorytellerRole(input.roleId);
 
     const updatedDto = await this.guildRepository.update(guild.toData());
@@ -270,14 +270,14 @@ export class GuildService {
 
     // Trust input - already validated at API/Bot edge
 
-    const dto = await this.guildRepository.findById(input.guildId);
-    if (!dto) {
+    const data = await this.guildRepository.findById(input.guildId);
+    if (!data) {
       throw new RealmError("Guild not found", {
         fields: { guildId: input.guildId },
       });
     }
 
-    const guild = new Guild(dto);
+    const guild = new Guild(data);
     guild.removeStorytellerRole(input.roleId);
 
     const updatedDto = await this.guildRepository.update(guild.toData());
