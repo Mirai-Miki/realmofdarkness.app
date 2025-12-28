@@ -52,7 +52,10 @@ export const members = pgTable(
   (table) => [primaryKey({ columns: [table.guildId, table.userId] })]
 );
 
-// Define relations
+// ============================================================================
+// Relations
+// ============================================================================
+
 export const membersRelations = relations(members, ({ one }) => ({
   user: one(users, {
     fields: [members.userId],
@@ -64,12 +67,11 @@ export const membersRelations = relations(members, ({ one }) => ({
   }),
 }));
 
-// Type exports for use in other parts of the application
-export type MemberDb = InferSelectModel<typeof members>;
+// ============================================================================
+// Zod Schemas & Types
+// ============================================================================
 
-// ============================================================================
-// Zod Schemas
-// ============================================================================
+export type MemberDb = InferSelectModel<typeof members>;
 
 /**
  * Zod schema for selecting/reading member records from the database.

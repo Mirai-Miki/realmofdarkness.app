@@ -8,7 +8,6 @@ import { members } from "./members";
 
 /**
  * Guild table - represents a Discord Guild/Server that uses the bot
- * Renamed from Chronicle to align with Discord conventions
  *
  * A Guild is linked to a Discord Server and manages characters, members,
  * and bot functionality for that server. Each Discord Guild can only
@@ -27,17 +26,19 @@ export const guilds = pgTable("guilds", {
   lastUpdated: timestamp().defaultNow().notNull(),
 });
 
-// Define relations
+// ============================================================================
+// Relations
+// ============================================================================
+
 export const guildsRelations = relations(guilds, ({ many }) => ({
   members: many(members),
 }));
 
-// Type exports for use in other parts of the application
-export type GuildDb = InferSelectModel<typeof guilds>;
+// ============================================================================
+// Zod Schemas & Types
+// ============================================================================
 
-// ============================================================================
-// Zod Schemas
-// ============================================================================
+export type GuildDb = InferSelectModel<typeof guilds>;
 
 /**
  * Zod schema for selecting/reading guild records from the database.

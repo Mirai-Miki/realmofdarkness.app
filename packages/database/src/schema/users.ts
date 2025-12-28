@@ -14,19 +14,17 @@ export const users = pgTable("users", {
   displayName: varchar({ length: UsernameConstraints.MaxLength })
     .notNull()
     .default(""),
-  email: varchar({ length: 100 }),
   avatarUrl: varchar({ length: DiscordCdnUrlMaxLength }).notNull().default(""),
-  registered: boolean().notNull().default(false), // If the user has ever logged in
   admin: boolean().notNull().default(false), // RoD admin
 
   createdAt: timestamp().defaultNow().notNull(),
-  // when the model was last saved
   updatedAt: timestamp().defaultNow().notNull(),
-  // when the user last logged in or used the bot
-  lastActive: timestamp().defaultNow().notNull(),
 });
 
-// Define relations
+// ============================================================================
+// Relations
+// ============================================================================
+
 export const usersRelations = relations(users, ({ one }) => ({
   // One-to-one relation with supporters
   // All users should have a supporter record (defaults to Base tier)
@@ -36,12 +34,11 @@ export const usersRelations = relations(users, ({ one }) => ({
   }),
 }));
 
-// Type exports for use in other parts of the application
-export type UserDb = InferSelectModel<typeof users>;
+// ============================================================================
+// Zod Schemas & Types
+// ============================================================================
 
-// ============================================================================
-// Zod Schemas
-// ============================================================================
+export type UserDb = InferSelectModel<typeof users>;
 
 /**
  * Zod schema for selecting/reading user records from the database.
