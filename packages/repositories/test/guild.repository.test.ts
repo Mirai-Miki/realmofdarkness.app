@@ -185,7 +185,8 @@ describe("GuildRepository", () => {
       const input: UpsertGuildInput = {
         id: testGuildId,
         name: "Test Guild",
-        iconUrl: "https://cdn.discordapp.com/icons/979622580950548520/62a3b63c3b0e0ae23ff0002f7d26a2e7.webp",
+        iconUrl:
+          "https://cdn.discordapp.com/icons/979622580950548520/62a3b63c3b0e0ae23ff0002f7d26a2e7.webp",
         storytellerRoleIds: [],
       };
 
