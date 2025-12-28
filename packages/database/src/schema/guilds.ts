@@ -1,9 +1,9 @@
 import type { InferSelectModel } from "drizzle-orm";
-
 import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { GuildNameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
-import { snowflake } from "../schema_types";
+import { snowflake } from "../schema.types";
 import { members } from "./members";
 
 /**
@@ -34,3 +34,19 @@ export const guildsRelations = relations(guilds, ({ many }) => ({
 
 // Type exports for use in other parts of the application
 export type GuildDb = InferSelectModel<typeof guilds>;
+
+// ============================================================================
+// Zod Schemas
+// ============================================================================
+
+/**
+ * Zod schema for selecting/reading guild records from the database.
+ * Matches the exact structure returned by SELECT queries.
+ */
+export const selectGuildSchema = createSelectSchema(guilds);
+
+/**
+ * Zod schema for inserting new guild records into the database.
+ * Matches the structure required by INSERT queries.
+ */
+export const insertGuildSchema = createInsertSchema(guilds);

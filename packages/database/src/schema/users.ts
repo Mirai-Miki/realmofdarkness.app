@@ -1,8 +1,8 @@
 import type { InferSelectModel } from "drizzle-orm";
-
 import { pgTable, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { snowflake } from "../schema_types";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { snowflake } from "../schema.types";
 import { UsernameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
 import { supporters } from "./supporters";
 
@@ -38,3 +38,19 @@ export const usersRelations = relations(users, ({ one }) => ({
 
 // Type exports for use in other parts of the application
 export type UserDb = InferSelectModel<typeof users>;
+
+// ============================================================================
+// Zod Schemas
+// ============================================================================
+
+/**
+ * Zod schema for selecting/reading user records from the database.
+ * Matches the exact structure returned by SELECT queries.
+ */
+export const selectUserSchema = createSelectSchema(users);
+
+/**
+ * Zod schema for inserting new user records into the database.
+ * Matches the structure required by INSERT queries.
+ */
+export const insertUserSchema = createInsertSchema(users);

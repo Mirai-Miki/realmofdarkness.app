@@ -25,10 +25,12 @@
   },
   "dependencies": {
     "@realm/common": "workspace:*",
-    "drizzle-orm": "workspace:*",
     "dotenv": "workspace:*",
-    "tsup": "workspace:*",
-    "pg": "^8.16.3"
+    "drizzle-orm": "workspace:*",
+    "zod": "workspace:*",
+    "drizzle-zod": "^0.8.3",
+    "pg": "^8.16.3",
+    "tsup": "workspace:*"
   },
   "devDependencies": {
     "@types/pg": "^8.16.0",

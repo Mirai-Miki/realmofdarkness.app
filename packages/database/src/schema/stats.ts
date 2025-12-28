@@ -1,5 +1,4 @@
 import type { InferSelectModel } from "drizzle-orm";
-
 import {
   pgTable,
   varchar,
@@ -7,8 +6,9 @@ import {
   timestamp,
   unique,
 } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { users } from "./users";
-import { snowflake } from "../schema_types";
+import { snowflake } from "../schema.types";
 
 /**
  * CommandStats table - tracks usage statistics for bot commands
@@ -46,3 +46,19 @@ export const commandStats = pgTable(
 
 // Type exports for use in other parts of the application
 export type CommandStatDb = InferSelectModel<typeof commandStats>;
+
+// ============================================================================
+// Zod Schemas
+// ============================================================================
+
+/**
+ * Zod schema for selecting/reading command stat records from the database.
+ * Matches the exact structure returned by SELECT queries.
+ */
+export const selectCommandStatSchema = createSelectSchema(commandStats);
+
+/**
+ * Zod schema for inserting new command stat records into the database.
+ * Matches the structure required by INSERT queries.
+ */
+export const insertCommandStatSchema = createInsertSchema(commandStats);

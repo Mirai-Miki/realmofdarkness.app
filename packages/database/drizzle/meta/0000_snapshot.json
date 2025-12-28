@@ -1,5 +1,5 @@
 {
-  "id": "37dcc630-2dcc-4c52-bac5-070139342626",
+  "id": "c85d9ce1-4354-4c0f-89f5-53aed2589caf",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -20,14 +20,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
-        "guildId": {
-          "name": "guildId",
+        "guild_id": {
+          "name": "guild_id",
           "type": "bigint",
           "primaryKey": false,
           "notNull": false
@@ -40,8 +40,8 @@
           "notNull": true,
           "default": "'vampire5th'"
         },
-        "isSheet": {
-          "name": "isSheet",
+        "is_sheet": {
+          "name": "is_sheet",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -53,15 +53,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "createdAt": {
-          "name": "createdAt",
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
-        "lastUpdated": {
-          "name": "lastUpdated",
+        "last_updated": {
+          "name": "last_updated",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
@@ -79,7 +79,7 @@
               "nulls": "last"
             },
             {
-              "expression": "userId",
+              "expression": "user_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -94,7 +94,7 @@
           "name": "characters_guild_idx",
           "columns": [
             {
-              "expression": "guildId",
+              "expression": "guild_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -109,13 +109,13 @@
           "name": "characters_user_guild_idx",
           "columns": [
             {
-              "expression": "userId",
+              "expression": "user_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             },
             {
-              "expression": "guildId",
+              "expression": "guild_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -128,21 +128,29 @@
         }
       },
       "foreignKeys": {
-        "characters_userId_users_id_fk": {
-          "name": "characters_userId_users_id_fk",
+        "characters_user_id_users_id_fk": {
+          "name": "characters_user_id_users_id_fk",
           "tableFrom": "characters",
           "tableTo": "users",
-          "columnsFrom": ["userId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "characters_guildId_guilds_id_fk": {
-          "name": "characters_guildId_guilds_id_fk",
+        "characters_guild_id_guilds_id_fk": {
+          "name": "characters_guild_id_guilds_id_fk",
           "tableFrom": "characters",
           "tableTo": "guilds",
-          "columnsFrom": ["guildId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "guild_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -152,7 +160,10 @@
         "characters_name_userId_unique": {
           "name": "characters_name_userId_unique",
           "nullsNotDistinct": false,
-          "columns": ["name", "userId"]
+          "columns": [
+            "name",
+            "user_id"
+          ]
         }
       },
       "policies": {},
@@ -175,29 +186,29 @@
           "primaryKey": false,
           "notNull": true
         },
-        "iconUrl": {
-          "name": "iconUrl",
+        "icon_url": {
+          "name": "icon_url",
           "type": "varchar(500)",
           "primaryKey": false,
           "notNull": true,
           "default": "''"
         },
-        "storytellerRoleIds": {
-          "name": "storytellerRoleIds",
+        "storyteller_role_ids": {
+          "name": "storyteller_role_ids",
           "type": "bigint[]",
           "primaryKey": false,
           "notNull": true,
           "default": "'{}'"
         },
-        "createdAt": {
-          "name": "createdAt",
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
-        "lastUpdated": {
-          "name": "lastUpdated",
+        "last_updated": {
+          "name": "last_updated",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
@@ -228,8 +239,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "displayName": {
-          "name": "displayName",
+        "display_name": {
+          "name": "display_name",
           "type": "varchar(35)",
           "primaryKey": false,
           "notNull": true,
@@ -241,8 +252,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "avatarUrl": {
-          "name": "avatarUrl",
+        "avatar_url": {
+          "name": "avatar_url",
           "type": "varchar(500)",
           "primaryKey": false,
           "notNull": true,
@@ -262,22 +273,22 @@
           "notNull": true,
           "default": false
         },
-        "createdAt": {
-          "name": "createdAt",
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
-        "updatedAt": {
-          "name": "updatedAt",
+        "updated_at": {
+          "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
-        "lastActive": {
-          "name": "lastActive",
+        "last_active": {
+          "name": "last_active",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
@@ -291,7 +302,9 @@
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": ["username"]
+          "columns": [
+            "username"
+          ]
         }
       },
       "policies": {},
@@ -302,14 +315,14 @@
       "name": "members",
       "schema": "",
       "columns": {
-        "guildId": {
-          "name": "guildId",
+        "guild_id": {
+          "name": "guild_id",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
@@ -321,8 +334,8 @@
           "notNull": true,
           "default": false
         },
-        "roleIds": {
-          "name": "roleIds",
+        "role_ids": {
+          "name": "role_ids",
           "type": "bigint[]",
           "primaryKey": false,
           "notNull": true,
@@ -342,22 +355,22 @@
           "notNull": true,
           "default": "''"
         },
-        "avatarUrl": {
-          "name": "avatarUrl",
+        "avatar_url": {
+          "name": "avatar_url",
           "type": "varchar(500)",
           "primaryKey": false,
           "notNull": true,
           "default": "''"
         },
-        "createdAt": {
-          "name": "createdAt",
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
-        "lastUpdated": {
-          "name": "lastUpdated",
+        "last_updated": {
+          "name": "last_updated",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
@@ -366,29 +379,40 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "members_guildId_guilds_id_fk": {
-          "name": "members_guildId_guilds_id_fk",
+        "members_guild_id_guilds_id_fk": {
+          "name": "members_guild_id_guilds_id_fk",
           "tableFrom": "members",
           "tableTo": "guilds",
-          "columnsFrom": ["guildId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "guild_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "members_userId_users_id_fk": {
-          "name": "members_userId_users_id_fk",
+        "members_user_id_users_id_fk": {
+          "name": "members_user_id_users_id_fk",
           "tableFrom": "members",
           "tableTo": "users",
-          "columnsFrom": ["userId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
-        "members_guildId_userId_pk": {
-          "name": "members_guildId_userId_pk",
-          "columns": ["guildId", "userId"]
+        "members_guild_id_user_id_pk": {
+          "name": "members_guild_id_user_id_pk",
+          "columns": [
+            "guild_id",
+            "user_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -406,8 +430,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "guildId": {
-          "name": "guildId",
+        "guild_id": {
+          "name": "guild_id",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
@@ -418,8 +442,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "lastUpdated": {
-          "name": "lastUpdated",
+        "last_updated": {
+          "name": "last_updated",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
@@ -428,12 +452,16 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "initiative_trackers_guildId_guilds_id_fk": {
-          "name": "initiative_trackers_guildId_guilds_id_fk",
+        "initiative_trackers_guild_id_guilds_id_fk": {
+          "name": "initiative_trackers_guild_id_guilds_id_fk",
           "tableFrom": "initiative_trackers",
           "tableTo": "guilds",
-          "columnsFrom": ["guildId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "guild_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -454,14 +482,14 @@
           "primaryKey": true,
           "notNull": true
         },
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
-        "botId": {
-          "name": "botId",
+        "bot_id": {
+          "name": "bot_id",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
@@ -479,8 +507,8 @@
           "notNull": true,
           "default": 1
         },
-        "lastUsed": {
-          "name": "lastUsed",
+        "last_used": {
+          "name": "last_used",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
@@ -489,12 +517,16 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "command_stats_userId_users_id_fk": {
-          "name": "command_stats_userId_users_id_fk",
+        "command_stats_user_id_users_id_fk": {
+          "name": "command_stats_user_id_users_id_fk",
           "tableFrom": "command_stats",
           "tableTo": "users",
-          "columnsFrom": ["userId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -504,7 +536,11 @@
         "command_stats_userId_command_botId_unique": {
           "name": "command_stats_userId_command_botId_unique",
           "nullsNotDistinct": false,
-          "columns": ["userId", "command", "botId"]
+          "columns": [
+            "user_id",
+            "command",
+            "bot_id"
+          ]
         }
       },
       "policies": {},
@@ -515,8 +551,8 @@
       "name": "supporters",
       "schema": "",
       "columns": {
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "bigint",
           "primaryKey": true,
           "notNull": true
@@ -536,8 +572,8 @@
           "notNull": true,
           "default": 0
         },
-        "firstSupported": {
-          "name": "firstSupported",
+        "first_supported": {
+          "name": "first_supported",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
@@ -545,12 +581,16 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "supporters_userId_users_id_fk": {
-          "name": "supporters_userId_users_id_fk",
+        "supporters_user_id_users_id_fk": {
+          "name": "supporters_user_id_users_id_fk",
           "tableFrom": "supporters",
           "tableTo": "users",
-          "columnsFrom": ["userId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

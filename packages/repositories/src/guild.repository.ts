@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db, guilds } from "@realm/database";
+import { db, guilds, insertGuildSchema } from "@realm/database";
 import type {
   IGuildRepository,
   GuildData,
@@ -59,7 +59,10 @@ export class GuildRepository implements IGuildRepository {
     try {
       const dbRecord = GuildMapper.fromData(guild);
 
-      const result = await db.insert(guilds).values(dbRecord).returning();
+      // Validate with Zod schema before inserting
+      const validated = insertGuildSchema.parse(dbRecord);
+
+      const result = await db.insert(guilds).values(validated).returning();
 
       return GuildMapper.toData(result[0]);
     } catch (error) {
@@ -80,12 +83,15 @@ export class GuildRepository implements IGuildRepository {
     try {
       const dbRecord = GuildMapper.fromData(guild);
 
+      // Validate update data with Zod schema
+      const validated = insertGuildSchema.partial().parse({
+        ...dbRecord,
+        lastUpdated: new Date(),
+      });
+
       const result = await db
         .update(guilds)
-        .set({
-          ...dbRecord,
-          lastUpdated: new Date(),
-        })
+        .set(validated)
         .where(eq(guilds.id, guild.id))
         .returning();
 
@@ -116,42 +122,51 @@ export class GuildRepository implements IGuildRepository {
    * @returns Upserted guild Data
    */
   public async upsert(input: UpsertGuildInput): Promise<GuildData> {
-    const now = new Date();
+    try {
+      const now = new Date();
 
-    // Build the conflict update set dynamically based on provided fields
-    const updateSet: {
-      name: string;
-      iconUrl: string;
-      storytellerRoleIds?: Snowflake[];
-      lastUpdated: Date;
-    } = {
-      name: input.name,
-      iconUrl: input.iconUrl,
-      lastUpdated: now,
-    };
-
-    // If storytellerRoleIds provided, update them
-    if (input.storytellerRoleIds !== undefined) {
-      updateSet.storytellerRoleIds = input.storytellerRoleIds;
-    }
-
-    const [result] = await db
-      .insert(guilds)
-      .values({
+      // Build insert values - validate with Zod schema
+      const insertValues = insertGuildSchema.parse({
         id: input.id,
         name: input.name,
         iconUrl: input.iconUrl,
         storytellerRoleIds: input.storytellerRoleIds || [],
         createdAt: now,
         lastUpdated: now,
-      })
-      .onConflictDoUpdate({
-        target: guilds.id,
-        set: updateSet,
-      })
-      .returning();
+      });
 
-    return result;
+      // Build conflict update set using Drizzle's inferred type
+      // Only include fields that should be updated on conflict
+      const conflictUpdate: Partial<typeof guilds.$inferInsert> = {
+        name: input.name,
+        iconUrl: input.iconUrl,
+        lastUpdated: now,
+      };
+
+      // Add storytellerRoleIds only if provided
+      if (input.storytellerRoleIds !== undefined) {
+        conflictUpdate.storytellerRoleIds = input.storytellerRoleIds;
+      }
+
+      // Validate conflict update set with partial schema
+      const validatedUpdate = insertGuildSchema.partial().parse(conflictUpdate);
+
+      const [result] = await db
+        .insert(guilds)
+        .values(insertValues)
+        .onConflictDoUpdate({
+          target: guilds.id,
+          set: validatedUpdate,
+        })
+        .returning();
+
+      return GuildMapper.toData(result);
+    } catch (error) {
+      throw new RealmError("Failed to upsert guild", {
+        cause: error,
+        fields: { guildId: input.id, guildName: input.name },
+      });
+    }
   }
 
   /**

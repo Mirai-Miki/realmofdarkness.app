@@ -1,8 +1,8 @@
 import type { InferSelectModel } from "drizzle-orm";
-
 import { pgTable, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { guilds } from "./guilds";
-import { snowflake } from "../schema_types";
+import { snowflake } from "../schema.types";
 
 /**
  * InitiativeTracker table - stores initiative tracking data for V20 sessions
@@ -28,3 +28,21 @@ export const initiativeTrackers = pgTable("initiative_trackers", {
 
 // Type exports for use in other parts of the application
 export type InitiativeTrackerDb = InferSelectModel<typeof initiativeTrackers>;
+
+// ============================================================================
+// Zod Schemas
+// ============================================================================
+
+/**
+ * Zod schema for selecting/reading initiative tracker records from the database.
+ * Matches the exact structure returned by SELECT queries.
+ */
+export const selectInitiativeTrackerSchema =
+  createSelectSchema(initiativeTrackers);
+
+/**
+ * Zod schema for inserting new initiative tracker records into the database.
+ * Matches the structure required by INSERT queries.
+ */
+export const insertInitiativeTrackerSchema =
+  createInsertSchema(initiativeTrackers);

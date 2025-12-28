@@ -1,5 +1,4 @@
 import type { InferSelectModel } from "drizzle-orm";
-
 import {
   pgTable,
   pgEnum,
@@ -11,11 +10,12 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { Splat, CharacterConstraints } from "@realm/common";
 import { users } from "./users";
 import { guilds } from "./guilds";
 import { members } from "./members";
-import { snowflake } from "../schema_types";
+import { snowflake } from "../schema.types";
 
 // Placeholder for CharacterJsonbData
 export interface CharacterJsonbData {
@@ -83,3 +83,19 @@ export const charactersRelations = relations(characters, ({ one }) => ({
 }));
 
 export type CharacterDb = InferSelectModel<typeof characters>;
+
+// ============================================================================
+// Zod Schemas
+// ============================================================================
+
+/**
+ * Zod schema for selecting/reading character records from the database.
+ * Matches the exact structure returned by SELECT queries.
+ */
+export const selectCharacterSchema = createSelectSchema(characters);
+
+/**
+ * Zod schema for inserting new character records into the database.
+ * Matches the structure required by INSERT queries.
+ */
+export const insertCharacterSchema = createInsertSchema(characters);
