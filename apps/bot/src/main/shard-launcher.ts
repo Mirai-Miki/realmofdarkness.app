@@ -131,7 +131,7 @@ function createShardManager(config: BotConfig): ShardingManager {
     });
 
     shard.on("disconnect", () => {
-      logger.warning(`[${config.name}] Shard ${shard.id} disconnected`);
+      logger.warn(`[${config.name}] Shard ${shard.id} disconnected`);
     });
 
     shard.on("reconnecting", () => {

@@ -7,10 +7,10 @@
     "clean": "rimraf dist .turbo",
     "typecheck": "tsc --noEmit",
 
-    "dev": "nodemon --exec tsx src/main/shard-launcher.ts",
-    "dev:5th": "nodemon --exec tsx src/main/shard-launcher.ts 5th",
-    "dev:20th": "nodemon --exec tsx src/main/shard-launcher.ts 20th",
-    "dev:cod": "nodemon --exec tsx src/main/shard-launcher.ts cod",
+    "dev": "nodemon --exec \"turbo run build --filter=@realm/bot... && tsx src/main/shard-launcher.ts\"",
+    "dev:5th": "nodemon --exec \"turbo run build --filter=@realm/bot... && tsx src/main/shard-launcher.ts 5th\"",
+    "dev:20th": "nodemon --exec \"turbo run build --filter=@realm/bot... && tsx src/main/shard-launcher.ts 20th\"",
+    "dev:cod": "nodemon --exec \"turbo run build --filter=@realm/bot... && tsx src/main/shard-launcher.ts cod\"",
 
     "start": "node dist/main/shard-launcher.js",
 

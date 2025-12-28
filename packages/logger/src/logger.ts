@@ -2,22 +2,20 @@ import type { LoggerConfig, LogEntry, LogOptions } from "./logger.types";
 
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
 import { HTTPError } from "discord.js";
-import { RealmError, type ILogger } from "@realm/common";
+import { RealmError, LogLevelNameSchema, type ILogger } from "@realm/common";
 import { DiscordLogger } from "./discord-logger";
 import { FileLogger } from "./file-logger";
-import { LogLevel, Environment } from "./logger.types";
-
-/**
- * Log level priority mapping for filtering.
- */
-const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
-  debug: 0,
-  info: 1,
-  warning: 2,
-  error: 3,
-  fatal: 4,
-} as const;
+import { LogLevel, Environment } from "@realm/common";
+import {
+  getLogLevelName,
+  getLogLevelFromName,
+  getColor,
+  getLogLevelColor,
+  formatTimestamp,
+} from "./logger.utils";
+import { Color } from "./logger.types";
 
 /**
  * Singleton logger class for the Realm of Darkness application.
@@ -33,22 +31,48 @@ class Logger implements ILogger {
   private environment: Environment = Environment.Development;
   private discordLogger?: DiscordLogger;
   private fileLogger?: FileLogger;
-  private minLevelPriority: number = 0;
+  private minLevelPriority: LogLevel = LogLevel.Debug;
   private enableConsoleLogging: boolean = true;
   private enableDiscordLogging: boolean = false;
+  private projectRoot: string;
 
   /**
    * Private constructor to enforce singleton pattern.
    * Also sets up global error handlers for unhandled rejections and exceptions.
    */
   constructor() {
+    // Find the monorepo root
+    this.projectRoot = this.findProjectRoot();
+
     // Load environment variables
     dotenv.config({
-      path: path.join(process.cwd(), "../../.env"),
+      path: path.join(this.projectRoot, ".env"),
       quiet: true,
     });
     this.initializeFromEnv();
     this.setupGlobalErrorHandlers();
+  }
+
+  /**
+   * Finds the monorepo root by traversing up from the current directory
+   * looking for pnpm-workspace.yaml.
+   *
+   * @returns The absolute path to the project root
+   */
+  private findProjectRoot(): string {
+    let currentDir = process.cwd();
+
+    // Traverse up the directory tree looking for pnpm-workspace.yaml
+    while (currentDir !== path.dirname(currentDir)) {
+      const workspaceFile = path.join(currentDir, "pnpm-workspace.yaml");
+      if (fs.existsSync(workspaceFile)) {
+        return currentDir;
+      }
+      currentDir = path.dirname(currentDir);
+    }
+
+    // Fallback to two levels up from cwd (assumes package structure)
+    return path.resolve(process.cwd(), "../..");
   }
 
   /**
@@ -124,7 +148,7 @@ class Logger implements ILogger {
     }
 
     if (config.customMinLogLevel) {
-      this.minLevelPriority = LOG_LEVEL_PRIORITY[config.customMinLogLevel];
+      this.minLevelPriority = config.customMinLogLevel;
     }
 
     // Reinitialize loggers if needed
@@ -142,19 +166,19 @@ class Logger implements ILogger {
         this.environment = Environment.Production;
         this.enableConsoleLogging = false;
         this.enableDiscordLogging = true;
-        this.minLevelPriority = LOG_LEVEL_PRIORITY.error;
+        this.minLevelPriority = LogLevel.Warn;
         break;
       case Environment.Preproduction:
         this.environment = Environment.Preproduction;
         this.enableConsoleLogging = false;
         this.enableDiscordLogging = true;
-        this.minLevelPriority = LOG_LEVEL_PRIORITY.debug;
+        this.minLevelPriority = LogLevel.Info;
         break;
       case Environment.Development:
         this.environment = Environment.Development;
         this.enableConsoleLogging = true;
         this.enableDiscordLogging = false;
-        this.minLevelPriority = LOG_LEVEL_PRIORITY.debug;
+        this.minLevelPriority = LogLevel.Debug;
         break;
       default:
         throw new RealmError(
@@ -169,6 +193,18 @@ class Logger implements ILogger {
 
     if (process.env.ENABLE_DISCORD_LOGGING !== undefined) {
       this.enableDiscordLogging = process.env.ENABLE_DISCORD_LOGGING === "true";
+    }
+
+    if (process.env.LOGGER_LEVEL) {
+      const selectedLevel = LogLevelNameSchema.safeParse(
+        process.env.LOGGER_LEVEL.toLowerCase()
+      );
+      if (!selectedLevel.success) {
+        throw new RealmError(
+          `Invalid LOGGER_LEVEL value: "${process.env.LOGGER_LEVEL}".`
+        );
+      }
+      this.minLevelPriority = getLogLevelFromName(selectedLevel.data);
     }
 
     this.initializeLoggers();
@@ -225,8 +261,8 @@ class Logger implements ILogger {
    * @param message - The warning message
    * @param options - Additional logging options
    */
-  public warning(message: string, options: LogOptions = {}): void {
-    this.log(LogLevel.Warning, message, options);
+  public warn(message: string, options: LogOptions = {}): void {
+    this.log(LogLevel.Warn, message, options);
   }
 
   /**
@@ -300,7 +336,7 @@ class Logger implements ILogger {
     options: LogOptions = {}
   ): void {
     // Check if this log level should be processed
-    if (LOG_LEVEL_PRIORITY[level] < this.minLevelPriority) {
+    if (level < this.minLevelPriority) {
       return;
     }
     // Need to be extra safe here since an error here could remain uncaught
@@ -456,30 +492,42 @@ class Logger implements ILogger {
   }
 
   /**
-   * Logs a message to the console with appropriate formatting.
+   * Logs a message to the console with appropriate formatting and colors.
+   * Uses absolute paths for VSCode clickability.
    *
    * @param logEntry - The log entry to log to console
    */
   private logToConsole(logEntry: LogEntry): void {
-    const timestamp = logEntry.timestamp.toISOString();
-    const level = logEntry.level.toUpperCase();
-    const prefix = `[${timestamp}] [${level}] [${logEntry.appName}]`;
+    const timestamp = formatTimestamp(logEntry.timestamp);
+    const level = logEntry.level;
+    const levelName = getLogLevelName(level).toUpperCase();
 
     const consoleMethod = this.getConsoleMethod(logEntry.level);
-    consoleMethod(`${prefix} ${logEntry.message}`);
+    consoleMethod(
+      `${getColor(Color.Cyan)}[${timestamp}] [${logEntry.appName}]${getColor(Color.Reset)} ${getLogLevelColor(level)}[${levelName}] - ${logEntry.message}${getColor(Color.Reset)}`
+    );
 
     if (logEntry.location) {
-      consoleMethod(`  Location: ${logEntry.location}`);
+      // Convert relative path to absolute for VSCode clickability
+      const absolutePath = path.join(this.projectRoot, logEntry.location);
+      consoleMethod(
+        `${getColor(Color.Gray)}Location: ${getColor(Color.Reset)}${getColor(Color.Green)}${absolutePath}${getColor(Color.Reset)}`
+      );
     }
 
     if (logEntry.fields && Object.keys(logEntry.fields).length > 0) {
-      consoleMethod("  Fields:", logEntry.fields);
+      consoleMethod(
+        `${getColor(Color.Gray)}Fields:${getColor(Color.Reset)}`,
+        logEntry.fields
+      );
     }
 
     if (logEntry.stackTrace) {
-      consoleMethod("  Stack Trace:");
-      consoleMethod(logEntry.stackTrace);
+      consoleMethod(
+        `${getColor(Color.Gray)}Stack Trace:${getColor(Color.Reset)}\n${getColor(Color.Red)}${logEntry.stackTrace}${getColor(Color.Reset)}`
+      );
     }
+    consoleMethod(""); // Empty line for spacing
   }
 
   /**
@@ -496,7 +544,7 @@ class Logger implements ILogger {
       case LogLevel.Info:
         // eslint-disable-next-line no-console
         return console.info;
-      case LogLevel.Warning:
+      case LogLevel.Warn:
         return console.warn;
       case LogLevel.Error:
       case LogLevel.Fatal:
@@ -506,8 +554,10 @@ class Logger implements ILogger {
         return console.log;
     }
   }
+
   /**
    * Gets the location of the caller (file and line number).
+   * Returns path relative to the project root.
    *
    * @returns The caller's location or undefined if not found
    */
@@ -540,8 +590,9 @@ class Logger implements ILogger {
           const filePath = match[1];
           const lineNum = match[2];
 
-          // Make path relative to project root for cleaner logs
-          const relativePath = path.relative(process.cwd(), filePath);
+          // Make path relative to project root (not cwd)
+          // This gives us paths like 'apps\bot\src\commands\dice.ts:42'
+          const relativePath = path.relative(this.projectRoot, filePath);
           return `${relativePath}:${lineNum}`;
         }
       }

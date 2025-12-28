@@ -3,6 +3,6 @@ packages:
   - packages/*
 
 ignoredBuiltDependencies:
-  - '@nestjs/core'
+  - "@nestjs/core"
   - esbuild
   - unrs-resolver

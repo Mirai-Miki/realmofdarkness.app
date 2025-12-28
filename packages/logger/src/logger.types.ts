@@ -5,10 +5,8 @@
  */
 
 // Import types from @realm/common
-import type { Environment, LogLevel } from "@realm/common";
-
-// Re-export enums from @realm/common for convenience
-export { Environment, LogLevel } from "@realm/common";
+import type { Environment } from "@realm/common";
+import type { LogLevel } from "@realm/common";
 
 /**
  * Configuration options for the RealmLogger singleton.
@@ -86,3 +84,28 @@ export interface LogOptions {
   /** An error object to extract information from */
   error?: unknown;
 }
+
+/**
+ * ANSI color codes for console output.
+ */
+export const Color = {
+  Reset: "\x1b[0m",
+  Bright: "\x1b[1m",
+  Dim: "\x1b[2m",
+
+  // Foreground colors
+  Red: "\x1b[31m",
+  Green: "\x1b[32m",
+  Yellow: "\x1b[33m",
+  Blue: "\x1b[34m",
+  Magenta: "\x1b[35m",
+  Cyan: "\x1b[36m",
+  Gray: "\x1b[37m",
+  White: "\x1b[97m",
+
+  // Background colors
+  BgRed: "\x1b[41m",
+  BgYellow: "\x1b[43m",
+  BgBlue: "\x1b[44m",
+} as const;
+export type Color = (typeof Color)[keyof typeof Color];

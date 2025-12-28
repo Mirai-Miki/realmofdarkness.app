@@ -132,12 +132,8 @@
           "name": "characters_userId_users_id_fk",
           "tableFrom": "characters",
           "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -145,12 +141,8 @@
           "name": "characters_guildId_guilds_id_fk",
           "tableFrom": "characters",
           "tableTo": "guilds",
-          "columnsFrom": [
-            "guildId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["guildId"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -160,10 +152,7 @@
         "characters_name_userId_unique": {
           "name": "characters_name_userId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name",
-            "userId"
-          ]
+          "columns": ["name", "userId"]
         }
       },
       "policies": {},
@@ -302,9 +291,7 @@
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},
@@ -383,12 +370,8 @@
           "name": "members_guildId_guilds_id_fk",
           "tableFrom": "members",
           "tableTo": "guilds",
-          "columnsFrom": [
-            "guildId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["guildId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -396,12 +379,8 @@
           "name": "members_userId_users_id_fk",
           "tableFrom": "members",
           "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -409,10 +388,7 @@
       "compositePrimaryKeys": {
         "members_guildId_userId_pk": {
           "name": "members_guildId_userId_pk",
-          "columns": [
-            "guildId",
-            "userId"
-          ]
+          "columns": ["guildId", "userId"]
         }
       },
       "uniqueConstraints": {},
@@ -456,12 +432,8 @@
           "name": "initiative_trackers_guildId_guilds_id_fk",
           "tableFrom": "initiative_trackers",
           "tableTo": "guilds",
-          "columnsFrom": [
-            "guildId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["guildId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -521,12 +493,8 @@
           "name": "command_stats_userId_users_id_fk",
           "tableFrom": "command_stats",
           "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -536,11 +504,7 @@
         "command_stats_userId_command_botId_unique": {
           "name": "command_stats_userId_command_botId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "userId",
-            "command",
-            "botId"
-          ]
+          "columns": ["userId", "command", "botId"]
         }
       },
       "policies": {},
@@ -585,12 +549,8 @@
           "name": "supporters_userId_users_id_fk",
           "tableFrom": "supporters",
           "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

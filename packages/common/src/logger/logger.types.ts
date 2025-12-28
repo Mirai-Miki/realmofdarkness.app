@@ -2,16 +2,28 @@
  * Log level enumeration.
  */
 
+import z from "zod";
 import type { Environment } from "../primitives/";
 
 export const LogLevel = {
+  Debug: 0,
+  Info: 1,
+  Warn: 2,
+  Error: 3,
+  Fatal: 4,
+} as const;
+export const LogLevelSchema = z.enum(LogLevel);
+export type LogLevel = z.infer<typeof LogLevelSchema>;
+
+export const LogLevelName = {
   Debug: "debug",
   Info: "info",
-  Warning: "warning",
+  Warn: "warn",
   Error: "error",
   Fatal: "fatal",
 } as const;
-export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel];
+export const LogLevelNameSchema = z.enum(LogLevelName);
+export type LogLevelName = z.infer<typeof LogLevelNameSchema>;
 
 /**
  * Options for log entries.

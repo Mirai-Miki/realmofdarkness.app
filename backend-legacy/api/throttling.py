@@ -24,7 +24,7 @@ class BaseThrottle:
             request.user.username if request.user.is_authenticated else "anonymous"
         )
 
-        logger.warning(
+        logger.warn(
             f"Rate limit exceeded: user_id={user_id}, username={username}, ip={client_ip}, endpoint={endpoint}"
         )
         # Return parent implementation (which returns False)

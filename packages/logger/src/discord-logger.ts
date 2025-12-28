@@ -1,29 +1,31 @@
-import type { LogLevel, LogEntry } from "./logger.types";
+import type { LogEntry } from "./logger.types";
 
 import { EmbedBuilder } from "@discordjs/builders";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v10";
+import { LogLevel } from "@realm/common";
+import { getLogLevelName, prettyPrintIfJson } from "./logger.utils";
 
 /**
  * Maps log levels to Discord embed colors.
  */
 const LOG_LEVEL_COLORS: Record<LogLevel, number> = {
-  debug: 0x9ca3af, // Gray-400
-  info: 0x3b82f6, // Blue-500
-  warning: 0xf59e0b, // Amber-500
-  error: 0xef4444, // Red-500
-  fatal: 0x7c2d12, // Red-900
+  [LogLevel.Debug]: 0x9ca3af, // Gray-400
+  [LogLevel.Info]: 0x3b82f6, // Blue-500
+  [LogLevel.Warn]: 0xf59e0b, // Amber-500
+  [LogLevel.Error]: 0xef4444, // Red-500
+  [LogLevel.Fatal]: 0x7c2d12, // Red-900
 } as const;
 
 /**
  * Maps log levels to emoji indicators.
  */
 const LOG_LEVEL_EMOJIS: Record<LogLevel, string> = {
-  debug: "🐛",
-  info: "ℹ️",
-  warning: "⚠️",
-  error: "❌",
-  fatal: "💀",
+  [LogLevel.Debug]: "🐛",
+  [LogLevel.Info]: "ℹ️",
+  [LogLevel.Warn]: "⚠️",
+  [LogLevel.Error]: "❌",
+  [LogLevel.Fatal]: "💀",
 } as const;
 
 /**
@@ -79,33 +81,31 @@ export class DiscordLogger {
       .setColor(LOG_LEVEL_COLORS[logEntry.level])
       .setAuthor({
         name: logEntry.appName,
-      })
-      .setTitle(
-        `${LOG_LEVEL_EMOJIS[logEntry.level]} ${logEntry.level.toUpperCase()}`
-      )
-      .setTimestamp(logEntry.timestamp);
-
-    // Set description based on whether we have a stack trace
-    if (logEntry.stackTrace) {
-      // If we have a stack trace, use it as description and add message as a field
-      embed.setDescription(
-        `\`\`\`js\n${this.truncateText(logEntry.stackTrace, 4096)}\n\`\`\``
-      );
-      embed.addFields({
-        name: "Message",
-        value: this.truncateText(logEntry.message, 1024),
-        inline: false,
       });
+
+    let title = `${LOG_LEVEL_EMOJIS[logEntry.level]} ${getLogLevelName(logEntry.level).toUpperCase()}`;
+    embed.setTimestamp(logEntry.timestamp);
+
+    // Set description based on whether we have a stack trace. If the
+    // message or stack contains JSON, pretty-print it for readability.
+    if (logEntry.stackTrace) {
+      const pretty = prettyPrintIfJson(logEntry.stackTrace);
+
+      embed.setDescription(
+        `\`\`\`json\n${this.truncateText(pretty, 4096)}\n\`\`\``
+      );
+      title += ` - ${logEntry.message}`;
     } else {
-      // If no stack trace, use message as description
-      embed.setDescription(this.truncateText(logEntry.message, 4096));
+      const pretty = prettyPrintIfJson(logEntry.message);
+      embed.setDescription(this.truncateText(pretty, 4096));
     }
+    embed.setTitle(this.truncateText(title, 1024));
 
     // Add location if provided
     if (logEntry.location) {
       embed.addFields({
         name: "Location",
-        value: this.truncateText(logEntry.location, 1024),
+        value: `\`\`\`${this.truncateText(logEntry.location, 1024)}\`\`\``,
         inline: false,
       });
     }
@@ -117,9 +117,16 @@ export class DiscordLogger {
 
       for (let i = 0; i < Math.min(fieldEntries.length, maxFields); i++) {
         const [name, value] = fieldEntries[i];
+        // If the field value is JSON, pretty-print it inside a code block.
+        const prettyValue = prettyPrintIfJson(value);
+        const fieldValue =
+          prettyValue !== value
+            ? `\`\`\`json\n${this.truncateText(prettyValue, 1016)}\n\`\`\``
+            : this.truncateText(value, 1024);
+
         embed.addFields({
           name: this.truncateText(name, 256),
-          value: this.truncateText(value, 1024),
+          value: fieldValue,
           inline: false,
         });
       }

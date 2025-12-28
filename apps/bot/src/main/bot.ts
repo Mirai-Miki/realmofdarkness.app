@@ -65,7 +65,7 @@ async function loadCommand(filePath: string): Promise<BotCommand | null> {
     if (result.success) {
       return command as BotCommand;
     } else {
-      logger.warning(
+      logger.warn(
         `Invalid command structure in ${filePath}: ${result.error.message}`
       );
       return null;
@@ -96,7 +96,7 @@ async function loadComponent(filePath: string): Promise<BotComponent | null> {
     if (result.success) {
       return component as BotComponent;
     } else {
-      logger.warning(
+      logger.warn(
         `Invalid component structure in ${filePath}: ${result.error.message}`
       );
       return null;
@@ -128,7 +128,7 @@ async function loadEvent(filePath: string): Promise<BotEvent | null> {
     if (result.success) {
       return event as BotEvent;
     } else {
-      logger.warning(
+      logger.warn(
         `Invalid event structure in ${filePath}: ${result.error.message}`
       );
       return null;
@@ -374,7 +374,7 @@ if (fs.existsSync(commandsPath)) {
       client.commands.set(command.data.name, command);
       logger.debug(`Loaded command: ${command.data.name}`);
     } else {
-      logger.warning(`Failed to load command from file: ${file}`);
+      logger.warn(`Failed to load command from file: ${file}`);
     }
   }
 } else {
@@ -410,11 +410,11 @@ if (config.hasComponents) {
         client.components.set(component.name, component);
         logger.debug(`Loaded component: ${component.name}`);
       } else {
-        logger.warning(`Failed to load component from file: ${file}`);
+        logger.warn(`Failed to load component from file: ${file}`);
       }
     }
   } else {
-    logger.warning(`Components directory not found: ${componentsPath}`);
+    logger.warn(`Components directory not found: ${componentsPath}`);
   }
 }
 
@@ -451,7 +451,7 @@ if (fs.existsSync(eventsPath)) {
       }
       logger.debug(`Loaded event: ${event.name}`);
     } else {
-      logger.warning(`Failed to load event from file: ${file}`);
+      logger.warn(`Failed to load event from file: ${file}`);
     }
   }
 } else {

@@ -2,6 +2,7 @@ import type { LogEntry } from "./logger.types";
 
 import { promises as fs } from "fs";
 import { dirname } from "path";
+import { getLogLevelName, formatTimestamp } from "./logger.utils";
 
 /**
  * File-based logger implementation that writes log entries to a file.
@@ -49,26 +50,27 @@ export class FileLogger {
    * @returns The formatted log string
    */
   private formatLogEntry(logEntry: LogEntry): string {
-    const timestamp = logEntry.timestamp.toISOString();
-    const level = logEntry.level.toUpperCase();
+    const timestamp = formatTimestamp(logEntry.timestamp);
+    const level = logEntry.level;
     const appName = logEntry.appName;
 
-    let logLine = `${timestamp} [${level}] [${appName}] ${logEntry.message}`;
+    let logLine = `[${timestamp}] [${appName}] [${getLogLevelName(level).toUpperCase()}] - ${logEntry.message}`;
 
     if (logEntry.location) {
-      logLine += ` | Location: ${logEntry.location}`;
+      logLine += `\nLocation: ${logEntry.location}`;
     }
 
     if (logEntry.fields && Object.keys(logEntry.fields).length > 0) {
       const fieldsStr = Object.entries(logEntry.fields)
         .map(([key, value]) => `${key}=${value}`)
         .join(", ");
-      logLine += ` | Fields: ${fieldsStr}`;
+      logLine += `\nFields: ${fieldsStr}`;
     }
 
     if (logEntry.stackTrace) {
-      logLine += `\n${logEntry.stackTrace}`;
+      logLine += `\nStackTrace:\n${logEntry.stackTrace}`;
     }
+    logLine += "\n"; // Extra newline for spacing
 
     return logLine;
   }

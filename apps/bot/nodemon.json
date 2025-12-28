@@ -1,7 +1,21 @@
 {
-  "watch": ["src"],
+  "watch": [
+    "src",
+    "../../packages/common/src",
+    "../../packages/core/src",
+    "../../packages/database/src",
+    "../../packages/repositories/src",
+    "../../packages/logger/src",
+    "../../packages/events/src"
+  ],
   "ext": "ts,js,json",
-  "ignore": ["src/**/*.spec.ts", "src/**/*.test.ts", "node_modules", "dist"],
+  "ignore": [
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "node_modules",
+    "dist",
+    "**/*.d.ts"
+  ],
   "delay": 500,
   "execMap": {
     "ts": "tsx"

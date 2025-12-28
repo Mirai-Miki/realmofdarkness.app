@@ -38,7 +38,7 @@ async function handleCommand(
   const command = interaction.client.commands.get(interaction.commandName);
 
   if (!command) {
-    logger.warning("Received unknown command", {
+    logger.warn("Received unknown command", {
       fields: { commandName: interaction.commandName },
     });
     return;
@@ -57,7 +57,7 @@ async function handleMessageComponent(
   const component = interaction.client.components.get(componentId);
 
   if (!component) {
-    logger.warning("Received unknown component", {
+    logger.warn("Received unknown component", {
       fields: { componentId },
     });
     return;
@@ -75,7 +75,7 @@ async function handleAutocomplete(
   const command = interaction.client.commands.get(interaction.commandName);
 
   if (!command?.autocomplete) {
-    logger.warning("Received autocomplete for unknown command", {
+    logger.warn("Received autocomplete for unknown command", {
       fields: { commandName: interaction.commandName },
     });
     return;

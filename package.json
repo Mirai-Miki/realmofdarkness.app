@@ -4,10 +4,10 @@
   "packageManager": "pnpm@10.25.0",
   "scripts": {
     "dev": "turbo run dev --parallel",
-    "dev:bot": "turbo run dev --filter=@realm/bot",
-    "dev:bot:5th": "turbo run dev:5th --filter=@realm/bot",
-    "dev:bot:20th": "turbo run dev:20th --filter=@realm/bot",
-    "dev:bot:cod": "turbo run dev:cod --filter=@realm/bot",
+    "dev:bot": "pnpm --filter @realm/bot dev",
+    "dev:bot:5th": "pnpm --filter @realm/bot dev:5th",
+    "dev:bot:20th": "pnpm --filter @realm/bot dev:20th",
+    "dev:bot:cod": "pnpm --filter @realm/bot dev:cod",
     "dev:api": "turbo run dev --filter=@realm/api",
 
     "build": "turbo run build",

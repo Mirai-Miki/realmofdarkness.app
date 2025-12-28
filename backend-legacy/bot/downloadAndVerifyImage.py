@@ -32,7 +32,7 @@ def download_and_verify_image(
           - A string indicating success or the reason for failure
     """
     if not image_url:
-        logger.warning("No image URL provided")
+        logger.warn("No image URL provided")
         return None, ImageError.NO_URL
 
     # Convert MB to bytes for comparison
@@ -53,7 +53,7 @@ def download_and_verify_image(
 
         # Check content length if available
         if content_length and int(content_length) > max_size_bytes:
-            logger.warning(
+            logger.warn(
                 f"Image too large: {int(content_length) / (1024 * 1024):.2f}MB exceeds limit of {max_size_mb}MB"
             )
             return None, ImageError.TOO_LARGE
@@ -64,7 +64,7 @@ def download_and_verify_image(
 
         # Check if the response was successful
         if response.status_code != 200:
-            logger.warning(
+            logger.warn(
                 f"Failed to download image. Status code: {response.status_code}"
             )
             return None, ImageError.DOWNLOAD_FAILED
@@ -123,7 +123,7 @@ def download_and_verify_image(
         return image_file, ImageError.SUCCESS
 
     except requests.RequestException as req_error:
-        logger.warning(f"Request error downloading image: {req_error}")
+        logger.warn(f"Request error downloading image: {req_error}")
         return None, ImageError.DOWNLOAD_FAILED
     except Exception as e:
         logger.exception(f"Unexpected error downloading image: {e}")

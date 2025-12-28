@@ -34,7 +34,7 @@ def authenticate(request):
     is_allowed_ip = any(str(client_ip).startswith(prefix) for prefix in allowed_ips)
 
     if token != settings.API_KEY or not is_allowed_ip:
-        logger.warning(f"Unauthorized bot API access attempt from {client_ip}")
+        logger.warn(f"Unauthorized bot API access attempt from {client_ip}")
         raise NotFound
 
     return

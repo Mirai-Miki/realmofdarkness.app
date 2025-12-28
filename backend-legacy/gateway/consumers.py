@@ -80,7 +80,7 @@ class GatewayConsumer(AsyncWebsocketConsumer):
 
             # Validate message structure
             if not gateway.validate():
-                logger.warning(f"Invalid message format received: {text_data}")
+                logger.warn(f"Invalid message format received: {text_data}")
                 return
 
             # Handle client identification

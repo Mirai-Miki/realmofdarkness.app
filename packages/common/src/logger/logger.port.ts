@@ -84,7 +84,7 @@ export interface ILogger {
    * @param message - The log message
    * @param options - Optional logging options
    */
-  warning(message: string, options?: LogOptions): void;
+  warn(message: string, options?: LogOptions): void;
 
   /**
    * Logs an error message.
