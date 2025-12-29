@@ -18,7 +18,7 @@ module.exports = {
 
     // Instantiate repositories
     const guildRepository = new GuildRepository();
-    const userRepository = new UserRepository(logger);
+    const userRepository = new UserRepository();
     const memberRepository = new MemberRepository();
 
     // Inject repositories into services

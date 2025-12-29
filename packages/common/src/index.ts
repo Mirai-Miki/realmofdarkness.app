@@ -22,95 +22,14 @@
 // Errors
 export { RealmError, UserError } from "./error.definitions.js";
 
-// Primitives (Snowflake, HexColor, Discord URL, Environment)
+// Exports
 export * from "./primitives";
-
-// Character module
 export * from "./character";
-
-// Dice Rolling module
 export * from "./dice";
-
-// Logger interface
 export * from "./logger";
-
-// Event System
 export * from "./event-system.definitions";
-
-// Repository interfaces
 export * from "./repository.definitions";
-
-// Supporter module
-export {
-  SupporterLevel,
-  SupporterLevelSchema,
-  type SupporterData,
-  type ISupporterRepository,
-} from "./supporter.definitions.js";
-
-// Guild module
-export {
-  // Field schemas
-  GuildNameSchema,
-  GuildIconUrlSchema,
-  StorytellerRolesSchema,
-  // Data schemas
-  GuildDataSchema,
-  type GuildData,
-  CreateGuildInputSchema,
-  type CreateGuildInput,
-  UpdateGuildInputSchema,
-  type UpdateGuildInput,
-  UpsertGuildInputSchema,
-  type UpsertGuildInput,
-  AddStorytellerRoleInputSchema,
-  type AddStorytellerRoleInput,
-  RemoveStorytellerRoleInputSchema,
-  type RemoveStorytellerRoleInput,
-  // Repository interface
-  type IGuildRepository,
-} from "./guild.definitions.js";
-
-// User module
-export {
-  // Field schemas
-  UsernameSchema,
-  DisplayNameSchema,
-  AvatarUrlSchema,
-  // Data schemas
-  UserDataSchema,
-  type UserData,
-  CreateUserInputSchema,
-  type CreateUserInput,
-  UpdateUserInputSchema,
-  type UpdateUserInput,
-  // Repository interface
-  type IUserRepository,
-} from "./user.definitions.js";
-
-// Member module
-export {
-  // Field schemas
-  MemberAdminSchema,
-  MemberRoleIdsSchema,
-  MemberBoostCountSchema,
-  MemberNicknameSchema,
-  MemberAvatarUrlSchema,
-  // Data schemas
-  MemberDataSchema,
-  type MemberData,
-  CreateMemberInputSchema,
-  type CreateMemberInput,
-  SyncMemberInputSchema,
-  type SyncMemberInput,
-  AddBoostInputSchema,
-  type AddBoostInput,
-  RemoveBoostInputSchema,
-  type RemoveBoostInput,
-  DeleteMemberInputSchema,
-  type DeleteMemberInput,
-  MemberExistsInputSchema,
-  type MemberExistsInput,
-  // Repository interface
-  type IMemberRepository,
-} from "./member.definitions.js";
+export * from "./supporter.definitions.js";
+export * from "./guild.definitions.js";
+export * from "./user.definitions.js";
+export * from "./member.definitions.js";

@@ -1,5 +1,5 @@
 import type { MemberDb } from "@realm/database";
-import type { MemberData } from "@realm/common";
+import type { MemberData, CreateMemberInput } from "@realm/common";
 import { RealmError } from "@realm/common";
 
 /**
@@ -8,6 +8,7 @@ import { RealmError } from "@realm/common";
  * Handles the conversion of:
  * - Database records (MemberDb) → Data (MemberData)
  * - Data (MemberData) → Database records (MemberDb)
+ * - Create input → Database records
  *
  * @example
  * ```typescript
@@ -16,6 +17,9 @@ import { RealmError } from "@realm/common";
  *
  * // Data → Database
  * const dbRecord = MemberMapper.fromData(memberData);
+ *
+ * // Create input → Database
+ * const dbRecord = MemberMapper.fromCreateInput(input);
  * ```
  */
 export class MemberMapper {
@@ -78,6 +82,40 @@ export class MemberMapper {
           userId: data.userId,
         },
       });
+    }
+  }
+
+  /**
+   * Convert CreateMemberInput to database record.
+   *
+   * @param input - Create member input
+   * @returns Database record (without timestamps)
+   * @throws {RealmError} If mapping fails
+   */
+  public static fromCreateInput(
+    input: CreateMemberInput
+  ): Omit<MemberDb, "createdAt" | "lastUpdated"> {
+    try {
+      return {
+        guildId: input.guildId,
+        userId: input.userId,
+        admin: input.admin,
+        roleIds: input.roleIds,
+        boosted: input.boosted,
+        nickname: input.nickname,
+        avatarUrl: input.avatarUrl,
+      };
+    } catch (error) {
+      throw new RealmError(
+        "Failed to map member from CreateInput to database",
+        {
+          cause: error,
+          fields: {
+            guildId: input.guildId,
+            userId: input.userId,
+          },
+        }
+      );
     }
   }
 }

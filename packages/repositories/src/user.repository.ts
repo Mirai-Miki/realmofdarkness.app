@@ -1,38 +1,50 @@
 import { eq, inArray } from "drizzle-orm";
-import { db, users } from "@realm/database";
-import { RealmError } from "@realm/common";
+import { db, users, insertUserSchema } from "@realm/database";
+import type { UserDb } from "@realm/database";
 import type {
-  ILogger,
-  Snowflake,
   IUserRepository,
+  Snowflake,
   UserData,
   CreateUserInput,
+  UpsertUserInput,
 } from "@realm/common";
+import { UsernameSchema } from "@realm/common";
+import { RealmError, SnowflakeSchema } from "@realm/common";
 import { UserMapper } from "./mappers/user.mapper";
 
 /**
- * Repository for User entity persistence operations.
+ * Repository implementation for User entity using Drizzle ORM.
  *
- * Handles CRUD operations for user identity and profile data.
- * For supporter/subscription data, use SupporterRepository.
+ * Handles all database operations for users including CRUD operations
+ * and queries. Returns User Data that can be hydrated into domain entities.
  *
  * @example
  * ```typescript
- * const userRepo = new UserRepository();
- *
- * // Find user by Discord ID
- * const user = await userRepo.findById("123456789012345678");
- *
- * // Create new user
- * const newUser = new User({ ... });
- * await userRepo.create(newUser);
+ * const repo = new UserRepository();
+ * const userData = await repo.findById("123456789012345678");
  * ```
  */
 export class UserRepository implements IUserRepository {
-  private readonly logger: ILogger;
+  /**
+   * Check if user database record has actually changed by comparing relevant fields.
+   * Excludes id and timestamps from comparison.
+   *
+   * @param current - Current user record from database
+   * @param incoming - New user record to compare
+   * @returns True if data has changed, false otherwise
+   */
+  private hasChanges(current: UserDb, incoming: Partial<UserDb>): boolean {
+    const keysToCompare = Object.keys(incoming).filter(
+      (key) => !["id", "createdAt", "updatedAt"].includes(key)
+    ) as (keyof UserDb)[];
 
-  constructor(logger: ILogger) {
-    this.logger = logger;
+    for (const key of keysToCompare) {
+      if (JSON.stringify(current[key]) !== JSON.stringify(incoming[key])) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -44,10 +56,13 @@ export class UserRepository implements IUserRepository {
    */
   public async findById(id: Snowflake): Promise<UserData | null> {
     try {
+      // Validate snowflake format
+      const validatedId = SnowflakeSchema.parse(id);
+
       const result = await db
         .select()
         .from(users)
-        .where(eq(users.id, id))
+        .where(eq(users.id, validatedId))
         .limit(1);
 
       if (result.length === 0) {
@@ -56,6 +71,9 @@ export class UserRepository implements IUserRepository {
 
       return UserMapper.toData(result[0]);
     } catch (error) {
+      if (error instanceof RealmError) {
+        throw error;
+      }
       throw new RealmError("Failed to find user by ID", {
         cause: error,
         fields: { userId: id },
@@ -74,13 +92,19 @@ export class UserRepository implements IUserRepository {
     if (ids.length === 0) return [];
 
     try {
+      // Validate all snowflakes
+      const validatedIds = ids.map((id) => SnowflakeSchema.parse(id));
+
       const results = await db
         .select()
         .from(users)
-        .where(inArray(users.id, ids));
+        .where(inArray(users.id, validatedIds));
 
       return results.map((r) => UserMapper.toData(r));
     } catch (error) {
+      if (error instanceof RealmError) {
+        throw error;
+      }
       throw new RealmError("Failed to find users by IDs", {
         cause: error,
         fields: { count: ids.length.toString() },
@@ -97,6 +121,8 @@ export class UserRepository implements IUserRepository {
    */
   public async findByUsername(username: string): Promise<UserData | null> {
     try {
+      UsernameSchema.parse(username);
+
       const result = await db
         .select()
         .from(users)
@@ -109,6 +135,9 @@ export class UserRepository implements IUserRepository {
 
       return UserMapper.toData(result[0]);
     } catch (error) {
+      if (error instanceof RealmError) {
+        throw error;
+      }
       throw new RealmError("Failed to find user by username", {
         cause: error,
         fields: { username },
@@ -117,96 +146,178 @@ export class UserRepository implements IUserRepository {
   }
 
   /**
-   * Find all users (paginated).
-   *
-   * @param limit - Maximum number of results (default: 100)
-   * @param offset - Number of results to skip (default: 0)
-   * @returns Array of User Data
-   * @throws {RealmError} If database query fails
-   */
-  public async findAll(
-    limit: number = 100,
-    offset: number = 0
-  ): Promise<UserData[]> {
-    try {
-      const results = await db.select().from(users).limit(limit).offset(offset);
-
-      return results.map((db) => UserMapper.toData(db));
-    } catch (error) {
-      throw new RealmError("Failed to find all users", {
-        cause: error,
-        fields: {
-          limit: limit.toString(),
-          offset: offset.toString(),
-        },
-      });
-    }
-  }
-
-  /**
    * Create a new user.
    *
-   * @param user - User Data to create
-   * @returns Created user Data with updated metadata
-   * @throws {RealmError} If user creation fails or user already exists
+   * @param input - Create user input (without timestamps)
+   * @throws {RealmError} If creation fails or user already exists
+   * @returns Created user Data
    */
-  public create(user: CreateUserInput): Promise<UserData> {
+  public async create(input: CreateUserInput): Promise<UserData> {
     try {
-      throw new Error("Method not implemented.");
-      /**
-      const dbRecord = UserMapper.fromData(user);
+      // Validate snowflake format first
+      SnowflakeSchema.parse(input.id);
 
-      const result = await db.insert(users).values(dbRecord).returning();
+      const dbRecord = UserMapper.fromCreateInput(input);
 
-      this.logger.info("User created", {
-        fields: { userId: result[0].id },
-      });
+      // Validate with Zod schema before inserting
+      const validated = insertUserSchema.parse(dbRecord);
+
+      const result = await db.insert(users).values(validated).returning();
 
       return UserMapper.toData(result[0]);
-      */
     } catch (error) {
+      if (error instanceof RealmError) {
+        throw error;
+      }
       throw new RealmError("Failed to create user", {
         cause: error,
-        fields: { userId: user.id, username: user.username },
+        fields: { userId: input.id, username: input.username },
       });
     }
   }
 
   /**
    * Update an existing user.
+   * Only performs database update if data has actually changed.
    *
    * @param user - User Data to update
-   * @returns Updated user Data with refreshed metadata
-   * @throws {RealmError} If update fails or user doesn't exist
+   * @returns Updated user Data (or current data if no changes)
    */
   public async update(user: UserData): Promise<UserData> {
     try {
-      const dbRecord = UserMapper.fromData(user);
+      // Validate snowflake format first
+      SnowflakeSchema.parse(user.id);
 
-      const result = await db
-        .update(users)
-        .set({
-          ...dbRecord,
-          updatedAt: new Date(),
-        })
+      // Fetch current user to check for changes
+      const currentResult = await db
+        .select()
+        .from(users)
         .where(eq(users.id, user.id))
-        .returning();
+        .limit(1);
 
-      if (result.length === 0) {
+      if (currentResult.length === 0) {
         throw new RealmError("User not found for update", {
           fields: { userId: user.id },
         });
       }
 
-      this.logger.info("User updated", {
-        fields: { userId: result[0].id },
+      const currentDb = currentResult[0];
+      const incomingDb = UserMapper.fromData(user);
+
+      // Check if anything actually changed
+      if (!this.hasChanges(currentDb, incomingDb)) {
+        // No changes detected - return current data without updating
+        return UserMapper.toData(currentDb);
+      }
+
+      // Data has changed - proceed with update
+      const validated = insertUserSchema.partial().parse({
+        ...incomingDb,
+        updatedAt: new Date(),
       });
+
+      const result = await db
+        .update(users)
+        .set(validated)
+        .where(eq(users.id, user.id))
+        .returning();
 
       return UserMapper.toData(result[0]);
     } catch (error) {
+      if (error instanceof RealmError) {
+        throw error;
+      }
       throw new RealmError("Failed to update user", {
         cause: error,
         fields: { userId: user.id },
+      });
+    }
+  }
+
+  /**
+   * Upsert a user.
+   * If user exists: updates provided fields only if data has changed.
+   * If user doesn't exist: creates new user.
+   *
+   * @param input - User data to upsert
+   * @returns Upserted user Data
+   */
+  public async upsert(input: UpsertUserInput): Promise<UserData> {
+    try {
+      // Validate snowflake format first
+      const validatedId = SnowflakeSchema.parse(input.id);
+
+      // Check if user exists
+      const existingResult = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, validatedId))
+        .limit(1);
+
+      if (existingResult.length > 0) {
+        // User exists - check if data has changed
+        const currentDb = existingResult[0];
+        const incomingDb: Partial<UserDb> = {
+          username: input.username,
+          displayName: input.displayName,
+          avatarUrl: input.avatarUrl || "",
+        };
+
+        if (input.admin !== undefined) {
+          incomingDb.admin = input.admin;
+        }
+
+        if (!this.hasChanges(currentDb, incomingDb)) {
+          // No changes - return existing data without updating
+          return UserMapper.toData(currentDb);
+        }
+      }
+
+      // Either user doesn't exist, or data has changed - proceed with upsert
+      const now = new Date();
+
+      // Build insert values
+      const insertValues = insertUserSchema.parse({
+        id: validatedId,
+        username: input.username,
+        displayName: input.displayName,
+        avatarUrl: input.avatarUrl || "",
+        admin: input.admin || false,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      // Build conflict update set
+      const conflictUpdate: Partial<typeof users.$inferInsert> = {
+        username: input.username,
+        displayName: input.displayName,
+        avatarUrl: input.avatarUrl || "",
+        updatedAt: now,
+      };
+
+      if (input.admin !== undefined) {
+        conflictUpdate.admin = input.admin;
+      }
+
+      const validatedUpdate = insertUserSchema.partial().parse(conflictUpdate);
+
+      const [result] = await db
+        .insert(users)
+        .values(insertValues)
+        .onConflictDoUpdate({
+          target: users.id,
+          set: validatedUpdate,
+        })
+        .returning();
+
+      return UserMapper.toData(result);
+    } catch (error) {
+      if (error instanceof RealmError) {
+        throw error;
+      }
+      throw new RealmError("Failed to upsert user", {
+        cause: error,
+        fields: { userId: input.id, username: input.username },
       });
     }
   }
@@ -219,11 +330,10 @@ export class UserRepository implements IUserRepository {
    */
   public async delete(id: Snowflake): Promise<void> {
     try {
-      await db.delete(users).where(eq(users.id, id));
+      // Validate snowflake format
+      const validatedId = SnowflakeSchema.parse(id);
 
-      this.logger.info("User deleted", {
-        fields: { userId: id },
-      });
+      await db.delete(users).where(eq(users.id, validatedId));
     } catch (error) {
       throw new RealmError("Failed to delete user", {
         cause: error,
@@ -241,10 +351,13 @@ export class UserRepository implements IUserRepository {
    */
   public async exists(id: Snowflake): Promise<boolean> {
     try {
+      // Validate snowflake format
+      const validatedId = SnowflakeSchema.parse(id);
+
       const result = await db
         .select({ id: users.id })
         .from(users)
-        .where(eq(users.id, id))
+        .where(eq(users.id, validatedId))
         .limit(1);
 
       return result.length > 0;

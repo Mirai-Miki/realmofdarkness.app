@@ -1,5 +1,5 @@
 import type { UserDb } from "@realm/database";
-import type { UserData } from "@realm/common";
+import type { UserData, CreateUserInput } from "@realm/common";
 import { RealmError } from "@realm/common";
 
 /**
@@ -8,6 +8,7 @@ import { RealmError } from "@realm/common";
  * Handles the conversion of:
  * - Database records (UserDb) → Data (UserData)
  * - Data (UserData) → Database records (UserDb)
+ * - Create input → Database records
  *
  * @example
  * ```typescript
@@ -16,6 +17,9 @@ import { RealmError } from "@realm/common";
  *
  * // Data → Database
  * const dbRecord = UserMapper.fromData(userData);
+ *
+ * // Create input → Database
+ * const dbRecord = UserMapper.fromCreateInput(input);
  * ```
  */
 export class UserMapper {
@@ -61,11 +65,37 @@ export class UserMapper {
         username: data.username,
         displayName: data.displayName,
         avatarUrl: data.avatarUrl || "",
-        admin: false, // Set by separate admin management
+        admin: data.admin,
       };
     } catch (error) {
       throw new RealmError("Failed to map user from Data to database", {
         cause: error,
+      });
+    }
+  }
+
+  /**
+   * Convert CreateUserInput to database record.
+   *
+   * @param input - Create user input
+   * @returns User database record (without timestamps)
+   * @throws {RealmError} If mapping fails
+   */
+  public static fromCreateInput(
+    input: CreateUserInput
+  ): Omit<UserDb, "createdAt" | "updatedAt"> {
+    try {
+      return {
+        id: input.id,
+        username: input.username,
+        displayName: input.displayName,
+        avatarUrl: input.avatarUrl || "",
+        admin: input.admin,
+      };
+    } catch (error) {
+      throw new RealmError("Failed to map user from CreateInput to database", {
+        cause: error,
+        fields: { userId: input.id },
       });
     }
   }

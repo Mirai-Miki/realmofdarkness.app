@@ -15,7 +15,7 @@ const userUpdateEvent: BotEvent<Events.UserUpdate> = {
   once: false,
   async execute(oldUser: User | PartialUser, newUser: User): Promise<void> {
     // Instantiate repository and service
-    const userRepository = new UserRepository(logger);
+    const userRepository = new UserRepository();
     const userService = new UserService(logger, userRepository);
 
     try {

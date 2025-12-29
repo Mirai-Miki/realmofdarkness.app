@@ -40,11 +40,6 @@ export const AvatarUrlSchema = z
   .max(DiscordCdnUrlMaxLength)
   .optional();
 
-/**
- * Whether user is a Realm of Darkness admin.
- */
-export const AdminSchema = z.boolean();
-
 // ============================================================================
 // User Data Schemas
 // ============================================================================
@@ -77,7 +72,7 @@ export const CreateUserInputSchema = z.object({
   username: UsernameSchema,
   displayName: DisplayNameSchema,
   avatarUrl: AvatarUrlSchema,
-  admin: AdminSchema.default(false),
+  admin: z.boolean().default(false),
 });
 export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
 
@@ -92,9 +87,24 @@ export const UpdateUserInputSchema = z.object({
   username: UsernameSchema.optional(),
   displayName: DisplayNameSchema.optional(),
   avatarUrl: AvatarUrlSchema.optional(),
-  admin: AdminSchema.optional(),
+  admin: z.boolean().optional(),
 });
 export type UpdateUserInput = z.infer<typeof UpdateUserInputSchema>;
+
+/**
+ * Input DTO for upserting a user.
+ *
+ * Used when syncing user data from Discord (create or update).
+ * Contains all required fields for insert, optional fields for update.
+ */
+export const UpsertUserInputSchema = z.object({
+  id: SnowflakeSchema,
+  username: UsernameSchema,
+  displayName: DisplayNameSchema,
+  avatarUrl: AvatarUrlSchema,
+  admin: z.boolean().optional(),
+});
+export type UpsertUserInput = z.infer<typeof UpsertUserInputSchema>;
 
 // ============================================================================
 // User Repository Interface
@@ -151,16 +161,6 @@ export interface IUserRepository {
   findByUsername(username: string): Promise<UserData | null>;
 
   /**
-   * Find all users (paginated).
-   *
-   * @param limit - Maximum number of results (default: 100)
-   * @param offset - Number of results to skip (default: 0)
-   * @returns Array of User entities
-   * @throws {RealmError} If database query fails
-   */
-  findAll(limit?: number, offset?: number): Promise<UserData[]>;
-
-  /**
    * Create a new user.
    *
    * @param user - User state to create
@@ -177,6 +177,17 @@ export interface IUserRepository {
    * @throws {RealmError} If update fails or user doesn't exist
    */
   update(user: UserData): Promise<UserData>;
+
+  /**
+   * Upsert a user.
+   * If user exists: updates provided fields only if data has changed.
+   * If user doesn't exist: creates new user.
+   *
+   * @param input - User data to upsert
+   * @returns Upserted user state
+   * @throws {RealmError} If upsert fails
+   */
+  upsert(input: UpsertUserInput): Promise<UserData>;
 
   /**
    * Delete a user and all associated data (cascade).
