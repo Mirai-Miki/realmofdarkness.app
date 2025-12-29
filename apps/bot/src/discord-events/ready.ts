@@ -2,7 +2,6 @@ import type { Client } from "discord.js";
 
 import { logger } from "@realm/logger";
 import { GuildRepository } from "@realm/repositories";
-import { GuildService } from "@realm/core";
 import { Events } from "discord.js";
 import { ActivityService } from "../services";
 import { initializeEmojis } from "../utilities/emoji-manager";

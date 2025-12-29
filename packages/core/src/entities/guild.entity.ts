@@ -1,8 +1,9 @@
+import type { GuildData, UpdateGuildInput, Snowflake } from "@realm/common";
+
 import {
   RealmError,
   GuildNameConstraints,
   DiscordCdnUrlMaxLength,
-  type GuildData,
 } from "@realm/common";
 
 /**
@@ -37,7 +38,7 @@ export class Guild {
   }
 
   // Getters
-  public get id(): string {
+  public get id(): Snowflake {
     return this._data.id;
   }
 
@@ -99,7 +100,7 @@ export class Guild {
    *
    * @param roleId - Discord role snowflake ID
    */
-  public addStorytellerRole(roleId: string): void {
+  public addStorytellerRole(roleId: Snowflake): void {
     if (!this._data.storytellerRoleIds.includes(roleId)) {
       this._data.storytellerRoleIds.push(roleId);
     }
@@ -110,7 +111,7 @@ export class Guild {
    *
    * @param roleId - Discord role snowflake ID
    */
-  public removeStorytellerRole(roleId: string): void {
+  public removeStorytellerRole(roleId: Snowflake): void {
     const index = this._data.storytellerRoleIds.indexOf(roleId);
     if (index > -1) {
       this._data.storytellerRoleIds.splice(index, 1);
@@ -124,5 +125,20 @@ export class Guild {
    */
   public toData(): GuildData {
     return { ...this._data };
+  }
+
+  /**
+   * Extract only update-relevant fields from this entity.
+   * Excludes createdAt and lastUpdated (managed by repository).
+   *
+   * @returns Guild update input data
+   */
+  public toUpdateData(): UpdateGuildInput {
+    return {
+      id: this._data.id,
+      name: this._data.name,
+      iconUrl: this._data.iconUrl,
+      storytellerRoleIds: this._data.storytellerRoleIds,
+    };
   }
 }

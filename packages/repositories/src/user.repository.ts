@@ -1,16 +1,32 @@
-import { eq, inArray } from "drizzle-orm";
-import { db, users, insertUserSchema } from "@realm/database";
-import type { UserDb } from "@realm/database";
+import type { UserDb, UpdateUserData, InsertUserData } from "@realm/database";
 import type {
   IUserRepository,
   Snowflake,
   UserData,
   CreateUserInput,
+  UpdateUserInput,
   UpsertUserInput,
 } from "@realm/common";
-import { UsernameSchema } from "@realm/common";
-import { RealmError, SnowflakeSchema } from "@realm/common";
-import { UserMapper } from "./mappers/user.mapper";
+
+import { eq, inArray } from "drizzle-orm";
+import { db, users, insertUserSchema, updateUserSchema } from "@realm/database";
+import { UsernameSchema, RealmError, SnowflakeSchema } from "@realm/common";
+import { hasDataChanged } from "./repository.utilities";
+
+/**
+ * Convert database record to UserData.
+ */
+function toUserData(db: UserDb): UserData {
+  return {
+    id: db.id,
+    username: db.username,
+    displayName: db.displayName,
+    avatarUrl: db.avatarUrl,
+    admin: db.admin,
+    createdAt: db.createdAt,
+    updatedAt: db.updatedAt,
+  };
+}
 
 /**
  * Repository implementation for User entity using Drizzle ORM.
@@ -27,24 +43,13 @@ import { UserMapper } from "./mappers/user.mapper";
 export class UserRepository implements IUserRepository {
   /**
    * Check if user database record has actually changed by comparing relevant fields.
-   * Excludes id and timestamps from comparison.
    *
    * @param current - Current user record from database
-   * @param incoming - New user record to compare
+   * @param incoming - New user data to compare
    * @returns True if data has changed, false otherwise
    */
-  private hasChanges(current: UserDb, incoming: Partial<UserDb>): boolean {
-    const keysToCompare = Object.keys(incoming).filter(
-      (key) => !["id", "createdAt", "updatedAt"].includes(key)
-    ) as (keyof UserDb)[];
-
-    for (const key of keysToCompare) {
-      if (JSON.stringify(current[key]) !== JSON.stringify(incoming[key])) {
-        return true;
-      }
-    }
-
-    return false;
+  private hasChanges(current: UserDb, incoming: UpdateUserData): boolean {
+    return hasDataChanged<UserDb, UpdateUserData>(current, incoming);
   }
 
   /**
@@ -69,11 +74,8 @@ export class UserRepository implements IUserRepository {
         return null;
       }
 
-      return UserMapper.toData(result[0]);
+      return toUserData(result[0]);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to find user by ID", {
         cause: error,
         fields: { userId: id },
@@ -100,11 +102,8 @@ export class UserRepository implements IUserRepository {
         .from(users)
         .where(inArray(users.id, validatedIds));
 
-      return results.map((r) => UserMapper.toData(r));
+      return results.map((r) => toUserData(r));
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to find users by IDs", {
         cause: error,
         fields: { count: ids.length.toString() },
@@ -133,11 +132,8 @@ export class UserRepository implements IUserRepository {
         return null;
       }
 
-      return UserMapper.toData(result[0]);
+      return toUserData(result[0]);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to find user by username", {
         cause: error,
         fields: { username },
@@ -154,21 +150,23 @@ export class UserRepository implements IUserRepository {
    */
   public async create(input: CreateUserInput): Promise<UserData> {
     try {
-      // Validate snowflake format first
-      SnowflakeSchema.parse(input.id);
+      const dbRecord: InsertUserData = {
+        id: input.id,
+        username: input.username,
+        displayName: input.displayName,
+        avatarUrl: input.avatarUrl,
+        admin: input.admin,
+      };
 
-      const dbRecord = UserMapper.fromCreateInput(input);
+      // Validate with insert schema
+      const validatedData = insertUserSchema.parse(dbRecord);
 
-      // Validate with Zod schema before inserting
-      const validated = insertUserSchema.parse(dbRecord);
+      const [result] = await db.insert(users).values(validatedData).returning();
 
-      const result = await db.insert(users).values(validated).returning();
+      // TODO Add any one to one relations such as supporter or analytics here
 
-      return UserMapper.toData(result[0]);
+      return toUserData(result);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to create user", {
         cause: error,
         fields: { userId: input.id, username: input.username },
@@ -180,56 +178,67 @@ export class UserRepository implements IUserRepository {
    * Update an existing user.
    * Only performs database update if data has actually changed.
    *
-   * @param user - User Data to update
+   * @param input - User update input data
    * @returns Updated user Data (or current data if no changes)
    */
-  public async update(user: UserData): Promise<UserData> {
+  public async update(input: UpdateUserInput): Promise<UserData> {
     try {
       // Validate snowflake format first
-      SnowflakeSchema.parse(user.id);
+      SnowflakeSchema.parse(input.id);
 
       // Fetch current user to check for changes
       const currentResult = await db
         .select()
         .from(users)
-        .where(eq(users.id, user.id))
+        .where(eq(users.id, input.id))
         .limit(1);
 
       if (currentResult.length === 0) {
         throw new RealmError("User not found for update", {
-          fields: { userId: user.id },
+          fields: { userId: input.id },
         });
       }
 
       const currentDb = currentResult[0];
-      const incomingDb = UserMapper.fromData(user);
+
+      // Build update object with proper typing
+      const updateData: UpdateUserData = {
+        id: input.id,
+        username:
+          input.username !== undefined ? input.username : currentDb.username,
+        displayName:
+          input.displayName !== undefined
+            ? input.displayName
+            : currentDb.displayName,
+        avatarUrl:
+          input.avatarUrl !== undefined ? input.avatarUrl : currentDb.avatarUrl,
+        admin: input.admin !== undefined ? input.admin : currentDb.admin,
+        updatedAt: new Date(),
+      };
 
       // Check if anything actually changed
-      if (!this.hasChanges(currentDb, incomingDb)) {
+      if (!this.hasChanges(currentDb, updateData)) {
         // No changes detected - return current data without updating
-        return UserMapper.toData(currentDb);
+        return toUserData(currentDb);
       }
 
-      // Data has changed - proceed with update
-      const validated = insertUserSchema.partial().parse({
-        ...incomingDb,
-        updatedAt: new Date(),
-      });
+      // Validate with update schema
+      const validatedData = updateUserSchema.parse(updateData);
 
-      const result = await db
+      const [result] = await db
         .update(users)
-        .set(validated)
-        .where(eq(users.id, user.id))
+        .set(validatedData)
+        .where(eq(users.id, input.id))
         .returning();
 
-      return UserMapper.toData(result[0]);
+      return toUserData(result);
     } catch (error) {
       if (error instanceof RealmError) {
-        throw error;
+        throw error; // Re-throw known RealmErrors
       }
       throw new RealmError("Failed to update user", {
         cause: error,
-        fields: { userId: user.id },
+        fields: { userId: input.id },
       });
     }
   }
@@ -244,77 +253,60 @@ export class UserRepository implements IUserRepository {
    */
   public async upsert(input: UpsertUserInput): Promise<UserData> {
     try {
-      // Validate snowflake format first
-      const validatedId = SnowflakeSchema.parse(input.id);
-
       // Check if user exists
       const existingResult = await db
         .select()
         .from(users)
-        .where(eq(users.id, validatedId))
+        .where(eq(users.id, input.id))
         .limit(1);
 
       if (existingResult.length > 0) {
-        // User exists - check if data has changed
+        // User exists - update it
         const currentDb = existingResult[0];
-        const incomingDb: Partial<UserDb> = {
+
+        const updateData: UpdateUserData = {
+          id: input.id,
           username: input.username,
           displayName: input.displayName,
-          avatarUrl: input.avatarUrl || "",
+          avatarUrl: input.avatarUrl,
+          admin: input.admin,
+          updatedAt: new Date(),
         };
 
-        if (input.admin !== undefined) {
-          incomingDb.admin = input.admin;
+        if (!this.hasChanges(currentDb, updateData)) {
+          // No changes - return existing data
+          return toUserData(currentDb);
         }
 
-        if (!this.hasChanges(currentDb, incomingDb)) {
-          // No changes - return existing data without updating
-          return UserMapper.toData(currentDb);
-        }
+        // Data has changed - update
+        const validatedData = updateUserSchema.parse(updateData);
+
+        const [result] = await db
+          .update(users)
+          .set(validatedData)
+          .where(eq(users.id, input.id))
+          .returning();
+
+        return toUserData(result);
       }
 
-      // Either user doesn't exist, or data has changed - proceed with upsert
-      const now = new Date();
-
-      // Build insert values
-      const insertValues = insertUserSchema.parse({
-        id: validatedId,
+      // User doesn't exist - insert it
+      const insertData: InsertUserData = {
+        id: input.id,
         username: input.username,
         displayName: input.displayName,
-        avatarUrl: input.avatarUrl || "",
-        admin: input.admin || false,
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      // Build conflict update set
-      const conflictUpdate: Partial<typeof users.$inferInsert> = {
-        username: input.username,
-        displayName: input.displayName,
-        avatarUrl: input.avatarUrl || "",
-        updatedAt: now,
+        avatarUrl: input.avatarUrl,
+        admin: input.admin,
       };
 
-      if (input.admin !== undefined) {
-        conflictUpdate.admin = input.admin;
-      }
+      const validatedData = insertUserSchema.parse(insertData);
 
-      const validatedUpdate = insertUserSchema.partial().parse(conflictUpdate);
+      const [result] = await db.insert(users).values(validatedData).returning();
 
-      const [result] = await db
-        .insert(users)
-        .values(insertValues)
-        .onConflictDoUpdate({
-          target: users.id,
-          set: validatedUpdate,
-        })
-        .returning();
+      // TODO Add any one to one relations such as supporter or analytics here
 
-      return UserMapper.toData(result);
+      return toUserData(result);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to upsert user", {
         cause: error,
         fields: { userId: input.id, username: input.username },

@@ -3,14 +3,26 @@ import type {
   GuildData,
   CreateGuildInput,
   UpsertGuildInput,
+  Snowflake,
 } from "@realm/common";
-import { GuildNameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
+import {
+  GuildNameConstraints,
+  DiscordCdnUrlMaxLength,
+  SnowflakeSchema,
+} from "@realm/common";
 import { GuildRepository } from "../src/guild.repository";
+
+/**
+ * Helper to convert test strings to branded Snowflake types.
+ * Uses Zod parser to ensure valid snowflake format.
+ */
+const toSnowflake = (id: string): Snowflake => SnowflakeSchema.parse(id);
+const toSnowflakes = (ids: string[]): Snowflake[] => ids.map(toSnowflake);
 
 describe("GuildRepository", () => {
   let repository: GuildRepository;
-  const testGuildId = "999999999999999999"; // Use a specific test ID
-  const testGuildId2 = "888888888888888888";
+  const testGuildId = toSnowflake("999999999999999999"); // Use a specific test ID
+  const testGuildId2 = toSnowflake("888888888888888888");
 
   beforeAll(async () => {
     repository = new GuildRepository();
@@ -35,7 +47,7 @@ describe("GuildRepository", () => {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://cdn.discordapp.com/icons/123/abc.png",
-        storytellerRoleIds: ["111222333444555666"],
+        storytellerRoleIds: toSnowflakes(["111222333444555666"]),
       };
 
       const created = await repository.create(guildInput);
@@ -94,14 +106,19 @@ describe("GuildRepository", () => {
     });
 
     it("should return null for non-existent guild", async () => {
-      const found = await repository.findById("000000000000000000");
+      const found = await repository.findById(
+        toSnowflake("000000000000000000")
+      );
       expect(found).toBeNull();
     });
 
     it("should throw error for invalid snowflake format", async () => {
+      // @ts-expect-error - Testing with invalid string format
       await expect(repository.findById("invalid-id")).rejects.toThrow();
+      // @ts-expect-error - Testing with empty string
       await expect(repository.findById("")).rejects.toThrow();
-      await expect(repository.findById("123")).rejects.toThrow(); // Too short
+      // @ts-expect-error - Testing with string too short
+      await expect(repository.findById("123")).rejects.toThrow();
     });
   });
 
@@ -134,7 +151,7 @@ describe("GuildRepository", () => {
         id: testGuildId,
         name: "Unchanged Guild",
         iconUrl: "https://example.com/icon.png",
-        storytellerRoleIds: ["123456789012345678"],
+        storytellerRoleIds: toSnowflakes(["123456789012345678"]),
       };
       const created = await repository.create(guildInput);
       const originalLastUpdated = created.lastUpdated;
@@ -147,7 +164,7 @@ describe("GuildRepository", () => {
         ...created,
         name: "Unchanged Guild", // Same name
         iconUrl: "https://example.com/icon.png", // Same icon
-        storytellerRoleIds: ["123456789012345678"], // Same roles
+        storytellerRoleIds: toSnowflakes(["123456789012345678"]), // Same roles
       };
       const updated = await repository.update(updateData);
 
@@ -162,7 +179,7 @@ describe("GuildRepository", () => {
         id: testGuildId,
         name: "Role Test Guild",
         iconUrl: "https://example.com/icon.png",
-        storytellerRoleIds: ["111111111111111111"],
+        storytellerRoleIds: toSnowflakes(["111111111111111111"]),
       };
       const created = await repository.create(guildInput);
 
@@ -172,7 +189,10 @@ describe("GuildRepository", () => {
       // Update with different roles
       const updateData: GuildData = {
         ...created,
-        storytellerRoleIds: ["222222222222222222", "333333333333333333"],
+        storytellerRoleIds: toSnowflakes([
+          "222222222222222222",
+          "333333333333333333",
+        ]),
       };
       const updated = await repository.update(updateData);
 
@@ -189,6 +209,7 @@ describe("GuildRepository", () => {
 
     it("should throw error when updating non-existent guild", async () => {
       const nonExistentGuild: GuildData = {
+        // @ts-expect-error - Testing with plain string instead of branded Snowflake
         id: "000000000000000000",
         name: "Ghost Guild",
         iconUrl: "",
@@ -204,6 +225,7 @@ describe("GuildRepository", () => {
 
     it("should validate snowflake format in update", async () => {
       const invalidGuild: GuildData = {
+        // @ts-expect-error - Testing with invalid string instead of branded Snowflake
         id: "invalid-snowflake",
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
@@ -260,7 +282,7 @@ describe("GuildRepository", () => {
         id: testGuildId,
         name: "New Guild",
         iconUrl: "https://example.com/new.png",
-        storytellerRoleIds: ["123456789012345678"],
+        storytellerRoleIds: toSnowflakes(["123456789012345678"]),
       };
 
       const result = await repository.upsert(input);
@@ -278,7 +300,7 @@ describe("GuildRepository", () => {
         id: testGuildId,
         name: "First Name",
         iconUrl: "https://example.com/first.png",
-        storytellerRoleIds: ["111111111111111111"],
+        storytellerRoleIds: toSnowflakes(["111111111111111111"]),
       };
       await repository.upsert(firstInput);
 
@@ -287,7 +309,7 @@ describe("GuildRepository", () => {
         id: testGuildId,
         name: "Second Name",
         iconUrl: "https://example.com/second.png",
-        storytellerRoleIds: ["222222222222222222"],
+        storytellerRoleIds: toSnowflakes(["222222222222222222"]),
       };
       const result = await repository.upsert(secondInput);
 
@@ -302,7 +324,7 @@ describe("GuildRepository", () => {
         id: testGuildId,
         name: "Unchanged Guild",
         iconUrl: "https://example.com/icon.png",
-        storytellerRoleIds: ["111111111111111111"],
+        storytellerRoleIds: toSnowflakes(["111111111111111111"]),
       };
       const first = await repository.upsert(firstInput);
       const originalLastUpdated = first.lastUpdated;
@@ -315,7 +337,7 @@ describe("GuildRepository", () => {
         id: testGuildId,
         name: "Unchanged Guild", // Same
         iconUrl: "https://example.com/icon.png", // Same
-        storytellerRoleIds: ["111111111111111111"], // Same
+        storytellerRoleIds: toSnowflakes(["111111111111111111"]), // Same
       };
       const second = await repository.upsert(secondInput);
 
@@ -390,7 +412,7 @@ describe("GuildRepository", () => {
         id: testGuildId,
         name: "Initial Name",
         iconUrl: "https://example.com/initial.png",
-        storytellerRoleIds: ["111111111111111111"],
+        storytellerRoleIds: toSnowflakes(["111111111111111111"]),
       });
 
       // Upsert without storytellerRoleIds (should not change them)
@@ -427,7 +449,9 @@ describe("GuildRepository", () => {
     });
 
     it("should throw error for invalid snowflake format", async () => {
+      // @ts-expect-error - Testing with invalid string
       await expect(repository.delete("invalid-id")).rejects.toThrow();
+      // @ts-expect-error - Testing with empty string
       await expect(repository.delete("")).rejects.toThrow();
     });
   });
@@ -447,12 +471,14 @@ describe("GuildRepository", () => {
     });
 
     it("should return false for non-existent guild", async () => {
-      const exists = await repository.exists("000000000000000000");
+      const exists = await repository.exists(toSnowflake("000000000000000000"));
       expect(exists).toBe(false);
     });
 
     it("should throw error for invalid snowflake format", async () => {
+      // @ts-expect-error - Testing with invalid string
       await expect(repository.exists("invalid-id")).rejects.toThrow();
+      // @ts-expect-error - Testing with empty string
       await expect(repository.exists("")).rejects.toThrow();
     });
   });
@@ -460,6 +486,7 @@ describe("GuildRepository", () => {
   describe("runtime validation", () => {
     it("should validate snowflake format in upsert", async () => {
       const invalidInput: UpsertGuildInput = {
+        // @ts-expect-error - Testing with invalid snowflake format
         id: "not-a-snowflake",
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
@@ -530,6 +557,7 @@ describe("GuildRepository", () => {
 
     it("should reject empty snowflake strings", async () => {
       const invalidGuild: CreateGuildInput = {
+        // @ts-expect-error - Testing with empty string ID
         id: "",
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
@@ -541,7 +569,8 @@ describe("GuildRepository", () => {
 
     it("should reject snowflakes that are too short", async () => {
       const invalidGuild: CreateGuildInput = {
-        id: "123456", // Too short
+        // @ts-expect-error - Testing with string too short to be a snowflake
+        id: "123456",
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
         storytellerRoleIds: [],

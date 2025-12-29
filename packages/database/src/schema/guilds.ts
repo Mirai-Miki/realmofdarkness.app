@@ -1,8 +1,17 @@
 import type { InferSelectModel } from "drizzle-orm";
 import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { GuildNameConstraints, DiscordCdnUrlMaxLength } from "@realm/common";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
+import type { z } from "zod";
+import {
+  GuildNameConstraints,
+  DiscordCdnUrlMaxLength,
+  SnowflakeSchema,
+} from "@realm/common";
 import { snowflake } from "../schema.types";
 import { members } from "./members";
 
@@ -44,10 +53,28 @@ export type GuildDb = InferSelectModel<typeof guilds>;
  * Zod schema for selecting/reading guild records from the database.
  * Matches the exact structure returned by SELECT queries.
  */
-export const selectGuildSchema = createSelectSchema(guilds);
+export const selectGuildSchema = createSelectSchema(guilds, {
+  id: SnowflakeSchema,
+  storytellerRoleIds: SnowflakeSchema.array(),
+});
+export type SelectGuildData = z.infer<typeof selectGuildSchema>;
 
 /**
  * Zod schema for inserting new guild records into the database.
  * Matches the structure required by INSERT queries.
  */
-export const insertGuildSchema = createInsertSchema(guilds);
+export const insertGuildSchema = createInsertSchema(guilds, {
+  id: SnowflakeSchema,
+  storytellerRoleIds: SnowflakeSchema.array(),
+});
+export type InsertGuildData = z.infer<typeof insertGuildSchema>;
+
+/**
+ * Zod schema for updating existing guild records in the database.
+ * All fields are optional except the id.
+ */
+export const updateGuildSchema = createUpdateSchema(guilds, {
+  id: SnowflakeSchema,
+  storytellerRoleIds: SnowflakeSchema.array(),
+});
+export type UpdateGuildData = z.infer<typeof updateGuildSchema>;

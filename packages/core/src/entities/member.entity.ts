@@ -1,4 +1,6 @@
-import { RealmError, type MemberData, type Snowflake } from "@realm/common";
+import type { UpdateMemberInput, MemberData, Snowflake } from "@realm/common";
+
+import { RealmError } from "@realm/common";
 
 /**
  * Domain entity representing a User's membership in a Guild.
@@ -221,5 +223,22 @@ export class Member {
    */
   public toData(): MemberData {
     return { ...this._data };
+  }
+
+  /**
+   * Extract only update-relevant fields from this entity.
+   * Excludes createdAt and lastActive (managed by repository).
+   *
+   * @returns Member update input data
+   */
+  public toUpdateData(): UpdateMemberInput {
+    return {
+      userId: this._data.userId,
+      guildId: this._data.guildId,
+      roleIds: this._data.roleIds,
+      admin: this._data.admin,
+      nickname: this._data.nickname,
+      boosted: this._data.boosted,
+    };
   }
 }

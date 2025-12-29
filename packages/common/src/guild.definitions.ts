@@ -153,10 +153,10 @@ export interface IGuildRepository {
   /**
    * Update an existing guild.
    *
-   * @param guild - Guild data to update
+   * @param input - Guild update input (id required, other fields optional)
    * @returns Updated guild data
    */
-  update(guild: GuildData): Promise<GuildData>;
+  update(input: UpdateGuildInput): Promise<GuildData>;
 
   /**
    * Upsert a guild.

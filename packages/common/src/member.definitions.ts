@@ -95,6 +95,22 @@ export const SyncMemberInputSchema = z.object({
 export type SyncMemberInput = z.infer<typeof SyncMemberInputSchema>;
 
 /**
+ * Input DTO for updating member data.
+ *
+ * Used when updating member fields. Only includes fields that can be updated.
+ */
+export const UpdateMemberInputSchema = z.object({
+  userId: SnowflakeSchema,
+  guildId: SnowflakeSchema,
+  admin: MemberAdminSchema.optional(),
+  roleIds: MemberRoleIdsSchema.optional(),
+  boosted: MemberBoostCountSchema.optional(),
+  nickname: MemberNicknameSchema.optional(),
+  avatarUrl: MemberAvatarUrlSchema.optional(),
+});
+export type UpdateMemberInput = z.infer<typeof UpdateMemberInputSchema>;
+
+/**
  * Input DTO for adding a boost to a member.
  *
  * Contains ALL required data including guild ID and user ID.
@@ -214,18 +230,18 @@ export interface IMemberRepository {
   /**
    * Create a new member record.
    *
-   * @param member - Member data to create
-   * @returns The created member data with timestamps
+   * @param input - Member creation input data (without timestamps)
+   * @returns The created member data with timestamps set by repository
    */
-  create(member: MemberData): Promise<MemberData>;
+  create(input: CreateMemberInput): Promise<MemberData>;
 
   /**
    * Update an existing member record.
    *
-   * @param member - Member data with updated values
+   * @param input - Member update input (userId, guildId required, other fields optional)
    * @returns The updated member data
    */
-  update(member: MemberData): Promise<MemberData>;
+  update(input: UpdateMemberInput): Promise<MemberData>;
 
   /**
    * Upsert a member.

@@ -1,15 +1,40 @@
-import { eq } from "drizzle-orm";
-import { db, guilds, insertGuildSchema } from "@realm/database";
-import type { GuildDb } from "@realm/database";
+import type {
+  GuildDb,
+  UpdateGuildData,
+  InsertGuildData,
+} from "@realm/database";
 import type {
   IGuildRepository,
   GuildData,
   Snowflake,
   CreateGuildInput,
+  UpdateGuildInput,
   UpsertGuildInput,
 } from "@realm/common";
+
+import { eq } from "drizzle-orm";
+import {
+  db,
+  guilds,
+  insertGuildSchema,
+  updateGuildSchema,
+} from "@realm/database";
 import { RealmError, SnowflakeSchema } from "@realm/common";
-import { GuildMapper } from "./mappers/guild.mapper";
+import { hasDataChanged } from "./repository.utilities";
+
+/**
+ * Convert database record to GuildData.
+ */
+function toGuildData(db: GuildDb): GuildData {
+  return {
+    id: db.id,
+    name: db.name,
+    iconUrl: db.iconUrl,
+    storytellerRoleIds: db.storytellerRoleIds,
+    createdAt: db.createdAt,
+    lastUpdated: db.lastUpdated,
+  };
+}
 
 /**
  * Repository implementation for Guild entity using Drizzle ORM.
@@ -26,24 +51,13 @@ import { GuildMapper } from "./mappers/guild.mapper";
 export class GuildRepository implements IGuildRepository {
   /**
    * Check if guild database record has actually changed by comparing relevant fields.
-   * Excludes id and timestamps from comparison.
    *
    * @param current - Current guild record from database
-   * @param incoming - New guild record to compare
+   * @param incoming - New guild data to compare
    * @returns True if data has changed, false otherwise
    */
-  private hasChanges(current: GuildDb, incoming: Partial<GuildDb>): boolean {
-    const keysToCompare = Object.keys(incoming).filter(
-      (key) => !["id", "createdAt", "lastUpdated"].includes(key)
-    ) as (keyof GuildDb)[];
-
-    for (const key of keysToCompare) {
-      if (JSON.stringify(current[key]) !== JSON.stringify(incoming[key])) {
-        return true;
-      }
-    }
-
-    return false;
+  private hasChanges(current: GuildDb, incoming: UpdateGuildData): boolean {
+    return hasDataChanged<GuildDb, UpdateGuildData>(current, incoming);
   }
 
   /**
@@ -67,11 +81,8 @@ export class GuildRepository implements IGuildRepository {
         return null;
       }
 
-      return GuildMapper.toData(result[0]);
+      return toGuildData(result[0]);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to find guild by ID", {
         cause: error,
         fields: { guildId: id },
@@ -88,21 +99,23 @@ export class GuildRepository implements IGuildRepository {
    */
   public async create(input: CreateGuildInput): Promise<GuildData> {
     try {
-      // Validate snowflake format first
-      SnowflakeSchema.parse(input.id);
+      const dbRecord: InsertGuildData = {
+        id: input.id,
+        name: input.name,
+        iconUrl: input.iconUrl,
+        storytellerRoleIds: input.storytellerRoleIds || [],
+      };
 
-      const dbRecord = GuildMapper.fromCreateInput(input);
+      // Validate with insert schema
+      const validatedData = insertGuildSchema.parse(dbRecord);
 
-      // Validate with Zod schema before inserting
-      const validated = insertGuildSchema.parse(dbRecord);
+      const [result] = await db
+        .insert(guilds)
+        .values(validatedData)
+        .returning();
 
-      const result = await db.insert(guilds).values(validated).returning();
-
-      return GuildMapper.toData(result[0]);
+      return toGuildData(result);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to create guild", {
         cause: error,
         fields: { guildId: input.id },
@@ -114,56 +127,64 @@ export class GuildRepository implements IGuildRepository {
    * Update an existing guild.
    * Only performs database update if data has actually changed.
    *
-   * @param guild - Guild Data to update
+   * @param input - Guild update input data
    * @returns Updated guild Data (or current data if no changes)
    */
-  public async update(guild: GuildData): Promise<GuildData> {
+  public async update(input: UpdateGuildInput): Promise<GuildData> {
     try {
-      // Validate snowflake format first
-      SnowflakeSchema.parse(guild.id);
+      const validatedId = SnowflakeSchema.parse(input.id);
 
       // Fetch current guild to check for changes
       const currentResult = await db
         .select()
         .from(guilds)
-        .where(eq(guilds.id, guild.id))
+        .where(eq(guilds.id, validatedId))
         .limit(1);
 
       if (currentResult.length === 0) {
         throw new RealmError("Guild not found for update", {
-          fields: { guildId: guild.id },
+          fields: { guildId: input.id },
         });
       }
 
       const currentDb = currentResult[0];
-      const incomingDb = GuildMapper.fromData(guild);
+
+      // Build update object with proper typing
+      const updateData: UpdateGuildData = {
+        id: input.id,
+        storytellerRoleIds:
+          input.storytellerRoleIds !== undefined
+            ? input.storytellerRoleIds
+            : currentDb.storytellerRoleIds,
+        name: input.name !== undefined ? input.name : currentDb.name,
+        iconUrl:
+          input.iconUrl !== undefined ? input.iconUrl : currentDb.iconUrl,
+        lastUpdated: new Date(),
+      };
 
       // Check if anything actually changed
-      if (!this.hasChanges(currentDb, incomingDb)) {
+      if (!this.hasChanges(currentDb, updateData)) {
         // No changes detected - return current data without updating
-        return GuildMapper.toData(currentDb);
+        return toGuildData(currentDb);
       }
 
-      // Data has changed - proceed with update
-      const validated = insertGuildSchema.partial().parse({
-        ...incomingDb,
-        lastUpdated: new Date(),
-      });
+      // Validate with update schema
+      const validatedData = updateGuildSchema.parse(updateData);
 
-      const result = await db
+      const [result] = await db
         .update(guilds)
-        .set(validated)
-        .where(eq(guilds.id, guild.id))
+        .set(validatedData)
+        .where(eq(guilds.id, input.id))
         .returning();
 
-      return GuildMapper.toData(result[0]);
+      return toGuildData(result);
     } catch (error) {
       if (error instanceof RealmError) {
-        throw error;
+        throw error; // Re-throw known RealmErrors
       }
       throw new RealmError("Failed to update guild", {
         cause: error,
-        fields: { guildId: guild.id },
+        fields: { guildId: input.id },
       });
     }
   }
@@ -178,77 +199,62 @@ export class GuildRepository implements IGuildRepository {
    */
   public async upsert(input: UpsertGuildInput): Promise<GuildData> {
     try {
-      // Validate snowflake format first
-      SnowflakeSchema.parse(input.id);
-
-      // Validate snowflake format
-      const validatedId = SnowflakeSchema.parse(input.id);
-
       // Check if guild exists
       const existingResult = await db
         .select()
         .from(guilds)
-        .where(eq(guilds.id, validatedId))
+        .where(eq(guilds.id, input.id))
         .limit(1);
 
       if (existingResult.length > 0) {
-        // Guild exists - check if data has changed
+        // Guild exists - update it
         const currentDb = existingResult[0];
-        const incomingDb: Partial<GuildDb> = {
+
+        const updateData: UpdateGuildData = {
+          id: input.id,
           name: input.name,
+          storytellerRoleIds:
+            input.storytellerRoleIds !== undefined
+              ? input.storytellerRoleIds
+              : currentDb.storytellerRoleIds,
           iconUrl: input.iconUrl,
+          lastUpdated: new Date(),
         };
 
-        if (input.storytellerRoleIds !== undefined) {
-          incomingDb.storytellerRoleIds = input.storytellerRoleIds;
+        if (!this.hasChanges(currentDb, updateData)) {
+          // No changes - return existing data
+          return toGuildData(currentDb);
         }
 
-        if (!this.hasChanges(currentDb, incomingDb)) {
-          // No changes - return existing data without updating
-          return GuildMapper.toData(currentDb);
-        }
+        // Data has changed - update
+        const validatedData = updateGuildSchema.parse(updateData);
+
+        const [result] = await db
+          .update(guilds)
+          .set(validatedData)
+          .where(eq(guilds.id, input.id))
+          .returning();
+
+        return toGuildData(result);
       }
 
-      // Either guild doesn't exist, or data has changed - proceed with upsert
-      const now = new Date();
-
-      // Build insert values
-      const insertValues = insertGuildSchema.parse({
-        id: validatedId,
+      // Guild doesn't exist - insert it
+      const insertData: InsertGuildData = {
+        id: input.id,
         name: input.name,
         iconUrl: input.iconUrl,
         storytellerRoleIds: input.storytellerRoleIds || [],
-        createdAt: now,
-        lastUpdated: now,
-      });
-
-      // Build conflict update set
-      const conflictUpdate: Partial<typeof guilds.$inferInsert> = {
-        name: input.name,
-        iconUrl: input.iconUrl,
-        lastUpdated: now,
       };
 
-      if (input.storytellerRoleIds !== undefined) {
-        conflictUpdate.storytellerRoleIds = input.storytellerRoleIds;
-      }
-
-      const validatedUpdate = insertGuildSchema.partial().parse(conflictUpdate);
+      const validatedData = insertGuildSchema.parse(insertData);
 
       const [result] = await db
         .insert(guilds)
-        .values(insertValues)
-        .onConflictDoUpdate({
-          target: guilds.id,
-          set: validatedUpdate,
-        })
+        .values(validatedData)
         .returning();
 
-      return GuildMapper.toData(result);
+      return toGuildData(result);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to upsert guild", {
         cause: error,
         fields: { guildId: input.id, guildName: input.name },
@@ -265,7 +271,6 @@ export class GuildRepository implements IGuildRepository {
     try {
       // Validate snowflake format
       const validatedId = SnowflakeSchema.parse(id);
-
       await db.delete(guilds).where(eq(guilds.id, validatedId));
     } catch (error) {
       throw new RealmError("Failed to delete guild", {

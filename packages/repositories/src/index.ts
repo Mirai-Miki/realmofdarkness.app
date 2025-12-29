@@ -16,15 +16,8 @@
 
 // Export repositories
 export { UserRepository } from "./user.repository";
-export { SupporterRepository } from "./supporter.repository";
 export { GuildRepository } from "./guild.repository";
 export { MemberRepository } from "./member.repository";
-
-// Export mappers
-export { UserMapper } from "./mappers/user.mapper";
-export { SupporterMapper } from "./mappers/supporter.mapper";
-export { GuildMapper } from "./mappers/guild.mapper";
-export { MemberMapper } from "./mappers/member.mapper";
 
 // TODO: Export when implemented
 // export { CharacterRepository } from "./character.repository";

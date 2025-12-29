@@ -2,7 +2,6 @@ import type { Guild as DiscordGuild } from "discord.js";
 
 import { logger } from "@realm/logger";
 import { GuildRepository } from "@realm/repositories";
-import { GuildService } from "@realm/core";
 import { Events } from "discord.js";
 
 module.exports = {
@@ -11,11 +10,11 @@ module.exports = {
   async execute(oldGuild: DiscordGuild, newGuild: DiscordGuild) {
     // Instantiate repository and service
     const guildRepository = new GuildRepository();
-    const guildService = new GuildService(logger, guildRepository);
 
     try {
+      logger.debug(`Guild updated: ${newGuild.name} (${newGuild.id})`);
       // Upsert updated guild data (updates name/icon, creates if missing)
-      await guildService.upsert({
+      await guildRepository.upsert({
         id: newGuild.id,
         name: newGuild.name,
         iconUrl: newGuild.iconURL() || "",

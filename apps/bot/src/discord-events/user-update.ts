@@ -3,7 +3,6 @@ import type { BotEvent } from "types";
 
 import { logger } from "@realm/logger";
 import { UserRepository } from "@realm/repositories";
-import { UserService } from "@realm/core";
 import { Events } from "discord.js";
 
 /**

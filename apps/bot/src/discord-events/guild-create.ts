@@ -7,7 +7,6 @@ import {
   UserRepository,
   MemberRepository,
 } from "@realm/repositories";
-import { GuildService, MemberService } from "@realm/core";
 import { ActivityService } from "services";
 
 module.exports = {

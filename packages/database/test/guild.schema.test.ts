@@ -180,6 +180,7 @@ describe("Guild Schema", () => {
 
       // Type test - this will fail at compile time if types are wrong
       const testInsert: GuildInsert = {
+        // @ts-expect-error - Testing with plain string, actual usage should parse with SnowflakeSchema
         id: "123456789012345678",
         name: "Test",
         iconUrl: "https://example.com",
@@ -196,6 +197,7 @@ describe("Guild Schema", () => {
 
       // Type test
       const testSelect: GuildSelect = {
+        // @ts-expect-error - Testing with plain string, actual usage should parse with SnowflakeSchema
         id: "123456789012345678",
         name: "Test",
         iconUrl: "https://example.com",

@@ -1,16 +1,43 @@
-import { db, members, guilds, insertMemberSchema } from "@realm/database";
-import type { MemberDb } from "@realm/database";
+import type {
+  MemberDb,
+  UpdateMemberData,
+  InsertMemberData,
+} from "@realm/database";
+import {
+  db,
+  members,
+  guilds,
+  insertMemberSchema,
+  updateMemberSchema,
+} from "@realm/database";
 import type {
   IMemberRepository,
   MemberData,
   CreateMemberInput,
+  UpdateMemberInput,
   UpsertMemberInput,
   Snowflake,
 } from "@realm/common";
 import { RealmError, SnowflakeSchema } from "@realm/common";
 import { eq, and, or, gt, sum, sql } from "drizzle-orm";
+import { hasDataChanged } from "./repository.utilities";
 
-import { MemberMapper } from "./mappers/member.mapper";
+/**
+ * Convert database record to MemberData.
+ */
+function toMemberData(db: MemberDb): MemberData {
+  return {
+    userId: db.userId,
+    guildId: db.guildId,
+    admin: db.admin,
+    roleIds: db.roleIds,
+    boosted: db.boosted,
+    nickname: db.nickname,
+    avatarUrl: db.avatarUrl,
+    createdAt: db.createdAt,
+    lastUpdated: db.lastUpdated,
+  };
+}
 
 /**
  * Repository implementation for Member entities.
@@ -28,24 +55,18 @@ import { MemberMapper } from "./mappers/member.mapper";
 export class MemberRepository implements IMemberRepository {
   /**
    * Check if member database record has actually changed by comparing relevant fields.
-   * Excludes id and timestamps from comparison.
    *
    * @param current - Current member record from database
-   * @param incoming - New member record to compare
+   * @param incoming - New member data to compare
    * @returns True if data has changed, false otherwise
    */
-  private hasChanges(current: MemberDb, incoming: Partial<MemberDb>): boolean {
-    const keysToCompare = Object.keys(incoming).filter(
-      (key) => !["guildId", "userId", "createdAt", "lastUpdated"].includes(key)
-    ) as (keyof MemberDb)[];
-
-    for (const key of keysToCompare) {
-      if (JSON.stringify(current[key]) !== JSON.stringify(incoming[key])) {
-        return true;
-      }
-    }
-
-    return false;
+  private hasChanges(current: MemberDb, incoming: UpdateMemberData): boolean {
+    return hasDataChanged<MemberDb, UpdateMemberData>(current, incoming, [
+      "guildId",
+      "userId",
+      "createdAt",
+      "lastUpdated",
+    ]);
   }
   /**
    * Find a member by their composite key (guild + user).
@@ -78,11 +99,8 @@ export class MemberRepository implements IMemberRepository {
         return null;
       }
 
-      return MemberMapper.toData(result[0]);
+      return toMemberData(result[0]);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to find member by guild and user", {
         cause: error,
         fields: { guildId, userId },
@@ -106,11 +124,8 @@ export class MemberRepository implements IMemberRepository {
         .from(members)
         .where(eq(members.guildId, validatedGuildId));
 
-      return result.map((record) => MemberMapper.toData(record));
+      return result.map(toMemberData);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to find members by guild", {
         cause: error,
         fields: { guildId },
@@ -134,11 +149,8 @@ export class MemberRepository implements IMemberRepository {
         .from(members)
         .where(eq(members.userId, validatedUserId));
 
-      return result.map((record) => MemberMapper.toData(record));
+      return result.map(toMemberData);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to find members by user", {
         cause: error,
         fields: { userId },
@@ -155,22 +167,26 @@ export class MemberRepository implements IMemberRepository {
    */
   public async create(input: CreateMemberInput): Promise<MemberData> {
     try {
-      // Validate snowflake formats first
-      SnowflakeSchema.parse(input.guildId);
-      SnowflakeSchema.parse(input.userId);
+      const dbRecord: InsertMemberData = {
+        guildId: input.guildId,
+        userId: input.userId,
+        admin: input.admin,
+        roleIds: input.roleIds,
+        boosted: input.boosted,
+        nickname: input.nickname,
+        avatarUrl: input.avatarUrl,
+      };
 
-      const dbRecord = MemberMapper.fromCreateInput(input);
+      // Validate with insert schema
+      const validatedData = insertMemberSchema.parse(dbRecord);
 
-      // Validate with Zod schema before inserting
-      const validated = insertMemberSchema.parse(dbRecord);
+      const [result] = await db
+        .insert(members)
+        .values(validatedData)
+        .returning();
 
-      const result = await db.insert(members).values(validated).returning();
-
-      return MemberMapper.toData(result[0]);
+      return toMemberData(result);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to create member", {
         cause: error,
         fields: {
@@ -185,14 +201,14 @@ export class MemberRepository implements IMemberRepository {
    * Update an existing member record.
    * Only performs database update if data has actually changed.
    *
-   * @param member - Member Data with updated values
+   * @param input - Member update input data
    * @returns Updated member Data (or current data if no changes)
    */
-  public async update(member: MemberData): Promise<MemberData> {
+  public async update(input: UpdateMemberInput): Promise<MemberData> {
     try {
       // Validate snowflake formats first
-      SnowflakeSchema.parse(member.guildId);
-      SnowflakeSchema.parse(member.userId);
+      SnowflakeSchema.parse(input.guildId);
+      SnowflakeSchema.parse(input.userId);
 
       // Fetch current member to check for changes
       const currentResult = await db
@@ -200,8 +216,8 @@ export class MemberRepository implements IMemberRepository {
         .from(members)
         .where(
           and(
-            eq(members.guildId, member.guildId),
-            eq(members.userId, member.userId)
+            eq(members.guildId, input.guildId),
+            eq(members.userId, input.userId)
           )
         )
         .limit(1);
@@ -209,48 +225,60 @@ export class MemberRepository implements IMemberRepository {
       if (currentResult.length === 0) {
         throw new RealmError("Member not found for update", {
           fields: {
-            guildId: member.guildId,
-            userId: member.userId,
+            guildId: input.guildId,
+            userId: input.userId,
           },
         });
       }
 
       const currentDb = currentResult[0];
-      const incomingDb = MemberMapper.fromData(member);
+
+      // Build update object with proper typing
+      const updateData: UpdateMemberData = {
+        guildId: input.guildId,
+        userId: input.userId,
+        admin: input.admin !== undefined ? input.admin : currentDb.admin,
+        roleIds:
+          input.roleIds !== undefined ? input.roleIds : currentDb.roleIds,
+        boosted:
+          input.boosted !== undefined ? input.boosted : currentDb.boosted,
+        nickname:
+          input.nickname !== undefined ? input.nickname : currentDb.nickname,
+        avatarUrl:
+          input.avatarUrl !== undefined ? input.avatarUrl : currentDb.avatarUrl,
+        lastUpdated: new Date(),
+      };
 
       // Check if anything actually changed
-      if (!this.hasChanges(currentDb, incomingDb)) {
+      if (!this.hasChanges(currentDb, updateData)) {
         // No changes detected - return current data without updating
-        return MemberMapper.toData(currentDb);
+        return toMemberData(currentDb);
       }
 
-      // Data has changed - proceed with update
-      const validated = insertMemberSchema.partial().parse({
-        ...incomingDb,
-        lastUpdated: new Date(),
-      });
+      // Validate with update schema
+      const validatedData = updateMemberSchema.parse(updateData);
 
-      const result = await db
+      const [result] = await db
         .update(members)
-        .set(validated)
+        .set(validatedData)
         .where(
           and(
-            eq(members.guildId, member.guildId),
-            eq(members.userId, member.userId)
+            eq(members.guildId, input.guildId),
+            eq(members.userId, input.userId)
           )
         )
         .returning();
 
-      return MemberMapper.toData(result[0]);
+      return toMemberData(result);
     } catch (error) {
       if (error instanceof RealmError) {
-        throw error;
+        throw error; // Re-throw known RealmErrors
       }
       throw new RealmError("Failed to update member", {
         cause: error,
         fields: {
-          guildId: member.guildId,
-          userId: member.userId,
+          guildId: input.guildId,
+          userId: input.userId,
         },
       });
     }
@@ -266,97 +294,81 @@ export class MemberRepository implements IMemberRepository {
    */
   public async upsert(input: UpsertMemberInput): Promise<MemberData> {
     try {
-      // Validate snowflake formats first
-      const validatedGuildId = SnowflakeSchema.parse(input.guildId);
-      const validatedUserId = SnowflakeSchema.parse(input.userId);
-
       // Check if member exists
       const existingResult = await db
         .select()
         .from(members)
         .where(
           and(
-            eq(members.guildId, validatedGuildId),
-            eq(members.userId, validatedUserId)
+            eq(members.guildId, input.guildId),
+            eq(members.userId, input.userId)
           )
         )
         .limit(1);
 
       if (existingResult.length > 0) {
-        // Member exists - check if data has changed
+        // Member exists - update it
         const currentDb = existingResult[0];
-        const incomingDb: Partial<MemberDb> = {
-          admin: input.admin,
-          boosted: input.boosted,
-          nickname: input.nickname || "",
-          avatarUrl: input.avatarUrl || "",
+
+        const updateData: UpdateMemberData = {
+          guildId: input.guildId,
+          userId: input.userId,
+          admin: input.admin !== undefined ? input.admin : currentDb.admin,
+          roleIds:
+            input.roleIds !== undefined ? input.roleIds : currentDb.roleIds,
+          boosted:
+            input.boosted !== undefined ? input.boosted : currentDb.boosted,
+          nickname:
+            input.nickname !== undefined ? input.nickname : currentDb.nickname,
+          avatarUrl:
+            input.avatarUrl !== undefined
+              ? input.avatarUrl
+              : currentDb.avatarUrl,
+          lastUpdated: new Date(),
         };
 
-        if (input.roleIds !== undefined) {
-          incomingDb.roleIds = input.roleIds;
+        if (!this.hasChanges(currentDb, updateData)) {
+          // No changes - return existing data
+          return toMemberData(currentDb);
         }
 
-        if (!this.hasChanges(currentDb, incomingDb)) {
-          // No changes - return existing data without updating
-          return MemberMapper.toData(currentDb);
-        }
+        // Data has changed - update
+        const validatedData = updateMemberSchema.parse(updateData);
+
+        const [result] = await db
+          .update(members)
+          .set(validatedData)
+          .where(
+            and(
+              eq(members.guildId, input.guildId),
+              eq(members.userId, input.userId)
+            )
+          )
+          .returning();
+
+        return toMemberData(result);
       }
 
-      // Either member doesn't exist, or data has changed - proceed with upsert
-      const now = new Date();
-
-      // Build insert values
-      const insertValues = insertMemberSchema.parse({
-        guildId: validatedGuildId,
-        userId: validatedUserId,
-        admin: input.admin || false,
-        roleIds: input.roleIds || [],
-        boosted: input.boosted || 0,
-        nickname: input.nickname || "",
-        avatarUrl: input.avatarUrl || "",
-        createdAt: now,
-        lastUpdated: now,
-      });
-
-      // Build conflict update set
-      const conflictUpdate: Partial<typeof members.$inferInsert> = {
-        lastUpdated: now,
+      // Member doesn't exist - insert it
+      const insertData: InsertMemberData = {
+        guildId: input.guildId,
+        userId: input.userId,
+        admin: input.admin ?? false,
+        roleIds: input.roleIds ?? [],
+        boosted: input.boosted ?? 0,
+        nickname: input.nickname ?? "",
+        avatarUrl: input.avatarUrl ?? "",
       };
 
-      if (input.admin !== undefined) {
-        conflictUpdate.admin = input.admin;
-      }
-      if (input.roleIds !== undefined) {
-        conflictUpdate.roleIds = input.roleIds;
-      }
-      if (input.boosted !== undefined) {
-        conflictUpdate.boosted = input.boosted;
-      }
-      if (input.nickname !== undefined) {
-        conflictUpdate.nickname = input.nickname;
-      }
-      if (input.avatarUrl !== undefined) {
-        conflictUpdate.avatarUrl = input.avatarUrl;
-      }
-
-      const validatedUpdate = insertMemberSchema
-        .partial()
-        .parse(conflictUpdate);
+      const validatedData = insertMemberSchema.parse(insertData);
 
       const [result] = await db
         .insert(members)
-        .values(insertValues)
-        .onConflictDoUpdate({
-          target: [members.guildId, members.userId],
-          set: validatedUpdate,
-        })
+        .values(validatedData)
         .returning();
 
-      return MemberMapper.toData(result);
+      return toMemberData(result);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error;
-      }
       throw new RealmError("Failed to upsert member", {
         cause: error,
         fields: { guildId: input.guildId, userId: input.userId },
@@ -469,7 +481,7 @@ export class MemberRepository implements IMemberRepository {
           and(eq(members.guildId, validatedGuildId), eq(members.admin, true))
         );
 
-      return result.map((record) => MemberMapper.toData(record));
+      return result.map(toMemberData);
     } catch (error) {
       throw new RealmError("Failed to find admins by guild", {
         cause: error,
@@ -520,7 +532,7 @@ export class MemberRepository implements IMemberRepository {
           )
         );
 
-      return result.map((record) => MemberMapper.toData(record));
+      return result.map(toMemberData);
     } catch (error) {
       throw new RealmError("Failed to find staff members by guild", {
         cause: error,
@@ -547,7 +559,7 @@ export class MemberRepository implements IMemberRepository {
           and(eq(members.guildId, validatedGuildId), gt(members.boosted, 0))
         );
 
-      return result.map((record) => MemberMapper.toData(record));
+      return result.map((record) => toMemberData(record));
     } catch (error) {
       throw new RealmError("Failed to find boosting members by guild", {
         cause: error,

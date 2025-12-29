@@ -1,3 +1,5 @@
+import type { UpdateUserInput, Snowflake } from "@realm/common";
+
 import { RealmError, type UserData } from "@realm/common";
 
 /**
@@ -16,7 +18,7 @@ export class User {
   }
 
   // Getters
-  public get id(): string {
+  public get id(): Snowflake {
     return this._data.id;
   }
 
@@ -78,5 +80,21 @@ export class User {
    */
   public toData(): UserData {
     return { ...this._data };
+  }
+
+  /**
+   * Extract only update-relevant fields from this entity.
+   * Excludes createdAt and lastActive (managed by repository).
+   *
+   * @returns User update input data
+   */
+  public toUpdateData(): UpdateUserInput {
+    return {
+      id: this._data.id,
+      username: this._data.username,
+      displayName: this._data.displayName,
+      avatarUrl: this._data.avatarUrl,
+      admin: this._data.admin,
+    };
   }
 }

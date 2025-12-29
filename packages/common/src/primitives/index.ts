@@ -33,10 +33,15 @@ export const HexColorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
  * Type alias for Discord snowflake IDs.
  * Snowflakes are unique 64-bit identifiers used by Discord.
  * We store them as strings to preserve precision.
+ *
+ * Uses branded type to ensure type safety - can't accidentally use regular strings.
  */
-export const SnowflakeSchema = z.string().regex(/^\d{17,20}$/, {
-  message: "Invalid snowflake ID format",
-});
+export const SnowflakeSchema = z
+  .string()
+  .regex(/^\d{17,20}$/, {
+    message: "Invalid snowflake ID format",
+  })
+  .brand<"Snowflake">();
 export type Snowflake = z.infer<typeof SnowflakeSchema>;
 
 // Discord CDN URLs

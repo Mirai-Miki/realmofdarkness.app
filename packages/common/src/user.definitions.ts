@@ -172,11 +172,11 @@ export interface IUserRepository {
   /**
    * Update an existing user.
    *
-   * @param user - User state to update
+   * @param input - User update input (id required, other fields optional)
    * @returns Updated user state with refreshed metadata
    * @throws {RealmError} If update fails or user doesn't exist
    */
-  update(user: UserData): Promise<UserData>;
+  update(input: UpdateUserInput): Promise<UserData>;
 
   /**
    * Upsert a user.

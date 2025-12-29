@@ -3,7 +3,6 @@ import type { GuildMember as DiscordGuildMember } from "discord.js";
 import { Events } from "discord.js";
 import { logger } from "@realm/logger";
 import { MemberRepository } from "@realm/repositories";
-import { MemberService } from "@realm/core";
 
 module.exports = {
   name: Events.GuildMemberAdd,
