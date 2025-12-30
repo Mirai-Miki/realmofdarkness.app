@@ -1,4 +1,4 @@
-import type { GuildData, UpdateGuildInput, Snowflake } from "@realm/common";
+import type { GuildData, GuildRepositoryInput, Snowflake } from "@realm/common";
 
 import {
   RealmError,
@@ -128,12 +128,12 @@ export class Guild {
   }
 
   /**
-   * Extract only update-relevant fields from this entity.
+   * Extract repository input data from this entity.
    * Excludes createdAt and lastUpdated (managed by repository).
    *
-   * @returns Guild update input data
+   * @returns Guild repository input data
    */
-  public toUpdateData(): UpdateGuildInput {
+  public toRepositoryInput(): GuildRepositoryInput {
     return {
       id: this._data.id,
       name: this._data.name,

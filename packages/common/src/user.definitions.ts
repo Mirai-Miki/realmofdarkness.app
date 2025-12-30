@@ -35,10 +35,7 @@ export const DisplayNameSchema = z
 /**
  * Avatar URL from Discord CDN.
  */
-export const AvatarUrlSchema = z
-  .string()
-  .max(DiscordCdnUrlMaxLength)
-  .optional();
+export const AvatarUrlSchema = z.string().max(DiscordCdnUrlMaxLength);
 
 // ============================================================================
 // User Data Schemas
@@ -62,49 +59,19 @@ export const UserDataSchema = z.object({
 export type UserData = z.infer<typeof UserDataSchema>;
 
 /**
- * Input DTO for creating a new user.
+ * Input DTO for creating & updating a user.
  *
  * Used by services to validate input before hydrating the User entity.
  * Does not include date fields as those are managed by the repository.
  */
-export const CreateUserInputSchema = z.object({
+export const UserRepositoryInputSchema = z.object({
   id: SnowflakeSchema,
   username: UsernameSchema,
   displayName: DisplayNameSchema,
   avatarUrl: AvatarUrlSchema,
   admin: z.boolean().default(false),
 });
-export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
-
-/**
- * Input DTO for updating user profile.
- *
- * Used when syncing user data from Discord.
- * Contains ALL required data including the user ID.
- */
-export const UpdateUserInputSchema = z.object({
-  id: SnowflakeSchema,
-  username: UsernameSchema.optional(),
-  displayName: DisplayNameSchema.optional(),
-  avatarUrl: AvatarUrlSchema.optional(),
-  admin: z.boolean().optional(),
-});
-export type UpdateUserInput = z.infer<typeof UpdateUserInputSchema>;
-
-/**
- * Input DTO for upserting a user.
- *
- * Used when syncing user data from Discord (create or update).
- * Contains all required fields for insert, optional fields for update.
- */
-export const UpsertUserInputSchema = z.object({
-  id: SnowflakeSchema,
-  username: UsernameSchema,
-  displayName: DisplayNameSchema,
-  avatarUrl: AvatarUrlSchema,
-  admin: z.boolean().optional(),
-});
-export type UpsertUserInput = z.infer<typeof UpsertUserInputSchema>;
+export type UserRepositoryInput = z.infer<typeof UserRepositoryInputSchema>;
 
 // ============================================================================
 // User Repository Interface
@@ -167,7 +134,7 @@ export interface IUserRepository {
    * @returns Created user state with updated metadata
    * @throws {RealmError} If user creation fails or user already exists
    */
-  create(user: CreateUserInput): Promise<UserData>;
+  create(user: UserRepositoryInput): Promise<UserData>;
 
   /**
    * Update an existing user.
@@ -176,7 +143,7 @@ export interface IUserRepository {
    * @returns Updated user state with refreshed metadata
    * @throws {RealmError} If update fails or user doesn't exist
    */
-  update(input: UpdateUserInput): Promise<UserData>;
+  update(input: UserRepositoryInput): Promise<UserData>;
 
   /**
    * Upsert a user.
@@ -187,7 +154,7 @@ export interface IUserRepository {
    * @returns Upserted user state
    * @throws {RealmError} If upsert fails
    */
-  upsert(input: UpsertUserInput): Promise<UserData>;
+  upsert(input: UserRepositoryInput): Promise<UserData>;
 
   /**
    * Delete a user and all associated data (cascade).

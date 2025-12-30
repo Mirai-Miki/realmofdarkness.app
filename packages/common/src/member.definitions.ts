@@ -63,52 +63,21 @@ export const MemberDataSchema = z.object({
 export type MemberData = z.infer<typeof MemberDataSchema>;
 
 /**
- * Input DTO for creating a new member.
+ * Input Data for creating & updating a member.
  *
  * Used by services to validate input before hydrating the Member entity.
  * Does not include date fields as those are managed by the repository.
  */
-export const CreateMemberInputSchema = z.object({
+export const MemberRepositoryInputSchema = z.object({
   userId: SnowflakeSchema,
   guildId: SnowflakeSchema,
   admin: MemberAdminSchema.default(false),
   roleIds: MemberRoleIdsSchema.default([]),
-  boosted: MemberBoostCountSchema.default(0),
   nickname: MemberNicknameSchema.default(""),
   avatarUrl: MemberAvatarUrlSchema.default(""),
-});
-export type CreateMemberInput = z.infer<typeof CreateMemberInputSchema>;
-
-/**
- * Input DTO for syncing member data from Discord.
- *
- * Used when Discord sends updated member information.
- */
-export const SyncMemberInputSchema = z.object({
-  userId: SnowflakeSchema,
-  guildId: SnowflakeSchema,
-  admin: MemberAdminSchema,
-  roleIds: MemberRoleIdsSchema,
-  nickname: MemberNicknameSchema,
-  avatarUrl: MemberAvatarUrlSchema,
-});
-export type SyncMemberInput = z.infer<typeof SyncMemberInputSchema>;
-
-/**
- * Input DTO for updating member data.
- *
- * Used when updating member fields. Only includes fields that can be updated.
- */
-export const UpdateMemberInputSchema = z.object({
-  userId: SnowflakeSchema,
-  guildId: SnowflakeSchema,
-  admin: MemberAdminSchema.optional(),
-  roleIds: MemberRoleIdsSchema.optional(),
   boosted: MemberBoostCountSchema.optional(),
-  nickname: MemberNicknameSchema.optional(),
-  avatarUrl: MemberAvatarUrlSchema.optional(),
 });
-export type UpdateMemberInput = z.infer<typeof UpdateMemberInputSchema>;
+export type MemberRepositoryInput = z.infer<typeof MemberRepositoryInputSchema>;
 
 /**
  * Input DTO for adding a boost to a member.
@@ -153,23 +122,6 @@ export const MemberExistsInputSchema = z.object({
   userId: SnowflakeSchema,
 });
 export type MemberExistsInput = z.infer<typeof MemberExistsInputSchema>;
-
-/**
- * Input DTO for upserting a member.
- *
- * Used when syncing member data from Discord (create or update).
- * Contains all required fields for insert, optional fields for update.
- */
-export const UpsertMemberInputSchema = z.object({
-  userId: SnowflakeSchema,
-  guildId: SnowflakeSchema,
-  admin: MemberAdminSchema.optional(),
-  roleIds: MemberRoleIdsSchema.optional(),
-  boosted: MemberBoostCountSchema.optional(),
-  nickname: MemberNicknameSchema.optional(),
-  avatarUrl: MemberAvatarUrlSchema.optional(),
-});
-export type UpsertMemberInput = z.infer<typeof UpsertMemberInputSchema>;
 
 // ============================================================================
 // Member Repository Interface
@@ -233,7 +185,7 @@ export interface IMemberRepository {
    * @param input - Member creation input data (without timestamps)
    * @returns The created member data with timestamps set by repository
    */
-  create(input: CreateMemberInput): Promise<MemberData>;
+  create(input: MemberRepositoryInput): Promise<MemberData>;
 
   /**
    * Update an existing member record.
@@ -241,7 +193,7 @@ export interface IMemberRepository {
    * @param input - Member update input (userId, guildId required, other fields optional)
    * @returns The updated member data
    */
-  update(input: UpdateMemberInput): Promise<MemberData>;
+  update(input: MemberRepositoryInput): Promise<MemberData>;
 
   /**
    * Upsert a member.
@@ -251,7 +203,7 @@ export interface IMemberRepository {
    * @param input - Member data to upsert
    * @returns Upserted member data
    */
-  upsert(input: UpsertMemberInput): Promise<MemberData>;
+  upsert(input: MemberRepositoryInput): Promise<MemberData>;
 
   /**
    * Delete a member record.

@@ -1,4 +1,4 @@
-import type { UpdateUserInput, Snowflake } from "@realm/common";
+import type { UserRepositoryInput, Snowflake } from "@realm/common";
 
 import { RealmError, type UserData } from "@realm/common";
 
@@ -83,12 +83,12 @@ export class User {
   }
 
   /**
-   * Extract only update-relevant fields from this entity.
+   * Extract repository input data from this entity.
    * Excludes createdAt and lastActive (managed by repository).
    *
-   * @returns User update input data
+   * @returns User repository input data
    */
-  public toUpdateData(): UpdateUserInput {
+  public toRepositoryInput(): UserRepositoryInput {
     return {
       id: this._data.id,
       username: this._data.username,

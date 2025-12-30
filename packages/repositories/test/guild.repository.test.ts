@@ -1,10 +1,5 @@
 import { db, guilds, insertGuildSchema, closeDatabase } from "@realm/database";
-import type {
-  GuildData,
-  CreateGuildInput,
-  UpsertGuildInput,
-  Snowflake,
-} from "@realm/common";
+import type { GuildData, GuildRepositoryInput, Snowflake } from "@realm/common";
 import {
   GuildNameConstraints,
   DiscordCdnUrlMaxLength,
@@ -43,7 +38,7 @@ describe("GuildRepository", () => {
 
   describe("create", () => {
     it("should create a new guild", async () => {
-      const guildInput: CreateGuildInput = {
+      const guildInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://cdn.discordapp.com/icons/123/abc.png",
@@ -60,7 +55,7 @@ describe("GuildRepository", () => {
     });
 
     it("should throw error when creating duplicate guild", async () => {
-      const guildInput: CreateGuildInput = {
+      const guildInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://cdn.discordapp.com/icons/123/abc.png",
@@ -80,7 +75,7 @@ describe("GuildRepository", () => {
         name: "A".repeat(101), // Exceeds max length
         iconUrl: "https://example.com",
         storytellerRoleIds: [],
-      } as CreateGuildInput;
+      } as GuildRepositoryInput;
 
       await expect(repository.create(invalidGuild)).rejects.toThrow();
     });
@@ -89,7 +84,7 @@ describe("GuildRepository", () => {
   describe("findById", () => {
     it("should find an existing guild", async () => {
       // First create a guild
-      const guildInput: CreateGuildInput = {
+      const guildInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Find Me Guild",
         iconUrl: "https://example.com/icon.png",
@@ -125,7 +120,7 @@ describe("GuildRepository", () => {
   describe("update", () => {
     it("should update an existing guild", async () => {
       // Create initial guild
-      const guildInput: CreateGuildInput = {
+      const guildInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Original Name",
         iconUrl: "https://example.com/original.png",
@@ -147,7 +142,7 @@ describe("GuildRepository", () => {
 
     it("should not update database when nothing has changed", async () => {
       // Create initial guild
-      const guildInput: CreateGuildInput = {
+      const guildInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Unchanged Guild",
         iconUrl: "https://example.com/icon.png",
@@ -175,7 +170,7 @@ describe("GuildRepository", () => {
 
     it("should update when storytellerRoleIds change", async () => {
       // Create initial guild
-      const guildInput: CreateGuildInput = {
+      const guildInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Role Test Guild",
         iconUrl: "https://example.com/icon.png",
@@ -239,7 +234,7 @@ describe("GuildRepository", () => {
 
     it("should validate name length in update", async () => {
       // First create a valid guild
-      const guildInput: CreateGuildInput = {
+      const guildInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Valid Name",
         iconUrl: "https://example.com/icon.png",
@@ -258,7 +253,7 @@ describe("GuildRepository", () => {
 
     it("should validate iconUrl length in update", async () => {
       // First create a valid guild
-      const guildInput: CreateGuildInput = {
+      const guildInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
@@ -278,7 +273,7 @@ describe("GuildRepository", () => {
 
   describe("upsert", () => {
     it("should insert a new guild when it doesn't exist", async () => {
-      const input: UpsertGuildInput = {
+      const input: GuildRepositoryInput = {
         id: testGuildId,
         name: "New Guild",
         iconUrl: "https://example.com/new.png",
@@ -296,7 +291,7 @@ describe("GuildRepository", () => {
 
     it("should update existing guild when it exists", async () => {
       // First insert
-      const firstInput: UpsertGuildInput = {
+      const firstInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "First Name",
         iconUrl: "https://example.com/first.png",
@@ -305,7 +300,7 @@ describe("GuildRepository", () => {
       await repository.upsert(firstInput);
 
       // Then upsert again (should update)
-      const secondInput: UpsertGuildInput = {
+      const secondInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Second Name",
         iconUrl: "https://example.com/second.png",
@@ -320,7 +315,7 @@ describe("GuildRepository", () => {
 
     it("should not update database when upserting with no changes", async () => {
       // First insert
-      const firstInput: UpsertGuildInput = {
+      const firstInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Unchanged Guild",
         iconUrl: "https://example.com/icon.png",
@@ -333,7 +328,7 @@ describe("GuildRepository", () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Upsert with exact same data
-      const secondInput: UpsertGuildInput = {
+      const secondInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Unchanged Guild", // Same
         iconUrl: "https://example.com/icon.png", // Same
@@ -347,7 +342,7 @@ describe("GuildRepository", () => {
     });
 
     it("should handle upsert without storytellerRoleIds", async () => {
-      const input: UpsertGuildInput = {
+      const input: GuildRepositoryInput = {
         id: testGuildId,
         name: "Guild Without Roles",
         iconUrl: "https://example.com/icon.png",
@@ -360,7 +355,7 @@ describe("GuildRepository", () => {
     });
 
     it("should validate insert values with Zod schema", async () => {
-      const input: UpsertGuildInput = {
+      const input: GuildRepositoryInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl:
@@ -375,7 +370,7 @@ describe("GuildRepository", () => {
 
     it("should use Drizzle's inferred types correctly", async () => {
       // This test verifies the fix for the original bug
-      const input: UpsertGuildInput = {
+      const input: GuildRepositoryInput = {
         id: testGuildId,
         name: "Test Place",
         iconUrl:
@@ -432,7 +427,7 @@ describe("GuildRepository", () => {
   describe("delete", () => {
     it("should delete an existing guild", async () => {
       // Create a guild
-      const guildInput: CreateGuildInput = {
+      const guildInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Delete Me",
         iconUrl: "",
@@ -458,7 +453,7 @@ describe("GuildRepository", () => {
 
   describe("exists", () => {
     it("should return true for existing guild", async () => {
-      const guildInput: CreateGuildInput = {
+      const guildInput: GuildRepositoryInput = {
         id: testGuildId,
         name: "Exists Test",
         iconUrl: "",
@@ -485,7 +480,7 @@ describe("GuildRepository", () => {
 
   describe("runtime validation", () => {
     it("should validate snowflake format in upsert", async () => {
-      const invalidInput: UpsertGuildInput = {
+      const invalidInput: GuildRepositoryInput = {
         // @ts-expect-error - Testing with invalid snowflake format
         id: "not-a-snowflake",
         name: "Test Guild",
@@ -496,7 +491,7 @@ describe("GuildRepository", () => {
     });
 
     it("should reject name exceeding max length", async () => {
-      const invalidGuild: CreateGuildInput = {
+      const invalidGuild: GuildRepositoryInput = {
         id: testGuildId,
         name: "A".repeat(GuildNameConstraints.MaxLength + 10),
         iconUrl: "https://example.com/icon.png",
@@ -507,7 +502,7 @@ describe("GuildRepository", () => {
     });
 
     it("should accept name at exact max length", async () => {
-      const validGuild: CreateGuildInput = {
+      const validGuild: GuildRepositoryInput = {
         id: testGuildId,
         name: "A".repeat(GuildNameConstraints.MaxLength),
         iconUrl: "https://example.com/icon.png",
@@ -520,7 +515,7 @@ describe("GuildRepository", () => {
     });
 
     it("should reject iconUrl exceeding max length", async () => {
-      const invalidGuild: CreateGuildInput = {
+      const invalidGuild: GuildRepositoryInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://example.com/" + "A".repeat(DiscordCdnUrlMaxLength),
@@ -532,7 +527,7 @@ describe("GuildRepository", () => {
 
     it("should accept iconUrl at exact max length", async () => {
       const validIconUrl = "A".repeat(DiscordCdnUrlMaxLength);
-      const validGuild: CreateGuildInput = {
+      const validGuild: GuildRepositoryInput = {
         id: testGuildId2,
         name: "Test Guild",
         iconUrl: validIconUrl,
@@ -545,7 +540,7 @@ describe("GuildRepository", () => {
     });
 
     it("should validate storytellerRoleIds are valid snowflakes", async () => {
-      const invalidGuild: CreateGuildInput = {
+      const invalidGuild: GuildRepositoryInput = {
         id: testGuildId,
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
@@ -556,7 +551,7 @@ describe("GuildRepository", () => {
     });
 
     it("should reject empty snowflake strings", async () => {
-      const invalidGuild: CreateGuildInput = {
+      const invalidGuild: GuildRepositoryInput = {
         // @ts-expect-error - Testing with empty string ID
         id: "",
         name: "Test Guild",
@@ -568,7 +563,7 @@ describe("GuildRepository", () => {
     });
 
     it("should reject snowflakes that are too short", async () => {
-      const invalidGuild: CreateGuildInput = {
+      const invalidGuild: GuildRepositoryInput = {
         // @ts-expect-error - Testing with string too short to be a snowflake
         id: "123456",
         name: "Test Guild",

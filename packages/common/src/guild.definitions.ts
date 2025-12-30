@@ -56,46 +56,17 @@ export const GuildDataSchema = z.object({
 export type GuildData = z.infer<typeof GuildDataSchema>;
 
 /**
- * Input DTO for creating a new guild.
+ * Input Data for creating & updating a guild.
  *
- * Used by services to validate input before hydrating the Guild entity.
- * Does not include date fields as those are managed by the repository.
+ * Used by the Guild repository for persistence operations.
  */
-export const CreateGuildInputSchema = z.object({
-  id: SnowflakeSchema,
-  name: GuildNameSchema,
-  iconUrl: GuildIconUrlSchema,
-  storytellerRoleIds: StorytellerRolesSchema.default([]),
-});
-export type CreateGuildInput = z.infer<typeof CreateGuildInputSchema>;
-
-/**
- * Input DTO for updating guild settings.
- *
- * Used when syncing guild data from Discord or updating settings.
- * Contains ALL required data including the guild ID.
- */
-export const UpdateGuildInputSchema = z.object({
-  id: SnowflakeSchema,
-  name: GuildNameSchema.optional(),
-  iconUrl: GuildIconUrlSchema.optional(),
-  storytellerRoleIds: StorytellerRolesSchema.optional(),
-});
-export type UpdateGuildInput = z.infer<typeof UpdateGuildInputSchema>;
-
-/**
- * Input for upserting a guild.
- * Works like update, but creates if guild doesn't exist.
- * - If guild exists: updates provided fields
- * - If guild doesn't exist: creates new guild (storytellerRoleIds defaults to [])
- */
-export const UpsertGuildInputSchema = z.object({
+export const GuildRepositoryInputSchema = z.object({
   id: SnowflakeSchema,
   name: GuildNameSchema,
   iconUrl: GuildIconUrlSchema,
   storytellerRoleIds: StorytellerRolesSchema.optional(),
 });
-export type UpsertGuildInput = z.infer<typeof UpsertGuildInputSchema>;
+export type GuildRepositoryInput = z.infer<typeof GuildRepositoryInputSchema>;
 
 /**
  * Input DTO for adding a storyteller role to a guild.
@@ -148,7 +119,7 @@ export interface IGuildRepository {
    * @param input - Guild input data (without timestamps)
    * @returns Created guild data
    */
-  create(input: CreateGuildInput): Promise<GuildData>;
+  create(input: GuildRepositoryInput): Promise<GuildData>;
 
   /**
    * Update an existing guild.
@@ -156,7 +127,7 @@ export interface IGuildRepository {
    * @param input - Guild update input (id required, other fields optional)
    * @returns Updated guild data
    */
-  update(input: UpdateGuildInput): Promise<GuildData>;
+  update(input: GuildRepositoryInput): Promise<GuildData>;
 
   /**
    * Upsert a guild.
@@ -166,7 +137,7 @@ export interface IGuildRepository {
    * @param input - Guild data to upsert
    * @returns Upserted guild data
    */
-  upsert(input: UpsertGuildInput): Promise<GuildData>;
+  upsert(input: GuildRepositoryInput): Promise<GuildData>;
 
   /**
    * Delete a guild by ID.

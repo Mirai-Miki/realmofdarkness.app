@@ -13,9 +13,7 @@ import {
 import type {
   IMemberRepository,
   MemberData,
-  CreateMemberInput,
-  UpdateMemberInput,
-  UpsertMemberInput,
+  MemberRepositoryInput,
   Snowflake,
 } from "@realm/common";
 import { RealmError, SnowflakeSchema } from "@realm/common";
@@ -67,6 +65,60 @@ export class MemberRepository implements IMemberRepository {
       "createdAt",
       "lastUpdated",
     ]);
+  }
+
+  private async performUpdate(
+    input: MemberRepositoryInput,
+    currentMember: MemberDb
+  ): Promise<MemberData> {
+    try {
+      // Build update object with proper typing
+      const updateData: UpdateMemberData = {
+        guildId: input.guildId,
+        userId: input.userId,
+        admin: input.admin !== undefined ? input.admin : currentMember.admin,
+        roleIds:
+          input.roleIds !== undefined ? input.roleIds : currentMember.roleIds,
+        boosted:
+          input.boosted !== undefined ? input.boosted : currentMember.boosted,
+        nickname:
+          input.nickname !== undefined
+            ? input.nickname
+            : currentMember.nickname,
+        avatarUrl:
+          input.avatarUrl !== undefined
+            ? input.avatarUrl
+            : currentMember.avatarUrl,
+        lastUpdated: new Date(),
+      };
+
+      // Check if anything actually changed
+      if (!this.hasChanges(currentMember, updateData)) {
+        // No changes detected - return current data without updating
+        return toMemberData(currentMember);
+      }
+
+      // Validate with update schema
+      const validatedData = updateMemberSchema.parse(updateData);
+
+      const [result] = await db
+        .update(members)
+        .set(validatedData)
+        .where(
+          and(
+            eq(members.guildId, input.guildId),
+            eq(members.userId, input.userId)
+          )
+        )
+        .returning();
+
+      return toMemberData(result);
+    } catch (error) {
+      throw new RealmError("Failed to update member", {
+        cause: error,
+        fields: { guildId: input.guildId, userId: input.userId },
+      });
+    }
   }
   /**
    * Find a member by their composite key (guild + user).
@@ -161,11 +213,11 @@ export class MemberRepository implements IMemberRepository {
   /**
    * Create a new member record.
    *
-   * @param input - Create member input (without timestamps)
+   * @param input - Member creation input (without timestamps)
    * @returns The created member Data
    * @throws {RealmError} If creation fails or member already exists
    */
-  public async create(input: CreateMemberInput): Promise<MemberData> {
+  public async create(input: MemberRepositoryInput): Promise<MemberData> {
     try {
       const dbRecord: InsertMemberData = {
         guildId: input.guildId,
@@ -204,7 +256,7 @@ export class MemberRepository implements IMemberRepository {
    * @param input - Member update input data
    * @returns Updated member Data (or current data if no changes)
    */
-  public async update(input: UpdateMemberInput): Promise<MemberData> {
+  public async update(input: MemberRepositoryInput): Promise<MemberData> {
     try {
       // Validate snowflake formats first
       SnowflakeSchema.parse(input.guildId);
@@ -231,45 +283,7 @@ export class MemberRepository implements IMemberRepository {
         });
       }
 
-      const currentDb = currentResult[0];
-
-      // Build update object with proper typing
-      const updateData: UpdateMemberData = {
-        guildId: input.guildId,
-        userId: input.userId,
-        admin: input.admin !== undefined ? input.admin : currentDb.admin,
-        roleIds:
-          input.roleIds !== undefined ? input.roleIds : currentDb.roleIds,
-        boosted:
-          input.boosted !== undefined ? input.boosted : currentDb.boosted,
-        nickname:
-          input.nickname !== undefined ? input.nickname : currentDb.nickname,
-        avatarUrl:
-          input.avatarUrl !== undefined ? input.avatarUrl : currentDb.avatarUrl,
-        lastUpdated: new Date(),
-      };
-
-      // Check if anything actually changed
-      if (!this.hasChanges(currentDb, updateData)) {
-        // No changes detected - return current data without updating
-        return toMemberData(currentDb);
-      }
-
-      // Validate with update schema
-      const validatedData = updateMemberSchema.parse(updateData);
-
-      const [result] = await db
-        .update(members)
-        .set(validatedData)
-        .where(
-          and(
-            eq(members.guildId, input.guildId),
-            eq(members.userId, input.userId)
-          )
-        )
-        .returning();
-
-      return toMemberData(result);
+      return await this.performUpdate(input, currentResult[0]);
     } catch (error) {
       if (error instanceof RealmError) {
         throw error; // Re-throw known RealmErrors
@@ -292,7 +306,7 @@ export class MemberRepository implements IMemberRepository {
    * @param input - Member data to upsert
    * @returns Upserted member Data
    */
-  public async upsert(input: UpsertMemberInput): Promise<MemberData> {
+  public async upsert(input: MemberRepositoryInput): Promise<MemberData> {
     try {
       // Check if member exists
       const existingResult = await db
@@ -308,66 +322,11 @@ export class MemberRepository implements IMemberRepository {
 
       if (existingResult.length > 0) {
         // Member exists - update it
-        const currentDb = existingResult[0];
-
-        const updateData: UpdateMemberData = {
-          guildId: input.guildId,
-          userId: input.userId,
-          admin: input.admin !== undefined ? input.admin : currentDb.admin,
-          roleIds:
-            input.roleIds !== undefined ? input.roleIds : currentDb.roleIds,
-          boosted:
-            input.boosted !== undefined ? input.boosted : currentDb.boosted,
-          nickname:
-            input.nickname !== undefined ? input.nickname : currentDb.nickname,
-          avatarUrl:
-            input.avatarUrl !== undefined
-              ? input.avatarUrl
-              : currentDb.avatarUrl,
-          lastUpdated: new Date(),
-        };
-
-        if (!this.hasChanges(currentDb, updateData)) {
-          // No changes - return existing data
-          return toMemberData(currentDb);
-        }
-
-        // Data has changed - update
-        const validatedData = updateMemberSchema.parse(updateData);
-
-        const [result] = await db
-          .update(members)
-          .set(validatedData)
-          .where(
-            and(
-              eq(members.guildId, input.guildId),
-              eq(members.userId, input.userId)
-            )
-          )
-          .returning();
-
-        return toMemberData(result);
+        return await this.performUpdate(input, existingResult[0]);
+      } else {
+        // Member doesn't exist - insert it
+        return await this.create(input);
       }
-
-      // Member doesn't exist - insert it
-      const insertData: InsertMemberData = {
-        guildId: input.guildId,
-        userId: input.userId,
-        admin: input.admin ?? false,
-        roleIds: input.roleIds ?? [],
-        boosted: input.boosted ?? 0,
-        nickname: input.nickname ?? "",
-        avatarUrl: input.avatarUrl ?? "",
-      };
-
-      const validatedData = insertMemberSchema.parse(insertData);
-
-      const [result] = await db
-        .insert(members)
-        .values(validatedData)
-        .returning();
-
-      return toMemberData(result);
     } catch (error) {
       throw new RealmError("Failed to upsert member", {
         cause: error,

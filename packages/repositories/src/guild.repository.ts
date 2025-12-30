@@ -7,9 +7,7 @@ import type {
   IGuildRepository,
   GuildData,
   Snowflake,
-  CreateGuildInput,
-  UpdateGuildInput,
-  UpsertGuildInput,
+  GuildRepositoryInput,
 } from "@realm/common";
 
 import { eq } from "drizzle-orm";
@@ -97,7 +95,7 @@ export class GuildRepository implements IGuildRepository {
    * @throws {RealmError} If creation fails or guild already exists
    * @returns Created guild Data
    */
-  public async create(input: CreateGuildInput): Promise<GuildData> {
+  public async create(input: GuildRepositoryInput): Promise<GuildData> {
     try {
       const dbRecord: InsertGuildData = {
         id: input.id,
@@ -130,7 +128,7 @@ export class GuildRepository implements IGuildRepository {
    * @param input - Guild update input data
    * @returns Updated guild Data (or current data if no changes)
    */
-  public async update(input: UpdateGuildInput): Promise<GuildData> {
+  public async update(input: GuildRepositoryInput): Promise<GuildData> {
     try {
       const validatedId = SnowflakeSchema.parse(input.id);
 
@@ -147,25 +145,40 @@ export class GuildRepository implements IGuildRepository {
         });
       }
 
-      const currentDb = currentResult[0];
+      return await this.performUpdate(input, currentResult[0]);
+    } catch (error) {
+      if (error instanceof RealmError) {
+        throw error; // Re-throw known RealmErrors
+      }
+      throw new RealmError("Failed to update guild", {
+        cause: error,
+        fields: { guildId: input.id },
+      });
+    }
+  }
 
+  private async performUpdate(
+    input: GuildRepositoryInput,
+    currentGuild: GuildDb
+  ): Promise<GuildData> {
+    try {
       // Build update object with proper typing
       const updateData: UpdateGuildData = {
         id: input.id,
         storytellerRoleIds:
           input.storytellerRoleIds !== undefined
             ? input.storytellerRoleIds
-            : currentDb.storytellerRoleIds,
-        name: input.name !== undefined ? input.name : currentDb.name,
+            : currentGuild.storytellerRoleIds,
+        name: input.name !== undefined ? input.name : currentGuild.name,
         iconUrl:
-          input.iconUrl !== undefined ? input.iconUrl : currentDb.iconUrl,
+          input.iconUrl !== undefined ? input.iconUrl : currentGuild.iconUrl,
         lastUpdated: new Date(),
       };
 
       // Check if anything actually changed
-      if (!this.hasChanges(currentDb, updateData)) {
+      if (!this.hasChanges(currentGuild, updateData)) {
         // No changes detected - return current data without updating
-        return toGuildData(currentDb);
+        return toGuildData(currentGuild);
       }
 
       // Validate with update schema
@@ -179,9 +192,6 @@ export class GuildRepository implements IGuildRepository {
 
       return toGuildData(result);
     } catch (error) {
-      if (error instanceof RealmError) {
-        throw error; // Re-throw known RealmErrors
-      }
       throw new RealmError("Failed to update guild", {
         cause: error,
         fields: { guildId: input.id },
@@ -197,7 +207,7 @@ export class GuildRepository implements IGuildRepository {
    * @param input - Guild data to upsert
    * @returns Upserted guild Data
    */
-  public async upsert(input: UpsertGuildInput): Promise<GuildData> {
+  public async upsert(input: GuildRepositoryInput): Promise<GuildData> {
     try {
       // Check if guild exists
       const existingResult = await db
@@ -208,52 +218,11 @@ export class GuildRepository implements IGuildRepository {
 
       if (existingResult.length > 0) {
         // Guild exists - update it
-        const currentDb = existingResult[0];
-
-        const updateData: UpdateGuildData = {
-          id: input.id,
-          name: input.name,
-          storytellerRoleIds:
-            input.storytellerRoleIds !== undefined
-              ? input.storytellerRoleIds
-              : currentDb.storytellerRoleIds,
-          iconUrl: input.iconUrl,
-          lastUpdated: new Date(),
-        };
-
-        if (!this.hasChanges(currentDb, updateData)) {
-          // No changes - return existing data
-          return toGuildData(currentDb);
-        }
-
-        // Data has changed - update
-        const validatedData = updateGuildSchema.parse(updateData);
-
-        const [result] = await db
-          .update(guilds)
-          .set(validatedData)
-          .where(eq(guilds.id, input.id))
-          .returning();
-
-        return toGuildData(result);
+        return await this.performUpdate(input, existingResult[0]);
+      } else {
+        // Guild doesn't exist - insert it
+        return await this.create(input);
       }
-
-      // Guild doesn't exist - insert it
-      const insertData: InsertGuildData = {
-        id: input.id,
-        name: input.name,
-        iconUrl: input.iconUrl,
-        storytellerRoleIds: input.storytellerRoleIds || [],
-      };
-
-      const validatedData = insertGuildSchema.parse(insertData);
-
-      const [result] = await db
-        .insert(guilds)
-        .values(validatedData)
-        .returning();
-
-      return toGuildData(result);
     } catch (error) {
       throw new RealmError("Failed to upsert guild", {
         cause: error,

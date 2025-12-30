@@ -1,4 +1,8 @@
-import type { UpdateMemberInput, MemberData, Snowflake } from "@realm/common";
+import type {
+  MemberRepositoryInput,
+  MemberData,
+  Snowflake,
+} from "@realm/common";
 
 import { RealmError } from "@realm/common";
 
@@ -226,12 +230,12 @@ export class Member {
   }
 
   /**
-   * Extract only update-relevant fields from this entity.
+   * Extract repository input data from this entity.
    * Excludes createdAt and lastActive (managed by repository).
    *
-   * @returns Member update input data
+   * @returns Member repository input data
    */
-  public toUpdateData(): UpdateMemberInput {
+  public toRepositoryInput(): MemberRepositoryInput {
     return {
       userId: this._data.userId,
       guildId: this._data.guildId,
@@ -239,6 +243,7 @@ export class Member {
       admin: this._data.admin,
       nickname: this._data.nickname,
       boosted: this._data.boosted,
+      avatarUrl: this._data.avatarUrl,
     };
   }
 }

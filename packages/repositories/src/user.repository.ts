@@ -3,9 +3,7 @@ import type {
   IUserRepository,
   Snowflake,
   UserData,
-  CreateUserInput,
-  UpdateUserInput,
-  UpsertUserInput,
+  UserRepositoryInput,
 } from "@realm/common";
 
 import { eq, inArray } from "drizzle-orm";
@@ -50,6 +48,52 @@ export class UserRepository implements IUserRepository {
    */
   private hasChanges(current: UserDb, incoming: UpdateUserData): boolean {
     return hasDataChanged<UserDb, UpdateUserData>(current, incoming);
+  }
+
+  private async performUpdate(
+    input: UserRepositoryInput,
+    currentUser: UserDb
+  ): Promise<UserData> {
+    try {
+      // Build update object with proper typing
+      const updateData: UpdateUserData = {
+        id: input.id,
+        username:
+          input.username !== undefined ? input.username : currentUser.username,
+        displayName:
+          input.displayName !== undefined
+            ? input.displayName
+            : currentUser.displayName,
+        avatarUrl:
+          input.avatarUrl !== undefined
+            ? input.avatarUrl
+            : currentUser.avatarUrl,
+        admin: input.admin !== undefined ? input.admin : currentUser.admin,
+        updatedAt: new Date(),
+      };
+
+      // Check if anything actually changed
+      if (!this.hasChanges(currentUser, updateData)) {
+        // No changes detected - return current data without updating
+        return toUserData(currentUser);
+      }
+
+      // Validate with update schema
+      const validatedData = updateUserSchema.parse(updateData);
+
+      const [result] = await db
+        .update(users)
+        .set(validatedData)
+        .where(eq(users.id, input.id))
+        .returning();
+
+      return toUserData(result);
+    } catch (error) {
+      throw new RealmError("Failed to update user", {
+        cause: error,
+        fields: { userId: input.id },
+      });
+    }
   }
 
   /**
@@ -144,11 +188,11 @@ export class UserRepository implements IUserRepository {
   /**
    * Create a new user.
    *
-   * @param input - Create user input (without timestamps)
+   * @param input - User creation input (without timestamps)
    * @throws {RealmError} If creation fails or user already exists
    * @returns Created user Data
    */
-  public async create(input: CreateUserInput): Promise<UserData> {
+  public async create(input: UserRepositoryInput): Promise<UserData> {
     try {
       const dbRecord: InsertUserData = {
         id: input.id,
@@ -181,16 +225,15 @@ export class UserRepository implements IUserRepository {
    * @param input - User update input data
    * @returns Updated user Data (or current data if no changes)
    */
-  public async update(input: UpdateUserInput): Promise<UserData> {
+  public async update(input: UserRepositoryInput): Promise<UserData> {
     try {
-      // Validate snowflake format first
-      SnowflakeSchema.parse(input.id);
+      const validatedId = SnowflakeSchema.parse(input.id);
 
       // Fetch current user to check for changes
       const currentResult = await db
         .select()
         .from(users)
-        .where(eq(users.id, input.id))
+        .where(eq(users.id, validatedId))
         .limit(1);
 
       if (currentResult.length === 0) {
@@ -199,39 +242,7 @@ export class UserRepository implements IUserRepository {
         });
       }
 
-      const currentDb = currentResult[0];
-
-      // Build update object with proper typing
-      const updateData: UpdateUserData = {
-        id: input.id,
-        username:
-          input.username !== undefined ? input.username : currentDb.username,
-        displayName:
-          input.displayName !== undefined
-            ? input.displayName
-            : currentDb.displayName,
-        avatarUrl:
-          input.avatarUrl !== undefined ? input.avatarUrl : currentDb.avatarUrl,
-        admin: input.admin !== undefined ? input.admin : currentDb.admin,
-        updatedAt: new Date(),
-      };
-
-      // Check if anything actually changed
-      if (!this.hasChanges(currentDb, updateData)) {
-        // No changes detected - return current data without updating
-        return toUserData(currentDb);
-      }
-
-      // Validate with update schema
-      const validatedData = updateUserSchema.parse(updateData);
-
-      const [result] = await db
-        .update(users)
-        .set(validatedData)
-        .where(eq(users.id, input.id))
-        .returning();
-
-      return toUserData(result);
+      return await this.performUpdate(input, currentResult[0]);
     } catch (error) {
       if (error instanceof RealmError) {
         throw error; // Re-throw known RealmErrors
@@ -251,7 +262,7 @@ export class UserRepository implements IUserRepository {
    * @param input - User data to upsert
    * @returns Upserted user Data
    */
-  public async upsert(input: UpsertUserInput): Promise<UserData> {
+  public async upsert(input: UserRepositoryInput): Promise<UserData> {
     try {
       // Check if user exists
       const existingResult = await db
@@ -262,50 +273,11 @@ export class UserRepository implements IUserRepository {
 
       if (existingResult.length > 0) {
         // User exists - update it
-        const currentDb = existingResult[0];
-
-        const updateData: UpdateUserData = {
-          id: input.id,
-          username: input.username,
-          displayName: input.displayName,
-          avatarUrl: input.avatarUrl,
-          admin: input.admin,
-          updatedAt: new Date(),
-        };
-
-        if (!this.hasChanges(currentDb, updateData)) {
-          // No changes - return existing data
-          return toUserData(currentDb);
-        }
-
-        // Data has changed - update
-        const validatedData = updateUserSchema.parse(updateData);
-
-        const [result] = await db
-          .update(users)
-          .set(validatedData)
-          .where(eq(users.id, input.id))
-          .returning();
-
-        return toUserData(result);
+        return await this.performUpdate(input, existingResult[0]);
+      } else {
+        // User doesn't exist - insert it
+        return await this.create(input);
       }
-
-      // User doesn't exist - insert it
-      const insertData: InsertUserData = {
-        id: input.id,
-        username: input.username,
-        displayName: input.displayName,
-        avatarUrl: input.avatarUrl,
-        admin: input.admin,
-      };
-
-      const validatedData = insertUserSchema.parse(insertData);
-
-      const [result] = await db.insert(users).values(validatedData).returning();
-
-      // TODO Add any one to one relations such as supporter or analytics here
-
-      return toUserData(result);
     } catch (error) {
       throw new RealmError("Failed to upsert user", {
         cause: error,
