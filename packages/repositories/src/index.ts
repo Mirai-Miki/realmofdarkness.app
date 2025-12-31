@@ -19,5 +19,4 @@ export { UserRepository } from "./user.repository";
 export { GuildRepository } from "./guild.repository";
 export { MemberRepository } from "./member.repository";
 
-// TODO: Export when implemented
-// export { CharacterRepository } from "./character.repository";
+export { CharacterRepository } from "./character.repository";

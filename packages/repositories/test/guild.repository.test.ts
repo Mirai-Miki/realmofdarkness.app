@@ -108,11 +108,8 @@ describe("GuildRepository", () => {
     });
 
     it("should throw error for invalid snowflake format", async () => {
-      // @ts-expect-error - Testing with invalid string format
       await expect(repository.findById("invalid-id")).rejects.toThrow();
-      // @ts-expect-error - Testing with empty string
       await expect(repository.findById("")).rejects.toThrow();
-      // @ts-expect-error - Testing with string too short
       await expect(repository.findById("123")).rejects.toThrow();
     });
   });
@@ -204,7 +201,6 @@ describe("GuildRepository", () => {
 
     it("should throw error when updating non-existent guild", async () => {
       const nonExistentGuild: GuildData = {
-        // @ts-expect-error - Testing with plain string instead of branded Snowflake
         id: "000000000000000000",
         name: "Ghost Guild",
         iconUrl: "",
@@ -220,7 +216,6 @@ describe("GuildRepository", () => {
 
     it("should validate snowflake format in update", async () => {
       const invalidGuild: GuildData = {
-        // @ts-expect-error - Testing with invalid string instead of branded Snowflake
         id: "invalid-snowflake",
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
@@ -444,9 +439,7 @@ describe("GuildRepository", () => {
     });
 
     it("should throw error for invalid snowflake format", async () => {
-      // @ts-expect-error - Testing with invalid string
       await expect(repository.delete("invalid-id")).rejects.toThrow();
-      // @ts-expect-error - Testing with empty string
       await expect(repository.delete("")).rejects.toThrow();
     });
   });
@@ -471,9 +464,7 @@ describe("GuildRepository", () => {
     });
 
     it("should throw error for invalid snowflake format", async () => {
-      // @ts-expect-error - Testing with invalid string
       await expect(repository.exists("invalid-id")).rejects.toThrow();
-      // @ts-expect-error - Testing with empty string
       await expect(repository.exists("")).rejects.toThrow();
     });
   });
@@ -481,7 +472,6 @@ describe("GuildRepository", () => {
   describe("runtime validation", () => {
     it("should validate snowflake format in upsert", async () => {
       const invalidInput: GuildRepositoryInput = {
-        // @ts-expect-error - Testing with invalid snowflake format
         id: "not-a-snowflake",
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
@@ -552,7 +542,6 @@ describe("GuildRepository", () => {
 
     it("should reject empty snowflake strings", async () => {
       const invalidGuild: GuildRepositoryInput = {
-        // @ts-expect-error - Testing with empty string ID
         id: "",
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",
@@ -564,7 +553,6 @@ describe("GuildRepository", () => {
 
     it("should reject snowflakes that are too short", async () => {
       const invalidGuild: GuildRepositoryInput = {
-        // @ts-expect-error - Testing with string too short to be a snowflake
         id: "123456",
         name: "Test Guild",
         iconUrl: "https://example.com/icon.png",

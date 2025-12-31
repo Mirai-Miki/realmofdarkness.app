@@ -7,20 +7,44 @@ import {
   timestamp,
   jsonb,
   uniqueIndex,
-  unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from "drizzle-zod";
 import { Splat, CharacterConstraints } from "@realm/common";
 import { users } from "./users";
 import { guilds } from "./guilds";
 import { members } from "./members";
 import { snowflake } from "../schema.types";
 
-// Placeholder for CharacterJsonbData
-export interface CharacterJsonbData {
-  [key: string]: unknown;
-}
+import type { Vampire5thData, Vampire20thData } from "@realm/common";
+
+/**
+ * Helper to extract the JSONB payload from a full Character Data type.
+ * Omits fields that are stored as explicit columns in the database.
+ */
+type SplatPayload<T> = Omit<
+  T,
+  | "id"
+  | "name"
+  | "userId"
+  | "guildId"
+  | "splat"
+  | "isSheet"
+  | "createdAt"
+  | "updatedAt"
+>;
+
+/**
+ * Union of all possible character JSONB payloads.
+ */
+export type CharacterJsonbData =
+  | SplatPayload<Vampire5thData>
+  | SplatPayload<Vampire20thData>
+  | Record<string, unknown>;
 
 /**
  * Character Splat types Enum
@@ -50,13 +74,14 @@ export const characters = pgTable(
 
     splat: characterSplats().notNull().default(Splat.Vampire5th),
     isSheet: boolean().notNull().default(false),
+
+    // JSONB column to store the rest of the character data (attributes, skills, disciplines, etc.)
     data: jsonb().$type<CharacterJsonbData>().notNull(),
 
     createdAt: timestamp().defaultNow().notNull(),
     lastUpdated: timestamp().defaultNow().notNull(),
   },
   (table) => [
-    unique().on(table.name, table.userId),
     uniqueIndex("characters_name_user_idx").on(table.name, table.userId),
     uniqueIndex("characters_guild_idx").on(table.guildId),
     uniqueIndex("characters_user_guild_idx").on(table.userId, table.guildId),
@@ -99,3 +124,9 @@ export const selectCharacterSchema = createSelectSchema(characters);
  * Matches the structure required by INSERT queries.
  */
 export const insertCharacterSchema = createInsertSchema(characters);
+
+/**
+ * Zod schema for updating character records in the database.
+ * Matches the structure required by UPDATE queries.
+ */
+export const updateCharacterSchema = createUpdateSchema(characters);

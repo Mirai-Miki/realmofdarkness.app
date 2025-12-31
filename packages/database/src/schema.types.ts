@@ -25,7 +25,6 @@ export const snowflake = customType<{ data: Snowflake }>({
     return BigInt(value);
   },
   fromDriver(value: unknown): Snowflake {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    return String(value) as Snowflake;
+    return String(value);
   },
 });
