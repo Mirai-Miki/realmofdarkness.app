@@ -26,13 +26,10 @@ CREATE TABLE "users" (
 	"id" bigint PRIMARY KEY NOT NULL,
 	"username" varchar(35) NOT NULL,
 	"display_name" varchar(35) DEFAULT '' NOT NULL,
-	"email" varchar(100),
 	"avatar_url" varchar(500) DEFAULT '' NOT NULL,
-	"registered" boolean DEFAULT false NOT NULL,
 	"admin" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"last_active" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "users_username_unique" UNIQUE("username")
 );
 --> statement-breakpoint

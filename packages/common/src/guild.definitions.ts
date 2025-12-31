@@ -63,7 +63,7 @@ export type GuildData = z.infer<typeof GuildDataSchema>;
 export const GuildRepositoryInputSchema = z.object({
   id: SnowflakeSchema,
   name: GuildNameSchema,
-  iconUrl: GuildIconUrlSchema,
+  iconUrl: GuildIconUrlSchema.optional(),
   storytellerRoleIds: StorytellerRolesSchema.optional(),
 });
 export type GuildRepositoryInput = z.infer<typeof GuildRepositoryInputSchema>;

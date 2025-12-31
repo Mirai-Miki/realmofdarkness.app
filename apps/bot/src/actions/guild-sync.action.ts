@@ -80,7 +80,7 @@ export class GuildSyncAction {
     const validatedGuildData = GuildRepositoryInputSchema.parse({
       id: guild.id,
       name: guild.name,
-      iconUrl: guild.iconURL() || "",
+      iconUrl: guild.iconURL() === null ? undefined : guild.iconURL(),
     });
     await this.guildRepository.upsert(validatedGuildData);
 

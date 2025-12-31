@@ -45,10 +45,10 @@ export const SnowflakeSchema = z
 export type Snowflake = z.infer<typeof SnowflakeSchema>;
 
 // Discord CDN URLs
+// Discord CDN URLs
 export const DiscordUrlSchema = z.url({
   hostname: /^(media\.discordapp\.net|cdn\.discordapp\.com)$/,
-  protocol: /^https:$/,
-  message: "URL must be a valid Discord CDN URL",
+  protocol: /^https$/,
 });
 export type DiscordUrl = z.infer<typeof DiscordUrlSchema>;
 /**

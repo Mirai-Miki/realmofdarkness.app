@@ -1,5 +1,5 @@
 {
-  "id": "c85d9ce1-4354-4c0f-89f5-53aed2589caf",
+  "id": "0626323e-ebc6-47b9-afe3-058a0b48b36d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -132,8 +132,12 @@
           "name": "characters_user_id_users_id_fk",
           "tableFrom": "characters",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -141,8 +145,12 @@
           "name": "characters_guild_id_guilds_id_fk",
           "tableFrom": "characters",
           "tableTo": "guilds",
-          "columnsFrom": ["guild_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "guild_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -152,7 +160,10 @@
         "characters_name_userId_unique": {
           "name": "characters_name_userId_unique",
           "nullsNotDistinct": false,
-          "columns": ["name", "user_id"]
+          "columns": [
+            "name",
+            "user_id"
+          ]
         }
       },
       "policies": {},
@@ -235,25 +246,12 @@
           "notNull": true,
           "default": "''"
         },
-        "email": {
-          "name": "email",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false
-        },
         "avatar_url": {
           "name": "avatar_url",
           "type": "varchar(500)",
           "primaryKey": false,
           "notNull": true,
           "default": "''"
-        },
-        "registered": {
-          "name": "registered",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         },
         "admin": {
           "name": "admin",
@@ -275,13 +273,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "last_active": {
-          "name": "last_active",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -291,7 +282,9 @@
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": ["username"]
+          "columns": [
+            "username"
+          ]
         }
       },
       "policies": {},
@@ -370,8 +363,12 @@
           "name": "members_guild_id_guilds_id_fk",
           "tableFrom": "members",
           "tableTo": "guilds",
-          "columnsFrom": ["guild_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "guild_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -379,8 +376,12 @@
           "name": "members_user_id_users_id_fk",
           "tableFrom": "members",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -388,7 +389,10 @@
       "compositePrimaryKeys": {
         "members_guild_id_user_id_pk": {
           "name": "members_guild_id_user_id_pk",
-          "columns": ["guild_id", "user_id"]
+          "columns": [
+            "guild_id",
+            "user_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -432,8 +436,12 @@
           "name": "initiative_trackers_guild_id_guilds_id_fk",
           "tableFrom": "initiative_trackers",
           "tableTo": "guilds",
-          "columnsFrom": ["guild_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "guild_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -493,8 +501,12 @@
           "name": "command_stats_user_id_users_id_fk",
           "tableFrom": "command_stats",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -504,7 +516,11 @@
         "command_stats_userId_command_botId_unique": {
           "name": "command_stats_userId_command_botId_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "command", "bot_id"]
+          "columns": [
+            "user_id",
+            "command",
+            "bot_id"
+          ]
         }
       },
       "policies": {},
@@ -549,8 +565,12 @@
           "name": "supporters_user_id_users_id_fk",
           "tableFrom": "supporters",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

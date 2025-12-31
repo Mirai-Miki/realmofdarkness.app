@@ -117,7 +117,7 @@ export class GuildRepository implements IGuildRepository {
       const dbRecord: InsertGuildData = {
         id: input.id,
         name: input.name,
-        iconUrl: input.iconUrl,
+        iconUrl: input.iconUrl || "",
         storytellerRoleIds: input.storytellerRoleIds || [],
       };
 
