@@ -172,6 +172,14 @@ export interface IMemberRepository {
   findByGuild(guildId: Snowflake): Promise<MemberData[]>;
 
   /**
+   * Find all member user IDs in a guild.
+   *
+   * @param guildId - Discord guild ID
+   * @returns Array of user IDs in the guild
+   */
+  findIdsByGuild(guildId: Snowflake): Promise<Snowflake[]>;
+
+  /**
    * Find all guilds a user is a member of.
    *
    * @param userId - Discord user ID
@@ -191,9 +199,16 @@ export interface IMemberRepository {
    * Update an existing member record.
    *
    * @param input - Member update input (userId, guildId required, other fields optional)
+   * @param options - Update options
+   * @param options.ignoreNotFound - If true, returns null instead of throwing when member doesn't exist
    * @returns The updated member data
+   * @throws {RealmError} If update fails or member doesn't exist (unless options.ignoreNotFound is true)
    */
   update(input: MemberRepositoryInput): Promise<MemberData>;
+  update(
+    input: MemberRepositoryInput,
+    options: { ignoreNotFound: true }
+  ): Promise<MemberData | null>;
 
   /**
    * Upsert a member.

@@ -114,6 +114,13 @@ export interface IGuildRepository {
   findById(id: Snowflake): Promise<GuildData | null>;
 
   /**
+   * Find all guild IDs.
+   *
+   * @returns Array of all guild IDs
+   */
+  findAllIds(): Promise<Snowflake[]>;
+
+  /**
    * Create a new guild.
    *
    * @param input - Guild input data (without timestamps)
@@ -125,9 +132,16 @@ export interface IGuildRepository {
    * Update an existing guild.
    *
    * @param input - Guild update input (id required, other fields optional)
+   * @param options - Update options
+   * @param options.ignoreNotFound - If true, returns null instead of throwing when guild doesn't exist
    * @returns Updated guild data
+   * @throws {RealmError} If update fails or guild doesn't exist (unless options.ignoreNotFound is true)
    */
   update(input: GuildRepositoryInput): Promise<GuildData>;
+  update(
+    input: GuildRepositoryInput,
+    options: { ignoreNotFound: true }
+  ): Promise<GuildData | null>;
 
   /**
    * Upsert a guild.

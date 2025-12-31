@@ -1,7 +1,9 @@
 import type { User, PartialUser } from "discord.js";
+import type { Snowflake } from "@realm/common";
 import type { BotEvent } from "types";
 
 import { logger } from "@realm/logger";
+import { UserRepositoryInputSchema } from "@realm/common";
 import { UserRepository } from "@realm/repositories";
 import { Events } from "discord.js";
 
@@ -15,7 +17,6 @@ const userUpdateEvent: BotEvent<Events.UserUpdate> = {
   async execute(oldUser: User | PartialUser, newUser: User): Promise<void> {
     // Instantiate repository and service
     const userRepository = new UserRepository();
-    const userService = new UserService(logger, userRepository);
 
     try {
       // Fetch full user data if partial
@@ -23,13 +24,15 @@ const userUpdateEvent: BotEvent<Events.UserUpdate> = {
         await newUser.fetch();
       }
 
-      // Update user profile with new Discord data
-      await userService.update({
-        id: newUser.id,
+      const validatedData = UserRepositoryInputSchema.parse({
+        id: newUser.id as Snowflake,
         username: newUser.username,
-        displayName: newUser.displayName || newUser.username,
-        avatarUrl: newUser.avatarURL() || undefined,
+        displayName: newUser.displayName,
+        avatarUrl: newUser.displayAvatarURL(),
       });
+
+      // Only update existing users
+      await userRepository.update(validatedData, { ignoreNotFound: true });
     } catch (error) {
       logger.exception(
         `Failed to handle user update for ${newUser.username} (${newUser.id}):`,

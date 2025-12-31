@@ -1,4 +1,5 @@
 import type { GuildMember, PartialGuildMember } from "discord.js";
+import type { Snowflake } from "@realm/common";
 
 import { Events } from "discord.js";
 import { logger } from "@realm/logger";
@@ -13,13 +14,12 @@ module.exports = {
     try {
       // Instantiate repository and service
       const memberRepository = new MemberRepository();
-      const memberService = new MemberService(logger, memberRepository);
 
       // Service handles deletion logic including existence check
-      await memberService.delete({
-        guildId: member.guild.id,
-        userId: member.id,
-      });
+      await memberRepository.delete(
+        member.guild.id as Snowflake,
+        member.user.id as Snowflake
+      );
     } catch (error) {
       logger.exception(
         `Failed to handle member remove for user ${member.id}`,

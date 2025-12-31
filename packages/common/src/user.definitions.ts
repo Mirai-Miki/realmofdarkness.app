@@ -140,10 +140,16 @@ export interface IUserRepository {
    * Update an existing user.
    *
    * @param input - User update input (id required, other fields optional)
+   * @param options - Update options
+   * @param options.ignoreNotFound - If true, returns null instead of throwing when user doesn't exist
    * @returns Updated user state with refreshed metadata
-   * @throws {RealmError} If update fails or user doesn't exist
+   * @throws {RealmError} If update fails or user doesn't exist (unless options.ignoreNotFound is true)
    */
   update(input: UserRepositoryInput): Promise<UserData>;
+  update(
+    input: UserRepositoryInput,
+    options: { ignoreNotFound: true }
+  ): Promise<UserData | null>;
 
   /**
    * Upsert a user.

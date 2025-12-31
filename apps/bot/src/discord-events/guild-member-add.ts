@@ -1,8 +1,10 @@
 import type { GuildMember as DiscordGuildMember } from "discord.js";
+import type { Snowflake } from "@realm/common";
 
-import { Events } from "discord.js";
+import { Events, PermissionFlagsBits } from "discord.js";
 import { logger } from "@realm/logger";
-import { MemberRepository } from "@realm/repositories";
+import { MemberRepository, UserRepository } from "@realm/repositories";
+import { MemberRepositoryInputSchema } from "@realm/common";
 
 module.exports = {
   name: Events.GuildMemberAdd,
@@ -15,18 +17,28 @@ module.exports = {
 
       // Instantiate repository and service
       const memberRepository = new MemberRepository();
-      const memberService = new MemberService(logger, memberRepository);
+      const userRepository = new UserRepository();
+
+      const exists = await userRepository.exists(member.user.id as Snowflake);
+
+      if (!exists) {
+        // We don't create members for users that don't exist in our DB
+        return;
+      }
 
       // Create member with DTO
-      await memberService.create({
-        guildId: member.guild.id,
-        userId: member.id,
-        nickname: member.nickname || "",
+
+      const validatedData = MemberRepositoryInputSchema.parse({
+        guildId: member.guild.id as Snowflake,
+        userId: member.id as Snowflake,
+        nickname: member.displayName,
         avatarUrl: member.displayAvatarURL(),
-        admin: member.permissions.has("Administrator"),
-        roleIds: Array.from(member.roles.cache.keys()),
+        admin: member.permissions.has(PermissionFlagsBits.Administrator),
+        roleIds: Array.from(member.roles.cache.keys()) as Snowflake[],
         boosted: 0,
       });
+
+      await memberRepository.create(validatedData);
     } catch (error) {
       logger.exception(
         `Failed to handle member add for user ${member.id}`,

@@ -89,6 +89,23 @@ export class GuildRepository implements IGuildRepository {
   }
 
   /**
+   * Find all guild IDs.
+   *
+   * @returns Array of all guild IDs
+   */
+  public async findAllIds(): Promise<Snowflake[]> {
+    try {
+      const result = await db.select({ id: guilds.id }).from(guilds);
+
+      return result.map((row) => row.id);
+    } catch (error) {
+      throw new RealmError("Failed to find all guild IDs", {
+        cause: error,
+      });
+    }
+  }
+
+  /**
    * Create a new guild.
    *
    * @param input - Create guild input (without timestamps)
@@ -126,9 +143,20 @@ export class GuildRepository implements IGuildRepository {
    * Only performs database update if data has actually changed.
    *
    * @param input - Guild update input data
+   * @param options - Update options
+   * @param options.ignoreNotFound - If true, returns null instead of throwing when guild doesn't exist
    * @returns Updated guild Data (or current data if no changes)
+   * @throws {RealmError} If update fails or guild doesn't exist (unless options.ignoreNotFound is true)
    */
-  public async update(input: GuildRepositoryInput): Promise<GuildData> {
+  public async update(input: GuildRepositoryInput): Promise<GuildData>;
+  public async update(
+    input: GuildRepositoryInput,
+    options: { ignoreNotFound: true }
+  ): Promise<GuildData | null>;
+  public async update(
+    input: GuildRepositoryInput,
+    options?: { ignoreNotFound: boolean }
+  ): Promise<GuildData | null> {
     try {
       const validatedId = SnowflakeSchema.parse(input.id);
 
@@ -140,9 +168,12 @@ export class GuildRepository implements IGuildRepository {
         .limit(1);
 
       if (currentResult.length === 0) {
-        throw new RealmError("Guild not found for update", {
-          fields: { guildId: input.id },
-        });
+        if (!options?.ignoreNotFound) {
+          throw new RealmError("Guild not found for update", {
+            fields: { guildId: input.id },
+          });
+        }
+        return null;
       }
 
       return await this.performUpdate(input, currentResult[0]);

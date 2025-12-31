@@ -186,6 +186,31 @@ export class MemberRepository implements IMemberRepository {
   }
 
   /**
+   * Find all member user IDs in a guild.
+   *
+   * @param guildId - Discord guild ID
+   * @returns Array of user IDs in the guild
+   */
+  public async findIdsByGuild(guildId: Snowflake): Promise<Snowflake[]> {
+    try {
+      // Validate snowflake format
+      const validatedGuildId = SnowflakeSchema.parse(guildId);
+
+      const result = await db
+        .select({ userId: members.userId })
+        .from(members)
+        .where(eq(members.guildId, validatedGuildId));
+
+      return result.map((row) => row.userId);
+    } catch (error) {
+      throw new RealmError("Failed to find member IDs by guild", {
+        cause: error,
+        fields: { guildId },
+      });
+    }
+  }
+
+  /**
    * Find all guilds a user is a member of.
    *
    * @param userId - Discord user ID
@@ -254,9 +279,20 @@ export class MemberRepository implements IMemberRepository {
    * Only performs database update if data has actually changed.
    *
    * @param input - Member update input data
+   * @param options - Update options
+   * @param options.ignoreNotFound - If true, returns null instead of throwing when member doesn't exist
    * @returns Updated member Data (or current data if no changes)
+   * @throws {RealmError} If update fails or member doesn't exist (unless options.ignoreNotFound is true)
    */
-  public async update(input: MemberRepositoryInput): Promise<MemberData> {
+  public async update(input: MemberRepositoryInput): Promise<MemberData>;
+  public async update(
+    input: MemberRepositoryInput,
+    options: { ignoreNotFound: true }
+  ): Promise<MemberData | null>;
+  public async update(
+    input: MemberRepositoryInput,
+    options?: { ignoreNotFound: boolean }
+  ): Promise<MemberData | null> {
     try {
       // Validate snowflake formats first
       SnowflakeSchema.parse(input.guildId);
@@ -275,12 +311,15 @@ export class MemberRepository implements IMemberRepository {
         .limit(1);
 
       if (currentResult.length === 0) {
-        throw new RealmError("Member not found for update", {
-          fields: {
-            guildId: input.guildId,
-            userId: input.userId,
-          },
-        });
+        if (!options?.ignoreNotFound) {
+          throw new RealmError("Member not found for update", {
+            fields: {
+              guildId: input.guildId,
+              userId: input.userId,
+            },
+          });
+        }
+        return null;
       }
 
       return await this.performUpdate(input, currentResult[0]);

@@ -223,9 +223,20 @@ export class UserRepository implements IUserRepository {
    * Only performs database update if data has actually changed.
    *
    * @param input - User update input data
+   * @param options - Update options
+   * @param options.ignoreNotFound - If true, returns null instead of throwing when user doesn't exist
    * @returns Updated user Data (or current data if no changes)
+   * @throws {RealmError} If update fails or user doesn't exist (unless options.ignoreNotFound is true)
    */
-  public async update(input: UserRepositoryInput): Promise<UserData> {
+  public async update(input: UserRepositoryInput): Promise<UserData>;
+  public async update(
+    input: UserRepositoryInput,
+    options: { ignoreNotFound: true }
+  ): Promise<UserData | null>;
+  public async update(
+    input: UserRepositoryInput,
+    options?: { ignoreNotFound: boolean }
+  ): Promise<UserData | null> {
     try {
       const validatedId = SnowflakeSchema.parse(input.id);
 
@@ -237,9 +248,12 @@ export class UserRepository implements IUserRepository {
         .limit(1);
 
       if (currentResult.length === 0) {
-        throw new RealmError("User not found for update", {
-          fields: { userId: input.id },
-        });
+        if (!options?.ignoreNotFound) {
+          throw new RealmError("User not found for update", {
+            fields: { userId: input.id },
+          });
+        }
+        return null;
       }
 
       return await this.performUpdate(input, currentResult[0]);

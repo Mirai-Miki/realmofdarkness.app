@@ -1,8 +1,8 @@
 import type { Client } from "discord.js";
 
 import { logger } from "@realm/logger";
-import { GuildRepository } from "@realm/repositories";
 import { Events } from "discord.js";
+import { GuildSyncAction } from "../actions";
 import { ActivityService } from "../services";
 import { initializeEmojis } from "../utilities/emoji-manager";
 
@@ -44,7 +44,10 @@ module.exports = {
     try {
       // Sync all guilds with database
       logger.info("Syncing guilds with database...");
-      await syncAllGuilds(client);
+
+      const guildSyncAction = new GuildSyncAction();
+      await guildSyncAction.execute(client.guilds.cache);
+
       logger.info(
         `Successfully synced ${client.guilds.cache.size} guilds with database`
       );
@@ -63,34 +66,3 @@ module.exports = {
     logger.info("Bot is ready and operational");
   },
 };
-
-/**
- * Sync all guilds the bot is in with the database.
- *
- * @param client - Discord client instance
- */
-async function syncAllGuilds(client: Client): Promise<void> {
-  const guildRepository = new GuildRepository();
-  const guildService = new GuildService(logger, guildRepository);
-
-  const guilds = Array.from(client.guilds.cache.values());
-
-  for (const guild of guilds) {
-    try {
-      // Upsert guild (creates if new, updates name/icon if exists)
-      await guildService.upsert({
-        id: guild.id,
-        name: guild.name,
-        iconUrl: guild.iconURL() || "",
-      });
-
-      // Small delay to avoid rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    } catch (error) {
-      logger.exception(
-        `Failed to sync guild ${guild.name} (${guild.id})`,
-        error
-      );
-    }
-  }
-}
