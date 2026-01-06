@@ -1,13 +1,14 @@
 import type {
   BaseCharacterData,
   ICharacter,
+  IVampire5th,
+  IVampire20th,
   IExperience,
   Snowflake,
-  Splat,
   SheetStatus,
 } from "@realm/common";
 
-import { RealmError } from "@realm/common";
+import { RealmError, Splat } from "@realm/common";
 import { Experience } from "./value-objects/experience.vo";
 
 /**
@@ -224,5 +225,22 @@ export abstract class Character implements ICharacter {
     return {
       ...this.data,
     };
+  }
+  // ============================================================================
+  // Type Guards
+  // ============================================================================
+
+  /**
+   * Check if character is a 5th Edition Vampire.
+   */
+  public isVampire5th(): this is IVampire5th {
+    return this.splat === Splat.Vampire5th;
+  }
+
+  /**
+   * Check if character is a 20th Anniversary Vampire.
+   */
+  public isVampire20th(): this is IVampire20th {
+    return this.splat === Splat.Vampire20th;
   }
 }

@@ -234,20 +234,6 @@ export const BaseCharacterDataSchema = z.object({
 });
 export type BaseCharacterData = z.infer<typeof BaseCharacterDataSchema>;
 
-/**
- * Union of all possible character data types.
- * Currently defined as an intersection for flexibility until all splats are defined.
- */
-export type CharacterData = BaseCharacterData & {
-  splat: Splat;
-  [key: string]: unknown;
-};
-
-/**
- * Input Data for creating & updating a character.
- */
-export type CharacterRepositoryInput = CharacterData;
-
 // ============================================================================
 // Entity Interfaces
 // ============================================================================
@@ -327,52 +313,4 @@ export interface IExperience extends ExperienceData {
   award(amount: number): IExperience;
   setTotal(total: number): IExperience;
   setCurrent(current: number): IExperience;
-}
-
-// ============================================================================
-// Repository Interface
-// ============================================================================
-
-/**
- * Repository interface for Character entity persistence.
- */
-export interface ICharacterRepository {
-  /**
-   * Find a character by ID.
-   */
-  findById(id: Snowflake): Promise<CharacterData | null>;
-
-  /**
-   * Find all characters belonging to a user.
-   */
-  findByUser(userId: Snowflake): Promise<CharacterData[]>;
-
-  /**
-   * Create a new character.
-   */
-  create(input: CharacterData): Promise<CharacterData>;
-
-  /**
-   * Update an existing character.
-   */
-  update(input: CharacterData): Promise<CharacterData>;
-  update(
-    input: CharacterData,
-    options: { ignoreNotFound: true }
-  ): Promise<CharacterData | null>;
-
-  /**
-   * Upsert a character.
-   */
-  upsert(input: CharacterData): Promise<CharacterData>;
-
-  /**
-   * Delete a character by ID.
-   */
-  delete(id: Snowflake): Promise<void>;
-
-  /**
-   * Check if a character exists.
-   */
-  exists(id: Snowflake): Promise<boolean>;
 }
