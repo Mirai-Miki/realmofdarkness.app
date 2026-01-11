@@ -14,17 +14,19 @@
 ## 🎯 Quick Reference: Core Principles
 
 1. **Type Safety First**: Explicit types everywhere, NEVER use `any`, use `import type` for types
-2. **🚨 NEVER USE .JS EXTENSIONS IN IMPORTS**: This will break the build - no exceptions
-3. **Package Dependencies**: All packages depend ONLY on `@realm/common` (never on each other)
-4. **Service Layer**: Pure services (services/) don't call other services; coordinator actions (actions/) orchestrate
-5. **Repository Access**: ONLY services call repositories (never entities, never actions directly)
-6. **Domain Purity**: Entities are pure logic - NO database code, NO framework code, NO repository calls
-7. **Timestamp Ownership**: Repositories manage `createdAt`/`updatedAt`, NOT entities
-8. **Zod-First Design**: Define Zod schema, infer TypeScript type (in `@realm/common`)
-9. **No TypeScript Enums**: Use `as const` objects instead
-10. **Error Hierarchy**: `RealmError` (system) vs `UserError` (client) - NEVER generic `Error`
-11. **Documentation Required**: JSDoc on all public functions, classes, interfaces
-12. **Edition Naming Convention**:
+2. **🚨 ALWAYS Use Barrel Exports**: `import { Thing } from "utilities"` NOT `import { Thing } from "./utilities/thing.utility"`
+3. **🚨 NEVER USE .JS EXTENSIONS IN IMPORTS**: This will break the build - no exceptions
+4. **Zod Enum Pattern**: Pass const object DIRECTLY to `z.enum(MyEnum)` - NOT an array, NOT `z.nativeEnum()`
+5. **Package Dependencies**: All packages depend ONLY on `@realm/common` (never on each other)
+6. **Service Layer**: Pure services (services/) don't call other services; coordinator actions (actions/) orchestrate
+7. **Repository Access**: ONLY services call repositories (never entities, never actions directly)
+8. **Domain Purity**: Entities are pure logic - NO database code, NO framework code, NO repository calls
+9. **Timestamp Ownership**: Repositories manage `createdAt`/`updatedAt`, NOT entities
+10. **Zod-First Design**: Define Zod schema, infer TypeScript type (in `@realm/common`)
+11. **No TypeScript Enums**: Use `as const` objects instead
+12. **Error Hierarchy**: `RealmError` (system) vs `UserError` (client) - NEVER generic `Error`
+13. **Documentation Required**: JSDoc on all public functions, classes, interfaces
+14. **Edition Naming Convention**:
     - **Standalone/at start**: wod20, wod5, cod (e.g., `wod20-roll.action.ts`, `Wod20RollAction`)
     - **Game-specific**: v5, v20, h5, w20 (e.g., `Vampire5thData`)
     - **Edition in middle/end**: 20th, 5th, cod (e.g., `Vampire20th`, `Hunter5th`, not `VampireWod20`)
@@ -46,8 +48,50 @@
 - Use type-only imports: `import type { ... }` when importing only types
 - **Discord IDs**: Always use the `Snowflake` type (from `@realm/common`)
 - **Method Visibility**: ALL class methods MUST explicitly declare `public`, `private`, or `protected` - no implicit public methods
+- **Imports**: ALWAYS use barrel exports - `import { Thing } from "utilities"` NOT `import { Thing } from "./utilities/thing.utility"`
+- **All exports MUST be added to index.ts barrel files**
 
 ### Enum Pattern (NEVER use TypeScript `enum`)
+
+**CRITICAL: Use this exact pattern for Zod enums:**
+
+```typescript
+// 1. Define const object
+export const MyEnum = {
+  Value1: "value1",
+  Value2: "value2",
+} as const;
+
+// 2. Pass const object DIRECTLY to z.enum() - NOT an array
+export const MyEnumSchema = z.enum(MyEnum);
+
+// 3. Infer type from schema
+export type MyEnum = z.infer<typeof MyEnumSchema>;
+```
+
+**DO NOT pass arrays to z.enum()** - pass the const object directly.
+**DO NOT use z.nativeEnum()** - use z.enum() with the const object.
+
+**Examples:**
+
+```typescript
+// ✅ CORRECT - Zod enum pattern
+export const SheetStatus = {
+  Draft: "Draft",
+  Review: "Review",
+  Active: "Active",
+  Dead: "Dead",
+  Archive: "Archive",
+} as const;
+export const SheetStatusSchema = z.enum(SheetStatus);
+export type SheetStatus = z.infer<typeof SheetStatusSchema>;
+
+// ❌ WRONG - Do NOT use arrays
+export const SheetStatusSchema = z.enum(["Draft", "Review", "Active"]);
+
+// ❌ WRONG - Do NOT use z.nativeEnum()
+export const SheetStatusSchema = z.nativeEnum(SheetStatus);
+```
 
 **For purely internal constants (no validation needed):**
 
@@ -61,22 +105,6 @@ export const LogLevel = {
 } as const;
 export type LogLevel = (typeof LogLevel)[keyof typeof LogLevel];
 ```
-
-**For values that need Zod validation:**
-
-```typescript
-export const SheetStatus = {
-  Draft: "Draft",
-  Review: "Review",
-  Active: "Active",
-  Dead: "Dead",
-  Archive: "Archive",
-} as const;
-export const SheetStatusSchema = z.enum(SheetStatus);
-export type SheetStatus = z.infer<typeof SheetStatusSchema>;
-```
-
-**Note:** Zod 4 supports passing objects directly to `z.enum()` - no Zod 3 workarounds needed.
 
 ---
 
@@ -469,27 +497,65 @@ if (!validated.success) {
 
 ---
 
-## 1️⃣1️⃣ Import Organization
+## 1️⃣1️⃣ Import Organization & Barrel Exports
 
-## 🚨 **CRITICAL WARNING: NEVER USE .JS EXTENSIONS IN IMPORTS**
+## 🚨 **CRITICAL IMPORT RULES**
 
-**This is a hard rule with ZERO exceptions. If you use .js extensions, the code will break.**
+### Rule 1: ALWAYS Use Barrel Exports
 
-**Order:**
+**MANDATORY**: Import from barrel exports (index.ts), NEVER from direct file paths.
+
+```typescript
+// ✅ CORRECT - Import from barrel export
+import { CustomIdProtocol } from "utilities";
+import { CustomIdAction } from "types";
+import { User } from "entities";
+
+// ❌ WRONG - Never import from direct file paths
+import { CustomIdProtocol } from "./utilities/custom-id-protocol.utility";
+import { CustomIdAction } from "./types/custom-id.types";
+import { User } from "./entities/user.entity";
+```
+
+**Every directory MUST have an index.ts file exporting all public members:**
+
+```typescript
+// utilities/index.ts
+export * from "./emoji-manager";
+export * from "./autocomplete-protocol.utility";
+export * from "./custom-id-protocol.utility";
+```
+
+### Rule 2: NEVER Use File Extensions
+
+**This is a hard rule with ZERO exceptions. File extensions will break the build.**
+
+```typescript
+// ✅ CORRECT
+import { users } from "./schema/users";
+import { Character } from "@realm/core";
+
+// ❌ WRONG - Will break the build
+import { users } from "./schema/users.js";
+import { users } from "./schema/users.ts";
+```
+
+### Rule 3: NEVER Import from /index Explicitly
+
+```typescript
+// ✅ CORRECT - Import from directory
+import { User } from "./entities";
+
+// ❌ WRONG - Don't explicitly reference index
+import { User } from "./entities/index";
+```
+
+### Import Order
 
 1. External dependencies
 2. Internal package imports (`@realm/*`)
-3. Relative imports
+3. Relative imports (using barrel exports)
 4. Type-only imports
-
-**CRITICAL Import Rules:**
-
-- **NEVER include file extensions** (`.ts`, `.js`, `.mts`, etc.) in import paths
-- **NEVER explicitly import from `index`** files - import from the directory instead
-  - ✅ Correct: `import { User } from "./entities"`
-  - ❌ Wrong: `import { User } from "./entities/index"`
-  - ✅ Correct: `import { users } from "./schema/users"`
-  - ❌ Wrong: `import { users } from "./schema/users.js"`
 
 **Example:**
 
@@ -502,6 +568,15 @@ import { v4 as uuidv4 } from "uuid";
 import { Character } from "@realm/core";
 import { GameSystem } from "@realm/common";
 
+// 3. Relative imports (using barrel exports)
+import { CustomIdProtocol } from "utilities";
+import { CustomIdAction } from "types";
+
+// 4. Type-only imports
+import type { ICharacterRepository } from "@realm/common";
+import type { CharacterId } from "@realm/common";
+```
+
 // 3. Relative imports (NO extensions, NO /index)
 import { CharacterMapper } from "./mappers/character.mapper";
 import { users } from "./schema/users";
@@ -509,6 +584,7 @@ import { users } from "./schema/users";
 // 4. Type-only imports
 import type { ICharacterRepository } from "@realm/common";
 import type { CharacterId } from "@realm/common";
+
 ```
 
 ## Architecture & Package Structure
@@ -520,6 +596,7 @@ This is a **pnpm monorepo** using **Turborepo** for build orchestration with Typ
 **CRITICAL RULE:** All packages depend ONLY on `@realm/common`. Packages DO NOT depend on each other.
 
 ```
+
         ┌─────────────────────────────────┐
         │     @realm/common               │
         │  (Shared Kernel - Base Package) │
@@ -532,102 +609,108 @@ This is a **pnpm monorepo** using **Turborepo** for build orchestration with Typ
                      ↑
         ┌────────────┼────────────┐
         │            │            │
-   ┌────▼────┐  ┌───▼────┐  ┌───▼────────┐
-   │  core   │  │database│  │repositories│
-   └─────────┘  └────────┘  └────────────┘
-        ↑            ↑            ↑
-        └────────────┴────────────┘
-                     │
-              ┌──────▼──────┐
-              │  apps (api, │
-              │   bot, web) │
-              └─────────────┘
+
+┌────▼────┐ ┌───▼────┐ ┌───▼────────┐
+│ core │ │database│ │repositories│
+└─────────┘ └────────┘ └────────────┘
+↑ ↑ ↑
+└────────────┴────────────┘
+│
+┌──────▼──────┐
+│ apps (api, │
+│ bot, web) │
+└─────────────┘
+
 ```
 
 ### Current Package Structure
 
 ```
+
 realm-of-darkness/
-├── apps/                           # Applications
-│   ├── api/                       ⚠️  NestJS REST/WebSocket API (scaffolded)
-│   ├── bot/                       ⚠️  Discord.js bots (needs TS migration)
-│   └── frontend/                  ⏳ React SPA (not started)
+├── apps/ # Applications
+│ ├── api/ ⚠️ NestJS REST/WebSocket API (scaffolded)
+│ ├── bot/ ⚠️ Discord.js bots (needs TS migration)
+│ └── frontend/ ⏳ React SPA (not started)
 │
-├── packages/                       # Shared libraries
-│   ├── common/                    ✅ Shared kernel (DTOs, contracts, Zod schemas)
-│   │   ├── primitives/           # Core types (Snowflake, HttpStatus)
-│   │   ├── error.definitions.ts  # RealmError, UserError
-│   │   ├── user.definitions.ts   # User DTOs & repository interface
-│   │   ├── guild.definitions.ts  # Guild DTOs & repository interface
-│   │   ├── member.definitions.ts # Member DTOs & repository interface
-│   │   ├── supporter.definitions.ts # Supporter DTOs & repository interface
-│   │   └── character/            # Character DTOs & Zod schemas
-│   │
-│   ├── core/                      🔄 Business logic (entities, services, actions)
-│   │   ├── entities/             # Domain entities (User, Guild, Character, etc.)
-│   │   ├── services/             # Pure services (standalone operations)
-│   │   ├── actions/              # Coordinator services (orchestration)
-│   │   └── value-objects/        # Immutable value objects
-│   │
-│   ├── database/                  ✅ Drizzle ORM schemas (PostgreSQL)
-│   │   ├── schema/               # Table definitions (users, guilds, characters)
-│   │   └── index.ts              # DB connection & type exports
-│   │
-│   ├── repositories/              🔄 Data access implementations
-│   │   ├── user.repository.ts
-│   │   ├── guild.repository.ts
-│   │   ├── member.repository.ts
-│   │   └── mappers/              # DTO ↔ DB mappers
-│   │
-│   ├── logger/                    ✅ Logging singleton
-│   └── events/                    ⏳ Redis pub/sub (planned)
+├── packages/ # Shared libraries
+│ ├── common/ ✅ Shared kernel (DTOs, contracts, Zod schemas)
+│ │ ├── primitives/ # Core types (Snowflake, HttpStatus)
+│ │ ├── error.definitions.ts # RealmError, UserError
+│ │ ├── user.definitions.ts # User DTOs & repository interface
+│ │ ├── guild.definitions.ts # Guild DTOs & repository interface
+│ │ ├── member.definitions.ts # Member DTOs & repository interface
+│ │ ├── supporter.definitions.ts # Supporter DTOs & repository interface
+│ │ └── character/ # Character DTOs & Zod schemas
+│ │
+│ ├── core/ 🔄 Business logic (entities, services, actions)
+│ │ ├── entities/ # Domain entities (User, Guild, Character, etc.)
+│ │ ├── services/ # Pure services (standalone operations)
+│ │ ├── actions/ # Coordinator services (orchestration)
+│ │ └── value-objects/ # Immutable value objects
+│ │
+│ ├── database/ ✅ Drizzle ORM schemas (PostgreSQL)
+│ │ ├── schema/ # Table definitions (users, guilds, characters)
+│ │ └── index.ts # DB connection & type exports
+│ │
+│ ├── repositories/ 🔄 Data access implementations
+│ │ ├── user.repository.ts
+│ │ ├── guild.repository.ts
+│ │ ├── member.repository.ts
+│ │ └── mappers/ # DTO ↔ DB mappers
+│ │
+│ ├── logger/ ✅ Logging singleton
+│ └── events/ ⏳ Redis pub/sub (planned)
 │
-└── backend-legacy/                 ⚠️  Old Django code (frozen, reference only)
+└── backend-legacy/ ⚠️ Old Django code (frozen, reference only)
+
 ```
 
 ### Architecture Layers & Data Flow
 
 ```
+
 ┌─────────────────────────────────────────────────────────────┐
-│  PRESENTATION LAYER (apps/api, apps/bot)                    │
-│  - Gather endpoint/event data (HTTP requests, Discord events)│
-│  - Inject dependencies into services/actions                 │
-│  - Call services/actions from @realm/core                    │
-│  - Format responses (JSON for API, embeds for Discord)       │
-│  - NO validation (that's in services via Zod)                │
+│ PRESENTATION LAYER (apps/api, apps/bot) │
+│ - Gather endpoint/event data (HTTP requests, Discord events)│
+│ - Inject dependencies into services/actions │
+│ - Call services/actions from @realm/core │
+│ - Format responses (JSON for API, embeds for Discord) │
+│ - NO validation (that's in services via Zod) │
 └──────────────────┬──────────────────────────────────────────┘
-                   │ calls
+│ calls
 ┌──────────────────▼──────────────────────────────────────────┐
-│  COORDINATION LAYER (core/actions/)                          │
-│  - Orchestrate multiple pure services                        │
-│  - Handle cross-cutting concerns (transactions, events)      │
-│  - Return DTOs                                               │
+│ COORDINATION LAYER (core/actions/) │
+│ - Orchestrate multiple pure services │
+│ - Handle cross-cutting concerns (transactions, events) │
+│ - Return DTOs │
 └──────────────────┬──────────────────────────────────────────┘
-                   │ calls
+│ calls
 ┌──────────────────▼──────────────────────────────────────────┐
-│  SERVICE LAYER (core/services/)                              │
-│  - Standalone business operations                            │
-│  - Validate inputs (Zod schemas from @realm/common)          │
-│  - Use entities for business logic                           │
-│  - Call repositories for data access                         │
-│  - Return DTOs (not entities)                                │
+│ SERVICE LAYER (core/services/) │
+│ - Standalone business operations │
+│ - Validate inputs (Zod schemas from @realm/common) │
+│ - Use entities for business logic │
+│ - Call repositories for data access │
+│ - Return DTOs (not entities) │
 └──────────────────┬──────────────────────────────────────────┘
-                   │ calls
+│ calls
 ┌──────────────────▼──────────────────────────────────────────┐
-│  INFRASTRUCTURE LAYER (repositories/)                        │
-│  - Implement repository interfaces from @realm/common        │
-│  - Map DTOs ↔ Database records                               │
-│  - Manage timestamps (createdAt, updatedAt)                  │
-│  - Return DTOs                                               │
+│ INFRASTRUCTURE LAYER (repositories/) │
+│ - Implement repository interfaces from @realm/common │
+│ - Map DTOs ↔ Database records │
+│ - Manage timestamps (createdAt, updatedAt) │
+│ - Return DTOs │
 └──────────────────┬──────────────────────────────────────────┘
-                   │ uses
+│ uses
 ┌──────────────────▼──────────────────────────────────────────┐
-│  DATABASE LAYER (database/)                                  │
-│  - Drizzle ORM schemas                                       │
-│  - Database connection                                       │
-│  - Type exports                                              │
+│ DATABASE LAYER (database/) │
+│ - Drizzle ORM schemas │
+│ - Database connection │
+│ - Type exports │
 └─────────────────────────────────────────────────────────────┘
-```
+
+````
 
 **Key Architectural Rules:**
 
@@ -654,7 +737,7 @@ realm-of-darkness/
    git checkout refactor/project-overhaul
    pnpm install
    pnpm build
-   ```
+````
 
 3. **Environment variables**: See [ENV_SETUP.md](../ENV_SETUP.md)
    - Single root `.env` file contains ALL environment variables

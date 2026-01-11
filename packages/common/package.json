@@ -18,6 +18,6 @@
   },
   "dependencies": {
     "tsup": "workspace:*",
-    "zod": "^4.2.1"
+    "zod": "workspace:*"
   }
 }

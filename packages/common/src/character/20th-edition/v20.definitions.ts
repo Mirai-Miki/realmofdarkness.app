@@ -11,6 +11,8 @@ import { Splat } from "../character.definitions";
 export const Vampire20thConstraints = {
   BloodPoolCurrent: { min: 0, max: 50 },
   BloodPoolTotal: { min: 1, max: 50 },
+  MoralityValue: { min: 0, max: 10 },
+  MortalityName: { minLength: 1, maxLength: 50 },
 } as const;
 
 export const BloodTrackerDataSchema = z
@@ -30,9 +32,27 @@ export const BloodTrackerDataSchema = z
   });
 export type BloodTrackerData = z.infer<typeof BloodTrackerDataSchema>;
 
+export const MoralityDataSchema = z
+  .object({
+    value: z
+      .int()
+      .min(Vampire20thConstraints.MoralityValue.min)
+      .max(Vampire20thConstraints.MoralityValue.max),
+    name: z
+      .string()
+      .min(Vampire20thConstraints.MortalityName.minLength)
+      .max(Vampire20thConstraints.MortalityName.maxLength),
+  })
+  .refine((data) => data.value <= 10, {
+    message: "Morality cannot exceed 10",
+    path: ["value"],
+  });
+export type MoralityData = z.infer<typeof MoralityDataSchema>;
+
 export const Vampire20thDataSchema = Character20thDataSchema.extend({
   splat: z.literal(Splat.Vampire20th),
   bloodPool: BloodTrackerDataSchema,
+  morality: MoralityDataSchema,
 });
 export type Vampire20thData = z.infer<typeof Vampire20thDataSchema>;
 
@@ -47,12 +67,19 @@ export type Vampire20thData = z.infer<typeof Vampire20thDataSchema>;
 export interface IVampire20th extends ICharacter20th {
   // Blood pool getters
   get bloodPool(): IBloodTracker;
+  get morality(): IMoralityTracker;
 
   // Blood pool methods
   spendBlood(amount: number): void;
   slakeBlood(amount: number): void;
   setCurrentBlood(amount: number): void;
   setBloodPool(current: number, total: number): void;
+
+  // Morality methods
+  loseMorality(amount: number): void;
+  gainMorality(amount: number): void;
+  setCurrentMorality(amount: number): void;
+  setMorality(value: number, name: string): void;
 
   toData(): Vampire20thData;
 }
@@ -68,4 +95,18 @@ export interface IBloodTracker extends BloodTrackerData {
   slake(amount: number): IBloodTracker;
   setCurrent(amount: number): IBloodTracker;
   setMax(amount: number): IBloodTracker;
+}
+
+/**
+ * Vampire 20th Morality Tracker Value Object
+ * Represents Humanity or Path of Enlightenment rating
+ */
+export interface IMoralityTracker extends MoralityData {
+  readonly current: number;
+  readonly total: number;
+
+  lose(amount: number): IMoralityTracker;
+  gain(amount: number): IMoralityTracker;
+  setValue(amount: number): IMoralityTracker;
+  setName(name: string): IMoralityTracker;
 }

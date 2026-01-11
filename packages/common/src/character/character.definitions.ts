@@ -24,6 +24,7 @@ export const CharacterConstraints = {
   Name: {
     MinLength: 1,
     MaxLength: 50,
+    systemPrefix: "~",
     Regex: /^(?!~).*$/, // Cannot start ~ as it's reserved for system use
   },
   Experience: {

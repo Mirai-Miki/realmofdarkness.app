@@ -1,6 +1,7 @@
 import type {
   SlashCommandSubcommandsOnlyBuilder,
   SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder,
   ChatInputCommandInteraction,
   MessageComponentInteraction,
   AutocompleteInteraction,
@@ -66,7 +67,10 @@ export const BotEventSchema = z.object({
  * Structurally matches BotCommandSchema but with proper Discord.js types.
  */
 export interface BotCommand {
-  data: SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder;
+  data:
+    | SlashCommandBuilder
+    | SlashCommandSubcommandsOnlyBuilder
+    | SlashCommandOptionsOnlyBuilder;
   execute(interaction: ChatInputCommandInteraction): Promise<void>;
   autocomplete?(interaction: AutocompleteInteraction): Promise<void>;
 }

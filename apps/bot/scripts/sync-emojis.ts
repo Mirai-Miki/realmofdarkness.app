@@ -1,9 +1,10 @@
 import { REST } from "discord.js";
 import { join } from "path";
-import { readdir, readFile, writeFile, mkdir } from "fs/promises";
+import { readFile, writeFile, mkdir } from "fs/promises";
 import { config } from "dotenv";
 import { resolve } from "path";
 import { BotTypes } from "../src/types";
+import { getAllEmojiFiles } from "@realm/assets";
 
 // Load root .env
 config({ path: resolve(process.cwd(), "../../.env"), quiet: true });
@@ -59,19 +60,16 @@ async function syncEmojis(): Promise<void> {
   console.log("║            Discord Application Emoji Sync                ║");
   console.log("╚══════════════════════════════════════════════════════════╝\n");
 
-  const emojisPath = join(process.cwd(), "emojis");
-
   let emojiFiles: EmojiFile[];
   try {
-    const entries = await readdir(emojisPath);
-    emojiFiles = entries
-      .filter((file) => /\.(png|jpg|jpeg|gif|webp)$/i.test(file))
-      .map((file) => ({
-        name: file.replace(/\.[^.]+$/, ""),
-        path: join(emojisPath, file),
-      }));
+    // Use the new utility to get all emoji files
+    const allEmojis = getAllEmojiFiles();
+    emojiFiles = allEmojis.map((emoji) => ({
+      name: emoji.name,
+      path: emoji.absolutePath,
+    }));
   } catch (error) {
-    console.log("⚠️  No emojis folder found, skipping emoji sync\n");
+    console.log("⚠️  No emojis found, skipping emoji sync\n");
 
     // Write empty output file for Turbo cache
     const turboDir = join(process.cwd(), ".turbo");

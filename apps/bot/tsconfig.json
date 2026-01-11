@@ -6,22 +6,24 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "experimentalDecorators": true,
-    "typeRoots": ["node_modules/@types", "./src/types"],
+    "typeRoots": ["node_modules/@types", "src/types"],
     "baseUrl": "./src",
     "paths": {
-      "services": ["./services/index.ts"],
-      "services/*": ["./services/*"],
+      "features": ["./features/index.ts"],
+      "features/*": ["./features/*"],
+      "framework": ["./framework/index.ts"],
+      "framework/*": ["./framework/*"],
       "utilities": ["./utilities/index.ts"],
       "utilities/*": ["./utilities/*"],
       "types": ["./types/index.ts"],
-      "types/*": ["./types/*"],
-      "validations": ["./validations.ts"]
+      "types/*": ["./types/*"]
     }
   },
   "include": ["src/**/*", "test/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../../packages/common" },
+    { "path": "../../packages/assets" },
     { "path": "../../packages/logger" },
     { "path": "../../packages/core" },
     { "path": "../../packages/repositories" },

@@ -1,11 +1,7 @@
-import type { ICharacter } from "../character.definitions";
-
 import { z } from "zod";
 import { BaseCharacterDataSchema } from "../character.definitions";
-
-// ===========================================================================
-// 20th Edition Character Constraints & Schema
-// ===========================================================================
+import type { ICharacter } from "../character.definitions";
+import { Splat } from "../character.definitions";
 
 export const Wod20CharacterConstraints = {
   AttributesSkillValues: { Min: 0, Max: 5 },
@@ -13,6 +9,17 @@ export const Wod20CharacterConstraints = {
   Health: { Min: 7, Max: 15 },
   Willpower: { Min: 1, Max: 10 },
 } as const;
+
+export const Splats20th = [
+  Splat.Vampire20th,
+  Splat.Werewolf20th,
+  Splat.Changeling20th,
+  Splat.Mage20th,
+  Splat.Demon20th,
+  Splat.Wraith20th,
+  Splat.Human20th,
+  Splat.Ghoul20th,
+] as const;
 
 export const Wod20AttributeSkillDataSchema = z.object({
   rating: z

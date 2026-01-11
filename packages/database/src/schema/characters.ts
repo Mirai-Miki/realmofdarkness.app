@@ -40,11 +40,13 @@ type SplatPayload<T> = Omit<
 
 /**
  * Union of all possible character JSONB payloads.
+ *
+ * IMPORTANT: When adding new character types, you MUST add them here.
+ * This ensures TypeScript will catch any schema changes in repository and database code.
  */
 export type CharacterJsonbData =
   | SplatPayload<Vampire5thData>
-  | SplatPayload<Vampire20thData>
-  | Record<string, unknown>;
+  | SplatPayload<Vampire20thData>;
 
 /**
  * Character Splat types Enum
