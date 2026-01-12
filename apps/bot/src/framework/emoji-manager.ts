@@ -36,10 +36,9 @@ class EmojiManager {
       // Clear existing emojis
       this.emojis.clear();
 
-      // Map emojis by name for easy access
+      // Map emojis by their MD5 hash name
       for (const emoji of applicationEmojis.values()) {
-        const name = emoji.name as EmojiName;
-        this.emojis.set(name, emoji);
+        this.emojis.set(emoji.name as EmojiName, emoji);
       }
 
       this.loaded = true;

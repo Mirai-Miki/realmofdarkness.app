@@ -1,10 +1,9 @@
 import { REST, Routes } from "discord.js";
-import { pathToFileURL } from "url";
 import { join } from "path";
-import { readdir, writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import { config } from "dotenv";
 import { resolve } from "path";
-import { BotTypes } from "types";
+import { loader } from "../src/framework/loader";
 
 // Load root .env
 config({ path: resolve(process.cwd(), "../../.env"), quiet: true });
@@ -22,93 +21,43 @@ interface DeployResult {
   error?: string;
 }
 
-interface CommandWithPath {
-  data: any;
-  filePath: string;
-}
-
 const BOT_CONFIGS: BotConfig[] = [
   {
-    name: BotTypes.Wod5,
+    name: "WoD 5th Edition",
     clientId: process.env.CLIENT_ID_5TH,
     token: process.env.TOKEN_5TH,
   },
   {
-    name: BotTypes.Wod20,
+    name: "WoD 20th Anniversary",
     clientId: process.env.CLIENT_ID_20TH,
     token: process.env.TOKEN_20TH,
   },
   {
-    name: BotTypes.Cod,
+    name: "Chronicles of Darkness",
     clientId: process.env.CLIENT_ID_COD,
     token: process.env.TOKEN_COD,
   },
 ];
-
-/**
- * Get folder names for a bot type
- * Each bot should only load commands from its specific folder and common folder
- */
-function getBotFolders(botType: string): string[] {
-  const commonFolder = "common";
-
-  switch (botType) {
-    case BotTypes.Wod5:
-      return [BotTypes.Wod5, commonFolder];
-    case BotTypes.Wod20:
-      return [BotTypes.Wod20, commonFolder];
-    case BotTypes.Cod:
-      return [BotTypes.Cod, commonFolder];
-    default:
-      return [commonFolder];
-  }
-}
 
 async function deployCommands(): Promise<void> {
   console.log("\n╔══════════════════════════════════════════════════════════╗");
   console.log("║         Discord Command Deployment (Global)              ║");
   console.log("╚══════════════════════════════════════════════════════════╝\n");
 
-  const commandsPath = join(process.cwd(), "./src/interactions/commands");
-  const commandFiles = await getCommandFiles(commandsPath);
+  const featuresPath = join(process.cwd(), "./src/features");
 
-  // Load all commands with their file paths
-  const allCommands: CommandWithPath[] = [];
-  for (const file of commandFiles) {
-    try {
-      const commandModule = await import(pathToFileURL(file).href);
+  // Use loader to scan for command handlers (DRY - same logic as runtime)
+  const commandHandlers = await loader.scanCommandHandlers(featuresPath);
 
-      // Check for CommonJS style (module.exports = { data, execute })
-      if ("data" in commandModule && "execute" in commandModule) {
-        allCommands.push({ data: commandModule.data.toJSON(), filePath: file });
-        continue;
-      }
+  console.log(`📋 Found ${commandHandlers.length} total commands\n`);
 
-      // Check for ES module named exports (export const commandName = { data, execute })
-      // Look for any property that has data and execute
-      for (const [_key, value] of Object.entries(commandModule)) {
-        if (
-          typeof value === "object" &&
-          value !== null &&
-          "data" in value &&
-          "execute" in value
-        ) {
-          allCommands.push({
-            data: (value as any).data.toJSON(),
-            filePath: file,
-          });
-          break; // Only take the first valid command from each file
-        }
-      }
-    } catch (error) {
-      console.error(`⚠️  Failed to load command ${file}:`, error);
-    }
-  }
-
-  console.log(`📋 Found ${allCommands.length} total commands\n`);
+  // Extract command data for deployment
+  const allCommands = commandHandlers.map((handler) => handler.data.toJSON());
 
   const results: DeployResult[] = [];
 
+  // Note: Currently deploying all commands to all bots
+  // TODO: Implement bot-specific command filtering when we have multiple bot types
   for (const { name, clientId, token } of BOT_CONFIGS) {
     if (!clientId || !token) {
       console.log(`⚠️  Skipping ${name} (missing credentials)\n`);
@@ -116,34 +65,19 @@ async function deployCommands(): Promise<void> {
       continue;
     }
 
-    // Filter commands for this bot based on folder
-    const botFolders = getBotFolders(name);
-    const botCommands = allCommands.filter((cmd) => {
-      // Normalize path separators for cross-platform compatibility
-      const normalizedPath = cmd.filePath.replace(/\\/g, "/");
-
-      // Check if command is in any of this bot's folders
-      return botFolders.some((folder) =>
-        normalizedPath.includes(`/commands/${folder}/`)
-      );
-    });
-
-    console.log(
-      `🤖 ${name}: Deploying ${botCommands.length} commands (folders: ${botFolders.join(", ")})`
-    );
+    console.log(`🤖 ${name}: Deploying ${allCommands.length} commands`);
 
     try {
       const rest = new REST().setToken(token);
-      const commandData = botCommands.map((cmd) => cmd.data);
 
       await rest.put(Routes.applicationCommands(clientId), {
-        body: commandData,
+        body: allCommands,
       });
 
       console.log(
-        `✅ Successfully deployed ${botCommands.length} commands for ${name}\n`
+        `✅ Successfully deployed ${allCommands.length} commands for ${name}\n`
       );
-      results.push({ bot: name, success: true, count: botCommands.length });
+      results.push({ bot: name, success: true, count: allCommands.length });
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -168,22 +102,6 @@ async function deployCommands(): Promise<void> {
   }
 
   console.log("✨ All deployments completed successfully!\n");
-}
-
-async function getCommandFiles(dir: string): Promise<string[]> {
-  const files: string[] = [];
-  const entries = await readdir(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...(await getCommandFiles(fullPath)));
-    } else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
 }
 
 deployCommands().catch((error) => {

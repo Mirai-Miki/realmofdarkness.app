@@ -2,7 +2,10 @@ import fg from "fast-glob";
 import path from "path";
 import { pathToFileURL } from "url";
 import { logger } from "@realm/logger";
-import { BaseInteractionHandler } from "./entities/interaction-handlers.entity";
+import {
+  BaseInteractionHandler,
+  CommandHandler,
+} from "./entities/interaction-handlers.entity";
 import { DiscordEvent } from "./entities/discord-event.entity";
 import { registry } from "./registry";
 import type { Client } from "discord.js";
@@ -12,6 +15,61 @@ import type { Client } from "discord.js";
  * Scans the file system for handler and event files and registers them.
  */
 export class Loader {
+  /**
+   * Core method to scan files and extract handler instances.
+   * Does NOT register handlers - returns them for processing.
+   *
+   * @param rootDirectory - The root directory to scan
+   * @param pattern - Glob pattern to match files
+   * @returns Array of handler instances found
+   */
+  private async scanHandlerFiles(
+    rootDirectory: string,
+    pattern: string
+  ): Promise<BaseInteractionHandler[]> {
+    const files = await fg.glob(pattern, {
+      cwd: rootDirectory,
+      absolute: true,
+      ignore: ["**/*.test.ts", "**/*.spec.ts", "**/node_modules/**"],
+    });
+
+    const handlers: BaseInteractionHandler[] = [];
+
+    // Process each file
+    for (const filePath of files) {
+      try {
+        // Dynamic import - convert to file URL for Windows compatibility
+        const fileUrl = pathToFileURL(filePath).href;
+        const module = (await import(fileUrl)) as Record<string, unknown>;
+
+        // Scan all exports
+        for (const [, exportedItem] of Object.entries(module)) {
+          // Check for handler instances
+          if (exportedItem instanceof BaseInteractionHandler) {
+            handlers.push(exportedItem);
+          }
+          // Support arrays of handlers
+          else if (Array.isArray(exportedItem)) {
+            for (const item of exportedItem) {
+              if (item instanceof BaseInteractionHandler) {
+                handlers.push(item);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        // Only log errors if logger is available (runtime mode)
+        if (logger) {
+          logger.exception("Failed to load handler file", error, {
+            fields: { filePath },
+          });
+        }
+      }
+    }
+
+    return handlers;
+  }
+
   /**
    * Load all handlers from the features directory.
    * Scans for files matching the handler pattern and registers
@@ -24,49 +82,18 @@ export class Loader {
 
     logger.debug("Scanning for handlers", { fields: { rootDirectory } });
 
-    // Pattern matches: src/features/wod-20/dice/dice.handlers.ts
-    const pattern = "**/*.handlers.{ts,js}";
+    // Pattern matches: src/features/**/something.handler.ts
+    const pattern = "**/*.handler.{ts,js}";
 
-    const files = await fg.glob(pattern, {
-      cwd: rootDirectory,
-      absolute: true,
-      ignore: ["**/*.test.ts", "**/*.spec.ts", "**/node_modules/**"],
-    });
+    const handlers = await this.scanHandlerFiles(rootDirectory, pattern);
 
     logger.debug("Found handler files", {
-      fields: { count: files.length.toString() },
+      fields: { count: handlers.length.toString() },
     });
 
-    // Process each file
-    for (const filePath of files) {
-      try {
-        const relativePath = path.relative(process.cwd(), filePath);
-        logger.debug("Loading handler file", { fields: { relativePath } });
-
-        // Dynamic import - convert to file URL for Windows compatibility
-        const fileUrl = pathToFileURL(filePath).href;
-        const module = (await import(fileUrl)) as Record<string, unknown>;
-
-        // Scan all exports
-        for (const [, exportedItem] of Object.entries(module)) {
-          // Check for handler instances
-          if (exportedItem instanceof BaseInteractionHandler) {
-            registry.registerInteractionHandler(exportedItem);
-          }
-          // Support arrays of handlers
-          else if (Array.isArray(exportedItem)) {
-            for (const item of exportedItem) {
-              if (item instanceof BaseInteractionHandler) {
-                registry.registerInteractionHandler(item);
-              }
-            }
-          }
-        }
-      } catch (error) {
-        logger.exception("Failed to load handler file", error, {
-          fields: { filePath },
-        });
-      }
+    // Register all handlers
+    for (const handler of handlers) {
+      registry.registerInteractionHandler(handler);
     }
 
     const elapsed = Date.now() - start;
@@ -152,6 +179,27 @@ export class Loader {
         discordEvents: stats.discordEvents.toString(),
       },
     });
+  }
+
+  /**
+   * Scan and return all command handlers without registering them.
+   * Useful for deployment scripts that need to extract command data.
+   *
+   * @param rootDirectory - The root directory to scan
+   * @returns Array of CommandHandler instances
+   */
+  public async scanCommandHandlers(
+    rootDirectory: string
+  ): Promise<CommandHandler[]> {
+    // Pattern matches: src/features/**/something.handler.ts
+    const pattern = "**/*.handler.{ts,js}";
+
+    const allHandlers = await this.scanHandlerFiles(rootDirectory, pattern);
+
+    // Filter to only CommandHandler instances
+    return allHandlers.filter(
+      (handler): handler is CommandHandler => handler instanceof CommandHandler
+    );
   }
 }
 

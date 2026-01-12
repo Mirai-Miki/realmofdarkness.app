@@ -3,7 +3,7 @@ import { join } from "path";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { config } from "dotenv";
 import { resolve } from "path";
-import { BotTypes } from "../src/types";
+import { BotTypes } from "types";
 import { getAllEmojiFiles } from "@realm/assets";
 
 // Load root .env
@@ -64,12 +64,34 @@ async function syncEmojis(): Promise<void> {
   try {
     // Use the new utility to get all emoji files
     const allEmojis = getAllEmojiFiles();
+
+    if (allEmojis.length === 0) {
+      console.log("⚠️  No emojis found, skipping emoji sync\n");
+      console.log(
+        "   This usually means the emoji directory couldn't be located.\n"
+      );
+
+      // Write empty output file for Turbo cache
+      const turboDir = join(process.cwd(), ".turbo");
+      await mkdir(turboDir, { recursive: true });
+      await writeFile(
+        join(turboDir, "emoji-sync.log"),
+        JSON.stringify(
+          { timestamp: new Date().toISOString(), results: [] },
+          null,
+          2
+        )
+      );
+      return;
+    }
+
     emojiFiles = allEmojis.map((emoji) => ({
       name: emoji.name,
       path: emoji.absolutePath,
     }));
   } catch (error) {
-    console.log("⚠️  No emojis found, skipping emoji sync\n");
+    console.log("⚠️  Error loading emojis, skipping emoji sync\n");
+    console.error("   Error:", error);
 
     // Write empty output file for Turbo cache
     const turboDir = join(process.cwd(), ".turbo");
@@ -104,6 +126,7 @@ async function syncEmojis(): Promise<void> {
         `/applications/${clientId}/emojis`
       )) as ApplicationEmojisResponse;
 
+      // emoji.name is already the MD5 hash from Emojis object
       const fileEmojiNames = new Set(emojiFiles.map((e) => e.name));
       const currentEmojiNames = new Set(currentEmojis.items.map((e) => e.name));
 
@@ -122,6 +145,7 @@ async function syncEmojis(): Promise<void> {
         const mimeType = getMimeType(ext);
         const imageDataUri = `data:${mimeType};base64,${imageBuffer.toString("base64")}`;
 
+        // emoji.name is already the MD5 hash
         await rest.post(`/applications/${clientId}/emojis`, {
           body: { name: emoji.name, image: imageDataUri },
         });

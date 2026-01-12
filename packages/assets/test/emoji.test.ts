@@ -3,15 +3,22 @@
  * @description Demonstrates usage of the assets package
  */
 
-import { getEmojiPath, emojiExists, EMOJI_COUNT, type EmojiName } from "../src";
+import {
+  getEmojiPath,
+  emojiExists,
+  EMOJI_COUNT,
+  Emojis,
+  type EmojiName,
+} from "../src";
 import fs from "node:fs";
 
 describe("Emoji Assets", () => {
   describe("EmojiName type", () => {
-    it("should provide type-safe emoji names", () => {
-      // This should compile without errors
-      const validEmoji: EmojiName = "dice_v5_default_primary_crit";
-      expect(validEmoji).toBe("dice_v5_default_primary_crit");
+    it("should provide type-safe emoji names (MD5 hashes)", () => {
+      // Use Emojis object to get the MD5 hash
+      const validEmoji: EmojiName = Emojis.Dice.V5.Default.Primary.Crit;
+      expect(typeof validEmoji).toBe("string");
+      expect(validEmoji.length).toBe(32); // MD5 hashes are 32 chars
     });
 
     it("should have correct count of emojis", () => {
@@ -21,20 +28,24 @@ describe("Emoji Assets", () => {
 
   describe("getEmojiPath", () => {
     it("should return absolute path to emoji file", () => {
-      const emojiPath = getEmojiPath("dice_v5_default_primary_crit");
+      const emojiHash = Emojis.Dice.V5.Default.Primary.Crit;
+      const emojiPath = getEmojiPath(emojiHash);
 
       expect(emojiPath).toContain("emojis");
-      expect(emojiPath).toContain("dice_v5_default_primary_crit.webp");
+      expect(emojiPath).toMatch(/dice.*v5.*default.*primary.*crit\.webp/i);
     });
 
     it("should support custom extensions", () => {
-      const emojiPath = getEmojiPath("logo_gold", "png");
+      const logoHash = Emojis.Logo.Gold;
+      const emojiPath = getEmojiPath(logoHash, "png");
 
-      expect(emojiPath).toContain("logo_gold.png");
+      expect(emojiPath).toContain("logo");
+      expect(emojiPath).toContain(".png");
     });
 
     it("should return path to existing file for valid emoji", () => {
-      const emojiPath = getEmojiPath("dice_v5_default_primary_crit");
+      const emojiHash = Emojis.Dice.V5.Default.Primary.Crit;
+      const emojiPath = getEmojiPath(emojiHash);
 
       // File should exist
       expect(fs.existsSync(emojiPath)).toBe(true);
@@ -42,8 +53,9 @@ describe("Emoji Assets", () => {
   });
 
   describe("emojiExists", () => {
-    it("should return true for valid emoji names", () => {
-      expect(emojiExists("dice_v5_default_primary_crit")).toBe(true);
+    it("should return true for valid emoji hashes", () => {
+      const emojiHash = Emojis.Dice.V5.Default.Primary.Crit;
+      expect(emojiExists(emojiHash)).toBe(true);
     });
 
     it("should return false for empty strings", () => {

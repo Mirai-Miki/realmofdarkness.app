@@ -75,17 +75,6 @@ export interface LogField {
 }
 
 /**
- * Options for creating a log entry.
- */
-export interface LogOptions {
-  /** Additional fields to include in the log */
-  fields?: Record<string, string>;
-
-  /** An error object to extract information from */
-  error?: unknown;
-}
-
-/**
  * ANSI color codes for console output.
  */
 export const Color = {

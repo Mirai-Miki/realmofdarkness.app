@@ -8,7 +8,60 @@ import {
   type InteractionEditReplyOptions,
   SeparatorBuilder,
 } from "discord.js";
-import { Splat } from "@realm/common";
+import { Splat, CharacterNameSchema } from "@realm/common";
+
+/**
+ * Handler ID for the splat selection interface.
+ * Used by the interface handler to route interactions.
+ */
+export const SPLAT_SELECTION_HANDLER_ID = "character_creation";
+
+/**
+ * Encode character name into custom ID for splat selection dropdown.
+ *
+ * @param characterName - Validated character name
+ * @returns Custom ID string in format: "character_creation:characterName"
+ */
+export function encodeSplatSelectionId(characterName: string): string {
+  return `${SPLAT_SELECTION_HANDLER_ID}:${characterName}`;
+}
+
+/**
+ * Decode custom ID to extract character name.
+ *
+ * @param customId - Custom ID from interaction
+ * @returns Parsed and validated character name
+ * @throws {Error} If custom ID format is invalid or name fails validation
+ */
+export function decodeSplatSelectionId(customId: string): {
+  characterName: string;
+} {
+  const parts = customId.split(":");
+
+  if (parts.length !== 2) {
+    throw new Error(
+      `Invalid custom ID format: expected 2 parts, got ${parts.length}`
+    );
+  }
+
+  const [handlerId, characterName] = parts;
+
+  if (handlerId !== SPLAT_SELECTION_HANDLER_ID) {
+    throw new Error(
+      `Invalid handler ID: expected ${SPLAT_SELECTION_HANDLER_ID}, got ${handlerId}`
+    );
+  }
+
+  // Validate character name
+  const validation = CharacterNameSchema.safeParse(characterName);
+  if (!validation.success) {
+    throw new Error(
+      `Invalid character name in custom ID: ${validation.error.message}`
+    );
+  }
+
+  return { characterName: validation.data };
+}
 
 /**
  * Renders the splat selection page for character creation using Components V2.
@@ -45,7 +98,7 @@ export class SplatSelectionView {
 
     // Splat selection menu (outside container)
     const selectMenu = new StringSelectMenuBuilder()
-      .setCustomId("TODO")
+      .setCustomId(encodeSplatSelectionId(characterName))
       .setPlaceholder("Select a character type...")
       .addOptions(
         Object.entries(Splat).map(([key, value]) =>

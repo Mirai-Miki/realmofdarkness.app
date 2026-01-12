@@ -10,6 +10,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 // Get directory name in ES module context
@@ -117,6 +118,15 @@ function scanEmojisRecursive(
 }
 
 /**
+ * Generate MD5 hash for Discord emoji name
+ * @param fullName - Full emoji name (e.g., "dice_v5_default_secondary_bestial")
+ * @returns 32-character hex MD5 hash
+ */
+function toDiscordHash(fullName: string): string {
+  return createHash("md5").update(fullName).digest("hex");
+}
+
+/**
  * Build nested object tree from emoji files
  */
 function buildEmojiTree(emojis: EmojiFile[]): EmojiTree {
@@ -131,8 +141,8 @@ function buildEmojiTree(emojis: EmojiFile[]): EmojiTree {
       const isLast = i === emoji.segments.length - 1;
 
       if (isLast) {
-        // Leaf node: assign emoji name
-        current[segment] = emoji.name;
+        // Leaf node: assign MD5 hash as Discord emoji name
+        current[segment] = toDiscordHash(emoji.name);
       } else {
         // Branch node: create nested object if needed
         if (typeof current[segment] !== "object") {
@@ -220,8 +230,8 @@ function validateStructure(tree: EmojiTree): void {
  * Generate TypeScript type definition content
  */
 function generateTypeContent(emojis: EmojiFile[], tree: EmojiTree): string {
-  const emojiNames = emojis.map((e) => e.name).sort();
-  const typeUnion = emojiNames.map((name) => `  | "${name}"`).join("\n");
+  // Generate MD5 hashes for each emoji (these are the Discord emoji names)
+  const emojiHashes = emojis.map((e) => toDiscordHash(e.name)).sort();
 
   const objectCode = generateObjectCode(tree);
 
@@ -233,24 +243,26 @@ function generateTypeContent(emojis: EmojiFile[], tree: EmojiTree): string {
 
 import { z } from "zod";
 
-
-
 /**
- * Zod schema for emoji name validation
+ * Zod schema for emoji name validation.
+ * Emoji names are MD5 hashes (32 characters) used as Discord emoji names.
  */
 export const EmojiNameSchema = z.enum([
-${emojiNames.map((name) => `  "${name}",`).join("\n")}
+${emojiHashes.map((hash) => `  "${hash}",`).join("\n")}
 ]);
 
 /**
- * Union type of all available emoji asset names.
- * Each name corresponds to an image file in the emojis/ directory.
+ * Union type of all available emoji names (MD5 hashes).
+ * Each hash corresponds to an emoji uploaded to Discord as an application emoji.
  *
  * @example
  * \`\`\`typescript
  * import type { EmojiName } from '@realm/assets';
+ * import { Emojis } from '@realm/assets';
  *
- * const emoji: EmojiName = 'dice_v5_default_primary_crit';
+ * // Access emoji hash via nested object
+ * const critDie: EmojiName = Emojis.Dice.V5.Default.Primary.Crit;
+ * // critDie is the MD5 hash string
  * \`\`\`
  */
 export type EmojiName = z.infer<typeof EmojiNameSchema>;
@@ -258,33 +270,28 @@ export type EmojiName = z.infer<typeof EmojiNameSchema>;
 /**
  * Total count of available emojis
  */
-export const EMOJI_COUNT = ${emojiNames.length} as const;
+export const EMOJI_COUNT = ${emojiHashes.length} as const;
 
 /**
  * Strongly-typed emoji asset accessor.
  * Provides nested object access matching the folder structure.
+ * Values are MD5 hashes used as Discord emoji names.
  *
  * @example
  * \`\`\`typescript
  * import { Emojis } from '@realm/assets';
  *
- * // Access V5 dice
+ * // Access V5 dice - returns MD5 hash
  * const critDie = Emojis.Dice.V5.Default.Primary.Crit;
- * // Returns: "dice_v5_default_primary_crit"
+ * // Returns: "31d0640fb8de2b6c669cb749ec8e90e5" (MD5 hash)
  *
- * // Access progress bar
- * const greenLeft = Emojis.ProgressBar.Green.Filled.Left;
- * // Returns: "progress_bar_green_filled_left"
+ * // Use with EmojiManager
+ * const emoji = emojiManager.get(Emojis.Dice.V5.Default.Primary.Crit);
  * \`\`\`
  */
 export const Emojis = {
 ${objectCode}
 } as const;
-
-/**
- * Type of the Emojis constant
- */
-export type EmojisType = typeof Emojis;
 `;
 }
 

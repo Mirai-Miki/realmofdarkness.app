@@ -35,7 +35,7 @@ export interface LogOptions {
   /** Additional structured fields for the log entry */
   fields?: Record<string, string>;
 
-  /** Error object (used by exception method) */
+  /** Error object */
   error?: unknown;
 
   /** Whether to send this log to Discord (overrides default behavior) */

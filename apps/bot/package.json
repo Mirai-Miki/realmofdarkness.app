@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "tsx scripts/deploy-commands.ts && tsx scripts/sync-emojis.ts",
     "build": "tsc",
     "clean": "rimraf dist .turbo",
     "typecheck": "tsc --noEmit",

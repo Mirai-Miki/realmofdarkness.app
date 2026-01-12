@@ -24,4 +24,4 @@
  */
 
 export { logger } from "./logger";
-export type { LoggerConfig, LogOptions } from "./logger.types";
+export type { LoggerConfig } from "./logger.types";

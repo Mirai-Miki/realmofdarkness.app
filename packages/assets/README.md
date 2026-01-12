@@ -20,7 +20,7 @@ pnpm add @realm/assets
 ### Accessing Emojis
 
 ```typescript
-import { Emojis, type EmojiName } from '@realm/assets';
+import { Emojis, type EmojiName } from "@realm/assets";
 
 // Type-safe nested access
 const critDie = Emojis.Dice.V5.Default.Primary.Crit;
@@ -34,7 +34,7 @@ const greenBar = Emojis.ProgressBar.Green.Filled.Left;
 ### Getting File Paths
 
 ```typescript
-import { getAllEmojiFiles, getEmojiFilePath } from '@realm/assets';
+import { getAllEmojiFiles, getEmojiFilePath } from "@realm/assets";
 
 // Get all emoji files with paths
 const emojis = getAllEmojiFiles();
@@ -47,12 +47,11 @@ const path = getEmojiFilePath("dice_v5_default_primary_crit");
 ### Themed Dice Sets
 
 ```typescript
-import { Emojis, type V5DiceSet } from '@realm/assets';
+import { Emojis, type V5DiceSet } from "@realm/assets";
 
-function loadV5Dice(theme: 'default' | 'wod'): V5DiceSet {
-  const diceSet = theme === 'default' 
-    ? Emojis.Dice.V5.Default 
-    : Emojis.Dice.V5.Wod;
+function loadV5Dice(theme: "default" | "wod"): V5DiceSet {
+  const diceSet =
+    theme === "default" ? Emojis.Dice.V5.Default : Emojis.Dice.V5.Wod;
 
   return {
     primary: {

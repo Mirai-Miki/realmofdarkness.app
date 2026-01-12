@@ -4,7 +4,7 @@
  */
 
 // Export types
-export type { EmojiName, EmojisType } from "./types";
+export type { EmojiName } from "./types";
 export { EMOJI_COUNT, Emojis, EmojiNameSchema } from "./types";
 
 // Export utilities

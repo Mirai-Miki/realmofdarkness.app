@@ -1,10 +1,15 @@
-import type { LoggerConfig, LogEntry, LogOptions } from "./logger.types";
+import type { LoggerConfig, LogEntry } from "./logger.types";
 
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 import { HTTPError } from "discord.js";
-import { RealmError, LogLevelNameSchema, type ILogger } from "@realm/common";
+import {
+  RealmError,
+  LogLevelNameSchema,
+  type ILogger,
+  type LogOptions,
+} from "@realm/common";
 import { DiscordLogger } from "./discord-logger";
 import { FileLogger } from "./file-logger";
 import { LogLevel, Environment } from "@realm/common";
@@ -289,7 +294,8 @@ class Logger implements ILogger {
 
   /**
    * Logs a RealmError with all its metadata.
-   * UserErrors are not logged as they represent user errors, not system issues.
+   * If the error has log=false, it will be logged at Debug level instead of Error level.
+   * This allows filtering in production while preserving logs in development.
    *
    * @param error - The error to log
    * @param additionalOptions - Additional logging options to merge
@@ -300,24 +306,10 @@ class Logger implements ILogger {
     error: unknown,
     additionalOptions: Omit<LogOptions, "error"> = {}
   ): void {
-    let options: LogOptions;
-    if (error instanceof RealmError && !error.log) {
-      return;
-    } else if (error instanceof RealmError) {
-      options = {
-        fields: {
-          ...error.fields,
-          ...additionalOptions.fields,
-        },
-        error: error,
-      };
-    } else {
-      // Handle error or unknown error types
-      options = {
-        fields: additionalOptions.fields,
-        error: error,
-      };
-    }
+    const options: LogOptions = {
+      fields: additionalOptions.fields,
+      error: error,
+    };
 
     this.log(LogLevel.Error, message, options);
   }
@@ -335,6 +327,12 @@ class Logger implements ILogger {
     message: string,
     options: LogOptions = {}
   ): void {
+    // Check if the error has log=false and downgrade to Debug level
+    // This must happen BEFORE the minLevelPriority check
+    if (options.error instanceof RealmError && !options.error.log) {
+      level = LogLevel.Debug;
+    }
+
     // Check if this log level should be processed
     if (level < this.minLevelPriority) {
       return;
@@ -425,9 +423,6 @@ class Logger implements ILogger {
 
       if (options.error instanceof RealmError && options.error.cause) {
         errorToLog = options.error.cause;
-        const fields = options.fields ?? {};
-        fields["Raised by RealmError"] = `RealmError: ${options.error.message}`;
-        options.fields = fields;
       } else if (options.error instanceof Error) {
         errorToLog = options.error;
       } else {
@@ -442,8 +437,14 @@ class Logger implements ILogger {
     }
 
     // Add additional fields
-    if (options.fields) {
-      logEntry.fields = options.fields;
+    if (
+      options.fields ||
+      (options.error instanceof RealmError && options.error.fields)
+    ) {
+      logEntry.fields = {
+        ...options.fields,
+        ...(options.error instanceof RealmError ? options.error.fields : {}),
+      };
     }
 
     return logEntry;

@@ -9,6 +9,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import type { EmojiName } from "../types/emoji.types.js";
 
@@ -53,11 +54,28 @@ function isSupportedImageFile(filename: string): boolean {
 
 /**
  * Get the root emojis directory path
+ *
+ * This function finds the package root by looking for package.json,
+ * which works reliably whether code is run from src/ or dist/.
  */
 function getEmojisDir(): string {
-  // From utilities/ -> src/ -> package root -> emojis/
-  const packageRoot = path.resolve(__dirname, "..", "..");
-  return path.join(packageRoot, "emojis");
+  // Start from current file location
+  let currentDir = __dirname;
+
+  // Walk up the directory tree until we find package.json
+  while (currentDir !== path.dirname(currentDir)) {
+    const packageJsonPath = path.join(currentDir, "package.json");
+    if (fs.existsSync(packageJsonPath)) {
+      // Found the package root
+      return path.join(currentDir, "emojis");
+    }
+    currentDir = path.dirname(currentDir);
+  }
+
+  // Fallback: assume we're in the package and emojis is a sibling
+  throw new Error(
+    "Could not find package root (no package.json found in parent directories)"
+  );
 }
 
 /**
@@ -86,7 +104,11 @@ function scanEmojisRecursive(
       // Add emoji file
       const baseName = path.parse(entry.name).name;
       const segments = [...pathPrefix, baseName];
-      const name = segments.join("_") as EmojiName;
+      const fullName = segments.join("_");
+      // Use MD5 hash as the emoji name (matches Discord emoji names)
+      const name = createHash("md5")
+        .update(fullName)
+        .digest("hex") as EmojiName;
       const relativePath = path.relative(rootDir, fullPath);
       const extension = path.extname(entry.name);
 
