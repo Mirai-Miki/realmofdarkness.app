@@ -2,6 +2,7 @@
 """
 Script to set up and verify the Python virtual environment
 """
+
 import subprocess
 import sys
 import os
