@@ -320,7 +320,7 @@ deploy_bots() {
 
         # Start fresh process
         print_color $YELLOW "[BOTS]       Starting fresh $BOT_NAME process..."
-        run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 start '$SCRIPT_PATH' -- $SCRIPT_ARGS $PM2_PARAMS --name '$BOT_NAME'"
+        run_as_user "$BOT_USER" "cd '$PROJECT_PATH/discord_bots' && pm2 start '$SCRIPT_PATH' --name '$BOT_NAME' $PM2_PARAMS -- $SCRIPT_ARGS"
 
         # Verify the process started successfully
         sleep 2
@@ -369,9 +369,22 @@ stop_services() {
 
 # Function to update code from git
 update_code() {
-    print_color $BLUE "[GIT] 📥 Updating from git repository..."
-    cd "$PROJECT_PATH" && git pull
-    print_color $GREEN "[GIT]    ✅ Code updated successfully."
+    print_color $BLUE "[GIT] 📥 Checking git repository state..."
+    cd "$PROJECT_PATH"
+
+    # Check if we're in a detached HEAD state (e.g., checked out to a tag)
+    if ! git symbolic-ref HEAD >/dev/null 2>&1; then
+        print_color $YELLOW "[GIT]    ⚠️  Detached HEAD state detected (possibly a release tag)"
+        print_color $YELLOW "[GIT]    → Skipping git pull, using current code state"
+        local CURRENT_REF=$(git describe --always --tags 2>/dev/null || git rev-parse --short HEAD)
+        print_color $CYAN "[GIT]    📍 Current ref: $CURRENT_REF"
+    else
+        # Normal branch - do git pull
+        local CURRENT_BRANCH=$(git symbolic-ref --short HEAD)
+        print_color $CYAN "[GIT]    → On branch: $CURRENT_BRANCH"
+        git pull
+        print_color $GREEN "[GIT]    ✅ Code updated successfully."
+    fi
 }
 
 # Main deployment logic
