@@ -53,8 +53,10 @@ async function getArgs(interaction) {
 }
 
 function applyDicePenalty(interaction) {
-  if (interaction.arguments.character?.tracked?.health) {
-    const dicePenalty = extractDicePenalty(interaction.arguments);
+  const damageInfo =
+    interaction.arguments.character?.tracked?.health?.damageInfo;
+  if (damageInfo) {
+    const dicePenalty = extractDicePenalty(damageInfo);
     interaction.arguments.pool -= dicePenalty;
 
     // Ensure the pool doesn't go below 1
@@ -64,9 +66,9 @@ function applyDicePenalty(interaction) {
   }
 }
 
-function extractDicePenalty(interaction) {
-  const healthStatus = interaction.character?.tracked.health.damageInfo;
-  const match = healthStatus.match(/\d+/);
+function extractDicePenalty(healthStatus) {
+  if (!healthStatus) return 0;
+  const match = healthStatus?.match(/\d+/);
   return match ? parseInt(match[0], 10) : 0;
 }
 
