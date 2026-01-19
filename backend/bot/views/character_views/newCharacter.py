@@ -16,7 +16,6 @@ from bot.downloadAndVerifyImage import download_and_verify_image
 from constants import ImageError, TrackerLimit, Supporter
 from haven.utility import get_deserializer, get_tracker_serializer
 
-
 channel_layer = get_channel_layer()
 User = get_user_model()
 

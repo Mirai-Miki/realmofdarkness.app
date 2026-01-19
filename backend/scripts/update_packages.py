@@ -3,6 +3,7 @@
 Package update utility for the Realm of Darkness project.
 This script checks for outdated packages and selectively updates them.
 """
+
 import json
 import re
 import subprocess
