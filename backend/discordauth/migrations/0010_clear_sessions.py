@@ -24,7 +24,3 @@ class Migration(migrations.Migration):
     dependencies = [
         ("discordauth", "0009_increment_supporter_tiers"),
     ]
-
-    operations = [
-        migrations.RunPython(clear_all_sessions, reverse_clear_sessions),
-    ]
