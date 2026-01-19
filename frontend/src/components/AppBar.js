@@ -166,7 +166,7 @@ export default function ResponsiveAppBar(props) {
           <MenuItem
             onClick={handleCloseUserMenu}
             component="a"
-            href={host + "auth/logout/"}
+            href={host + "/auth/logout/"}
           >
             <Typography textAlign="center">Logout</Typography>
           </MenuItem>
