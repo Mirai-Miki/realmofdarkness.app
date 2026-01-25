@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "tsup": "workspace:*",
-    "zod": "workspace:*"
+    "tsup": "^8.5.1",
+    "zod": "catalog:"
   }
 }

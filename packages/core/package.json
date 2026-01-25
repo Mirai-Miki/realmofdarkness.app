@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@realm/common": "workspace:*",
-    "tsup": "workspace:*"
+    "tsup": "^8.5.1",
+    "zod": "catalog:"
   }
 }

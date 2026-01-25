@@ -25,9 +25,9 @@
     "@realm/logger": "workspace:*",
     "@realm/repositories": "workspace:*",
     "discord.js": "^14.25.1",
-    "dotenv": "17.2.3",
+    "dotenv": "^17.2.3",
     "fast-glob": "^3.3.3",
-    "zod": "4.3.5"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "fs-extra": "^11.3.3",

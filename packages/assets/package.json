@@ -21,8 +21,8 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "tsup": "workspace:*",
-    "zod": "workspace:*"
+    "tsup": "^8.5.1",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "tsx": "^4.21.0"

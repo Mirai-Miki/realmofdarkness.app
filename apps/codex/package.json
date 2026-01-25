@@ -1,0 +1,19 @@
+{
+  "name": "@realm/codex",
+  "type": "module",
+  "version": "v001",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "upgrade": "pnpm dlx @astrojs/upgrade"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.6",
+    "@astrojs/starlight": "^0.37.4",
+    "astro": "^5.16.15",
+    "sharp": "^0.34.5"
+  }
+}

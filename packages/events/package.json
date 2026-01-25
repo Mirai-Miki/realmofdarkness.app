@@ -21,9 +21,9 @@
   },
   "dependencies": {
     "@realm/common": "workspace:*",
-    "ioredis": "^5.9.1",
-    "tsup": "workspace:*",
+    "ioredis": "^5.9.2",
+    "tsup": "^8.5.1",
     "uuid": "^13.0.0",
-    "zod": "workspace:*"
+    "zod": "catalog:"
   }
 }
