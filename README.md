@@ -2,282 +2,121 @@
 
 ![Project Banner](https://res.cloudinary.com/dze64d7cr/image/upload/v1701410603/Logo/banner_bg_index.webp)
 
-Welcome to the Realm of Darkness monorepo! This is a comprehensive platform designed for World of Darkness tabletop roleplaying enthusiasts, providing web-based character sheets, Discord bot integration, and real-time collaboration tools for storytellers and players.
+Realm of Darkness is a pnpm/Turborepo monorepo for a World of Darkness platform (API, Discord bots, shared packages, and docs).
 
-The Realm of Darkness combines a modern web application with Discord bots to create an integrated experience for managing characters, chronicles, and gameplay across multiple World of Darkness game systems including Vampire: The Masquerade V5, V20 edition, and Chronicles of Darkness.
+The repository is in an active refactor from legacy Django/JavaScript services to a TypeScript-first architecture based on NestJS, PostgreSQL, Drizzle, and shared domain packages.
 
-## ✨ Features
+## Current State (March 2026)
 
-- **🌐 Web Application**: Modern React frontend with Django REST API backend
-- **🤖 Discord Integration**: Suite of Discord bots for dice rolling and character management
-- **📊 Character Sheets**: Full character sheet support for multiple World of Darkness systems
-- **⚡ Real-time Collaboration**: Live character sheet updates via WebSockets
-- **🎲 Dice Rolling**: Game-specific dice mechanics with Discord slash commands
-- **🏰 Chronicle Management**: Organize characters into shared storytelling environments
-- **🔐 Discord OAuth**: Seamless login and server synchronization
-- **📱 Responsive Design**: Works on desktop, tablet, and mobile devices
+- Refactor branch is active (`refactor/project-overhaul`)
+- New TypeScript monorepo foundation is in place
+- Core shared packages are implemented and building
+- API exists as a NestJS Fastify app scaffold
+- Bot app is TypeScript-based and integrated with shared packages
+- Legacy code is preserved under [legacy/](legacy) as reference-only
 
-## ⚠️ Major Refactor In Progress
+For detailed progress, see [REFACTOR_STATUS.md](REFACTOR_STATUS.md).
 
-**Current Branch:** `refactor/project-overhaul`
+## Repository Layout
 
-This project is undergoing a major refactor to modernize the tech stack and establish clean architecture:
-
-- **From:** Django/MariaDB/JavaScript → **To:** TypeScript/NestJS/PostgreSQL/Drizzle ORM
-- **Goal:** Unify codebase under TypeScript with proper separation of concerns
-- **Status:** ~40% complete - Domain layer and service layer complete
-
-### 📖 Documentation
-
-- **[QUICKSTART.md](./QUICKSTART.md)** - Developer onboarding guide
-- **[REFACTOR_STATUS.md](./REFACTOR_STATUS.md)** - Current progress snapshot
-- **[REFACTOR_PLAN.md](./REFACTOR_PLAN.md)** - Complete architectural plan
-- **[NAMING_CONVENTIONS.md](./NAMING_CONVENTIONS.md)** - Code standards and patterns
-- **[DOMAIN_REPOSITORY_EXPLAINED.md](./DOMAIN_REPOSITORY_EXPLAINED.md)** - Architecture patterns explained
-- **[ENV_SETUP.md](./ENV_SETUP.md)** - Environment variable configuration
-
----
-
-## 🏗️ Project Structure
-
-### Monorepo Packages
-
-```
+```text
 realm-of-darkness/
-├── packages/
-│   ├── common/          ✅ Shared contracts, types, DTOs (Zod schemas)
-│   ├── core/            ✅ Domain entities and services
-│   ├── database/        ✅ Drizzle ORM schemas for PostgreSQL
-│   ├── repositories/    🔄 Data access layer (mappers need work)
-│   ├── logger/          ✅ Singleton logger with Discord integration
-│   └── events/          ⏳ Redis pub/sub system (planned)
-│
 ├── apps/
-│   ├── api/             ⚠️  NestJS REST & WebSocket API (scaffolded)
-│   ├── bot/             ⚠️  Discord.js bot (needs TS migration)
-│   └── frontend/        ⏳ React SPA (not started)
+│   ├── api/         # @realm/api (NestJS + Fastify)
+│   ├── bot/         # @realm/bot (Discord.js)
+│   └── codex/       # @realm/codex (Astro/Starlight docs)
 │
-└── Legacy (will be removed):
-    ├── backend-legacy/   # Django REST API (frozen)
-    ├── frontend/         # Old React app (frozen)
-    └── bot-legacy/       # Old Discord bots (frozen)
+├── packages/
+│   ├── assets/        # @realm/assets
+│   ├── common/        # @realm/common (schemas, types, contracts, errors)
+│   ├── content/       # @realm/content
+│   ├── core/          # @realm/core (entities, services, actions)
+│   ├── database/      # @realm/database (Drizzle schema + DB tooling)
+│   ├── events/        # @realm/events (event system package)
+│   ├── logger/        # @realm/logger
+│   └── repositories/  # @realm/repositories
+│
+├── legacy/
+│   ├── backend-legacy/
+│   ├── bot-legacy/
+│   └── frontend-legacy/
+│
+└── scripts/
 ```
 
-### Package Architecture
+## Architecture Rules (Important)
 
-```
-┌─────────────────────────────────────────────┐
-│  APPS (api, bot, frontend)                  │
-│  - Use services from core                   │
-│  - Inject repositories from repositories    │
-└──────────────────┬──────────────────────────┘
-                   │
-┌──────────────────▼──────────────────────────┐
-│  CORE (domain entities & services)          │
-│  - Pure TypeScript business logic           │
-│  - Uses contracts from common               │
-└──────────────────┬──────────────────────────┘
-                   │
-        ┌──────────┴──────────┐
-        │                     │
-        ▼                     ▼
-┌──────────────┐      ┌──────────────┐
-│ REPOSITORIES │      │ COMMON       │
-│ (data access)│      │ (contracts)  │
-└──────┬───────┘      └──────────────┘
-       │
-       ▼
-┌──────────────┐
-│ DATABASE     │
-│ (Drizzle ORM)│
-└──────────────┘
-```
+- Type safety first (strict TypeScript, explicit types)
+- Zod-first contracts in `@realm/common`
+- No TypeScript enums (use `as const` objects)
+- Barrel exports required (`index.ts` exports)
+- No `.js` extensions in TypeScript imports
+- Domain logic in `@realm/core`; persistence in `@realm/repositories`
 
-## 🚀 Quick Start
+See [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md) and [DOMAIN_REPOSITORY_EXPLAINED.md](DOMAIN_REPOSITORY_EXPLAINED.md).
+
+## Quick Start
 
 ### Prerequisites
 
-- **Python 3.12+** for the Django backend
-- **Node.js 18+** and npm for frontend and Discord bots
-- **Redis** for WebSocket and caching (WSL required for Windows)
-- **Git** for version control
+- Node.js 18+
+- pnpm 10+
+- PostgreSQL
 
-### Development Setup
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/Mirai-Miki/realm-of-darkness-site.git
-   cd realm-of-darkness-site
-   ```
-
-2. **Run the setup script** (creates .env files and installs dependencies)
-
-   ```bash
-   # Windows
-   backend\scripts\setup.bat
-
-   # Linux/macOS
-   chmod +x backend/scripts/*.sh
-   backend/scripts/setup.sh
-   ```
-
-3. **Start the full development environment**
-
-   ```bash
-   # Windows
-   dev.bat
-
-   # Linux/macOS
-   ./dev.sh
-   ```
-
-This will start:
-
-- **Backend API**: http://localhost:8080
-- **Frontend**: http://localhost:3000
-- **Redis server**: Running in background
-- **Database migrations**: Applied automatically
-
-### Individual Component Development
-
-You can also run components separately:
+### Setup
 
 ```bash
-# Backend only
-cd backend/scripts && ./dev.bat
-
-# Frontend only
-cd frontend && ./dev.bat
-
-# Discord bots only
-cd discord_bots && npm run dev
+pnpm install
+cp .env.example .env
+pnpm build
 ```
 
-## 🎯 Usage
+Environment is centralized in one root `.env`. See [ENV_SETUP.md](ENV_SETUP.md).
 
-### For Players
+## Common Commands
 
-1. Visit https://realmofdarkness.app
-2. Login with your Discord account
-3. Create character sheets for your campaigns
-4. Join Discord servers with the bots installed
-5. Use slash commands to roll dice and manage characters
+```bash
+# Development
+pnpm dev
+pnpm dev:api
+pnpm dev:bot
+pnpm dev:bot:5th
+pnpm dev:bot:20th
+pnpm dev:bot:cod
 
-### For Storytellers
+# Build / quality
+pnpm build
+pnpm lint
+pnpm test
+pnpm format
 
-1. Set up chronicles on the website
-2. Invite the Discord bots to your server
-3. Manage player characters and track campaign progress
-4. Use real-time features for collaborative storytelling
+# Database
+pnpm db:generate
+pnpm db:migrate
+pnpm db:studio
+pnpm db:reset
+```
 
-### For Developers
+## Key Documentation
 
-1. Each component has its own README with detailed development information
-2. Use the monorepo dev scripts for full-stack development
-3. See individual component READMEs for specific development guidelines
+- [QUICKSTART.md](QUICKSTART.md)
+- [REFACTOR_STATUS.md](REFACTOR_STATUS.md)
+- [REFACTOR_PLAN.md](REFACTOR_PLAN.md)
+- [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md)
+- [DOMAIN_REPOSITORY_EXPLAINED.md](DOMAIN_REPOSITORY_EXPLAINED.md)
+- [ENV_SETUP.md](ENV_SETUP.md)
 
-## 🔧 Technology Stack
+## Legacy Code Policy
 
-### Backend
+Code under [legacy/](legacy) is frozen and kept for reference while features are ported to the new TypeScript packages.
 
-- **Django 5.2** - Web framework
-- **Django REST Framework** - API development
-- **Django Channels** - WebSocket support
-- **Redis** - Caching and WebSocket backend
-- **SQLite/MySQL** - Database (SQLite for dev, MySQL for production)
+## Contributing
 
-### Frontend
+1. Create a branch (`feature/*`, `refactor/*`, `fix/*`, `docs/*`, etc.)
+2. Follow repository conventions and package boundaries
+3. Run `pnpm build`, `pnpm lint`, and `pnpm test`
+4. Open a pull request with a focused description
 
-- **React 19** - UI framework
-- **Material-UI** - Component library
-- **React Router** - Client-side routing
-- **WebSocket** - Real-time updates
+## License
 
-### Discord Bots
-
-- **Discord.js 14** - Discord API wrapper
-- **Node.js** - JavaScript runtime
-- **TypeScript** - Type safety (transitioning)
-
-## 📝 Environment Configuration
-
-Each component has its own `.env` file for environment variables:
-
-| Component        | Env File Location        | Key Variables (examples)                                 |
-| ---------------- | ------------------------ | -------------------------------------------------------- |
-| **Backend**      | `backend/.env`           | `DEBUG`, `SECRET_KEY`, `API_KEY`, `REDIS_DB_INDEX`, etc. |
-| **Discord Bots** | `discord_bots/.env`      | `DISCORD_BOT_TOKEN`, `API_KEY`, etc.                     |
-| **Frontend**     | `frontend/.env` (rarely) | (Usually only for frontend-specific overrides)           |
-
-> The setup scripts will help you configure these values for each component.
-
-**Note:**
-
-- The backend and Discord bots each require their own `.env` file with the appropriate variables for their service.
-
-## 🤝 Contributing
-
-We welcome contributions to improve the Realm of Darkness platform! Here's how:
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes following our coding standards
-4. Test your changes thoroughly
-5. Submit a pull request with a clear description
-
-### Branch Naming Conventions
-
-- `feature/description` - New functionality or enhancements
-- `bugfix/issue-description` - Bug fixes
-- `refactor/component-name` - Code improvements or restructuring
-- `docs/description` - Documentation updates
-- `test/description` - Test additions or updates
-- `chore/description` - Maintenance tasks (e.g. cleanup, scripts)
-- `deps/description` - Dependency updates
-- `config/description` - Configuration or static value changes
-- `ci/description` - Continuous integration or workflow changes
-- `style/description` - Formatting or stylistic changes
-- `perf/description` - Performance improvements
-- `revert/description` - Reverting previous changes
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-**Backend won't start**
-
-- Check Python version (requires 3.12)
-- Ensure Redis is running
-- Verify .env file exists in backend/
-
-**Frontend build errors**
-
-- Clear npm cache: `npm cache clean --force`
-- Delete node_modules and reinstall: `rm -rf node_modules && npm install`
-
-**Discord bots not responding**
-
-- Verify bot tokens are correct
-- Check API_KEY matches between backend and bots
-- Ensure backend server is running and accessible
-
-### Getting Help
-
-- Check component-specific READMEs for detailed troubleshooting
-- Join our Discord community for support
-- Report bugs via GitHub issues
-
-## 🔄 Connect
-
-- **🌐 Website**: [Realm of Darkness](https://realmofdarkness.app)
-- **💬 Discord**: [Join our community](https://discord.com/invite/p82yc8sKx2)
-- **🐛 Issues**: [Report bugs](https://github.com/Mirai-Miki/realmofdarkness.app/issues)
-
-## 📄 License
-
-This project is licensed under the AGPL License. See the [LICENSE](LICENSE) file for details.
-
----
-
-Made with ❤️ for the World of Darkness community
+Licensed under AGPL. See [LICENSE](LICENSE).
