@@ -11,3 +11,6 @@ ignoredBuiltDependencies:
   - "@nestjs/core"
   - esbuild
   - unrs-resolver
+
+onlyBuiltDependencies:
+  - sharp
