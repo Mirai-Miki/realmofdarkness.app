@@ -37,10 +37,9 @@ export class V5DiceService extends DiceService {
    * ```
    */
   public roll(input: V5Dice): V5DiceResult {
-    const pool = input.pool;
+    const pool = input.pool + (input.specialty ? 1 : 0);
     const hunger = input.hunger ?? 0;
     const difficulty = input.difficulty ?? 1;
-    const specialty = input.specialty ?? false;
 
     // Validate hunger doesn't exceed pool
     if (hunger > pool) {
@@ -84,15 +83,6 @@ export class V5DiceService extends DiceService {
 
     // Each pair of 10s adds 2 extra successes (they already counted as 1 each)
     successes += criticalPairs * 2;
-
-    // Add specialty die if applicable
-    let poolModified = pool;
-    if (specialty) {
-      poolModified += 1;
-      // Specialty adds one die - for now we'll simulate it as adding 1 success
-      // In a real implementation, you'd roll one more die
-      // But based on the old bot code, specialty just adds to the pool before rolling
-    }
 
     // Determine result type
     const messyCritical = criticalPairs > 0 && hungerCriticals > 0;

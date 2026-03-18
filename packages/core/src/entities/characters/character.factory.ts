@@ -1,9 +1,5 @@
 import { Splat } from "@realm/common";
-import type {
-  CharacterData,
-  Vampire5thData,
-  Vampire20thData,
-} from "@realm/common";
+import type { CharacterData } from "@realm/common";
 import { Vampire5th } from "./vampire-5th.entity";
 import { Vampire20th } from "./vampire-20th.entity";
 
@@ -27,9 +23,9 @@ export class CharacterFactory {
   public static create(data: CharacterData): CharacterEntity {
     switch (data.splat) {
       case Splat.Vampire5th:
-        return new Vampire5th(data as Vampire5thData);
+        return new Vampire5th(data);
       case Splat.Vampire20th:
-        return new Vampire20th(data as Vampire20thData);
+        return new Vampire20th(data);
     }
   }
 }
