@@ -13,6 +13,7 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 
 import { logger } from "@realm/logger";
+import { SystemRepository } from "@realm/repositories";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,6 +83,14 @@ function createShardManager(): ShardingManager {
  * Creates and spawns the ShardingManager for the bot.
  */
 async function main(): Promise<void> {
+  const systemRepo = new SystemRepository();
+  const isDbHealthy = await systemRepo.healthCheck();
+
+  if (!isDbHealthy) {
+    logger.error("Failed to connect to the database. Exiting...");
+    process.exit(1);
+  }
+
   const manager = createShardManager();
 
   logger.info(`Starting bot manager...`);

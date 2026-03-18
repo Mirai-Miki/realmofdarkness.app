@@ -33,3 +33,4 @@ export * from "./supporter.definitions.js";
 export * from "./guild.definitions.js";
 export * from "./user.definitions.js";
 export * from "./member.definitions.js";
+export * from "./system.definitions";

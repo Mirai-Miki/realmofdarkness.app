@@ -18,5 +18,6 @@
 export { UserRepository } from "./user.repository";
 export { GuildRepository } from "./guild.repository";
 export { MemberRepository } from "./member.repository";
+export { SystemRepository } from "./system.repository";
 
 export { CharacterRepository } from "./character.repository";
