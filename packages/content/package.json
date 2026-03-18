@@ -21,12 +21,5 @@
   "dependencies": {
     "tsup": "^8.5.1",
     "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@types/node": "^25.0.10",
-    "eslint": "^9.39.2",
-    "jest": "^30.2.0",
-    "rimraf": "^6.1.2",
-    "typescript": "^5.9.3"
   }
 }

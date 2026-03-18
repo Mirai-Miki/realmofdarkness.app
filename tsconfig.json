@@ -24,7 +24,7 @@
     "composite": true,
     "incremental": true,
     "removeComments": false,
-    "typeRoots": ["./node_modules/@types"],
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
     "paths": {
       "@realm/core": ["./packages/core/src/index.ts"],
       "@realm/core/*": ["./packages/core/src/*"],

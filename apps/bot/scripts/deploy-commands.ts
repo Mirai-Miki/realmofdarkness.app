@@ -23,19 +23,9 @@ interface DeployResult {
 
 const BOT_CONFIGS: BotConfig[] = [
   {
-    name: "WoD 5th Edition",
-    clientId: process.env.CLIENT_ID_5TH,
-    token: process.env.TOKEN_5TH,
-  },
-  {
-    name: "WoD 20th Anniversary",
-    clientId: process.env.CLIENT_ID_20TH,
-    token: process.env.TOKEN_20TH,
-  },
-  {
-    name: "Chronicles of Darkness",
-    clientId: process.env.CLIENT_ID_COD,
-    token: process.env.TOKEN_COD,
+    name: "Realm of Darkness Bot",
+    clientId: process.env.DISCORD_CLIENT_ID,
+    token: process.env.DISCORD_TOKEN,
   },
 ];
 
@@ -56,8 +46,6 @@ async function deployCommands(): Promise<void> {
 
   const results: DeployResult[] = [];
 
-  // Note: Currently deploying all commands to all bots
-  // TODO: Implement bot-specific command filtering when we have multiple bot types
   for (const { name, clientId, token } of BOT_CONFIGS) {
     if (!clientId || !token) {
       console.log(`⚠️  Skipping ${name} (missing credentials)\n`);

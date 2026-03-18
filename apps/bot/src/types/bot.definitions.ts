@@ -10,18 +10,6 @@ import type {
 import { z } from "zod";
 
 // ============================================================================
-// Bot Type
-// ============================================================================
-
-export const BotTypes = {
-  Cod: "cod",
-  Wod5: "5th",
-  Wod20: "20th",
-} as const;
-export const BotTypesSchema = z.enum(BotTypes);
-export type BotType = z.infer<typeof BotTypesSchema>;
-
-// ============================================================================
 // Zod Schemas
 // ============================================================================
 

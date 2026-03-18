@@ -3,7 +3,6 @@ import { join } from "path";
 import { readFile, writeFile, mkdir } from "fs/promises";
 import { config } from "dotenv";
 import { resolve } from "path";
-import { BotTypes } from "types";
 import { getAllEmojiFiles } from "@realm/assets";
 
 // Load root .env
@@ -39,19 +38,9 @@ interface SyncResult {
 
 const BOT_CONFIGS: BotConfig[] = [
   {
-    name: BotTypes.Wod5,
-    clientId: process.env.CLIENT_ID_5TH,
-    token: process.env.TOKEN_5TH,
-  },
-  {
-    name: BotTypes.Wod20,
-    clientId: process.env.CLIENT_ID_20TH,
-    token: process.env.TOKEN_20TH,
-  },
-  {
-    name: BotTypes.Cod,
-    clientId: process.env.CLIENT_ID_COD,
-    token: process.env.TOKEN_COD,
+    name: "Realm of Darkness Bot",
+    clientId: process.env.DISCORD_CLIENT_ID,
+    token: process.env.DISCORD_TOKEN,
   },
 ];
 

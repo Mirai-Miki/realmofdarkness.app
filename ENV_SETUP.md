@@ -34,8 +34,8 @@ dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
 - `LOGGER_TOKEN` - Discord bot token for logging
 - `LOGGER_CHANNEL_ID` - Discord channel for logs
 - `LOG_FILE_PATH` - Custom log file location
-- `CLIENT_ID_*` - Discord bot client IDs
-- `TOKEN_*` - Discord bot tokens
+- `DISCORD_CLIENT_ID` - Discord bot client ID
+- `DISCORD_TOKEN` - Discord bot token
 - `DEV_SERVER_ID` - Development Discord server
 - `ERROR_CHANNEL_ID` - Error logging channel
 - `API_PORT` - API server port
