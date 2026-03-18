@@ -1,17 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "esModuleInterop": true,
     "isolatedModules": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
     "rootDir": "./",
     "outDir": "./dist",
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "strictBindCallApply": true,
-    "noFallthroughCasesInSwitch": true,
     "types": ["node", "jest"],
     "paths": {}
   },
