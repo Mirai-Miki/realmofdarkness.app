@@ -3,12 +3,12 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": ".",
-    "baseUrl": "./src",
     "module": "esnext",
     "moduleResolution": "bundler",
     "experimentalDecorators": true,
+    "types": ["node", "jest"],
     "paths": {
-      "types": ["./types.ts"]
+      "types": ["./src/types.ts"]
     }
   },
   "include": ["src/**/*", "test/**/*", "tsup.config.ts"],

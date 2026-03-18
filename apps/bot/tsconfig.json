@@ -6,27 +6,31 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "experimentalDecorators": true,
-    "typeRoots": ["node_modules/@types", "src/types"],
-    "baseUrl": "./src",
+    "typeRoots": [
+      "../../node_modules/@types",
+      "node_modules/@types",
+      "src/types"
+    ],
+    "types": ["node", "jest"],
     "paths": {
-      "features": ["./features/index.ts"],
-      "features/*": ["./features/*"],
-      "framework": ["./framework/index.ts"],
-      "framework/*": ["./framework/*"],
-      "utilities": ["./utilities/index.ts"],
-      "utilities/*": ["./utilities/*"],
-      "types": ["./types/index.ts"],
-      "types/*": ["./types/*"]
+      "features": ["./src/features/index.ts"],
+      "features/*": ["./src/features/*"],
+      "framework": ["./src/framework/index.ts"],
+      "framework/*": ["./src/framework/*"],
+      "utilities": ["./src/utilities/index.ts"],
+      "utilities/*": ["./src/utilities/*"],
+      "types": ["./src/types/index.ts"],
+      "types/*": ["./src/types/*"]
     }
   },
   "include": ["src/**/*", "test/**/*", "scripts/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
-    { "path": "../../packages/common" },
-    { "path": "../../packages/assets" },
-    { "path": "../../packages/logger" },
-    { "path": "../../packages/core" },
-    { "path": "../../packages/repositories" },
-    { "path": "../../packages/database" }
+    { "path": "../../packages/common/tsconfig.build.json" },
+    { "path": "../../packages/assets/tsconfig.build.json" },
+    { "path": "../../packages/logger/tsconfig.build.json" },
+    { "path": "../../packages/core/tsconfig.build.json" },
+    { "path": "../../packages/repositories/tsconfig.build.json" },
+    { "path": "../../packages/database/tsconfig.build.json" }
   ]
 }

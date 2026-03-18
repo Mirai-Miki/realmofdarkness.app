@@ -1,5 +1,11 @@
 import { HttpStatus } from "./primitives/http-status.enum";
 
+declare global {
+  interface ErrorConstructor {
+    captureStackTrace(targetObject: object, constructorOpt?: unknown): void;
+  }
+}
+
 /**
  * Custom error class for the Realm of Darkness application.
  * Extends the native Error class to include additional context and metadata

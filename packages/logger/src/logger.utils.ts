@@ -1,4 +1,4 @@
-import type { Color } from "logger.types";
+import type { Color } from "./logger.types";
 import { LogLevel, LogLevelName } from "@realm/common";
 
 /**

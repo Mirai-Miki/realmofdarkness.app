@@ -101,7 +101,7 @@ export class GuildSyncAction {
           if (!discordMemberSet.has(dbUserId)) {
             await this.memberRepository
               .delete(guild.id, dbUserId)
-              .catch((err) =>
+              .catch((err: Error) =>
                 logger.exception(
                   `Failed to delete old member ${dbUserId} from guild ${guild.id}`,
                   err

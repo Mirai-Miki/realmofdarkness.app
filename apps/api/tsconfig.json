@@ -8,17 +8,18 @@
     "allowSyntheticDefaultImports": true,
     "rootDir": "./",
     "outDir": "./dist",
-    "baseUrl": "./",
     "skipLibCheck": true,
     "strictNullChecks": true,
     "strictBindCallApply": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "types": ["node", "jest"],
+    "paths": {}
   },
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
-    { "path": "../../packages/common" },
-    { "path": "../../packages/logger" },
-    { "path": "../../packages/core" }
+    { "path": "../../packages/common/tsconfig.build.json" },
+    { "path": "../../packages/logger/tsconfig.build.json" },
+    { "path": "../../packages/core/tsconfig.build.json" }
   ]
 }

@@ -3,23 +3,23 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "baseUrl": "./src",
     "isolatedModules": true,
+    "types": ["node", "jest"],
     "paths": {
-      "@/*": ["./*"],
-      "domain": ["./domain"],
-      "domain/*": ["./domain/*"],
-      "application": ["./application"],
-      "application/*": ["./application/*"],
-      "types": ["./types"],
-      "types/*": ["./types/*"],
-      "utils": ["./utils"],
-      "utils/*": ["./utils/*"],
-      "validations": ["./validations"],
-      "validations/*": ["./validations/*"]
+      "@/*": ["./src/*"],
+      "domain": ["./src/domain"],
+      "domain/*": ["./src/domain/*"],
+      "application": ["./src/application"],
+      "application/*": ["./src/application/*"],
+      "types": ["./src/types"],
+      "types/*": ["./src/types/*"],
+      "utils": ["./src/utils"],
+      "utils/*": ["./src/utils/*"],
+      "validations": ["./src/validations"],
+      "validations/*": ["./src/validations/*"]
     }
   },
   "include": ["src/**/*", "test/**/*", "tsup.config.ts"],
   "exclude": ["dist", "node_modules"],
-  "references": [{ "path": "../../packages/common" }]
+  "references": [{ "path": "../../packages/common/tsconfig.build.json" }]
 }

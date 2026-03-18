@@ -2,11 +2,11 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "baseUrl": "./src",
-    "rootDir": ".",
-    "isolatedModules": true
+    "rootDir": "./",
+    "isolatedModules": true,
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*", "test/**/*", "tsup.config.ts"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../common" }]
+  "references": [{ "path": "../common/tsconfig.build.json" }]
 }
