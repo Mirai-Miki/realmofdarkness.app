@@ -25,16 +25,16 @@
   },
   "dependencies": {
     "@realm/common": "workspace:*",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.4.0",
     "drizzle-orm": "catalog:",
     "drizzle-zod": "^0.8.3",
-    "pg": "^8.17.2",
+    "pg": "^8.20.0",
     "tsup": "^8.5.1",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/pg": "^8.16.0",
-    "drizzle-kit": "^0.31.8",
+    "@types/pg": "^8.20.0",
+    "drizzle-kit": "^0.31.10",
     "tsx": "^4.21.0"
   }
 }
