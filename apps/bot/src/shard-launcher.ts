@@ -38,8 +38,7 @@ function createShardManager(): ShardingManager {
 
   const token = process.env.DISCORD_TOKEN;
   if (!token) {
-    logger.error("Missing DISCORD_TOKEN environment variable");
-    process.exit(1);
+    throw new Error("Missing DISCORD_TOKEN environment variable");
   }
 
   logger.info(`Creating shard manager...`);
@@ -87,21 +86,15 @@ async function main(): Promise<void> {
   const isDbHealthy = await systemRepo.healthCheck();
 
   if (!isDbHealthy) {
-    logger.error("Failed to connect to the database. Exiting...");
-    process.exit(1);
+    throw new Error("Failed to connect to the database.");
   }
 
   const manager = createShardManager();
 
   logger.info(`Starting bot manager...`);
 
-  try {
-    await manager.spawn();
-    logger.info(`Successfully launched bot manager!`);
-  } catch (error) {
-    logger.exception("Error while spawning shard manager:", error);
-    process.exit(1);
-  }
+  await manager.spawn();
+  logger.info(`Successfully launched bot manager!`);
 
   // Handle graceful shutdown
   process.on("SIGINT", () => {
@@ -121,13 +114,10 @@ async function main(): Promise<void> {
   });
 }
 
-main().catch((error) => {
-  logger.exception("Fatal error in launcher:", error);
-  process.exit(1);
-});
-
 // Start the launcher
-main().catch((error) => {
-  logger.exception("Fatal error in shard launcher:", error);
+main().catch(async (error) => {
+  logger.fatal("Fatal error in shard launcher:", { error });
+  // Allow async discord logger time to send the HTTP request before exiting
+  await new Promise((resolve) => setTimeout(resolve, 4000));
   process.exit(1);
 });
