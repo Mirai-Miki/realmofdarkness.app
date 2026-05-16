@@ -11,9 +11,9 @@
     "upgrade": "pnpm dlx @astrojs/upgrade"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.6",
-    "@astrojs/starlight": "^0.37.4",
-    "astro": "^5.16.15",
+    "@astrojs/check": "^0.9.9",
+    "@astrojs/starlight": "^0.39.2",
+    "astro": "^6.3.3",
     "sharp": "^0.34.5"
   }
 }
