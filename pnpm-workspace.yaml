@@ -8,7 +8,7 @@ catalogs:
     zod: ^4.4.3
 
 ignoredBuiltDependencies:
-  - '@nestjs/core'
+  - "@nestjs/core"
   - esbuild
   - unrs-resolver
 

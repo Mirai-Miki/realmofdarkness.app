@@ -5,9 +5,6 @@
   "scripts": {
     "dev": "turbo run dev --parallel",
     "dev:bot": "pnpm --filter @realm/bot dev",
-    "dev:bot:5th": "pnpm --filter @realm/bot dev:5th",
-    "dev:bot:20th": "pnpm --filter @realm/bot dev:20th",
-    "dev:bot:cod": "pnpm --filter @realm/bot dev:cod",
     "dev:api": "turbo run dev --filter=@realm/api",
     "build": "turbo run build",
     "build:bot": "turbo run build --filter=@realm/bot",

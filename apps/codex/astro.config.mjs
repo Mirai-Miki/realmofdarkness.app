@@ -15,15 +15,23 @@ export default defineConfig({
           items: [
             {
               label: "Vampire: The Masquerade",
-              autogenerate: {
-                directory: "../../packages/content/collections/5th/v5",
-              },
+              items: [
+                {
+                  autogenerate: {
+                    directory: "../../packages/content/collections/5th/v5",
+                  },
+                },
+              ],
             },
             {
               label: "Werewolf: The Apocalypse",
-              autogenerate: {
-                directory: "../../packages/content/collections/5th/w5",
-              },
+              items: [
+                {
+                  autogenerate: {
+                    directory: "../../packages/content/collections/5th/w5",
+                  },
+                },
+              ],
             },
           ],
         },
@@ -32,9 +40,13 @@ export default defineConfig({
           items: [
             {
               label: "Vampire: The Masquerade",
-              autogenerate: {
-                directory: "../../packages/content/collections/20th/v20",
-              },
+              items: [
+                {
+                  autogenerate: {
+                    directory: "../../packages/content/collections/20th/v20",
+                  },
+                },
+              ],
             },
           ],
         },
@@ -43,7 +55,7 @@ export default defineConfig({
           items: [
             {
               label: "Vampire: The Requiem",
-              autogenerate: { directory: "cod/vtr" },
+              items: [{ autogenerate: { directory: "cod/vtr" } }],
             },
           ],
         },
