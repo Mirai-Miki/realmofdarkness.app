@@ -16,8 +16,8 @@ export default tseslint.config(
       "**/coverage/**",
       "eslint.config.mjs",
       "**/jest.config.js",
-      "apps/frontend/**", // legacy CRA app (ignored)
-      "backend-legacy/**", // legacy Django backend
+      "legacy/**",
+      ".agents/**",
     ],
   },
   eslint.configs.recommended,

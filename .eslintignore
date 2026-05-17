@@ -16,3 +16,4 @@ coverage
 **/schema.sql
 .env
 legacy/**
+.agents

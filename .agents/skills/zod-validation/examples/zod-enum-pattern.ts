@@ -1,3 +1,5 @@
+/* eslint-disable */
+// @ts-nocheck
 import { z } from "zod";
 
 // 1. Define the const object FIRST using `as const`
