@@ -29,9 +29,6 @@ export type LogLevelName = z.infer<typeof LogLevelNameSchema>;
  * Options for log entries.
  */
 export interface LogOptions {
-  /** Location/source of the log (e.g., file path, method name) */
-  location?: string;
-
   /** Additional structured fields for the log entry */
   fields?: Record<string, string>;
 
