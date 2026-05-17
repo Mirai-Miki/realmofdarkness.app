@@ -73,7 +73,7 @@ function loadV5Dice(theme: "default" | "wod"): V5DiceSet {
 
 Emojis are organized by category and theme:
 
-```
+```text
 emojis/
 ├── dice/
 │   ├── v5/          # Vampire 5th Edition
