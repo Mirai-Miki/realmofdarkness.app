@@ -15,8 +15,6 @@ The repository is in an active refactor from legacy Django/JavaScript services t
 - Bot app is TypeScript-based and integrated with shared packages
 - Legacy code is preserved under [legacy/](legacy) as reference-only
 
-For detailed progress, see [REFACTOR_STATUS.md](REFACTOR_STATUS.md).
-
 ## Repository Layout
 
 ```text
@@ -96,15 +94,6 @@ pnpm db:migrate
 pnpm db:studio
 pnpm db:reset
 ```
-
-## Key Documentation
-
-- [QUICKSTART.md](QUICKSTART.md)
-- [REFACTOR_STATUS.md](REFACTOR_STATUS.md)
-- [REFACTOR_PLAN.md](REFACTOR_PLAN.md)
-- [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md)
-- [DOMAIN_REPOSITORY_EXPLAINED.md](DOMAIN_REPOSITORY_EXPLAINED.md)
-- [ENV_SETUP.md](ENV_SETUP.md)
 
 ## Legacy Code Policy
 
