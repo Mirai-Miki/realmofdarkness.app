@@ -11,24 +11,40 @@ import {
 import { snowflake } from "../schema.types";
 import {
   UsernameConstraints,
-  DiscordCdnUrlMaxLength,
   SnowflakeSchema,
+  DiscordCdnUrlMaxLength,
 } from "@realm/common";
 import { supporters } from "./supporters";
 
 export const users = pgTable("users", {
-  id: snowflake().primaryKey(), // Discord Snowflake
-  username: varchar({ length: UsernameConstraints.MaxLength })
-    .notNull()
-    .unique(),
+  id: snowflake().primaryKey(), // RoD Snowflake
   displayName: varchar({ length: UsernameConstraints.MaxLength })
     .notNull()
-    .default(""),
-  avatarUrl: varchar({ length: DiscordCdnUrlMaxLength }).notNull().default(""),
+    .default("Undefined"),
+  avatarUrl: varchar({ length: 500 }).notNull().default(""),
   admin: boolean().notNull().default(false), // RoD admin
 
   createdAt: timestamp().defaultNow().notNull(),
   updatedAt: timestamp().defaultNow().notNull(),
+});
+
+// ============================================================================
+// Identities Tables
+// ============================================================================
+
+export const discordIdentities = pgTable("discord_identities", {
+  // Store the raw Discord Snowflake with its native data constraint
+  discordId: snowflake().primaryKey(),
+  username: varchar({ length: UsernameConstraints.MaxLength }).notNull(),
+  avatarUrl: varchar({ length: DiscordCdnUrlMaxLength }).notNull(),
+
+  // Explicit, type-safe 1:1 bond to RoD user
+  userId: snowflake()
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+
+  createdAt: timestamp().defaultNow().notNull(),
 });
 
 // ============================================================================
@@ -37,12 +53,27 @@ export const users = pgTable("users", {
 
 export const usersRelations = relations(users, ({ one }) => ({
   // One-to-one relation with supporters
-  // All users should have a supporter record (defaults to Base tier)
   supporter: one(supporters, {
     fields: [users.id],
     references: [supporters.userId],
   }),
+
+  // One-to-one relation with discord identities
+  discordIdentity: one(discordIdentities, {
+    fields: [users.id],
+    references: [discordIdentities.userId],
+  }),
 }));
+
+export const discordIdentitiesRelations = relations(
+  discordIdentities,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [discordIdentities.userId],
+      references: [users.id],
+    }),
+  })
+);
 
 // ============================================================================
 // Zod Schemas & Types
