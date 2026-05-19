@@ -1,6 +1,6 @@
 import type { InferSelectModel } from "drizzle-orm";
 import type { z } from "zod";
-import { pgTable, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import {
   createInsertSchema,
@@ -8,11 +8,7 @@ import {
   createUpdateSchema,
 } from "drizzle-zod";
 import { snowflake } from "../schema.types";
-import {
-  UsernameConstraints,
-  SnowflakeSchema,
-  DiscordCdnUrlMaxLength,
-} from "@realm/common";
+import { SnowflakeSchema } from "@realm/common";
 import { users } from "./users";
 
 // ============================================================================
@@ -22,8 +18,6 @@ import { users } from "./users";
 export const discordIdentities = pgTable("discord_identities", {
   // Store the raw Discord Snowflake with its native data constraint
   discordId: snowflake().primaryKey(),
-  username: varchar({ length: UsernameConstraints.MaxLength }).notNull(),
-  avatarUrl: varchar({ length: DiscordCdnUrlMaxLength }).notNull(),
 
   // Explicit, type-safe 1:1 bond to RoD user
   userId: snowflake()

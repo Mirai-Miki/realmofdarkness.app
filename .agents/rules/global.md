@@ -16,6 +16,7 @@ You are an expert software engineer operating within a strict TypeScript monorep
 ## 2. TypeScript & Code Quality
 
 - **Strict Typing**: Never use `any`. Use `unknown` if a type is truly indeterminate, and always follow up with type narrowing/guards.
+- **JSDocs**: All code should be commently correctly with JSDocs
 - **Validation**: Rely heavily on `zod` for all data validation across the API and Discord client. If a type can be inferred from a Zod schema using `z.infer`, do not manually write a duplicate TypeScript interface.
 - **Immutability**: Prefer immutable data structures. Avoid `let` where `const` can be used.
 
