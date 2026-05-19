@@ -16,8 +16,8 @@ import {
 } from "drizzle-zod";
 import { Splat, CharacterConstraints } from "@realm/common";
 import { users } from "./users";
-import { guilds } from "./guilds";
-import { members } from "./members";
+import { chronicles } from "./chronicles";
+import { chronicleMembers } from "./chronicle-members";
 import { snowflake } from "../schema.types";
 
 import type { Vampire5thData, Vampire20thData } from "@realm/common";
@@ -31,7 +31,7 @@ type SplatPayload<T> = Omit<
   | "id"
   | "name"
   | "userId"
-  | "guildId"
+  | "chronicleId"
   | "splat"
   | "isSheet"
   | "createdAt"
@@ -70,7 +70,7 @@ export const characters = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
 
-    guildId: snowflake().references(() => guilds.id, {
+    chronicleId: snowflake().references(() => chronicles.id, {
       onDelete: "set null",
     }),
 
@@ -85,8 +85,11 @@ export const characters = pgTable(
   },
   (table) => [
     uniqueIndex("characters_name_user_idx").on(table.name, table.userId),
-    uniqueIndex("characters_guild_idx").on(table.guildId),
-    uniqueIndex("characters_user_guild_idx").on(table.userId, table.guildId),
+    uniqueIndex("characters_chronicle_idx").on(table.chronicleId),
+    uniqueIndex("characters_user_chronicle_idx").on(
+      table.userId,
+      table.chronicleId
+    ),
   ]
 );
 
@@ -97,15 +100,15 @@ export const charactersRelations = relations(characters, ({ one }) => ({
     fields: [characters.userId],
     references: [users.id],
   }),
-  guild: one(guilds, {
-    fields: [characters.guildId],
-    references: [guilds.id],
+  chronicle: one(chronicles, {
+    fields: [characters.chronicleId],
+    references: [chronicles.id],
   }),
-  // Inferred relation: member is the user-guild relationship
-  // Only exists when character has a guild
-  member: one(members, {
-    fields: [characters.userId, characters.guildId],
-    references: [members.userId, members.guildId],
+  // Inferred relation: member is the user-chronicle relationship
+  // Only exists when character has a chronicle
+  member: one(chronicleMembers, {
+    fields: [characters.userId, characters.chronicleId],
+    references: [chronicleMembers.userId, chronicleMembers.chronicleId],
   }),
 }));
 

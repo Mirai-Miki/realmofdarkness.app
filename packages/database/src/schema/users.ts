@@ -9,12 +9,9 @@ import {
   createUpdateSchema,
 } from "drizzle-zod";
 import { snowflake } from "../schema.types";
-import {
-  UsernameConstraints,
-  SnowflakeSchema,
-  DiscordCdnUrlMaxLength,
-} from "@realm/common";
+import { UsernameConstraints, SnowflakeSchema } from "@realm/common";
 import { supporters } from "./supporters";
+import { discordIdentities } from "./discord-identities";
 
 export const users = pgTable("users", {
   id: snowflake().primaryKey(), // RoD Snowflake
@@ -26,25 +23,6 @@ export const users = pgTable("users", {
 
   createdAt: timestamp().defaultNow().notNull(),
   updatedAt: timestamp().defaultNow().notNull(),
-});
-
-// ============================================================================
-// Identities Tables
-// ============================================================================
-
-export const discordIdentities = pgTable("discord_identities", {
-  // Store the raw Discord Snowflake with its native data constraint
-  discordId: snowflake().primaryKey(),
-  username: varchar({ length: UsernameConstraints.MaxLength }).notNull(),
-  avatarUrl: varchar({ length: DiscordCdnUrlMaxLength }).notNull(),
-
-  // Explicit, type-safe 1:1 bond to RoD user
-  userId: snowflake()
-    .notNull()
-    .unique()
-    .references(() => users.id, { onDelete: "cascade" }),
-
-  createdAt: timestamp().defaultNow().notNull(),
 });
 
 // ============================================================================
@@ -64,16 +42,6 @@ export const usersRelations = relations(users, ({ one }) => ({
     references: [discordIdentities.userId],
   }),
 }));
-
-export const discordIdentitiesRelations = relations(
-  discordIdentities,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [discordIdentities.userId],
-      references: [users.id],
-    }),
-  })
-);
 
 // ============================================================================
 // Zod Schemas & Types

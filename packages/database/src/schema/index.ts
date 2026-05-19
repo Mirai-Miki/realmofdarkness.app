@@ -4,9 +4,12 @@
 // This file exports all database schemas for Drizzle ORM
 
 export * from "./users";
-export * from "./members";
-export * from "./guilds";
+export * from "./chronicle-members";
+export * from "./discord-guilds";
+export * from "./chronicles";
+export * from "./storytellers";
 export * from "./characters";
 export * from "./initiative";
 export * from "./stats";
 export * from "./supporters";
+export * from "./discord-identities";

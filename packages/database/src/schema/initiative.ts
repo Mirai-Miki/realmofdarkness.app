@@ -1,7 +1,7 @@
 import type { InferSelectModel } from "drizzle-orm";
 import { pgTable, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { guilds } from "./guilds";
+import { chronicles } from "./chronicles";
 import { snowflake } from "../schema.types";
 
 /**
@@ -14,10 +14,10 @@ export const initiativeTrackers = pgTable("initiative_trackers", {
   /** Discord Channel Snowflake ID where the tracker is active */
   id: snowflake().primaryKey(),
 
-  /** Foreign key to the Guild this tracker belongs to */
-  guildId: snowflake()
+  /** Foreign key to the Chronicle this tracker belongs to */
+  chronicleId: snowflake()
     .notNull()
-    .references(() => guilds.id, { onDelete: "cascade" }),
+    .references(() => chronicles.id, { onDelete: "cascade" }),
 
   /** JSONB data containing the initiative order and combat state */
   data: jsonb().notNull(),
