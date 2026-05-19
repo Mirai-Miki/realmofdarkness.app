@@ -60,6 +60,10 @@ export const characterSplats = pgEnum("character_splats", splatValues);
  * This is the main character table that all character types inherit from.
  * Uses single-table inheritance with the 'splat' field to determine the specific type.
  */
+// TODO: This JSONB implementation is likely to be refactored into a more structured table for each
+// splat system. JSONB is not ideal for the complex queries and micro-patches required on character
+// data. When this refactoring occurs, the character repository will need to handle optimized queries
+// and stitch the relational data back together to form the unified domain entities.
 export const characters = pgTable(
   "characters",
   {
@@ -78,6 +82,7 @@ export const characters = pgTable(
     isSheet: boolean().notNull().default(false),
 
     // JSONB column to store the rest of the character data (attributes, skills, disciplines, etc.)
+
     data: jsonb().$type<CharacterJsonbData>().notNull(),
 
     createdAt: timestamp().defaultNow().notNull(),
