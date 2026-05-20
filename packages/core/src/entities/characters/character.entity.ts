@@ -83,7 +83,6 @@ export abstract class Character implements ICharacter {
     this.data.guildId = value;
   }
 
-
   get status(): CharacterStatus {
     return this.data.status;
   }

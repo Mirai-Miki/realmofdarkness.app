@@ -3,8 +3,8 @@ import type { Role } from "discord.js";
 import { Events } from "discord.js";
 import { DiscordEvent } from "framework";
 import { logger } from "@realm/logger";
-import { Guild as AppGuild } from "@realm/core";
-import { GuildRepository } from "@realm/repositories";
+import { DiscordGuild as AppGuild } from "@realm/core";
+import { DiscordGuildRepository } from "@realm/repositories";
 
 /**
  * Handles role deletion events.
@@ -16,7 +16,7 @@ class RoleDeleteEvent extends DiscordEvent<Events.GuildRoleDelete> {
 
   async execute(role: Role): Promise<void> {
     // Instantiate repository and service
-    const guildRepository = new GuildRepository();
+    const guildRepository = new DiscordGuildRepository();
 
     try {
       // Get the guild entity to check if this role is a storyteller role
@@ -32,7 +32,7 @@ class RoleDeleteEvent extends DiscordEvent<Events.GuildRoleDelete> {
       const appGuild = new AppGuild(guildData);
 
       // Check if the deleted role is in the storyteller roles array
-      if (appGuild.storytellerRoles.includes(role.id)) {
+      if (appGuild.storytellerRoleIds.includes(role.id)) {
         logger.info(
           `Storyteller role "${role.name}" was deleted from guild "${role.guild.name}", removing from guild configuration`,
           {

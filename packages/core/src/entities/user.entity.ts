@@ -22,10 +22,6 @@ export class User {
     return this._data.id;
   }
 
-  public get username(): string {
-    return this._data.username;
-  }
-
   public get displayName(): string {
     return this._data.displayName;
   }
@@ -39,18 +35,6 @@ export class User {
   }
 
   // Business methods
-
-  /**
-   * Update the user's username.
-   *
-   * @param username - New username
-   */
-  public updateUsername(username: string): void {
-    if (!username || username.trim().length === 0) {
-      throw new RealmError("Username cannot be empty");
-    }
-    this._data.username = username;
-  }
 
   /**
    * Update the user's display name.
@@ -91,7 +75,6 @@ export class User {
   public toRepositoryInput(): UserRepositoryInput {
     return {
       id: this._data.id,
-      username: this._data.username,
       displayName: this._data.displayName,
       avatarUrl: this._data.avatarUrl,
       admin: this._data.admin,

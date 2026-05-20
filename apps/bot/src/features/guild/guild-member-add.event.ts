@@ -1,10 +1,13 @@
 import type { GuildMember as DiscordGuildMember } from "discord.js";
 
-import { Events, PermissionFlagsBits } from "discord.js";
+import { Events } from "discord.js";
 import { DiscordEvent } from "framework";
 import { logger } from "@realm/logger";
-import { MemberRepository, UserRepository } from "@realm/repositories";
-import { MemberRepositoryInputSchema } from "@realm/common";
+import {
+  DiscordGuildRepository,
+  ChronicleMemberRepository,
+  DiscordIdentityRepository,
+} from "@realm/repositories";
 
 /**
  * Handles guild member add events.
@@ -21,29 +24,31 @@ class GuildMemberAddEvent extends DiscordEvent<Events.GuildMemberAdd> {
       if (member.partial) await member.fetch();
 
       // Instantiate repository and service
-      const memberRepository = new MemberRepository();
-      const userRepository = new UserRepository();
+      const guildRepo = new DiscordGuildRepository();
+      const identityRepo = new DiscordIdentityRepository();
+      const chronicleMemberRepo = new ChronicleMemberRepository();
 
-      const exists = await userRepository.exists(member.user.id);
+      const discordGuild = await guildRepo.findById(member.guild.id);
 
-      if (!exists) {
+      if (!discordGuild) {
+        // We don't create members for guilds that aren't tracked
+        return;
+      }
+
+      const identity = await identityRepo.findByDiscordId(member.id);
+
+      if (!identity) {
         // We don't create members for users that don't exist in our DB
         return;
       }
 
-      // Create member with DTO
-
-      const validatedData = MemberRepositoryInputSchema.parse({
-        guildId: member.guild.id,
-        userId: member.id,
+      await chronicleMemberRepo.upsert({
+        chronicleId: discordGuild.chronicleId,
+        userId: identity.userId,
         nickname: member.displayName,
         avatarUrl: member.displayAvatarURL(),
-        admin: member.permissions.has(PermissionFlagsBits.Administrator),
-        roleIds: Array.from(member.roles.cache.keys()),
-        boosted: 0,
+        boosted: member.premiumSince ? 1 : 0,
       });
-
-      await memberRepository.create(validatedData);
     } catch (error) {
       logger.exception(
         `Failed to handle member add for user ${member.id}`,

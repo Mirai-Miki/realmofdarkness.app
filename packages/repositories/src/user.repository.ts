@@ -8,7 +8,7 @@ import type {
 
 import { eq, inArray } from "drizzle-orm";
 import { db, users, insertUserSchema, updateUserSchema } from "@realm/database";
-import { UsernameSchema, RealmError, SnowflakeSchema } from "@realm/common";
+import { RealmError, SnowflakeSchema } from "@realm/common";
 import { hasDataChanged } from "./repository.utilities";
 
 /**
@@ -17,7 +17,6 @@ import { hasDataChanged } from "./repository.utilities";
 function toUserData(db: UserDb): UserData {
   return {
     id: db.id,
-    username: db.username,
     displayName: db.displayName,
     avatarUrl: db.avatarUrl,
     admin: db.admin,
@@ -58,8 +57,6 @@ export class UserRepository implements IUserRepository {
       // Build update object with proper typing
       const updateData: UpdateUserData = {
         id: input.id,
-        username:
-          input.username !== undefined ? input.username : currentUser.username,
         displayName:
           input.displayName !== undefined
             ? input.displayName
@@ -156,36 +153,6 @@ export class UserRepository implements IUserRepository {
   }
 
   /**
-   * Find a user by their Discord username.
-   *
-   * @param username - Discord username (unique)
-   * @returns User Data if found, null otherwise
-   * @throws {RealmError} If database query fails
-   */
-  public async findByUsername(username: string): Promise<UserData | null> {
-    try {
-      UsernameSchema.parse(username);
-
-      const result = await db
-        .select()
-        .from(users)
-        .where(eq(users.username, username))
-        .limit(1);
-
-      if (result.length === 0) {
-        return null;
-      }
-
-      return toUserData(result[0]);
-    } catch (error) {
-      throw new RealmError("Failed to find user by username", {
-        cause: error,
-        fields: { username },
-      });
-    }
-  }
-
-  /**
    * Create a new user.
    *
    * @param input - User creation input (without timestamps)
@@ -196,7 +163,6 @@ export class UserRepository implements IUserRepository {
     try {
       const dbRecord: InsertUserData = {
         id: input.id,
-        username: input.username,
         displayName: input.displayName,
         avatarUrl: input.avatarUrl,
         admin: input.admin,
@@ -213,7 +179,7 @@ export class UserRepository implements IUserRepository {
     } catch (error) {
       throw new RealmError("Failed to create user", {
         cause: error,
-        fields: { userId: input.id, username: input.username },
+        fields: { userId: input.id },
       });
     }
   }
@@ -295,7 +261,7 @@ export class UserRepository implements IUserRepository {
     } catch (error) {
       throw new RealmError("Failed to upsert user", {
         cause: error,
-        fields: { userId: input.id, username: input.username },
+        fields: { userId: input.id },
       });
     }
   }

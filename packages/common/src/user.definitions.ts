@@ -49,7 +49,6 @@ export const AvatarUrlSchema = z.string().max(DiscordCdnUrlMaxLength);
  */
 export const UserDataSchema = z.object({
   id: SnowflakeSchema,
-  username: UsernameSchema,
   displayName: DisplayNameSchema,
   avatarUrl: AvatarUrlSchema,
   admin: z.boolean(),
@@ -66,7 +65,6 @@ export type UserData = z.infer<typeof UserDataSchema>;
  */
 export const UserRepositoryInputSchema = z.object({
   id: SnowflakeSchema,
-  username: UsernameSchema,
   displayName: DisplayNameSchema,
   avatarUrl: AvatarUrlSchema,
   admin: z.boolean().default(false),
@@ -117,15 +115,6 @@ export interface IUserRepository {
    * @throws {RealmError} If database query fails
    */
   findManyByIds(ids: Snowflake[]): Promise<UserData[]>;
-
-  /**
-   * Find a user by their Discord username.
-   *
-   * @param username - Discord username (unique)
-   * @returns User entity if found, null otherwise
-   * @throws {RealmError} If database query fails
-   */
-  findByUsername(username: string): Promise<UserData | null>;
 
   /**
    * Create a new user.

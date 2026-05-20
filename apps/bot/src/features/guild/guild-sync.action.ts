@@ -1,16 +1,13 @@
 import type { Guild } from "discord.js";
+import type { DiscordIdentityData } from "@realm/common";
 
 import { Collection } from "discord.js";
 import { logger } from "@realm/logger";
 import {
-  GuildRepository,
-  MemberRepository,
-  UserRepository,
+  DiscordGuildRepository,
+  ChronicleMemberRepository,
+  DiscordIdentityRepository,
 } from "@realm/repositories";
-import {
-  GuildRepositoryInputSchema,
-  MemberRepositoryInputSchema,
-} from "@realm/common";
 
 /**
  * Action to sync guild(s) and their members with the database.
@@ -20,14 +17,14 @@ import {
  * bulk sync (e.g. ready event).
  */
 export class GuildSyncAction {
-  private guildRepository: GuildRepository;
-  private memberRepository: MemberRepository;
-  private userRepository: UserRepository;
+  private guildRepository: DiscordGuildRepository;
+  private memberRepository: ChronicleMemberRepository;
+  private identityRepository: DiscordIdentityRepository;
 
   constructor() {
-    this.guildRepository = new GuildRepository();
-    this.memberRepository = new MemberRepository();
-    this.userRepository = new UserRepository();
+    this.guildRepository = new DiscordGuildRepository();
+    this.memberRepository = new ChronicleMemberRepository();
+    this.identityRepository = new DiscordIdentityRepository();
   }
 
   /**
@@ -49,13 +46,6 @@ export class GuildSyncAction {
       ? input
       : new Collection<string, Guild>([[input.id, input]]);
 
-    // Perform full cleanup if it's a full sync
-    // We do this BEFORE syncing new data to ensure we don't process deleted guilds?
-    // Actually, usually cleanup happens after or separate.
-    // But the requirement is: "if we get a Collection do the cleanup".
-    // Let's stick to the previous order: Sync then Cleanup, or Cleanup then Sync?
-    // User didn't specify order, but usually cleaner to sync valid ones then remove invalid ones.
-
     // Sync each guild
     for (const [guildId, guild] of guildsToSync) {
       try {
@@ -75,35 +65,54 @@ export class GuildSyncAction {
   ): Promise<void> {
     logger.info(`Syncing guild: ${guild.name} (${guild.id})`);
 
-    // Validate at the edge
-    const validatedGuildData = GuildRepositoryInputSchema.parse({
-      id: guild.id,
-      name: guild.name,
-      iconUrl: guild.iconURL() === null ? undefined : guild.iconURL(),
-    });
-    await this.guildRepository.upsert(validatedGuildData);
+    const existingGuild = await this.guildRepository.findById(guild.id);
+    if (!existingGuild) {
+      return; // Not tracked, so skip
+    }
 
-    // 2. Sync Member Data
+    // Only update tracked guilds
+    const trackedGuild = await this.guildRepository.update(
+      {
+        discordId: guild.id,
+        chronicleId: existingGuild.chronicleId,
+        name: guild.name,
+        iconUrl: guild.iconURL() || "",
+      },
+      { ignoreNotFound: true }
+    );
+
+    if (!trackedGuild) {
+      return; // Not tracked, so skip
+    }
+
     try {
-      // Fetch all members from Discord
       const discordMembers = await guild.members.fetch();
       const memberIds = Array.from(discordMembers.keys());
 
-      // Cleanup: Remove members from DB that are no longer in Discord guild
-      // Only perform if cleanupMembers is true (which comes from isFullSync)
-      if (cleanupMembers) {
-        const dbMemberIds = await this.memberRepository.findIdsByGuild(
-          guild.id
-        );
-        const discordMemberSet = new Set(memberIds);
+      const identities = await Promise.all(
+        memberIds.map((id) => this.identityRepository.findByDiscordId(id))
+      );
 
-        for (const dbUserId of dbMemberIds) {
-          if (!discordMemberSet.has(dbUserId)) {
+      const validIdentities = identities.filter(
+        (id): id is DiscordIdentityData => id !== null
+      );
+
+      if (cleanupMembers) {
+        // Find existing members in DB
+        const dbMemberUserIds = await this.memberRepository.findIdsByChronicle(
+          trackedGuild.chronicleId
+        );
+        const discordMemberUserIdSet = new Set(
+          validIdentities.map((i) => i.userId)
+        );
+
+        for (const dbUserId of dbMemberUserIds) {
+          if (!discordMemberUserIdSet.has(dbUserId)) {
             await this.memberRepository
-              .delete(guild.id, dbUserId)
+              .delete(trackedGuild.chronicleId, dbUserId)
               .catch((err: Error) =>
                 logger.exception(
-                  `Failed to delete old member ${dbUserId} from guild ${guild.id}`,
+                  `Failed to delete old member ${dbUserId} from chronicle ${trackedGuild.chronicleId}`,
                   err
                 )
               );
@@ -111,36 +120,26 @@ export class GuildSyncAction {
         }
       }
 
-      // Use findManyByIds to check which members are registered users
-      // This is efficient batch processing
-      const registeredUsers =
-        await this.userRepository.findManyByIds(memberIds);
-
-      if (registeredUsers.length > 0) {
+      if (validIdentities.length > 0) {
         logger.info(
-          `Found ${registeredUsers.length} registered users in ${guild.name}`
+          `Found ${validIdentities.length} registered users in ${guild.name}`
         );
 
-        // Process each registered user
-        for (const user of registeredUsers) {
-          const discordMember = discordMembers.get(user.id);
+        for (const identity of validIdentities) {
+          const discordMember = discordMembers.get(identity.discordId);
           if (!discordMember) continue;
 
           try {
-            // Validate at the edge
-            const validatedMemberData = MemberRepositoryInputSchema.parse({
-              guildId: guild.id,
-              userId: user.id,
-              nickname: discordMember.nickname || "",
+            await this.memberRepository.upsert({
+              chronicleId: trackedGuild.chronicleId,
+              userId: identity.userId,
+              nickname: discordMember.displayName,
               avatarUrl: discordMember.displayAvatarURL(),
-              admin: discordMember.permissions.has("Administrator"),
-              roleIds: Array.from(discordMember.roles.cache.keys()),
+              boosted: discordMember.premiumSince ? 1 : 0,
             });
-
-            await this.memberRepository.upsert(validatedMemberData);
           } catch (err) {
             logger.exception(
-              `Failed to sync member ${user.username} in guild ${guild.name}`,
+              `Failed to sync member ${identity.userId} in guild ${guild.name}`,
               err
             );
           }

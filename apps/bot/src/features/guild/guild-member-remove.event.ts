@@ -3,7 +3,11 @@ import type { GuildMember, PartialGuildMember } from "discord.js";
 import { Events } from "discord.js";
 import { DiscordEvent } from "framework";
 import { logger } from "@realm/logger";
-import { MemberRepository } from "@realm/repositories";
+import {
+  DiscordGuildRepository,
+  ChronicleMemberRepository,
+  DiscordIdentityRepository,
+} from "@realm/repositories";
 
 /**
  * Handles guild member remove events.
@@ -18,10 +22,21 @@ class GuildMemberRemoveEvent extends DiscordEvent<Events.GuildMemberRemove> {
 
     try {
       // Instantiate repository and service
-      const memberRepository = new MemberRepository();
+      const guildRepo = new DiscordGuildRepository();
+      const identityRepo = new DiscordIdentityRepository();
+      const chronicleMemberRepo = new ChronicleMemberRepository();
+
+      const discordGuild = await guildRepo.findById(member.guild.id);
+      if (!discordGuild) return;
+
+      const identity = await identityRepo.findByDiscordId(member.id);
+      if (!identity) return;
 
       // Service handles deletion logic including existence check
-      await memberRepository.delete(member.guild.id, member.user.id);
+      await chronicleMemberRepo.delete(
+        discordGuild.chronicleId,
+        identity.userId
+      );
     } catch (error) {
       logger.exception(
         `Failed to handle member remove for user ${member.id}`,

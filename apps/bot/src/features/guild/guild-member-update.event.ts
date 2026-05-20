@@ -1,10 +1,13 @@
 import type { GuildMember, PartialGuildMember } from "discord.js";
 
-import { Events, PermissionFlagsBits } from "discord.js";
+import { Events } from "discord.js";
 import { DiscordEvent } from "framework";
 import { logger } from "@realm/logger";
-import { MemberRepository } from "@realm/repositories";
-import { MemberRepositoryInputSchema } from "@realm/common";
+import {
+  DiscordGuildRepository,
+  ChronicleMemberRepository,
+  DiscordIdentityRepository,
+} from "@realm/repositories";
 
 /**
  * Handles guild member update events.
@@ -24,19 +27,27 @@ class GuildMemberUpdateEvent extends DiscordEvent<Events.GuildMemberUpdate> {
       if (newMember.partial) await newMember.fetch();
 
       // Instantiate repository and service
-      const memberRepository = new MemberRepository();
+      const guildRepo = new DiscordGuildRepository();
+      const identityRepo = new DiscordIdentityRepository();
+      const chronicleMemberRepo = new ChronicleMemberRepository();
 
-      const validatedData = MemberRepositoryInputSchema.parse({
-        guildId: newMember.guild.id,
-        userId: newMember.id,
-        nickname: newMember.displayName,
-        avatarUrl: newMember.displayAvatarURL(),
-        admin: newMember.permissions.has(PermissionFlagsBits.Administrator),
-        roleIds: Array.from(newMember.roles.cache.keys()),
-      });
+      const discordGuild = await guildRepo.findById(newMember.guild.id);
+      if (!discordGuild) return;
+
+      const identity = await identityRepo.findByDiscordId(newMember.id);
+      if (!identity) return;
 
       // Only update existing members
-      await memberRepository.update(validatedData, { ignoreNotFound: true });
+      await chronicleMemberRepo.update(
+        {
+          chronicleId: discordGuild.chronicleId,
+          userId: identity.userId,
+          nickname: newMember.displayName,
+          avatarUrl: newMember.displayAvatarURL(),
+          boosted: newMember.premiumSince ? 1 : 0,
+        },
+        { ignoreNotFound: true }
+      );
     } catch (error) {
       logger.exception(
         `Failed to handle member update for user ${newMember.id}`,

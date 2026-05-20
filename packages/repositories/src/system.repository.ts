@@ -12,7 +12,7 @@ export class SystemRepository implements ISystemRepository {
     try {
       await db.execute(sql`SELECT 1`);
       return true;
-    } catch (_error) {
+    } catch {
       return false;
     }
   }

@@ -16,8 +16,9 @@
 
 // Export repositories
 export { UserRepository } from "./user.repository";
-export { GuildRepository } from "./guild.repository";
-export { MemberRepository } from "./member.repository";
+export { DiscordGuildRepository } from "./discord-guild.repository";
+export { ChronicleMemberRepository } from "./chronicle-member.repository";
+export { DiscordIdentityRepository } from "./discord-identity.repository";
 export { SystemRepository } from "./system.repository";
 
 export { CharacterRepository } from "./character.repository";
