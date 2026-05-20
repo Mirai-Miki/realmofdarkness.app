@@ -5,7 +5,7 @@ import type {
   IVampire20th,
   IExperience,
   Snowflake,
-  SheetStatus,
+  CharacterStatus,
 } from "@realm/common";
 
 import { RealmError, Splat } from "@realm/common";
@@ -83,19 +83,12 @@ export abstract class Character implements ICharacter {
     this.data.guildId = value;
   }
 
-  get isSheet(): boolean {
-    return this.data.isSheet;
-  }
 
-  set isSheet(value: boolean) {
-    this.data.isSheet = value;
-  }
-
-  get status(): SheetStatus {
+  get status(): CharacterStatus {
     return this.data.status;
   }
 
-  set status(value: SheetStatus) {
+  set status(value: CharacterStatus) {
     this.data.status = value;
   }
 

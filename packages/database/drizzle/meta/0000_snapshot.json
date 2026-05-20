@@ -1,5 +1,5 @@
 {
-  "id": "c7da50f5-0566-4fb0-ad5c-cfef470016bc",
+  "id": "e293f23f-37cf-42f0-8f57-dcbb9d33cc74",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -40,18 +40,13 @@
           "notNull": true,
           "default": "'vampire5th'"
         },
-        "is_sheet": {
-          "name": "is_sheet",
-          "type": "boolean",
+        "status": {
+          "name": "status",
+          "type": "character_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": false
-        },
-        "data": {
-          "name": "data",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
+          "default": "'Draft'"
         },
         "created_at": {
           "name": "created_at",
@@ -152,6 +147,46 @@
             "id"
           ],
           "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.vampire_5th": {
+      "name": "vampire_5th",
+      "schema": "",
+      "columns": {
+        "character_id": {
+          "name": "character_id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "hunger": {
+          "name": "hunger",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "vampire_5th_character_id_characters_id_fk": {
+          "name": "vampire_5th_character_id_characters_id_fk",
+          "tableFrom": "vampire_5th",
+          "tableTo": "characters",
+          "columnsFrom": [
+            "character_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -383,18 +418,6 @@
           "name": "discord_id",
           "type": "bigint",
           "primaryKey": true,
-          "notNull": true
-        },
-        "username": {
-          "name": "username",
-          "type": "varchar(35)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "avatar_url": {
-          "name": "avatar_url",
-          "type": "varchar(500)",
-          "primaryKey": false,
           "notNull": true
         },
         "user_id": {
@@ -789,6 +812,17 @@
         "wraith20th",
         "human20th",
         "ghoul20th"
+      ]
+    },
+    "public.character_status": {
+      "name": "character_status",
+      "schema": "public",
+      "values": [
+        "Draft",
+        "Review",
+        "Active",
+        "Dead",
+        "Archive"
       ]
     },
     "public.supporter_level": {

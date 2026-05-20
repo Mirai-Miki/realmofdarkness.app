@@ -62,18 +62,24 @@ export const CharacterNameSchema = z
 export type CharacterName = z.infer<typeof CharacterNameSchema>;
 
 /**
- * Character sheet status.
- * Represents the lifecycle state of a character sheet.
+ * Character status.
+ * Represents the lifecycle state of a character.
  */
-export const SheetStatus = {
+export const CharacterStatus = {
   Draft: "Draft",
   Review: "Review",
   Active: "Active",
   Dead: "Dead",
   Archive: "Archive",
 } as const;
-export const SheetStatusSchema = z.enum(SheetStatus);
-export type SheetStatus = z.infer<typeof SheetStatusSchema>;
+export const CharacterStatusSchema = z.enum([
+  CharacterStatus.Draft,
+  CharacterStatus.Review,
+  CharacterStatus.Active,
+  CharacterStatus.Dead,
+  CharacterStatus.Archive,
+]);
+export type CharacterStatus = z.infer<typeof CharacterStatusSchema>;
 
 /**
  * Character splats (types).
@@ -228,8 +234,7 @@ export const BaseCharacterDataSchema = z.object({
   userId: SnowflakeSchema,
   guildId: SnowflakeSchema.nullable(),
   name: CharacterNameSchema,
-  status: SheetStatusSchema,
-  isSheet: z.boolean().default(false),
+  status: CharacterStatusSchema,
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -258,11 +263,8 @@ export interface ICharacter {
   get guildId(): Snowflake | null;
   set guildId(value: Snowflake | null);
 
-  get isSheet(): boolean;
-  set isSheet(value: boolean);
-
-  get status(): SheetStatus;
-  set status(value: SheetStatus);
+  get status(): CharacterStatus;
+  set status(value: CharacterStatus);
 
   // Experience (value object with immutable updates)
   get experience(): IExperience;

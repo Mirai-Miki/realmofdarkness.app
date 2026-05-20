@@ -1,4 +1,5 @@
 CREATE TYPE "public"."character_splats" AS ENUM('vampire5th', 'hunter5th', 'werewolf5th', 'human5th', 'ghoul5th', 'vampire20th', 'werewolf20th', 'changeling20th', 'mage20th', 'demon20th', 'wraith20th', 'human20th', 'ghoul20th');--> statement-breakpoint
+CREATE TYPE "public"."character_status" AS ENUM('Draft', 'Review', 'Active', 'Dead', 'Archive');--> statement-breakpoint
 CREATE TYPE "public"."supporter_level" AS ENUM('base', 'mortal', 'fledgling', 'neonate', 'ancilla', 'elder', 'methuselah', 'antediluvian');--> statement-breakpoint
 CREATE TABLE "characters" (
 	"id" bigint PRIMARY KEY NOT NULL,
@@ -6,10 +7,14 @@ CREATE TABLE "characters" (
 	"user_id" bigint NOT NULL,
 	"chronicle_id" bigint,
 	"splat" character_splats DEFAULT 'vampire5th' NOT NULL,
-	"is_sheet" boolean DEFAULT false NOT NULL,
-	"data" jsonb NOT NULL,
+	"status" character_status DEFAULT 'Draft' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"last_updated" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "vampire_5th" (
+	"character_id" bigint PRIMARY KEY NOT NULL,
+	"hunger" integer DEFAULT 1 NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "chronicle_members" (
@@ -43,8 +48,6 @@ CREATE TABLE "discord_guilds" (
 --> statement-breakpoint
 CREATE TABLE "discord_identities" (
 	"discord_id" bigint PRIMARY KEY NOT NULL,
-	"username" varchar(35) NOT NULL,
-	"avatar_url" varchar(500) NOT NULL,
 	"user_id" bigint NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "discord_identities_userId_unique" UNIQUE("user_id")
@@ -93,6 +96,7 @@ CREATE TABLE "supporters" (
 --> statement-breakpoint
 ALTER TABLE "characters" ADD CONSTRAINT "characters_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "characters" ADD CONSTRAINT "characters_chronicle_id_chronicles_id_fk" FOREIGN KEY ("chronicle_id") REFERENCES "public"."chronicles"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "vampire_5th" ADD CONSTRAINT "vampire_5th_character_id_characters_id_fk" FOREIGN KEY ("character_id") REFERENCES "public"."characters"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "chronicle_members" ADD CONSTRAINT "chronicle_members_chronicle_id_chronicles_id_fk" FOREIGN KEY ("chronicle_id") REFERENCES "public"."chronicles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "chronicle_members" ADD CONSTRAINT "chronicle_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "discord_guilds" ADD CONSTRAINT "discord_guilds_chronicle_id_chronicles_id_fk" FOREIGN KEY ("chronicle_id") REFERENCES "public"."chronicles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

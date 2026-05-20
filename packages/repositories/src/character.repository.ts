@@ -28,7 +28,6 @@ function splitData(input: CharacterData): {
     userId: Snowflake;
     guildId: Snowflake | null;
     splat: CharacterData["splat"];
-    isSheet: boolean;
     createdAt: Date;
     lastUpdated: Date;
   };
@@ -40,7 +39,6 @@ function splitData(input: CharacterData): {
     userId,
     guildId,
     splat,
-    isSheet,
     createdAt,
     updatedAt,
     status,
@@ -54,7 +52,6 @@ function splitData(input: CharacterData): {
       userId,
       guildId,
       splat,
-      isSheet,
       createdAt,
       lastUpdated: updatedAt,
     },
