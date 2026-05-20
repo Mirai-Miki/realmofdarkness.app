@@ -38,7 +38,8 @@ export class FileLogger {
       await fs.appendFile(this.logPath, logLine + "\n", "utf8");
     } catch (error) {
       throw new Error(
-        `Failed to write log to file: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to write log to file: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { cause: error }
       );
     }
   }

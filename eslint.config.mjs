@@ -8,9 +8,9 @@ import globals from "globals";
 export default tseslint.config(
   {
     ignores: [
-      "node_modules/**",
-      "dist/**",
-      "build/**",
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
       "**/test/**",
       "**/scripts/**",
       "**/coverage/**",

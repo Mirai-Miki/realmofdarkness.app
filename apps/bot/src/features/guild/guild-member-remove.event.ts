@@ -5,13 +5,14 @@ import { DiscordEvent } from "framework";
 import { logger } from "@realm/logger";
 import {
   DiscordGuildRepository,
+  DiscordGuildChronicleRepository,
   ChronicleMemberRepository,
   DiscordIdentityRepository,
 } from "@realm/repositories";
 
 /**
  * Handles guild member remove events.
- * Removes member records when members leave guilds.
+ * Removes member records when members leave guilds, across all linked Chronicles.
  */
 class GuildMemberRemoveEvent extends DiscordEvent<Events.GuildMemberRemove> {
   readonly eventName = Events.GuildMemberRemove as const;
@@ -21,8 +22,8 @@ class GuildMemberRemoveEvent extends DiscordEvent<Events.GuildMemberRemove> {
     if (member.user.bot) return;
 
     try {
-      // Instantiate repository and service
       const guildRepo = new DiscordGuildRepository();
+      const linkRepo = new DiscordGuildChronicleRepository();
       const identityRepo = new DiscordIdentityRepository();
       const chronicleMemberRepo = new ChronicleMemberRepository();
 
@@ -32,12 +33,13 @@ class GuildMemberRemoveEvent extends DiscordEvent<Events.GuildMemberRemove> {
       const identity = await identityRepo.findByDiscordId(member.id);
       if (!identity) return;
 
-      // Service handles deletion logic including existence check
-      await chronicleMemberRepo.delete(
-        discordGuild.chronicleId,
-        identity.userId
-      );
-    } catch (error) {
+      const links = await linkRepo.findByDiscordId(discordGuild.discordId);
+
+      for (const link of links) {
+        // Remove the member from each chronicle this guild is linked to
+        await chronicleMemberRepo.delete(link.chronicleId, identity.userId);
+      }
+    } catch (error: unknown) {
       logger.exception(
         `Failed to handle member remove for user ${member.id}`,
         error

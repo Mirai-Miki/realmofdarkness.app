@@ -13,28 +13,29 @@ class GuildUpdateEvent extends DiscordEvent<Events.GuildUpdate> {
   readonly eventName = Events.GuildUpdate as const;
   override readonly once = false;
 
-  async execute(oldGuild: DiscordGuild, newGuild: DiscordGuild): Promise<void> {
-    // Instantiate repository and service
+  async execute(
+    _oldGuild: DiscordGuild,
+    newGuild: DiscordGuild
+  ): Promise<void> {
     const guildRepository = new DiscordGuildRepository();
 
     try {
       logger.debug(`Guild updated: ${newGuild.name} (${newGuild.id})`);
-      const existingGuild = await guildRepository.findById(newGuild.id);
-      if (!existingGuild) {
+      const exists = await guildRepository.exists(newGuild.id);
+      if (!exists) {
         return; // Guild is not tracked, do not update
       }
 
-      // Update existing guild data (updates name/icon, does NOT create if missing because chronicleId is required)
+      // Update existing guild name and icon only
       await guildRepository.update(
         {
           discordId: newGuild.id,
-          chronicleId: existingGuild.chronicleId,
           name: newGuild.name,
           iconUrl: newGuild.iconURL() || "",
         },
         { ignoreNotFound: true }
       );
-    } catch (error) {
+    } catch (error: unknown) {
       logger.exception(
         `Failed to update guild ${newGuild.name} (${newGuild.id}):`,
         error

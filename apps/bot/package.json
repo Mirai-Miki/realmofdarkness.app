@@ -13,7 +13,7 @@
     "emoji:sync": "tsx scripts/sync-emojis.ts",
     "format": "prettier --write \"src/**/*.{js,ts,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,ts,json}\"",
-    "lint": "eslint . --ext .js,.ts"
+    "lint": "eslint src --ext .ts"
   },
   "dependencies": {
     "@realm/assets": "workspace:*",

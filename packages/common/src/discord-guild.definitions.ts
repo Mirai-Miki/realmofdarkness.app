@@ -46,7 +46,6 @@ export const StorytellerRolesSchema = z.array(SnowflakeSchema);
  */
 export const DiscordGuildDataSchema = z.object({
   discordId: SnowflakeSchema,
-  chronicleId: SnowflakeSchema,
   name: DiscordGuildNameSchema,
   iconUrl: DiscordGuildIconUrlSchema,
   storytellerRoleIds: StorytellerRolesSchema.default([]),
@@ -62,7 +61,6 @@ export type DiscordGuildData = z.infer<typeof DiscordGuildDataSchema>;
  */
 export const DiscordGuildRepositoryInputSchema = z.object({
   discordId: SnowflakeSchema,
-  chronicleId: SnowflakeSchema,
   name: DiscordGuildNameSchema,
   iconUrl: DiscordGuildIconUrlSchema.optional(),
   storytellerRoleIds: StorytellerRolesSchema.optional(),
@@ -90,14 +88,6 @@ export interface IDiscordGuildRepository {
   findById(discordId: Snowflake): Promise<DiscordGuildData | null>;
 
   /**
-   * Find all discord guilds linked to a specific chronicle.
-   *
-   * @param chronicleId - Chronicle snowflake ID
-   * @returns Array of discord guild data
-   */
-  findByChronicleId(chronicleId: Snowflake): Promise<DiscordGuildData[]>;
-
-  /**
    * Create a new discord guild.
    *
    * @param input - Discord guild input data
@@ -108,7 +98,7 @@ export interface IDiscordGuildRepository {
   /**
    * Update an existing discord guild.
    *
-   * @param input - Discord guild update input (discordId and chronicleId required)
+   * @param input - Discord guild update input (discordId required)
    * @param options - Update options
    * @param options.ignoreNotFound - If true, returns null instead of throwing when guild doesn't exist
    * @returns Updated discord guild data

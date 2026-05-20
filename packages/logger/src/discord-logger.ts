@@ -65,7 +65,8 @@ export class DiscordLogger {
       });
     } catch (error) {
       throw new Error(
-        `Failed to send log to Discord: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to send log to Discord: ${error instanceof Error ? error.message : "Unknown error"}`,
+        { cause: error }
       );
     }
   }

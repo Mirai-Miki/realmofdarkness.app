@@ -7,6 +7,7 @@ import {
   DiscordGuildRepository,
   ChronicleMemberRepository,
   DiscordIdentityRepository,
+  DiscordGuildChronicleRepository,
 } from "@realm/repositories";
 
 /**
@@ -20,11 +21,13 @@ export class GuildSyncAction {
   private guildRepository: DiscordGuildRepository;
   private memberRepository: ChronicleMemberRepository;
   private identityRepository: DiscordIdentityRepository;
+  private linkRepository: DiscordGuildChronicleRepository;
 
   constructor() {
     this.guildRepository = new DiscordGuildRepository();
     this.memberRepository = new ChronicleMemberRepository();
     this.identityRepository = new DiscordIdentityRepository();
+    this.linkRepository = new DiscordGuildChronicleRepository();
   }
 
   /**
@@ -74,7 +77,6 @@ export class GuildSyncAction {
     const trackedGuild = await this.guildRepository.update(
       {
         discordId: guild.id,
-        chronicleId: existingGuild.chronicleId,
         name: guild.name,
         iconUrl: guild.iconURL() || "",
       },
@@ -83,6 +85,15 @@ export class GuildSyncAction {
 
     if (!trackedGuild) {
       return; // Not tracked, so skip
+    }
+
+    const links = await this.linkRepository.findByDiscordId(
+      trackedGuild.discordId
+    );
+    const chronicleIds = links.map((l) => l.chronicleId);
+
+    if (chronicleIds.length === 0) {
+      return; // No chronicles linked, nothing to sync members to
     }
 
     try {
@@ -98,24 +109,26 @@ export class GuildSyncAction {
       );
 
       if (cleanupMembers) {
-        // Find existing members in DB
-        const dbMemberUserIds = await this.memberRepository.findIdsByChronicle(
-          trackedGuild.chronicleId
-        );
         const discordMemberUserIdSet = new Set(
           validIdentities.map((i) => i.userId)
         );
 
-        for (const dbUserId of dbMemberUserIds) {
-          if (!discordMemberUserIdSet.has(dbUserId)) {
-            await this.memberRepository
-              .delete(trackedGuild.chronicleId, dbUserId)
-              .catch((err: Error) =>
-                logger.exception(
-                  `Failed to delete old member ${dbUserId} from chronicle ${trackedGuild.chronicleId}`,
-                  err
-                )
-              );
+        for (const chronicleId of chronicleIds) {
+          // Find existing members in DB for this chronicle
+          const dbMemberUserIds =
+            await this.memberRepository.findIdsByChronicle(chronicleId);
+
+          for (const dbUserId of dbMemberUserIds) {
+            if (!discordMemberUserIdSet.has(dbUserId)) {
+              await this.memberRepository
+                .delete(chronicleId, dbUserId)
+                .catch((err: Error) =>
+                  logger.exception(
+                    `Failed to delete old member ${dbUserId} from chronicle ${chronicleId}`,
+                    err
+                  )
+                );
+            }
           }
         }
       }
@@ -129,19 +142,23 @@ export class GuildSyncAction {
           const discordMember = discordMembers.get(identity.discordId);
           if (!discordMember) continue;
 
-          try {
-            await this.memberRepository.upsert({
-              chronicleId: trackedGuild.chronicleId,
-              userId: identity.userId,
-              nickname: discordMember.displayName,
-              avatarUrl: discordMember.displayAvatarURL(),
-              boosted: discordMember.premiumSince ? 1 : 0,
-            });
-          } catch (err) {
-            logger.exception(
-              `Failed to sync member ${identity.userId} in guild ${guild.name}`,
-              err
-            );
+          for (const chronicleId of chronicleIds) {
+            try {
+              // TODO: Syncing member display names across multiple chronicles linked to different guilds might create a loop or conflict.
+              // We will need a more robust solution in the future to handle name overrides depending on the context.
+              await this.memberRepository.upsert({
+                chronicleId: chronicleId,
+                userId: identity.userId,
+                nickname: discordMember.displayName,
+                avatarUrl: discordMember.displayAvatarURL(),
+                boosted: discordMember.premiumSince ? 1 : 0,
+              });
+            } catch (err) {
+              logger.exception(
+                `Failed to sync member ${identity.userId} in guild ${guild.name} for chronicle ${chronicleId}`,
+                err
+              );
+            }
           }
         }
       }

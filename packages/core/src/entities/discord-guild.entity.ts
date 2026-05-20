@@ -13,7 +13,7 @@ import {
 /**
  * Domain entity representing a Discord Guild (Server).
  *
- * A DiscordGuild represents a Discord server that is linked to a Chronicle.
+ * A DiscordGuild represents a Discord server that can be linked to one or more Chronicles.
  * It manages bot configuration and storyteller permissions for that server.
  *
  * This entity wraps DiscordGuildData with business logic and validation.
@@ -38,10 +38,6 @@ export class DiscordGuild {
   // Getters
   public get discordId(): Snowflake {
     return this._data.discordId;
-  }
-
-  public get chronicleId(): Snowflake {
-    return this._data.chronicleId;
   }
 
   public get name(): string {
@@ -143,20 +139,6 @@ export class DiscordGuild {
   }
 
   /**
-   * Update the chronicle this discord guild is linked to.
-   *
-   * @param chronicleId - New chronicle snowflake ID
-   *
-   * @example
-   * ```typescript
-   * guild.updateChronicle("987654321098765432");
-   * ```
-   */
-  public updateChronicle(chronicleId: Snowflake): void {
-    this._data.chronicleId = chronicleId;
-  }
-
-  /**
    * Extract the Data from this entity.
    *
    * @returns Discord Guild Data for persistence
@@ -184,7 +166,6 @@ export class DiscordGuild {
   public toRepositoryInput(): DiscordGuildRepositoryInput {
     return {
       discordId: this._data.discordId,
-      chronicleId: this._data.chronicleId,
       name: this._data.name,
       iconUrl: this._data.iconUrl,
       storytellerRoleIds: this._data.storytellerRoleIds,

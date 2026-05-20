@@ -36,9 +36,16 @@ CREATE TABLE "chronicles" (
 	"last_updated" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "discord_guild_chronicles" (
+	"discord_id" bigint NOT NULL,
+	"chronicle_id" bigint NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"last_updated" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "discord_guild_chronicles_discord_id_chronicle_id_pk" PRIMARY KEY("discord_id","chronicle_id")
+);
+--> statement-breakpoint
 CREATE TABLE "discord_guilds" (
 	"discord_id" bigint PRIMARY KEY NOT NULL,
-	"chronicle_id" bigint NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"icon_url" varchar(500) DEFAULT '' NOT NULL,
 	"storyteller_role_ids" bigint[] DEFAULT '{}' NOT NULL,
@@ -99,7 +106,8 @@ ALTER TABLE "characters" ADD CONSTRAINT "characters_chronicle_id_chronicles_id_f
 ALTER TABLE "vampire_5th" ADD CONSTRAINT "vampire_5th_character_id_characters_id_fk" FOREIGN KEY ("character_id") REFERENCES "public"."characters"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "chronicle_members" ADD CONSTRAINT "chronicle_members_chronicle_id_chronicles_id_fk" FOREIGN KEY ("chronicle_id") REFERENCES "public"."chronicles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "chronicle_members" ADD CONSTRAINT "chronicle_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "discord_guilds" ADD CONSTRAINT "discord_guilds_chronicle_id_chronicles_id_fk" FOREIGN KEY ("chronicle_id") REFERENCES "public"."chronicles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "discord_guild_chronicles" ADD CONSTRAINT "discord_guild_chronicles_discord_id_discord_guilds_discord_id_fk" FOREIGN KEY ("discord_id") REFERENCES "public"."discord_guilds"("discord_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "discord_guild_chronicles" ADD CONSTRAINT "discord_guild_chronicles_chronicle_id_chronicles_id_fk" FOREIGN KEY ("chronicle_id") REFERENCES "public"."chronicles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "discord_identities" ADD CONSTRAINT "discord_identities_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "storytellers" ADD CONSTRAINT "storytellers_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "storytellers" ADD CONSTRAINT "storytellers_chronicle_id_chronicles_id_fk" FOREIGN KEY ("chronicle_id") REFERENCES "public"."chronicles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

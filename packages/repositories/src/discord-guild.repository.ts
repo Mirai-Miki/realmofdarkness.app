@@ -26,7 +26,6 @@ import { hasDataChanged } from "./repository.utilities";
 function toDiscordGuildData(db: DiscordGuildDb): DiscordGuildData {
   return {
     discordId: db.discordId,
-    chronicleId: db.chronicleId,
     name: db.name,
     iconUrl: db.iconUrl,
     storytellerRoleIds: db.storytellerRoleIds,
@@ -86,37 +85,7 @@ export class DiscordGuildRepository implements IDiscordGuildRepository {
     }
   }
 
-  /**
-   * Find all Discord guilds associated with a specific chronicle.
-   *
-   * @param chronicleId - Chronicle snowflake ID
-   * @returns Array of discord guild configurations
-   * @throws {RealmError} If the database query fails
-   *
-   * @example
-   * ```typescript
-   * const guilds = await repository.findByChronicleId("987654321098765432");
-   * ```
-   */
-  public async findByChronicleId(
-    chronicleId: Snowflake
-  ): Promise<DiscordGuildData[]> {
-    try {
-      const validatedId = SnowflakeSchema.parse(chronicleId);
-
-      const result = await db
-        .select()
-        .from(discordGuilds)
-        .where(eq(discordGuilds.chronicleId, validatedId));
-
-      return result.map(toDiscordGuildData);
-    } catch (error) {
-      throw new RealmError("Failed to find discord guilds by chronicle ID", {
-        cause: error,
-        fields: { chronicleId },
-      });
-    }
-  }
+  // findByChronicleId removed (delegated to DiscordGuildChronicleRepository)
 
   /**
    * Create a new Discord guild configuration record.
@@ -129,7 +98,6 @@ export class DiscordGuildRepository implements IDiscordGuildRepository {
    * ```typescript
    * const guild = await repository.create({
    *   discordId: "123456789012345678",
-   *   chronicleId: "987654321098765432",
    *   name: "My Server",
    * });
    * ```
@@ -140,7 +108,6 @@ export class DiscordGuildRepository implements IDiscordGuildRepository {
     try {
       const dbRecord: InsertDiscordGuildData = {
         discordId: input.discordId,
-        chronicleId: input.chronicleId,
         name: input.name,
         iconUrl: input.iconUrl || "",
         storytellerRoleIds: input.storytellerRoleIds || [],
@@ -226,7 +193,6 @@ export class DiscordGuildRepository implements IDiscordGuildRepository {
     try {
       const updateData: UpdateDiscordGuildData = {
         discordId: input.discordId,
-        chronicleId: input.chronicleId,
         storytellerRoleIds:
           input.storytellerRoleIds !== undefined
             ? input.storytellerRoleIds
@@ -269,7 +235,6 @@ export class DiscordGuildRepository implements IDiscordGuildRepository {
    * ```typescript
    * const guild = await repository.upsert({
    *   discordId: "123456789012345678",
-   *   chronicleId: "987654321098765432",
    *   name: "Upserted Server",
    * });
    * ```

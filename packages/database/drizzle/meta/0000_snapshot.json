@@ -1,5 +1,5 @@
 {
-  "id": "e293f23f-37cf-42f0-8f57-dcbb9d33cc74",
+  "id": "9a8874eb-588b-40ee-80eb-45381f9a2534",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -337,6 +337,80 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.discord_guild_chronicles": {
+      "name": "discord_guild_chronicles",
+      "schema": "",
+      "columns": {
+        "discord_id": {
+          "name": "discord_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chronicle_id": {
+          "name": "chronicle_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_updated": {
+          "name": "last_updated",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "discord_guild_chronicles_discord_id_discord_guilds_discord_id_fk": {
+          "name": "discord_guild_chronicles_discord_id_discord_guilds_discord_id_fk",
+          "tableFrom": "discord_guild_chronicles",
+          "tableTo": "discord_guilds",
+          "columnsFrom": [
+            "discord_id"
+          ],
+          "columnsTo": [
+            "discord_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "discord_guild_chronicles_chronicle_id_chronicles_id_fk": {
+          "name": "discord_guild_chronicles_chronicle_id_chronicles_id_fk",
+          "tableFrom": "discord_guild_chronicles",
+          "tableTo": "chronicles",
+          "columnsFrom": [
+            "chronicle_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "discord_guild_chronicles_discord_id_chronicle_id_pk": {
+          "name": "discord_guild_chronicles_discord_id_chronicle_id_pk",
+          "columns": [
+            "discord_id",
+            "chronicle_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.discord_guilds": {
       "name": "discord_guilds",
       "schema": "",
@@ -345,12 +419,6 @@
           "name": "discord_id",
           "type": "bigint",
           "primaryKey": true,
-          "notNull": true
-        },
-        "chronicle_id": {
-          "name": "chronicle_id",
-          "type": "bigint",
-          "primaryKey": false,
           "notNull": true
         },
         "name": {
@@ -389,21 +457,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "discord_guilds_chronicle_id_chronicles_id_fk": {
-          "name": "discord_guilds_chronicle_id_chronicles_id_fk",
-          "tableFrom": "discord_guilds",
-          "tableTo": "chronicles",
-          "columnsFrom": [
-            "chronicle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

@@ -14,6 +14,7 @@ import {
 } from "@realm/common";
 import { snowflake } from "../schema.types";
 import { chronicleMembers } from "./chronicle-members";
+import { discordGuildChronicles } from "./discord-guilds";
 
 /**
  * Chronicle table - represents the core game session.
@@ -35,6 +36,7 @@ export const chronicles = pgTable("chronicles", {
 
 export const chroniclesRelations = relations(chronicles, ({ many }) => ({
   members: many(chronicleMembers),
+  discordGuilds: many(discordGuildChronicles),
 }));
 
 // ============================================================================
