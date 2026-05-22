@@ -21,5 +21,5 @@ description: Instructs the agent on how to correctly build and manage exceptions
 ## 2. Bubble-Up Propagation Strategy
 
 - **No Defensive Wrapping**: Do not intercept external or native exceptions simply to wrap them inside a generic `RealmError`. Allow native exceptions to bubble up without chaining micro try/catch blocks down the functional pipeline.
-- **Centralized Handler Action**: Let all errors fall directly to the lowest centralized entry points (the master interaction router in `apps/bot` or global filter interceptors in `apps/api`).
+- **Centralized Handler Action**: Let all errors fall directly to the lowest centralized entry points (the master interaction router in `apps/discord` or global filter interceptors in `apps/api`).
 - **Centralized Processing Execution**: Entry boundaries should unconditionally pass all intercepted exceptions directly to `logger.exception(error)`. The centralized logger automatically evaluates the built-in `log` property on `RealmError` and `UserError` instances, silently suppressing alerts for those where `log: false`. After logging, extract the error message to notify the user and safely halt execution.

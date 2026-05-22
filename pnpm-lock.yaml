@@ -141,7 +141,22 @@ importers:
         specifier: ^9.5.7
         version: 9.5.7(typescript@6.0.2)(webpack@5.106.0(esbuild@0.28.0))
 
-  apps/bot:
+  apps/codex:
+    dependencies:
+      '@astrojs/check':
+        specifier: ^0.9.9
+        version: 0.9.9(prettier@3.8.3)(typescript@6.0.2)
+      '@astrojs/starlight':
+        specifier: ^0.39.2
+        version: 0.39.2(astro@6.3.3(@types/node@25.8.0)(idb-keyval@6.2.2)(ioredis@5.10.1)(jiti@1.21.7)(rollup@4.60.4)(terser@5.47.1)(tsx@4.22.0)(yaml@2.9.0))(typescript@6.0.2)
+      astro:
+        specifier: ^6.3.3
+        version: 6.3.3(@types/node@25.8.0)(idb-keyval@6.2.2)(ioredis@5.10.1)(jiti@1.21.7)(rollup@4.60.4)(terser@5.47.1)(tsx@4.22.0)(yaml@2.9.0)
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
+
+  apps/discord:
     dependencies:
       '@realm/assets':
         specifier: workspace:*
@@ -180,21 +195,6 @@ importers:
       tsx:
         specifier: ^4.22.0
         version: 4.22.0
-
-  apps/codex:
-    dependencies:
-      '@astrojs/check':
-        specifier: ^0.9.9
-        version: 0.9.9(prettier@3.8.3)(typescript@6.0.2)
-      '@astrojs/starlight':
-        specifier: ^0.39.2
-        version: 0.39.2(astro@6.3.3(@types/node@25.8.0)(idb-keyval@6.2.2)(ioredis@5.10.1)(jiti@1.21.7)(rollup@4.60.4)(terser@5.47.1)(tsx@4.22.0)(yaml@2.9.0))(typescript@6.0.2)
-      astro:
-        specifier: ^6.3.3
-        version: 6.3.3(@types/node@25.8.0)(idb-keyval@6.2.2)(ioredis@5.10.1)(jiti@1.21.7)(rollup@4.60.4)(terser@5.47.1)(tsx@4.22.0)(yaml@2.9.0)
-      sharp:
-        specifier: ^0.34.5
-        version: 0.34.5
 
   packages/assets:
     dependencies:

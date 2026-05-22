@@ -31,13 +31,13 @@ Code must be isolated within the correct workspace boundary according to intent,
 ### Applications (`apps/`)
 
 - `apps/api`: NestJS backend. Code unique to the API that is not shared with the bot or frontend must live here.
-- `apps/bot`: Discord.js v14+ client layer.
+- `apps/discord`: Discord.js v14+ client layer.
 - `apps/codex`: Astro web documentation layer.
 
 ### Packages (`packages/`)
 
 - `packages/common`: Universal types, baseline contracts, shared enums, primitives, and interfaces. Contains **strictly zero business logic**.
-- `packages/core`: Services, domain entities, value objects, and application-shared controllers. Logic shared between `apps/api` and `apps/bot` lives here. Non-shared logic remains in its respective app folder.
+- `packages/core`: Services, domain entities, value objects, and application-shared controllers. Logic shared between `apps/api` and `apps/discord` lives here. Non-shared logic remains in its respective app folder.
 - `packages/repositories`: The **exclusive database access gateway**. All apps and services must perform data mutations and queries through this package. No other app or package may touch or query the database layer directly.
 - `packages/database`: Drizzle ORM schema definitions, configuration files, and database migrations. It is only touched directly by `packages/repositories`.
 - `packages/logger`: The centralized logging system wrapper used throughout the workspace.

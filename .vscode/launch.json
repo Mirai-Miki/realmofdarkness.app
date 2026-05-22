@@ -16,14 +16,14 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Bot",
+      "name": "Debug Discord",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@realm/bot", "dev"],
+      "runtimeArgs": ["--filter", "@realm/discord", "dev"],
       "skipFiles": ["<node_internals>/**"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "restart": true,
-      "cwd": "${workspaceFolder}/apps/bot"
+      "cwd": "${workspaceFolder}/apps/discord"
     },
     {
       "type": "node",

@@ -1,5 +1,5 @@
 {
-  "name": "@realm/bot",
+  "name": "@realm/discord",
   "private": true,
   "type": "module",
   "scripts": {
@@ -7,7 +7,7 @@
     "build": "tsc",
     "clean": "rimraf dist .turbo",
     "typecheck": "tsc --noEmit",
-    "dev": "nodemon --exec \"turbo run build --filter=@realm/bot... && tsx src/shard-launcher.ts\"",
+    "dev": "nodemon --exec \"turbo run build --filter=@realm/discord... && tsx src/shard-launcher.ts\"",
     "start": "node dist/shard-launcher.js",
     "deploy-commands": "tsx scripts/deploy-commands.ts",
     "emoji:sync": "tsx scripts/sync-emojis.ts",

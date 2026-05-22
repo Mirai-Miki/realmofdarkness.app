@@ -49,7 +49,7 @@
     { "path": "packages/database" },
     { "path": "packages/content" },
     { "path": "apps/api" },
-    { "path": "apps/bot" },
+    { "path": "apps/discord" },
     { "path": "packages/logger" },
     { "path": "packages/repositories" },
     { "path": "packages/events" },

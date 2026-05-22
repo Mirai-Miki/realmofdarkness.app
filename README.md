@@ -12,7 +12,7 @@ The repository is in an active refactor from legacy Django/JavaScript services t
 - New TypeScript monorepo foundation is in place
 - Core shared packages are implemented and building
 - API exists as a NestJS Fastify app scaffold
-- Bot app is TypeScript-based and integrated with shared packages
+- Discord app is TypeScript-based and integrated with shared packages
 - Legacy code is preserved under [legacy/](legacy) as reference-only
 
 ## Repository Layout
@@ -21,7 +21,7 @@ The repository is in an active refactor from legacy Django/JavaScript services t
 realm-of-darkness/
 ├── apps/
 │   ├── api/         # @realm/api (NestJS + Fastify)
-│   ├── bot/         # @realm/bot (Discord.js)
+│   ├── discord/     # @realm/discord (Discord.js)
 │   └── codex/       # @realm/codex (Astro/Starlight docs)
 │
 ├── packages/
@@ -77,10 +77,7 @@ Environment is centralized in one root `.env`. See [ENV_SETUP.md](ENV_SETUP.md).
 # Development
 pnpm dev
 pnpm dev:api
-pnpm dev:bot
-pnpm dev:bot:5th
-pnpm dev:bot:20th
-pnpm dev:bot:cod
+pnpm dev:discord
 
 # Build / quality
 pnpm build
