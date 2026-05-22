@@ -1,10 +1,9 @@
 import {
   SlashCommandBuilder,
   MessageFlags,
-  type ChatInputCommandInteraction,
-  type AutocompleteInteraction,
   TextDisplayBuilder,
 } from "discord.js";
+import type { AutocompleteContext, CommandContext } from "framework";
 import { CommandHandler } from "framework";
 import { CharacterNameSchema, UserError } from "@realm/common";
 import { logger } from "@realm/logger";
@@ -30,9 +29,9 @@ export class CharacterCommandHandler extends CommandHandler {
    * Execute the character command.
    * Validates the character name and routes to creation or update.
    */
-  public async execute(
-    interaction: ChatInputCommandInteraction
-  ): Promise<void> {
+  public async execute(ctx: CommandContext): Promise<void> {
+    const { interaction } = ctx;
+
     try {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
       const characterName = interaction.options.getString("name", true);
@@ -52,21 +51,31 @@ export class CharacterCommandHandler extends CommandHandler {
       // If exists -> route to update handler (not yet implemented)
       // For now, we always route to creation
 
+      const infoFields: Record<string, string> = {
+        user: interaction.user.displayName,
+        characterName: validation.data,
+      };
+      if (ctx.actor) {
+        infoFields.rodUserId = ctx.actor.rodUserId;
+      }
+
       logger.info("Starting character creation", {
-        fields: {
-          user: interaction.user.displayName,
-          characterName: validation.data,
-        },
+        fields: infoFields,
       });
 
       await interaction.editReply(SplatSelectionView.render(validation.data));
     } catch (error) {
       // Handle errors - log if not a UserError, always respond to user
       if (!(error instanceof UserError)) {
+        const errorFields: Record<string, string> = {
+          userId: interaction.user.id,
+        };
+        if (ctx.actor) {
+          errorFields.rodUserId = ctx.actor.rodUserId;
+        }
+
         logger.exception("Error in character command handler", error, {
-          fields: {
-            userId: interaction.user.id,
-          },
+          fields: errorFields,
         });
       }
 
@@ -101,9 +110,8 @@ export class CharacterCommandHandler extends CommandHandler {
    * Returns list of existing character names for the user.
    * TODO: Implement autocomplete logic to query character repository
    */
-  public async autocomplete(
-    interaction: AutocompleteInteraction
-  ): Promise<void> {
+  public async autocomplete(ctx: AutocompleteContext): Promise<void> {
+    const { interaction } = ctx;
     // TODO: Query CharacterRepository.findAllByUser()
     // TODO: Filter by focused value
     // TODO: Return up to 25 matches

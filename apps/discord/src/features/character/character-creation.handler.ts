@@ -1,8 +1,4 @@
-import type {
-  MessageComponentInteraction,
-  ModalSubmitInteraction,
-} from "discord.js";
-import { InterfaceHandler } from "framework";
+import { InterfaceHandler, type InterfaceContext } from "framework";
 import { SplatSchema, UserError, RealmError } from "@realm/common";
 import { logger } from "@realm/logger";
 import {
@@ -21,9 +17,8 @@ export class CharacterCreationInterfaceHandler extends InterfaceHandler {
    * Execute the splat selection handler.
    * Creates a new character with the selected splat and routes to next page.
    */
-  public async execute(
-    interaction: MessageComponentInteraction | ModalSubmitInteraction
-  ): Promise<void> {
+  public async execute(ctx: InterfaceContext): Promise<void> {
+    const { interaction } = ctx;
     try {
       await interaction.deferUpdate();
       // Type guard - ensure this is a string select menu
@@ -63,6 +58,7 @@ export class CharacterCreationInterfaceHandler extends InterfaceHandler {
       logger.info("Character splat selected", {
         fields: {
           userId: interaction.user.id,
+          ...(ctx.actor ? { rodUserId: ctx.actor.rodUserId } : {}),
           characterName,
           splat,
         },
@@ -83,6 +79,7 @@ export class CharacterCreationInterfaceHandler extends InterfaceHandler {
         logger.error("Error in character creation interface handler", {
           fields: {
             userId: interaction.user.id,
+            ...(ctx.actor ? { rodUserId: ctx.actor.rodUserId } : {}),
             error: error instanceof Error ? error.message : String(error),
           },
         });

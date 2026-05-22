@@ -1,14 +1,29 @@
 import type {
-  Interaction,
+  AutocompleteInteraction,
+  BaseInteraction,
   ChatInputCommandInteraction,
+  ContextMenuCommandInteraction,
+  Interaction,
   MessageComponentInteraction,
   ModalSubmitInteraction,
-  AutocompleteInteraction,
-  ContextMenuCommandInteraction,
 } from "discord.js";
 import { logger } from "@realm/logger";
-import { registry } from "./registry";
-import { CommandHandler } from "./entities/interaction-handlers.entity";
+
+import {
+  CommandHandler,
+  InterfaceHandler,
+} from "../entities/interaction-handlers.entity";
+import { registry } from "../registry";
+import type {
+  AutocompleteContext,
+  BaseInteractionContext,
+  CommandContext,
+  ContextMenuContext,
+  InterfaceContext,
+} from "./interaction-context";
+import { parseHandlerIdFromCustomId } from "./interaction-context";
+import { composeMiddleware } from "./interaction-middleware";
+import { ensureActorMiddleware } from "./middlewares/ensure-actor.middleware";
 
 /**
  * Main router for handling Discord interactions.
@@ -19,41 +34,44 @@ import { CommandHandler } from "./entities/interaction-handlers.entity";
  * - Context Menus → Future implementation
  */
 export class InteractionRouter {
+  private readonly runBaseMiddleware = composeMiddleware<
+    BaseInteractionContext<BaseInteraction>
+  >([ensureActorMiddleware<BaseInteraction>()]);
+
   /**
    * Route an interaction to the appropriate handler.
    * @param interaction - The Discord interaction to route
    */
   public async route(interaction: Interaction): Promise<void> {
     try {
-      // Slash Command
       if (interaction.isChatInputCommand()) {
         await this.handleCommand(interaction);
-      } else if (
-        // Interface Interaction
-        interaction.isMessageComponent() ||
-        interaction.isModalSubmit()
-      ) {
-        await this.handleInterface(interaction);
-      } else if (interaction.isAutocomplete()) {
-        // Autocomplete Interaction
-        await this.handleAutocomplete(interaction);
-      } else if (interaction.isContextMenuCommand()) {
-        // Context Menu Interaction
-        await this.handleContextMenu(interaction);
-      } else {
-        // Unknown Interaction Type
-        logger.warn("Unknown interaction type", {
-          fields: { type: interaction.type.toString() },
-        });
+        return;
       }
+
+      if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
+        await this.handleInterface(interaction);
+        return;
+      }
+
+      if (interaction.isAutocomplete()) {
+        await this.handleAutocomplete(interaction);
+        return;
+      }
+
+      if (interaction.isContextMenuCommand()) {
+        await this.handleContextMenu(interaction);
+        return;
+      }
+
+      logger.warn("Unknown interaction type", {
+        fields: { type: interaction.type.toString() },
+      });
     } catch (error) {
       logger.fatal("Error handling interaction", { error });
     }
   }
 
-  /**
-   * Handle slash command interactions.
-   */
   private async handleCommand(
     interaction: ChatInputCommandInteraction
   ): Promise<void> {
@@ -76,18 +94,18 @@ export class InteractionRouter {
     logger.debug("Executing command", {
       fields: { commandName: interaction.commandName },
     });
-    await handler.execute(interaction);
+
+    const ctx: CommandContext = {
+      interaction,
+    };
+
+    await this.runBaseMiddleware(ctx, async () => handler.execute(ctx));
   }
 
-  /**
-   * Handle interface interactions (buttons, modals, select menus).
-   */
   private async handleInterface(
     interaction: MessageComponentInteraction | ModalSubmitInteraction
   ): Promise<void> {
-    // Extract handler ID from custom ID
-    // Format: "handler_id:params" or just "handler_id"
-    const [handlerId] = interaction.customId.split(":");
+    const handlerId = parseHandlerIdFromCustomId(interaction.customId);
 
     const handler = registry.getInteractionHandler(handlerId);
 
@@ -98,13 +116,22 @@ export class InteractionRouter {
       return;
     }
 
+    if (!(handler instanceof InterfaceHandler)) {
+      logger.warn("Handler is not an InterfaceHandler", {
+        fields: { handlerId },
+      });
+      return;
+    }
+
     logger.debug("Executing interface", { fields: { handlerId } });
-    await handler.execute(interaction);
+
+    const ctx: InterfaceContext = {
+      interaction,
+    };
+
+    await this.runBaseMiddleware(ctx, async () => handler.execute(ctx));
   }
 
-  /**
-   * Handle autocomplete interactions.
-   */
   private async handleAutocomplete(
     interaction: AutocompleteInteraction
   ): Promise<void> {
@@ -127,18 +154,30 @@ export class InteractionRouter {
     logger.debug("Executing autocomplete", {
       fields: { commandName: interaction.commandName },
     });
-    await handler.autocomplete(interaction);
+
+    const ctx: AutocompleteContext = {
+      interaction,
+    };
+
+    await this.runBaseMiddleware(
+      ctx,
+      async () => handler.autocomplete?.(ctx) ?? Promise.resolve()
+    );
   }
 
-  /**
-   * Handle context menu interactions.
-   */
   private async handleContextMenu(
     interaction: ContextMenuCommandInteraction
   ): Promise<void> {
     logger.debug("Context menu interaction received", {
       fields: { commandName: interaction.commandName },
     });
+
+    const ctx: ContextMenuContext = {
+      interaction,
+    };
+
+    await this.runBaseMiddleware(ctx, async () => Promise.resolve());
+
     // TODO: Implement context menu routing
     return Promise.resolve();
   }

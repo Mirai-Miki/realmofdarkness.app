@@ -1,11 +1,10 @@
+import type { SlashCommandBuilder } from "discord.js";
+
 import type {
-  ChatInputCommandInteraction,
-  MessageComponentInteraction,
-  ModalSubmitInteraction,
-  SlashCommandBuilder,
-  AutocompleteInteraction,
-  BaseInteraction,
-} from "discord.js";
+  AutocompleteContext,
+  CommandContext,
+  InterfaceContext,
+} from "../interaction-router/interaction-context";
 
 /**
  * Base class for all interaction handlers.
@@ -18,12 +17,6 @@ export abstract class BaseInteractionHandler {
    * For interfaces (buttons/modals), this is the custom ID prefix.
    */
   abstract readonly handlerId: string;
-
-  /**
-   * Execute the handler logic.
-   * @param interaction - The Discord interaction to handle
-   */
-  abstract execute(interaction: BaseInteraction): Promise<void>;
 }
 
 /**
@@ -46,17 +39,15 @@ export abstract class CommandHandler extends BaseInteractionHandler {
 
   /**
    * Execute the command.
-   * @param ChatInputCommandInteraction - The chat input command interaction
+   * @param ctx - The typed command context
    */
-  abstract override execute(
-    interaction: ChatInputCommandInteraction
-  ): Promise<void>;
+  abstract execute(ctx: CommandContext): Promise<void>;
 
   /**
    * Handle autocomplete interactions for the command.
-   * @param AutocompleteInteraction - The autocomplete interaction
+   * @param ctx - The typed autocomplete context
    */
-  abstract autocomplete?(interaction: AutocompleteInteraction): Promise<void>;
+  abstract autocomplete?(ctx: AutocompleteContext): Promise<void>;
 }
 
 /**
@@ -66,9 +57,7 @@ export abstract class CommandHandler extends BaseInteractionHandler {
 export abstract class InterfaceHandler extends BaseInteractionHandler {
   /**
    * Execute the handler logic.
-   * @param interaction - The interface interaction
+   * @param ctx - The typed interface context
    */
-  abstract override execute(
-    interaction: MessageComponentInteraction | ModalSubmitInteraction
-  ): Promise<void>;
+  abstract execute(ctx: InterfaceContext): Promise<void>;
 }

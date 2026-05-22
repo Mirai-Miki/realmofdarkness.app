@@ -82,10 +82,17 @@ export class Loader {
 
     logger.debug("Scanning for handlers", { fields: { rootDirectory } });
 
-    // Pattern matches: src/features/**/something.handler.ts
-    const pattern = "**/*.handler.{ts,js}";
+    // Patterns match:
+    // - src/features/**/something.handler.ts (legacy singular)
+    // - src/features/**/something.handlers.ts (preferred plural; supports multiple handlers per file)
+    // Note: We intentionally do not load .js files.
+    const patterns = ["**/*.handler.ts", "**/*.handlers.ts"];
 
-    const handlers = await this.scanHandlerFiles(rootDirectory, pattern);
+    const handlers = (
+      await Promise.all(
+        patterns.map((pattern) => this.scanHandlerFiles(rootDirectory, pattern))
+      )
+    ).flat();
 
     logger.debug("Found handler files", {
       fields: { count: handlers.length.toString() },
@@ -123,8 +130,9 @@ export class Loader {
 
     logger.debug("Scanning for Discord events", { fields: { rootDirectory } });
 
-    // Pattern matches: src/framework/events/ready.event.ts
-    const pattern = "**/*.event.{ts,js}";
+    // Pattern matches: src/**/something.event.ts
+    // Note: We intentionally do not load .js files.
+    const pattern = "**/*.event.ts";
 
     const files = await fg.glob(pattern, {
       cwd: rootDirectory,
@@ -191,10 +199,17 @@ export class Loader {
   public async scanCommandHandlers(
     rootDirectory: string
   ): Promise<CommandHandler[]> {
-    // Pattern matches: src/features/**/something.handler.ts
-    const pattern = "**/*.handler.{ts,js}";
+    // Patterns match:
+    // - src/features/**/something.handler.ts (legacy singular)
+    // - src/features/**/something.handlers.ts (preferred plural)
+    // Note: We intentionally do not load .js files.
+    const patterns = ["**/*.handler.ts", "**/*.handlers.ts"];
 
-    const allHandlers = await this.scanHandlerFiles(rootDirectory, pattern);
+    const allHandlers = (
+      await Promise.all(
+        patterns.map((pattern) => this.scanHandlerFiles(rootDirectory, pattern))
+      )
+    ).flat();
 
     // Filter to only CommandHandler instances
     return allHandlers.filter(

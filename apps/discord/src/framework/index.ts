@@ -24,7 +24,24 @@ export { DiscordEvent, createEvent } from "./entities/discord-event.entity";
 export { Registry, registry } from "./registry";
 
 // Router
-export { InteractionRouter } from "./interaction-router";
+export { InteractionRouter } from "./interaction-router/interaction-router";
+
+// Interaction Context
+export {
+  parseHandlerIdFromCustomId,
+  type DiscordActor,
+  type BaseInteractionContext,
+  type CommandContext,
+  type InterfaceContext,
+  type AutocompleteContext,
+  type ContextMenuContext,
+} from "./interaction-router/interaction-context";
+
+// Middleware
+export {
+  composeMiddleware,
+  type InteractionMiddleware,
+} from "./interaction-router/interaction-middleware";
 
 // Loader
 export { Loader, loader } from "./loader";
