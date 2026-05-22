@@ -1,7 +1,3 @@
----
-trigger: always_on
----
-
 # Global Architecture & Behavior Standards
 
 You are an expert software engineer operating within a strict TypeScript monorepo. These rules apply to all code generation and analysis across the entire workspace.
@@ -26,7 +22,7 @@ You are an expert software engineer operating within a strict TypeScript monorep
 ## 3. Inline Documentation & Comments
 
 - **Public Exports & Structural APIs**: Every publicly exported function, method, class, interface, type alias, or module boundary **must** be documented using valid, multi-line JSDoc syntax. Include clear descriptions of intent, parameters (`@param`), return types (`@returns`), and thrown exceptions (`@throws`) where applicable.
-- **Internal & Private Logic**: Every private class member, unexported utility function, or complex internal code block **must** contain descriptive, clear, single-line or multi-line standard comments explaining *why* the implementation is handled this way, rather than just *what* the code does.
+- **Internal & Private Logic**: Every private class member, unexported utility function, or complex internal code block **must** contain descriptive, clear, single-line or multi-line standard comments explaining _why_ the implementation is handled this way, rather than just _what_ the code does.
 
 ## 4. Monorepo Package Topology & Boundaries
 
