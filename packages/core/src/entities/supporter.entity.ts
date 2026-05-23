@@ -1,4 +1,10 @@
-import { RealmError, SupporterLevel, type SupporterData } from "@realm/common";
+import {
+  RealmError,
+  SupporterLevel,
+  SupporterLevelSchema,
+  BoostsSchema,
+  type SupporterData,
+} from "@realm/common";
 
 /**
  * Character sheet limits per supporter tier.
@@ -126,25 +132,40 @@ export class Supporter {
    * Update the supporter level (e.g., upgrade/downgrade subscription).
    *
    * @param newLevel - New supporter tier
+   * @throws {RealmError} If the new level is invalid according to SupporterLevelSchema
    */
   public updateLevel(newLevel: SupporterLevel): void {
-    this._data.level = newLevel;
+    const result = SupporterLevelSchema.safeParse(newLevel);
+    if (!result.success) {
+      throw new RealmError("Invalid supporter level", { cause: result.error });
+    }
+    this._data.level = result.data;
   }
 
   /**
    * Allocate a server boost.
+   * @throws {RealmError} If the resulting boost count exceeds schema limits
    */
   public allocateBoost(): void {
-    this._data.boosts += 1;
+    const nextBoosts = this._data.boosts + 1;
+    const result = BoostsSchema.safeParse(nextBoosts);
+    if (!result.success) {
+      throw new RealmError("Invalid boost count", { cause: result.error });
+    }
+    this._data.boosts = result.data;
   }
 
   /**
    * Deallocate a server boost.
+   * @throws {RealmError} If there are no boosts to remove or the resulting count is invalid
    */
   public deallocateBoost(): void {
-    if (this._data.boosts > 0) {
-      this._data.boosts -= 1;
+    const nextBoosts = this._data.boosts - 1;
+    const result = BoostsSchema.safeParse(nextBoosts);
+    if (!result.success) {
+      throw new RealmError("Invalid boost count", { cause: result.error });
     }
+    this._data.boosts = result.data;
   }
 
   /**

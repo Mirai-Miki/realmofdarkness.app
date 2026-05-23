@@ -2,7 +2,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import { pgTable, pgEnum, timestamp, integer } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { SupporterLevel } from "@realm/common";
+import { SupporterLevel, SnowflakeSchema } from "@realm/common";
 import { snowflake } from "../schema.types";
 import { users } from "./users";
 
@@ -51,10 +51,14 @@ export type SupporterDb = InferSelectModel<typeof supporters>;
  * Zod schema for selecting/reading supporter records from the database.
  * Matches the exact structure returned by SELECT queries.
  */
-export const selectSupporterSchema = createSelectSchema(supporters);
+export const selectSupporterSchema = createSelectSchema(supporters, {
+  userId: SnowflakeSchema,
+});
 
 /**
  * Zod schema for inserting new supporter records into the database.
  * Matches the structure required by INSERT queries.
  */
-export const insertSupporterSchema = createInsertSchema(supporters);
+export const insertSupporterSchema = createInsertSchema(supporters, {
+  userId: SnowflakeSchema,
+});

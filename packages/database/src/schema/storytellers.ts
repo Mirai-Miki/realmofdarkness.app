@@ -10,7 +10,7 @@ import {
 import { users } from "./users";
 import { chronicles } from "./chronicles";
 import { snowflake } from "../schema.types";
-import { SnowflakeSchema } from "@realm/common";
+import { SnowflakeSchema, StorytellerProviderMaxLength } from "@realm/common";
 
 /**
  * Storytellers table - tracks users who have storyteller permissions for a chronicle
@@ -32,7 +32,9 @@ export const storytellers = pgTable(
       .references(() => chronicles.id, { onDelete: "cascade" }),
 
     /** Provider of the permission: "hoisted" for manual web, or a Discord Server ID */
-    provider: varchar({ length: 255 }).notNull().default("hoisted"),
+    provider: varchar({ length: StorytellerProviderMaxLength })
+      .notNull()
+      .default("hoisted"),
 
     createdAt: timestamp().defaultNow().notNull(),
   },

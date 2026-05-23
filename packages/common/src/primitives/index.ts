@@ -23,6 +23,11 @@ export const GuildNameConstraints = {
 export const DiscordCdnUrlMaxLength = 500;
 
 /**
+ * Maximum length of the `command_stats.command` column.
+ */
+export const CommandNameMaxLength = 100;
+
+/**
  * Maximum length for notes/description fields across the application.
  */
 export const CommandNotesMaxLength = 300;
@@ -43,11 +48,21 @@ export type Snowflake = z.infer<typeof SnowflakeSchema>;
 
 // Discord CDN URLs
 // Discord CDN URLs
-export const DiscordUrlSchema = z.url({
-  hostname: /^(media\.discordapp\.net|cdn\.discordapp\.com)$/,
-  protocol: /^https$/,
-});
-export type DiscordUrl = z.infer<typeof DiscordUrlSchema>;
+export const DiscordCdnUrlSchema = z
+  .url({
+    hostname: /^(media\.discordapp\.net|cdn\.discordapp\.com)$/,
+    protocol: /^https$/,
+  })
+  .max(DiscordCdnUrlMaxLength);
+export type DiscordUrl = z.infer<typeof DiscordCdnUrlSchema>;
+
+/**
+ * Database-aligned Discord CDN URL schema.
+ *
+ * Many DB columns store CDN URLs as NOT NULL with default "".
+ * This schema allows either "" or a valid Discord CDN URL.
+ */
+export const DiscordCdnUrlOrEmptySchema = z.literal("").or(DiscordCdnUrlSchema);
 /**
  * Environment modes.
  * Defines the runtime environment.

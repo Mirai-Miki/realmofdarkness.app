@@ -6,8 +6,9 @@ import type {
 
 import {
   RealmError,
-  GuildNameConstraints,
-  DiscordCdnUrlMaxLength,
+  DiscordGuildNameSchema,
+  DiscordGuildIconUrlSchema,
+  SnowflakeSchema,
 } from "@realm/common";
 
 /**
@@ -66,7 +67,7 @@ export class DiscordGuild {
    * Update the discord guild's name.
    *
    * @param name - New discord guild name
-   * @throws {RealmError} If the name is empty or exceeds the maximum length
+   * @throws {RealmError} If name is invalid according to DiscordGuildNameSchema
    *
    * @example
    * ```typescript
@@ -74,22 +75,20 @@ export class DiscordGuild {
    * ```
    */
   public updateName(name: string): void {
-    if (!name || name.trim().length === 0) {
-      throw new RealmError("Discord guild name cannot be empty");
+    const result = DiscordGuildNameSchema.safeParse(name);
+    if (!result.success) {
+      throw new RealmError("Invalid Discord guild name", {
+        cause: result.error,
+      });
     }
-    if (name.length > GuildNameConstraints.MaxLength) {
-      throw new RealmError(
-        `Discord guild name cannot exceed ${GuildNameConstraints.MaxLength} characters`
-      );
-    }
-    this._data.name = name;
+    this._data.name = result.data;
   }
 
   /**
    * Update the discord guild's icon URL.
    *
    * @param iconUrl - New icon URL
-   * @throws {RealmError} If the URL exceeds the maximum length
+   * @throws {RealmError} If icon URL is invalid according to DiscordGuildIconUrlSchema
    *
    * @example
    * ```typescript
@@ -97,18 +96,18 @@ export class DiscordGuild {
    * ```
    */
   public updateIconUrl(iconUrl: string): void {
-    if (iconUrl.length > DiscordCdnUrlMaxLength) {
-      throw new RealmError(
-        `Icon URL cannot exceed ${DiscordCdnUrlMaxLength} characters`
-      );
+    const result = DiscordGuildIconUrlSchema.safeParse(iconUrl);
+    if (!result.success) {
+      throw new RealmError("Invalid icon URL", { cause: result.error });
     }
-    this._data.iconUrl = iconUrl;
+    this._data.iconUrl = result.data;
   }
 
   /**
    * Add a storyteller role.
    *
    * @param roleId - Discord role snowflake ID
+   * @throws {RealmError} If roleId is invalid according to SnowflakeSchema
    *
    * @example
    * ```typescript
@@ -116,8 +115,12 @@ export class DiscordGuild {
    * ```
    */
   public addStorytellerRole(roleId: Snowflake): void {
-    if (!this._data.storytellerRoleIds.includes(roleId)) {
-      this._data.storytellerRoleIds.push(roleId);
+    const result = SnowflakeSchema.safeParse(roleId);
+    if (!result.success) {
+      throw new RealmError("Invalid role ID format", { cause: result.error });
+    }
+    if (!this._data.storytellerRoleIds.includes(result.data)) {
+      this._data.storytellerRoleIds.push(result.data);
     }
   }
 
@@ -125,6 +128,7 @@ export class DiscordGuild {
    * Remove a storyteller role.
    *
    * @param roleId - Discord role snowflake ID
+   * @throws {RealmError} If roleId is invalid according to SnowflakeSchema
    *
    * @example
    * ```typescript
@@ -132,7 +136,11 @@ export class DiscordGuild {
    * ```
    */
   public removeStorytellerRole(roleId: Snowflake): void {
-    const index = this._data.storytellerRoleIds.indexOf(roleId);
+    const result = SnowflakeSchema.safeParse(roleId);
+    if (!result.success) {
+      throw new RealmError("Invalid role ID format", { cause: result.error });
+    }
+    const index = this._data.storytellerRoleIds.indexOf(result.data);
     if (index > -1) {
       this._data.storytellerRoleIds.splice(index, 1);
     }

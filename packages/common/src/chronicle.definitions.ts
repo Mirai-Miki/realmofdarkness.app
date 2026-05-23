@@ -8,7 +8,7 @@ import { z } from "zod";
 import type { Snowflake } from "./primitives";
 import {
   SnowflakeSchema,
-  DiscordUrlSchema,
+  DiscordCdnUrlOrEmptySchema,
   GuildNameConstraints,
 } from "./primitives";
 
@@ -27,7 +27,7 @@ export const ChronicleNameSchema = z
 /**
  * Chronicle icon URL from Discord CDN.
  */
-export const ChronicleIconUrlSchema = DiscordUrlSchema;
+export const ChronicleIconUrlSchema = DiscordCdnUrlOrEmptySchema;
 
 // ============================================================================
 // Chronicle DTOs

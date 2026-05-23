@@ -8,7 +8,7 @@ import { z } from "zod";
 import type { Snowflake } from "./primitives";
 import {
   SnowflakeSchema,
-  DiscordUrlSchema,
+  DiscordCdnUrlOrEmptySchema,
   GuildNameConstraints,
 } from "./primitives";
 
@@ -27,7 +27,7 @@ export const DiscordGuildNameSchema = z
 /**
  * Discord Guild icon URL from Discord CDN.
  */
-export const DiscordGuildIconUrlSchema = DiscordUrlSchema;
+export const DiscordGuildIconUrlSchema = DiscordCdnUrlOrEmptySchema;
 
 /**
  * Array of role IDs that have storyteller permissions in the Discord guild.

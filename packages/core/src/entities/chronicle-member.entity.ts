@@ -4,7 +4,12 @@ import type {
   Snowflake,
 } from "@realm/common";
 
-import { RealmError } from "@realm/common";
+import {
+  RealmError,
+  ChronicleMemberNicknameSchema,
+  ChronicleMemberAvatarUrlSchema,
+  ChronicleMemberBoostCountSchema,
+} from "@realm/common";
 
 /**
  * Domain entity representing a User's membership in a Chronicle.
@@ -75,6 +80,7 @@ export class ChronicleMember {
    * Update the member's nickname.
    *
    * @param nickname - New nickname
+   * @throws {RealmError} If nickname is invalid according to ChronicleMemberNicknameSchema
    *
    * @example
    * ```typescript
@@ -82,13 +88,18 @@ export class ChronicleMember {
    * ```
    */
   public setNickname(nickname: string): void {
-    this._data.nickname = nickname;
+    const result = ChronicleMemberNicknameSchema.safeParse(nickname);
+    if (!result.success) {
+      throw new RealmError("Invalid nickname", { cause: result.error });
+    }
+    this._data.nickname = result.data;
   }
 
   /**
    * Update the member's avatar URL.
    *
    * @param avatarUrl - New avatar URL
+   * @throws {RealmError} If avatarUrl is invalid according to ChronicleMemberAvatarUrlSchema
    *
    * @example
    * ```typescript
@@ -96,7 +107,11 @@ export class ChronicleMember {
    * ```
    */
   public setAvatarUrl(avatarUrl: string): void {
-    this._data.avatarUrl = avatarUrl;
+    const result = ChronicleMemberAvatarUrlSchema.safeParse(avatarUrl);
+    if (!result.success) {
+      throw new RealmError("Invalid avatar URL", { cause: result.error });
+    }
+    this._data.avatarUrl = result.data;
   }
 
   // ============================================================================
@@ -105,6 +120,7 @@ export class ChronicleMember {
 
   /**
    * Add a boost to this member's chronicle.
+   * @throws {RealmError} If the resulting boost count exceeds schema limits
    *
    * @example
    * ```typescript
@@ -112,13 +128,18 @@ export class ChronicleMember {
    * ```
    */
   public addBoost(): void {
-    this._data.boosted += 1;
+    const nextBoostCount = this._data.boosted + 1;
+    const result = ChronicleMemberBoostCountSchema.safeParse(nextBoostCount);
+    if (!result.success) {
+      throw new RealmError("Invalid boost count", { cause: result.error });
+    }
+    this._data.boosted = result.data;
   }
 
   /**
    * Remove a boost from this member's chronicle.
    *
-   * @throws {RealmError} If the member does not have any boosts to remove
+   * @throws {RealmError} If the member does not have any boosts to remove or resulting count is invalid
    *
    * @example
    * ```typescript
@@ -126,10 +147,14 @@ export class ChronicleMember {
    * ```
    */
   public removeBoost(): void {
-    if (this._data.boosted <= 0) {
-      throw new RealmError("Member has no boosts to remove");
+    const nextBoostCount = this._data.boosted - 1;
+    const result = ChronicleMemberBoostCountSchema.safeParse(nextBoostCount);
+    if (!result.success) {
+      throw new RealmError("Member has no boosts to remove", {
+        cause: result.error,
+      });
     }
-    this._data.boosted -= 1;
+    this._data.boosted = result.data;
   }
 
   /**

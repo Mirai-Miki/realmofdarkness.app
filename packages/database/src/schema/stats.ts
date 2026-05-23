@@ -9,6 +9,7 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { users } from "./users";
 import { snowflake } from "../schema.types";
+import { CommandNameMaxLength } from "@realm/common";
 
 /**
  * CommandStats table - tracks usage statistics for bot commands
@@ -30,7 +31,7 @@ export const commandStats = pgTable(
     botId: snowflake().notNull(),
 
     /** Name of the command that was used */
-    command: varchar({ length: 100 }).notNull(),
+    command: varchar({ length: CommandNameMaxLength }).notNull(),
 
     /** Number of times this command has been used by this user with this bot */
     used: integer().notNull().default(1),

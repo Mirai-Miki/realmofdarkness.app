@@ -1,6 +1,11 @@
 import type { UserRepositoryInput, Snowflake } from "@realm/common";
 
-import { RealmError, type UserData } from "@realm/common";
+import {
+  RealmError,
+  DisplayNameSchema,
+  AvatarUrlSchema,
+  type UserData,
+} from "@realm/common";
 
 /**
  * Domain entity representing a User.
@@ -44,21 +49,28 @@ export class User {
    * Update the user's display name.
    *
    * @param displayName - New display name
+   * @throws {RealmError} If display name is invalid according to DisplayNameSchema
    */
   public updateDisplayName(displayName: string): void {
-    if (!displayName || displayName.trim().length === 0) {
-      throw new RealmError("Display name cannot be empty");
+    const result = DisplayNameSchema.safeParse(displayName);
+    if (!result.success) {
+      throw new RealmError("Invalid display name", { cause: result.error });
     }
-    this._data.displayName = displayName;
+    this._data.displayName = result.data;
   }
 
   /**
    * Update the user's avatar URL.
    *
    * @param avatarUrl - New avatar URL
+   * @throws {RealmError} If avatar URL is invalid according to AvatarUrlSchema
    */
   public updateAvatarUrl(avatarUrl: string): void {
-    this._data.avatarUrl = avatarUrl;
+    const result = AvatarUrlSchema.safeParse(avatarUrl);
+    if (!result.success) {
+      throw new RealmError("Invalid avatar URL", { cause: result.error });
+    }
+    this._data.avatarUrl = result.data;
   }
 
   /**

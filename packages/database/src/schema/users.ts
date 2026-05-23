@@ -15,7 +15,11 @@ import {
   createUpdateSchema,
 } from "drizzle-zod";
 import { snowflake } from "../schema.types";
-import { UsernameConstraints, SnowflakeSchema } from "@realm/common";
+import {
+  UsernameConstraints,
+  SnowflakeSchema,
+  DiscordCdnUrlMaxLength,
+} from "@realm/common";
 import { supporters } from "./supporters";
 
 export const users = pgTable(
@@ -29,7 +33,9 @@ export const users = pgTable(
     displayName: varchar({ length: UsernameConstraints.MaxLength })
       .notNull()
       .default("Undefined"),
-    avatarUrl: varchar({ length: 500 }).notNull().default(""),
+    avatarUrl: varchar({ length: DiscordCdnUrlMaxLength })
+      .notNull()
+      .default(""),
     admin: boolean().notNull().default(false), // RoD admin
 
     createdAt: timestamp().defaultNow().notNull(),

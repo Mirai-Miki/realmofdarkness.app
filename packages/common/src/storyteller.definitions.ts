@@ -5,17 +5,24 @@
  * @packageDocumentation
  */
 import { z } from "zod";
-import type { Snowflake } from "./primitives";
-import { SnowflakeSchema } from "./primitives";
+import { SnowflakeSchema, type Snowflake } from "./primitives";
 
 // ============================================================================
 // Storyteller Field Schemas
 // ============================================================================
 
 /**
+ * Maximum length of the `storytellers.provider` column.
+ */
+export const StorytellerProviderMaxLength = 255;
+
+/**
  * Storyteller provider string (e.g. "hoisted", discord server id, etc).
  */
-export const StorytellerProviderSchema = z.string().min(1).max(255);
+export const StorytellerProviderSchema = z
+  .string()
+  .min(1)
+  .max(StorytellerProviderMaxLength);
 
 // ============================================================================
 // Storyteller DTOs
