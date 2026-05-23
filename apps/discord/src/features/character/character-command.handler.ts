@@ -56,7 +56,7 @@ export class CharacterCommandHandler extends CommandHandler {
         characterName: validation.data,
       };
       if (ctx.actor) {
-        infoFields.rodUserId = ctx.actor.rodUserId;
+        infoFields.rodUserId = ctx.actor.id;
       }
 
       logger.info("Starting character creation", {
@@ -71,7 +71,7 @@ export class CharacterCommandHandler extends CommandHandler {
           userId: interaction.user.id,
         };
         if (ctx.actor) {
-          errorFields.rodUserId = ctx.actor.rodUserId;
+          errorFields.rodUserId = ctx.actor.id;
         }
 
         logger.exception("Error in character command handler", error, {

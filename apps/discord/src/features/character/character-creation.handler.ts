@@ -58,7 +58,7 @@ export class CharacterCreationInterfaceHandler extends InterfaceHandler {
       logger.info("Character splat selected", {
         fields: {
           userId: interaction.user.id,
-          ...(ctx.actor ? { rodUserId: ctx.actor.rodUserId } : {}),
+          ...(ctx.actor ? { rodUserId: ctx.actor.id } : {}),
           characterName,
           splat,
         },
@@ -79,7 +79,7 @@ export class CharacterCreationInterfaceHandler extends InterfaceHandler {
         logger.error("Error in character creation interface handler", {
           fields: {
             userId: interaction.user.id,
-            ...(ctx.actor ? { rodUserId: ctx.actor.rodUserId } : {}),
+            ...(ctx.actor ? { rodUserId: ctx.actor.id } : {}),
             error: error instanceof Error ? error.message : String(error),
           },
         });

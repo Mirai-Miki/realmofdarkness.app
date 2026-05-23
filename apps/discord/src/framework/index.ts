@@ -29,7 +29,6 @@ export { InteractionRouter } from "./interaction-router/interaction-router";
 // Interaction Context
 export {
   parseHandlerIdFromCustomId,
-  type DiscordActor,
   type BaseInteractionContext,
   type CommandContext,
   type InterfaceContext,

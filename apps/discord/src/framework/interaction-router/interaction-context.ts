@@ -6,24 +6,7 @@ import type {
   MessageComponentInteraction,
   ModalSubmitInteraction,
 } from "discord.js";
-import type { Snowflake, UserData } from "@realm/common";
-
-/**
- * Discord app aggregate representing the acting user.
- *
- * This shape is intentionally scoped to the Discord app. Shared packages should
- * receive only the fields they explicitly require (usually the core User/UserData).
- */
-export type DiscordActor = {
-  /** RoD user ID. */
-  rodUserId: Snowflake;
-
-  /** Discord user snowflake ID. */
-  discordUserId: Snowflake;
-
-  /** Core user record. */
-  user: UserData;
-};
+import type { User as RodUser } from "@realm/core";
 
 /**
  * Minimal interaction context passed into handlers.
@@ -36,8 +19,12 @@ export type BaseInteractionContext<TInteraction extends BaseInteraction> = {
   /** Raw Discord.js interaction. */
   interaction: TInteraction;
 
-  /** Actor aggregate, attached by middleware such as ensure-actor. */
-  actor?: DiscordActor;
+  /**
+   * Hydrated RoD domain user entity, attached by middleware such as ensure-actor.
+   *
+   * Do not pass raw `UserData` around inside the app.
+   */
+  actor?: RodUser;
 };
 
 export type CommandContext =

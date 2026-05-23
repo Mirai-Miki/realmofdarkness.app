@@ -1,13 +1,10 @@
 import { logger } from "@realm/logger";
 import { UserRepository } from "@realm/repositories";
-import { generateSnowflake } from "@realm/core";
+import { generateSnowflake, User } from "@realm/core";
 
 import type { BaseInteraction } from "discord.js";
 
-import type {
-  BaseInteractionContext,
-  DiscordActor,
-} from "../interaction-context";
+import type { BaseInteractionContext } from "../interaction-context";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -35,11 +32,11 @@ function isPostgresUniqueViolation(error: unknown): boolean {
  */
 export async function ensureActor<TInteraction extends BaseInteraction>(
   ctx: BaseInteractionContext<TInteraction>
-): Promise<DiscordActor> {
+): Promise<User> {
   const discordUserId = ctx.interaction.user.id;
   const userRepo = new UserRepository();
   try {
-    const user = await userRepo.upsertFromDiscordProfile(
+    const userData = await userRepo.upsertFromDiscordProfile(
       {
         discordId: discordUserId,
         displayName: ctx.interaction.user.displayName,
@@ -48,11 +45,7 @@ export async function ensureActor<TInteraction extends BaseInteraction>(
       { newUserId: generateSnowflake() }
     );
 
-    return {
-      rodUserId: user.id,
-      discordUserId,
-      user,
-    };
+    return new User(userData);
   } catch (error) {
     if (!isPostgresUniqueViolation(error)) throw error;
 
@@ -62,10 +55,10 @@ export async function ensureActor<TInteraction extends BaseInteraction>(
       fields: { discordUserId },
     });
 
-    const racedUser = await userRepo.findByDiscordId(discordUserId);
-    if (!racedUser) throw error;
+    const racedUserData = await userRepo.findByDiscordId(discordUserId);
+    if (!racedUserData) throw error;
 
-    return { rodUserId: racedUser.id, discordUserId, user: racedUser };
+    return new User(racedUserData);
   }
 }
 
