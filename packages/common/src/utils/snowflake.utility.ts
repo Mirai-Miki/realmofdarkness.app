@@ -17,7 +17,7 @@
  * with Discord snowflakes to approximately the year 2070.
  */
 
-import { RealmError } from "@realm/common";
+import { RealmError } from "../error.definitions.js";
 
 /**
  * Snowflake component bit lengths

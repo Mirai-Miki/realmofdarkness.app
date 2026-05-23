@@ -1,6 +1,6 @@
 import { logger } from "@realm/logger";
 import { UserRepository } from "@realm/repositories";
-import { generateSnowflake, User } from "@realm/core";
+import { User } from "@realm/core";
 
 import type { BaseInteraction } from "discord.js";
 
@@ -36,14 +36,11 @@ export async function ensureActor<TInteraction extends BaseInteraction>(
   const discordUserId = ctx.interaction.user.id;
   const userRepo = new UserRepository();
   try {
-    const userData = await userRepo.upsertFromDiscordProfile(
-      {
-        discordId: discordUserId,
-        displayName: ctx.interaction.user.displayName,
-        avatarUrl: ctx.interaction.user.displayAvatarURL(),
-      },
-      { newUserId: generateSnowflake() }
-    );
+    const userData = await userRepo.upsertFromDiscordProfile({
+      discordId: discordUserId,
+      displayName: ctx.interaction.user.displayName,
+      avatarUrl: ctx.interaction.user.displayAvatarURL(),
+    });
 
     return new User(userData);
   } catch (error) {

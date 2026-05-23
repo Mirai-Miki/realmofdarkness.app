@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "@realm/common": "workspace:*",
-    "@realm/core": "workspace:*",
     "@realm/database": "workspace:*",
     "drizzle-orm": "catalog:",
     "fast-deep-equal": "^3.1.3",

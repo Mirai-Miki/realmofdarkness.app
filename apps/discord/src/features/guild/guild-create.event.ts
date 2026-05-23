@@ -1,6 +1,6 @@
 import type { Guild as DiscordGuild } from "discord.js";
 
-import { Events, SnowflakeUtil } from "discord.js";
+import { Events } from "discord.js";
 import { DiscordEvent } from "framework";
 import { GuildSyncAction } from "./guild-sync.action";
 import { ActivityService } from "../core/activity.service";
@@ -44,10 +44,7 @@ class GuildCreateEvent extends DiscordEvent<Events.GuildCreate> {
         });
 
         // 3. Create a default Chronicle
-        // Use discord.js SnowflakeUtil to generate a valid snowflake for the new Chronicle
-        const chronicleId = SnowflakeUtil.generate().toString();
-        await this.chronicleRepository.create({
-          id: chronicleId,
+        const chronicle = await this.chronicleRepository.create({
           name: guild.name, // Use guild name as default chronicle name per user request
           iconUrl: guild.iconURL() || "",
         });
@@ -55,15 +52,17 @@ class GuildCreateEvent extends DiscordEvent<Events.GuildCreate> {
         // 4. Link the Guild to the new Chronicle
         await this.linkRepository.link({
           discordId: guild.id,
-          chronicleId: chronicleId,
+          chronicleId: chronicle.id,
         });
 
         logger.info(
-          `Successfully created and linked default Chronicle (${chronicleId}) for guild ${guild.id}`
+          `Successfully created and linked default Chronicle (${chronicle.id}) for guild ${guild.id}`
         );
       }
     } catch (error) {
-      logger.exception(`Failed to setup new guild ${guild.name}`, error);
+      // This is fatal will cause a cascade issues when trying to do operations
+      // in that guild
+      logger.fatal(`Failed to setup new guild ${guild.name}`, { error });
     }
 
     // 5. Sync Members

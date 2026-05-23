@@ -11,6 +11,7 @@ This package serves as the **shared kernel** in our clean architecture. It defin
 - **Types** for type safety across packages
 - **Enums** that standardize common values
 - **Errors** for consistent error handling
+- **Stateless Utilities** that provide global helper functions (e.g., Snowflake generation)
 
 **Key Rule:** All other packages depend on this one, but `common` has ZERO dependencies on other internal packages (only `zod`).
 
@@ -40,6 +41,9 @@ This package serves as the **shared kernel** in our clean architecture. It defin
 │   ├── primitives/          # Core types
 │   │   ├── index.ts         # Snowflake, Environment, etc.
 │   │   └── http-status.enum.ts
+│   ├── utils/               # High-level stateless utilities
+│   │   ├── index.ts
+│   │   └── snowflake.utility.ts
 │   ├── error.definitions.ts # RealmError, UserError
 │   ├── logger/              # ILogger interface
 │   ├── user.definitions.ts  # User DTOs & repository
@@ -136,4 +140,14 @@ throw new RealmError("Database connection failed", {
 throw new UserError("Invalid username format", {
   fields: { username },
 });
+```
+
+### Stateless Utilities
+
+High-level stateless utilities that are used across all packages (e.g., Snowflake ID generation) are located in `src/utils/`:
+
+```typescript
+import { generateSnowflake } from "@realm/common";
+
+const id = generateSnowflake(); // "1234567890123456789"
 ```

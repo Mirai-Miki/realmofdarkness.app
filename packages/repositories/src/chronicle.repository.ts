@@ -8,6 +8,7 @@ import type {
   ChronicleData,
   Snowflake,
   ChronicleRepositoryInput,
+  CreateChronicleInput,
 } from "@realm/common";
 
 import { eq } from "drizzle-orm";
@@ -17,7 +18,7 @@ import {
   insertChronicleSchema,
   updateChronicleSchema,
 } from "@realm/database";
-import { RealmError, SnowflakeSchema } from "@realm/common";
+import { RealmError, SnowflakeSchema, generateSnowflake } from "@realm/common";
 import { hasDataChanged } from "./repository.utilities";
 
 function toChronicleData(db: ChronicleDb): ChronicleData {
@@ -66,10 +67,11 @@ export class ChronicleRepository implements IChronicleRepository {
     }
   }
 
-  public async create(input: ChronicleRepositoryInput): Promise<ChronicleData> {
+  public async create(input: CreateChronicleInput): Promise<ChronicleData> {
+    const chronicleId = generateSnowflake();
     try {
       const dbRecord: InsertChronicleData = {
-        id: input.id,
+        id: chronicleId,
         name: input.name,
         iconUrl: input.iconUrl || "",
       };
@@ -82,7 +84,7 @@ export class ChronicleRepository implements IChronicleRepository {
     } catch (error) {
       throw new RealmError("Failed to create chronicle", {
         cause: error,
-        fields: { id: input.id },
+        fields: { id: chronicleId },
       });
     }
   }

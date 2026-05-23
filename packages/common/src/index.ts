@@ -36,4 +36,5 @@ export * from "./discord-guild.definitions.js";
 export * from "./discord-guild-chronicle.definitions.js";
 export * from "./chronicle-member.definitions.js";
 export * from "./storyteller.definitions.js";
-export * from "./system.definitions";
+export * from "./system.definitions.js";
+export * from "./utils/index.js";

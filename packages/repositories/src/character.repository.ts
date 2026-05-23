@@ -24,10 +24,10 @@ export class CharacterRepository implements ICharacterRepository {
     );
   }
 
-  public create(input: CharacterData): Promise<CharacterData> {
+  public create(): Promise<CharacterData> {
     return Promise.reject(
       new Error(
-        `Not implemented - schema refactoring in progress for ${input.id}`
+        `Not implemented - schema refactoring in progress for character creation`
       )
     );
   }

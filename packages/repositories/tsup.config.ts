@@ -13,6 +13,6 @@ export default defineConfig({
   },
   sourcemap: true,
   clean: true,
-  external: ["@realm/common", "@realm/core", "@realm/database"],
+  external: ["@realm/common", "@realm/database"],
   tsconfig: "./tsconfig.build.json",
 });

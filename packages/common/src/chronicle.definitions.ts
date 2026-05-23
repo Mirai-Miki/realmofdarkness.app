@@ -61,6 +61,11 @@ export type ChronicleRepositoryInput = z.infer<
   typeof ChronicleRepositoryInputSchema
 >;
 
+export const CreateChronicleInputSchema = ChronicleRepositoryInputSchema.omit({
+  id: true,
+});
+export type CreateChronicleInput = z.infer<typeof CreateChronicleInputSchema>;
+
 // ============================================================================
 // Chronicle Repository Interface
 // ============================================================================
@@ -89,10 +94,10 @@ export interface IChronicleRepository {
   /**
    * Create a new chronicle.
    *
-   * @param input - Chronicle input data (without timestamps)
+   * @param input - Chronicle input data (without timestamps and id)
    * @returns Created chronicle data
    */
-  create(input: ChronicleRepositoryInput): Promise<ChronicleData>;
+  create(input: CreateChronicleInput): Promise<ChronicleData>;
 
   /**
    * Update an existing chronicle.

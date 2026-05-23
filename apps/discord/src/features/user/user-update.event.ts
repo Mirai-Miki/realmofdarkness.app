@@ -34,9 +34,7 @@ class UserUpdateEvent extends DiscordEvent<Events.UserUpdate> {
         avatarUrl: newUser.displayAvatarURL(),
       });
 
-      await userRepository.upsertFromDiscordProfile(validatedData, {
-        newUserId: existing.id,
-      });
+      await userRepository.upsertFromDiscordProfile(validatedData);
     } catch (error) {
       logger.exception(
         `Failed to handle user update for ${newUser.username} (${newUser.id}):`,

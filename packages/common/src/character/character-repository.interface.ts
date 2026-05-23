@@ -18,7 +18,7 @@ export interface ICharacterRepository {
   /**
    * Create a new character.
    */
-  create(input: CharacterData): Promise<CharacterData>;
+  create(input: Omit<CharacterData, "id">): Promise<CharacterData>;
 
   /**
    * Update an existing character.

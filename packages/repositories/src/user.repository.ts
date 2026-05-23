@@ -5,6 +5,7 @@ import type {
   Snowflake,
   UserData,
   UserRepositoryInput,
+  CreateUserInput,
 } from "@realm/common";
 
 import { eq, inArray } from "drizzle-orm";
@@ -13,6 +14,7 @@ import {
   DiscordUserProfileInputSchema,
   RealmError,
   SnowflakeSchema,
+  generateSnowflake,
 } from "@realm/common";
 import { hasDataChanged } from "./repository.utilities";
 
@@ -199,10 +201,11 @@ export class UserRepository implements IUserRepository {
    * @throws {RealmError} If creation fails or user already exists
    * @returns Created user Data
    */
-  public async create(input: UserRepositoryInput): Promise<UserData> {
+  public async create(input: CreateUserInput): Promise<UserData> {
+    const userId = generateSnowflake();
     try {
       const dbRecord: InsertUserData = {
-        id: input.id,
+        id: userId,
         discordId: input.discordId ?? null,
         displayName: input.displayName,
         avatarUrl: input.avatarUrl,
@@ -220,7 +223,7 @@ export class UserRepository implements IUserRepository {
     } catch (error) {
       throw new RealmError("Failed to create user", {
         cause: error,
-        fields: { userId: input.id },
+        fields: { userId },
       });
     }
   }
@@ -320,14 +323,13 @@ export class UserRepository implements IUserRepository {
    * @throws {RealmError} If upsert fails
    */
   public async upsertFromDiscordProfile(
-    input: DiscordUserProfileInput,
-    options: { newUserId: Snowflake }
+    input: DiscordUserProfileInput
   ): Promise<UserData> {
     try {
       const validatedInput = DiscordUserProfileInputSchema.parse(input);
 
       const now = new Date();
-      const newRodUserId: Snowflake = options.newUserId;
+      const newRodUserId: Snowflake = generateSnowflake();
 
       const insertRecord: InsertUserData = {
         id: newRodUserId,

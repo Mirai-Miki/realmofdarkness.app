@@ -75,6 +75,11 @@ export const UserRepositoryInputSchema = z.object({
 });
 export type UserRepositoryInput = z.infer<typeof UserRepositoryInputSchema>;
 
+export const CreateUserInputSchema = UserRepositoryInputSchema.omit({
+  id: true,
+});
+export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
+
 // ============================================================================
 // Discord Context DTOs
 // ============================================================================
@@ -151,11 +156,11 @@ export interface IUserRepository {
   /**
    * Create a new user.
    *
-   * @param user - User state to create
+   * @param user - User state to create (without id)
    * @returns Created user state with updated metadata
    * @throws {RealmError} If user creation fails or user already exists
    */
-  create(user: UserRepositoryInput): Promise<UserData>;
+  create(user: CreateUserInput): Promise<UserData>;
 
   /**
    * Update an existing user.
@@ -194,16 +199,7 @@ export interface IUserRepository {
    * @param input - Discord user profile input
    * @returns Upserted user state
    */
-  upsertFromDiscordProfile(
-    input: DiscordUserProfileInput,
-    options: {
-      /**
-       * New RoD user ID to use if the record does not exist yet.
-       * The repository will ignore this when the user already exists.
-       */
-      newUserId: Snowflake;
-    }
-  ): Promise<UserData>;
+  upsertFromDiscordProfile(input: DiscordUserProfileInput): Promise<UserData>;
 
   /**
    * Delete a user and all associated data (cascade).
