@@ -1,13 +1,13 @@
 import type { Guild } from "discord.js";
-import type { DiscordIdentityData } from "@realm/common";
+import type { UserData } from "@realm/common";
 
 import { Collection } from "discord.js";
 import { logger } from "@realm/logger";
 import {
   DiscordGuildRepository,
   ChronicleMemberRepository,
-  DiscordIdentityRepository,
   DiscordGuildChronicleRepository,
+  UserRepository,
 } from "@realm/repositories";
 
 /**
@@ -20,13 +20,13 @@ import {
 export class GuildSyncAction {
   private guildRepository: DiscordGuildRepository;
   private memberRepository: ChronicleMemberRepository;
-  private identityRepository: DiscordIdentityRepository;
+  private userRepository: UserRepository;
   private linkRepository: DiscordGuildChronicleRepository;
 
   constructor() {
     this.guildRepository = new DiscordGuildRepository();
     this.memberRepository = new ChronicleMemberRepository();
-    this.identityRepository = new DiscordIdentityRepository();
+    this.userRepository = new UserRepository();
     this.linkRepository = new DiscordGuildChronicleRepository();
   }
 
@@ -101,17 +101,13 @@ export class GuildSyncAction {
       const memberIds = Array.from(discordMembers.keys());
 
       const identities = await Promise.all(
-        memberIds.map((id) => this.identityRepository.findByDiscordId(id))
+        memberIds.map((id) => this.userRepository.findByDiscordId(id))
       );
 
-      const validIdentities = identities.filter(
-        (id): id is DiscordIdentityData => id !== null
-      );
+      const validUsers = identities.filter((u): u is UserData => u !== null);
 
       if (cleanupMembers) {
-        const discordMemberUserIdSet = new Set(
-          validIdentities.map((i) => i.userId)
-        );
+        const discordMemberUserIdSet = new Set(validUsers.map((u) => u.id));
 
         for (const chronicleId of chronicleIds) {
           // Find existing members in DB for this chronicle
@@ -133,13 +129,14 @@ export class GuildSyncAction {
         }
       }
 
-      if (validIdentities.length > 0) {
+      if (validUsers.length > 0) {
         logger.info(
-          `Found ${validIdentities.length} registered users in ${guild.name}`
+          `Found ${validUsers.length} registered users in ${guild.name}`
         );
 
-        for (const identity of validIdentities) {
-          const discordMember = discordMembers.get(identity.discordId);
+        for (const user of validUsers) {
+          if (!user.discordId) continue;
+          const discordMember = discordMembers.get(user.discordId);
           if (!discordMember) continue;
 
           for (const chronicleId of chronicleIds) {
@@ -148,14 +145,14 @@ export class GuildSyncAction {
               // We will need a more robust solution in the future to handle name overrides depending on the context.
               await this.memberRepository.upsert({
                 chronicleId: chronicleId,
-                userId: identity.userId,
+                userId: user.id,
                 nickname: discordMember.displayName,
                 avatarUrl: discordMember.displayAvatarURL(),
                 boosted: discordMember.premiumSince ? 1 : 0,
               });
             } catch (err) {
               logger.exception(
-                `Failed to sync member ${identity.userId} in guild ${guild.name} for chronicle ${chronicleId}`,
+                `Failed to sync member ${user.id} in guild ${guild.name} for chronicle ${chronicleId}`,
                 err
               );
             }

@@ -53,15 +53,9 @@ CREATE TABLE "discord_guilds" (
 	"last_updated" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "discord_identities" (
-	"discord_id" bigint PRIMARY KEY NOT NULL,
-	"user_id" bigint NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "discord_identities_userId_unique" UNIQUE("user_id")
-);
---> statement-breakpoint
 CREATE TABLE "users" (
 	"id" bigint PRIMARY KEY NOT NULL,
+	"discord_id" bigint,
 	"display_name" varchar(35) DEFAULT 'Undefined' NOT NULL,
 	"avatar_url" varchar(500) DEFAULT '' NOT NULL,
 	"admin" boolean DEFAULT false NOT NULL,
@@ -108,7 +102,6 @@ ALTER TABLE "chronicle_members" ADD CONSTRAINT "chronicle_members_chronicle_id_c
 ALTER TABLE "chronicle_members" ADD CONSTRAINT "chronicle_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "discord_guild_chronicles" ADD CONSTRAINT "discord_guild_chronicles_discord_id_discord_guilds_discord_id_fk" FOREIGN KEY ("discord_id") REFERENCES "public"."discord_guilds"("discord_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "discord_guild_chronicles" ADD CONSTRAINT "discord_guild_chronicles_chronicle_id_chronicles_id_fk" FOREIGN KEY ("chronicle_id") REFERENCES "public"."chronicles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "discord_identities" ADD CONSTRAINT "discord_identities_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "storytellers" ADD CONSTRAINT "storytellers_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "storytellers" ADD CONSTRAINT "storytellers_chronicle_id_chronicles_id_fk" FOREIGN KEY ("chronicle_id") REFERENCES "public"."chronicles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "initiative_trackers" ADD CONSTRAINT "initiative_trackers_chronicle_id_chronicles_id_fk" FOREIGN KEY ("chronicle_id") REFERENCES "public"."chronicles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -117,4 +110,5 @@ ALTER TABLE "supporters" ADD CONSTRAINT "supporters_user_id_users_id_fk" FOREIGN
 CREATE UNIQUE INDEX "characters_name_user_idx" ON "characters" USING btree ("name","user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "characters_chronicle_idx" ON "characters" USING btree ("chronicle_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "characters_user_chronicle_idx" ON "characters" USING btree ("user_id","chronicle_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "users_discord_id_unique" ON "users" USING btree ("discord_id");--> statement-breakpoint
 CREATE INDEX "storytellers_user_chronicle_idx" ON "storytellers" USING btree ("user_id","chronicle_id");

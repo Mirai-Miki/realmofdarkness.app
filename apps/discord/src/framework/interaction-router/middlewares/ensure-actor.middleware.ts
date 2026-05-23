@@ -1,7 +1,6 @@
-import type { Snowflake, UserData } from "@realm/common";
 import { logger } from "@realm/logger";
+import { UserRepository } from "@realm/repositories";
 import { generateSnowflake } from "@realm/core";
-import { DiscordIdentityRepository, UserRepository } from "@realm/repositories";
 
 import type { BaseInteraction } from "discord.js";
 
@@ -29,129 +28,44 @@ function isPostgresUniqueViolation(error: unknown): boolean {
 }
 
 /**
- * Ensure the interacting Discord user has a corresponding RoD User + DiscordIdentity mapping.
+ * Ensure the interacting Discord user has a corresponding RoD user record.
  *
- * If no mapping exists, this creates a new RoD user ID and inserts both records.
- * The resolved aggregate is attached to `ctx.actor`.
+ * The Discord app only tracks users who interact with it.
+ * This middleware upserts the user using Discord profile data keyed by `discordId`.
  */
 export async function ensureActor<TInteraction extends BaseInteraction>(
   ctx: BaseInteractionContext<TInteraction>
 ): Promise<DiscordActor> {
   const discordUserId = ctx.interaction.user.id;
-
-  const identityRepo = new DiscordIdentityRepository();
   const userRepo = new UserRepository();
-
-  const existingIdentity = await identityRepo.findByDiscordId(discordUserId);
-
-  if (existingIdentity) {
-    const user = await userRepo.findById(existingIdentity.userId);
-
-    if (!user) {
-      const created = await userRepo.upsert({
-        id: existingIdentity.userId,
+  try {
+    const user = await userRepo.upsertFromDiscordProfile(
+      {
+        discordId: discordUserId,
         displayName: ctx.interaction.user.displayName,
         avatarUrl: ctx.interaction.user.displayAvatarURL(),
-        admin: false,
-      });
-
-      return {
-        rodUserId: created.id,
-        discordUserId,
-        user: created,
-        discordIdentity: existingIdentity,
-      };
-    }
-
-    const updated = await userRepo.upsert({
-      id: user.id,
-      displayName: ctx.interaction.user.displayName,
-      avatarUrl: ctx.interaction.user.displayAvatarURL(),
-      admin: user.admin,
-    });
+      },
+      { newUserId: generateSnowflake() }
+    );
 
     return {
-      rodUserId: updated.id,
+      rodUserId: user.id,
       discordUserId,
-      user: updated,
-      discordIdentity: existingIdentity,
-    };
-  }
-
-  const newRodUserId: Snowflake = generateSnowflake();
-
-  const createdUser: UserData = await userRepo.create({
-    id: newRodUserId,
-    displayName: ctx.interaction.user.displayName,
-    avatarUrl: ctx.interaction.user.displayAvatarURL(),
-    admin: false,
-  });
-
-  try {
-    const createdIdentity = await identityRepo.create({
-      discordId: discordUserId,
-      userId: newRodUserId,
-    });
-
-    return {
-      rodUserId: newRodUserId,
-      discordUserId,
-      user: createdUser,
-      discordIdentity: createdIdentity,
+      user,
     };
   } catch (error) {
-    if (!isPostgresUniqueViolation(error)) {
-      throw error;
-    }
+    if (!isPostgresUniqueViolation(error)) throw error;
 
-    // Race condition: someone else created the identity first.
-    // Best effort:
-    // - Re-fetch the identity and use it
-    // - Clean up the just-created user to avoid an orphan
-    logger.debug("Discord identity was created concurrently; re-fetching", {
+    // Extremely rare fallback: if a unique violation happened concurrently,
+    // re-fetch the user by discordId.
+    logger.debug("User was created concurrently; re-fetching", {
       fields: { discordUserId },
     });
 
-    const racedIdentity = await identityRepo.findByDiscordId(discordUserId);
-    if (!racedIdentity) {
-      throw error;
-    }
+    const racedUser = await userRepo.findByDiscordId(discordUserId);
+    if (!racedUser) throw error;
 
-    try {
-      await userRepo.delete(newRodUserId);
-    } catch (cleanupError) {
-      logger.exception(
-        "Failed to cleanup orphan user after identity race",
-        cleanupError,
-        {
-          fields: { rodUserId: newRodUserId, discordUserId },
-        }
-      );
-    }
-
-    const racedUser = await userRepo.findById(racedIdentity.userId);
-    if (!racedUser) {
-      const fallbackCreated = await userRepo.upsert({
-        id: racedIdentity.userId,
-        displayName: ctx.interaction.user.displayName,
-        avatarUrl: ctx.interaction.user.displayAvatarURL(),
-        admin: false,
-      });
-
-      return {
-        rodUserId: fallbackCreated.id,
-        discordUserId,
-        user: fallbackCreated,
-        discordIdentity: racedIdentity,
-      };
-    }
-
-    return {
-      rodUserId: racedUser.id,
-      discordUserId,
-      user: racedUser,
-      discordIdentity: racedIdentity,
-    };
+    return { rodUserId: racedUser.id, discordUserId, user: racedUser };
   }
 }
 

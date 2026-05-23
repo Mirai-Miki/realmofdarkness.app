@@ -7,7 +7,7 @@ import {
   DiscordGuildRepository,
   DiscordGuildChronicleRepository,
   ChronicleMemberRepository,
-  DiscordIdentityRepository,
+  UserRepository,
 } from "@realm/repositories";
 
 /**
@@ -29,14 +29,14 @@ class GuildMemberUpdateEvent extends DiscordEvent<Events.GuildMemberUpdate> {
 
       const guildRepo = new DiscordGuildRepository();
       const linkRepo = new DiscordGuildChronicleRepository();
-      const identityRepo = new DiscordIdentityRepository();
+      const userRepo = new UserRepository();
       const chronicleMemberRepo = new ChronicleMemberRepository();
 
       const discordGuild = await guildRepo.findById(newMember.guild.id);
       if (!discordGuild) return;
 
-      const identity = await identityRepo.findByDiscordId(newMember.id);
-      if (!identity) return;
+      const user = await userRepo.findByDiscordId(newMember.id);
+      if (!user) return;
 
       const links = await linkRepo.findByDiscordId(discordGuild.discordId);
 
@@ -45,7 +45,7 @@ class GuildMemberUpdateEvent extends DiscordEvent<Events.GuildMemberUpdate> {
         await chronicleMemberRepo.update(
           {
             chronicleId: link.chronicleId,
-            userId: identity.userId,
+            userId: user.id,
             nickname: newMember.displayName,
             avatarUrl: newMember.displayAvatarURL(),
             boosted: newMember.premiumSince ? 1 : 0,

@@ -49,6 +49,8 @@ export const AvatarUrlSchema = z.string().max(DiscordCdnUrlMaxLength);
  */
 export const UserDataSchema = z.object({
   id: SnowflakeSchema,
+  /** Optional linked Discord account snowflake ID. */
+  discordId: SnowflakeSchema.nullable(),
   displayName: DisplayNameSchema,
   avatarUrl: AvatarUrlSchema,
   admin: z.boolean(),
@@ -65,11 +67,33 @@ export type UserData = z.infer<typeof UserDataSchema>;
  */
 export const UserRepositoryInputSchema = z.object({
   id: SnowflakeSchema,
+  /** Optional linked Discord account snowflake ID. */
+  discordId: SnowflakeSchema.nullable().optional(),
   displayName: DisplayNameSchema,
   avatarUrl: AvatarUrlSchema,
   admin: z.boolean().default(false),
 });
 export type UserRepositoryInput = z.infer<typeof UserRepositoryInputSchema>;
+
+// ============================================================================
+// Discord Context DTOs
+// ============================================================================
+
+/**
+ * Input DTO for upserting a user from a Discord user profile.
+ *
+ * This is used when the caller does not yet know the RoD user ID.
+ * The repository should use `discordId` (indexed/unique) as the lookup key.
+ */
+export const DiscordUserProfileInputSchema = z.object({
+  discordId: SnowflakeSchema,
+  displayName: DisplayNameSchema,
+  avatarUrl: AvatarUrlSchema,
+});
+
+export type DiscordUserProfileInput = z.infer<
+  typeof DiscordUserProfileInputSchema
+>;
 
 // ============================================================================
 // User Repository Interface
@@ -117,6 +141,14 @@ export interface IUserRepository {
   findManyByIds(ids: Snowflake[]): Promise<UserData[]>;
 
   /**
+   * Find a user by their linked Discord snowflake ID.
+   *
+   * @param discordId - Discord user snowflake ID
+   * @returns User state if found, null otherwise
+   */
+  findByDiscordId(discordId: Snowflake): Promise<UserData | null>;
+
+  /**
    * Create a new user.
    *
    * @param user - User state to create
@@ -150,6 +182,28 @@ export interface IUserRepository {
    * @throws {RealmError} If upsert fails
    */
   upsert(input: UserRepositoryInput): Promise<UserData>;
+
+  /**
+   * Upsert a user record using only Discord-derived profile data.
+   *
+   * This should:
+   * - Use `discordId` as the lookup key (efficient via index)
+   * - Create a new RoD user record when missing
+   * - Update only Discord-derived profile fields when present
+   *
+   * @param input - Discord user profile input
+   * @returns Upserted user state
+   */
+  upsertFromDiscordProfile(
+    input: DiscordUserProfileInput,
+    options: {
+      /**
+       * New RoD user ID to use if the record does not exist yet.
+       * The repository will ignore this when the user already exists.
+       */
+      newUserId: Snowflake;
+    }
+  ): Promise<UserData>;
 
   /**
    * Delete a user and all associated data (cascade).

@@ -22,6 +22,10 @@ export class User {
     return this._data.id;
   }
 
+  public get discordId(): Snowflake | null {
+    return this._data.discordId;
+  }
+
   public get displayName(): string {
     return this._data.displayName;
   }
@@ -75,6 +79,7 @@ export class User {
   public toRepositoryInput(): UserRepositoryInput {
     return {
       id: this._data.id,
+      discordId: this._data.discordId,
       displayName: this._data.displayName,
       avatarUrl: this._data.avatarUrl,
       admin: this._data.admin,

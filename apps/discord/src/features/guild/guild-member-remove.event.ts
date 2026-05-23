@@ -7,7 +7,7 @@ import {
   DiscordGuildRepository,
   DiscordGuildChronicleRepository,
   ChronicleMemberRepository,
-  DiscordIdentityRepository,
+  UserRepository,
 } from "@realm/repositories";
 
 /**
@@ -24,20 +24,20 @@ class GuildMemberRemoveEvent extends DiscordEvent<Events.GuildMemberRemove> {
     try {
       const guildRepo = new DiscordGuildRepository();
       const linkRepo = new DiscordGuildChronicleRepository();
-      const identityRepo = new DiscordIdentityRepository();
+      const userRepo = new UserRepository();
       const chronicleMemberRepo = new ChronicleMemberRepository();
 
       const discordGuild = await guildRepo.findById(member.guild.id);
       if (!discordGuild) return;
 
-      const identity = await identityRepo.findByDiscordId(member.id);
-      if (!identity) return;
+      const user = await userRepo.findByDiscordId(member.id);
+      if (!user) return;
 
       const links = await linkRepo.findByDiscordId(discordGuild.discordId);
 
       for (const link of links) {
         // Remove the member from each chronicle this guild is linked to
-        await chronicleMemberRepo.delete(link.chronicleId, identity.userId);
+        await chronicleMemberRepo.delete(link.chronicleId, user.id);
       }
     } catch (error: unknown) {
       logger.exception(

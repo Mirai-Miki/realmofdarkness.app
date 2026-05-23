@@ -7,7 +7,7 @@ import {
   DiscordGuildRepository,
   DiscordGuildChronicleRepository,
   ChronicleMemberRepository,
-  DiscordIdentityRepository,
+  UserRepository,
 } from "@realm/repositories";
 
 /**
@@ -26,7 +26,7 @@ class GuildMemberAddEvent extends DiscordEvent<Events.GuildMemberAdd> {
 
       const guildRepo = new DiscordGuildRepository();
       const linkRepo = new DiscordGuildChronicleRepository();
-      const identityRepo = new DiscordIdentityRepository();
+      const userRepo = new UserRepository();
       const chronicleMemberRepo = new ChronicleMemberRepository();
 
       const discordGuild = await guildRepo.findById(member.guild.id);
@@ -36,9 +36,8 @@ class GuildMemberAddEvent extends DiscordEvent<Events.GuildMemberAdd> {
         return;
       }
 
-      const identity = await identityRepo.findByDiscordId(member.id);
-
-      if (!identity) {
+      const user = await userRepo.findByDiscordId(member.id);
+      if (!user) {
         // We don't create members for users that don't exist in our DB
         return;
       }
@@ -48,7 +47,7 @@ class GuildMemberAddEvent extends DiscordEvent<Events.GuildMemberAdd> {
       for (const link of links) {
         await chronicleMemberRepo.upsert({
           chronicleId: link.chronicleId,
-          userId: identity.userId,
+          userId: user.id,
           nickname: member.displayName,
           avatarUrl: member.displayAvatarURL(),
           boosted: member.premiumSince ? 1 : 0,

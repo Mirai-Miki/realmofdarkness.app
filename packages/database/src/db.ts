@@ -10,10 +10,6 @@ import {
 import { storytellers, storytellersRelations } from "./schema/storytellers";
 import { chronicles, chroniclesRelations } from "./schema/chronicles";
 import { discordGuilds, discordGuildsRelations } from "./schema/discord-guilds";
-import {
-  discordIdentities,
-  discordIdentitiesRelations,
-} from "./schema/discord-identities";
 import { initiativeTrackers } from "./schema/initiative";
 import { commandStats } from "./schema/stats";
 import {
@@ -57,8 +53,6 @@ export const db = drizzle(pool, {
   schema: {
     users,
     usersRelations,
-    discordIdentities,
-    discordIdentitiesRelations,
     chronicles,
     chroniclesRelations,
     discordGuilds,

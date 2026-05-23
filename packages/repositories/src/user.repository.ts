@@ -1,5 +1,6 @@
 import type { UserDb, UpdateUserData, InsertUserData } from "@realm/database";
 import type {
+  DiscordUserProfileInput,
   IUserRepository,
   Snowflake,
   UserData,
@@ -8,7 +9,11 @@ import type {
 
 import { eq, inArray } from "drizzle-orm";
 import { db, users, insertUserSchema, updateUserSchema } from "@realm/database";
-import { RealmError, SnowflakeSchema } from "@realm/common";
+import {
+  DiscordUserProfileInputSchema,
+  RealmError,
+  SnowflakeSchema,
+} from "@realm/common";
 import { hasDataChanged } from "./repository.utilities";
 
 /**
@@ -17,6 +22,7 @@ import { hasDataChanged } from "./repository.utilities";
 function toUserData(db: UserDb): UserData {
   return {
     id: db.id,
+    discordId: db.discordId,
     displayName: db.displayName,
     avatarUrl: db.avatarUrl,
     admin: db.admin,
@@ -57,6 +63,10 @@ export class UserRepository implements IUserRepository {
       // Build update object with proper typing
       const updateData: UpdateUserData = {
         id: input.id,
+        discordId:
+          input.discordId !== undefined
+            ? input.discordId
+            : currentUser.discordId,
         displayName:
           input.displayName !== undefined
             ? input.displayName
@@ -153,6 +163,36 @@ export class UserRepository implements IUserRepository {
   }
 
   /**
+   * Find a user by their linked Discord snowflake ID.
+   *
+   * @param discordId - Discord user snowflake ID
+   * @returns User Data if found, null otherwise
+   * @throws {RealmError} If database query fails
+   */
+  public async findByDiscordId(discordId: Snowflake): Promise<UserData | null> {
+    try {
+      const validatedId = SnowflakeSchema.parse(discordId);
+
+      const result = await db
+        .select()
+        .from(users)
+        .where(eq(users.discordId, validatedId))
+        .limit(1);
+
+      if (result.length === 0) {
+        return null;
+      }
+
+      return toUserData(result[0]);
+    } catch (error) {
+      throw new RealmError("Failed to find user by Discord ID", {
+        cause: error,
+        fields: { discordId },
+      });
+    }
+  }
+
+  /**
    * Create a new user.
    *
    * @param input - User creation input (without timestamps)
@@ -163,6 +203,7 @@ export class UserRepository implements IUserRepository {
     try {
       const dbRecord: InsertUserData = {
         id: input.id,
+        discordId: input.discordId ?? null,
         displayName: input.displayName,
         avatarUrl: input.avatarUrl,
         admin: input.admin,
@@ -262,6 +303,60 @@ export class UserRepository implements IUserRepository {
       throw new RealmError("Failed to upsert user", {
         cause: error,
         fields: { userId: input.id },
+      });
+    }
+  }
+
+  /**
+   * Upsert a user record using only Discord-derived profile data.
+   *
+   * Uses `users.discord_id` (unique/indexed) as the lookup key.
+   * Creates a new RoD user record if missing.
+   *
+   * Important: Does not overwrite privileged fields such as `admin`.
+   *
+   * @param input - Discord user profile input
+   * @returns Upserted user Data
+   * @throws {RealmError} If upsert fails
+   */
+  public async upsertFromDiscordProfile(
+    input: DiscordUserProfileInput,
+    options: { newUserId: Snowflake }
+  ): Promise<UserData> {
+    try {
+      const validatedInput = DiscordUserProfileInputSchema.parse(input);
+
+      const now = new Date();
+      const newRodUserId: Snowflake = options.newUserId;
+
+      const insertRecord: InsertUserData = {
+        id: newRodUserId,
+        discordId: validatedInput.discordId,
+        displayName: validatedInput.displayName,
+        avatarUrl: validatedInput.avatarUrl,
+        admin: false,
+      };
+
+      const validatedInsert = insertUserSchema.parse(insertRecord);
+
+      const [result] = await db
+        .insert(users)
+        .values(validatedInsert)
+        .onConflictDoUpdate({
+          target: users.discordId,
+          set: {
+            displayName: validatedInput.displayName,
+            avatarUrl: validatedInput.avatarUrl,
+            updatedAt: now,
+          },
+        })
+        .returning();
+
+      return toUserData(result);
+    } catch (error) {
+      throw new RealmError("Failed to upsert user from Discord profile", {
+        cause: error,
+        fields: { discordId: input.discordId },
       });
     }
   }

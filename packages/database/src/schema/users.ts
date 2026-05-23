@@ -1,7 +1,13 @@
 import type { InferSelectModel } from "drizzle-orm";
 import type { z } from "zod";
 
-import { pgTable, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  varchar,
+  timestamp,
+  boolean,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import {
   createInsertSchema,
@@ -11,19 +17,30 @@ import {
 import { snowflake } from "../schema.types";
 import { UsernameConstraints, SnowflakeSchema } from "@realm/common";
 import { supporters } from "./supporters";
-import { discordIdentities } from "./discord-identities";
 
-export const users = pgTable("users", {
-  id: snowflake().primaryKey(), // RoD Snowflake
-  displayName: varchar({ length: UsernameConstraints.MaxLength })
-    .notNull()
-    .default("Undefined"),
-  avatarUrl: varchar({ length: 500 }).notNull().default(""),
-  admin: boolean().notNull().default(false), // RoD admin
+export const users = pgTable(
+  "users",
+  {
+    id: snowflake().primaryKey(), // RoD Snowflake
 
-  createdAt: timestamp().defaultNow().notNull(),
-  updatedAt: timestamp().defaultNow().notNull(),
-});
+    /** Optional linked Discord account snowflake. */
+    discordId: snowflake(),
+
+    displayName: varchar({ length: UsernameConstraints.MaxLength })
+      .notNull()
+      .default("Undefined"),
+    avatarUrl: varchar({ length: 500 }).notNull().default(""),
+    admin: boolean().notNull().default(false), // RoD admin
+
+    createdAt: timestamp().defaultNow().notNull(),
+    updatedAt: timestamp().defaultNow().notNull(),
+  },
+  (table) => [
+    // One Discord account maps to at most one RoD user.
+    // Postgres allows multiple NULLs in a UNIQUE index.
+    uniqueIndex("users_discord_id_unique").on(table.discordId),
+  ]
+);
 
 // ============================================================================
 // Relations
@@ -34,12 +51,6 @@ export const usersRelations = relations(users, ({ one }) => ({
   supporter: one(supporters, {
     fields: [users.id],
     references: [supporters.userId],
-  }),
-
-  // One-to-one relation with discord identities
-  discordIdentity: one(discordIdentities, {
-    fields: [users.id],
-    references: [discordIdentities.userId],
   }),
 }));
 
@@ -55,6 +66,7 @@ export type UserDb = InferSelectModel<typeof users>;
  */
 export const selectUserSchema = createSelectSchema(users, {
   id: SnowflakeSchema,
+  discordId: SnowflakeSchema.nullable(),
 });
 
 /**
@@ -63,6 +75,7 @@ export const selectUserSchema = createSelectSchema(users, {
  */
 export const insertUserSchema = createInsertSchema(users, {
   id: SnowflakeSchema,
+  discordId: SnowflakeSchema.nullable().optional(),
 });
 
 /**
@@ -71,6 +84,7 @@ export const insertUserSchema = createInsertSchema(users, {
  */
 export const updateUserSchema = createUpdateSchema(users, {
   id: SnowflakeSchema,
+  discordId: SnowflakeSchema.nullable().optional(),
 });
 
 // ============================================================================

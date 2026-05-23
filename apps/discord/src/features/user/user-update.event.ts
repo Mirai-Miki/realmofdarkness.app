@@ -2,7 +2,7 @@ import type { User, PartialUser } from "discord.js";
 import { Events } from "discord.js";
 import { DiscordEvent } from "framework";
 import { logger } from "@realm/logger";
-import { UserRepositoryInputSchema } from "@realm/common";
+import { DiscordUserProfileInputSchema } from "@realm/common";
 import { UserRepository } from "@realm/repositories";
 
 /**
@@ -23,15 +23,20 @@ class UserUpdateEvent extends DiscordEvent<Events.UserUpdate> {
         await newUser.fetch();
       }
 
-      const validatedData = UserRepositoryInputSchema.parse({
-        id: newUser.id,
-        username: newUser.username,
+      // Only update users that are already registered in our DB.
+      // We intentionally do not track every Discord user the bot can see.
+      const existing = await userRepository.findByDiscordId(newUser.id);
+      if (!existing) return;
+
+      const validatedData = DiscordUserProfileInputSchema.parse({
+        discordId: newUser.id,
         displayName: newUser.displayName,
         avatarUrl: newUser.displayAvatarURL(),
       });
 
-      // Only update existing users
-      await userRepository.update(validatedData, { ignoreNotFound: true });
+      await userRepository.upsertFromDiscordProfile(validatedData, {
+        newUserId: existing.id,
+      });
     } catch (error) {
       logger.exception(
         `Failed to handle user update for ${newUser.username} (${newUser.id}):`,

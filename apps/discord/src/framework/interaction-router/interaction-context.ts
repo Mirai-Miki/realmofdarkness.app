@@ -6,7 +6,7 @@ import type {
   MessageComponentInteraction,
   ModalSubmitInteraction,
 } from "discord.js";
-import type { DiscordIdentityData, Snowflake, UserData } from "@realm/common";
+import type { Snowflake, UserData } from "@realm/common";
 
 /**
  * Discord app aggregate representing the acting user.
@@ -23,9 +23,6 @@ export type DiscordActor = {
 
   /** Core user record. */
   user: UserData;
-
-  /** Mapping record between Discord ID and RoD user ID. */
-  discordIdentity: DiscordIdentityData;
 };
 
 /**

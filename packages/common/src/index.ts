@@ -31,7 +31,6 @@ export * from "./event-system.definitions";
 export * from "./repository.definitions";
 export * from "./supporter.definitions.js";
 export * from "./user.definitions.js";
-export * from "./discord-identity.definitions.js";
 export * from "./chronicle.definitions.js";
 export * from "./discord-guild.definitions.js";
 export * from "./discord-guild-chronicle.definitions.js";
