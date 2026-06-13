@@ -4,7 +4,6 @@ import { Events } from "discord.js";
 import { DiscordEvent } from "framework";
 import { logger } from "@realm/logger";
 import {
-  DiscordGuildRepository,
   DiscordGuildChronicleRepository,
   ChronicleMemberRepository,
   UserRepository,
@@ -22,21 +21,16 @@ class GuildMemberRemoveEvent extends DiscordEvent<Events.GuildMemberRemove> {
     if (member.user.bot) return;
 
     try {
-      const guildRepo = new DiscordGuildRepository();
       const linkRepo = new DiscordGuildChronicleRepository();
       const userRepo = new UserRepository();
       const chronicleMemberRepo = new ChronicleMemberRepository();
 
-      const discordGuild = await guildRepo.findById(member.guild.id);
-      if (!discordGuild) return;
-
       const user = await userRepo.findByDiscordId(member.id);
       if (!user) return;
 
-      const links = await linkRepo.findByDiscordId(discordGuild.discordId);
+      const links = await linkRepo.findByDiscordId(member.guild.id);
 
       for (const link of links) {
-        // Remove the member from each chronicle this guild is linked to
         await chronicleMemberRepo.delete(link.chronicleId, user.id);
       }
     } catch (error: unknown) {

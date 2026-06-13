@@ -1,7 +1,5 @@
-import type { Guild } from "discord.js";
+import type { Guild, Collection } from "discord.js";
 import type { UserData } from "@realm/common";
-
-import { Collection } from "discord.js";
 import { logger } from "@realm/logger";
 import {
   DiscordGuildRepository,
@@ -9,13 +7,13 @@ import {
   DiscordGuildChronicleRepository,
   UserRepository,
 } from "@realm/repositories";
+import { CreateGuildAction } from "./create-guild.action";
 
 /**
  * Action to sync guild(s) and their members with the database.
  *
  * Coordinates between Discord data and the database repositories.
- * Handles both single guild sync (e.g. guild create event) and
- * bulk sync (e.g. ready event).
+ * Handles bulk sync on startup.
  */
 export class GuildSyncAction {
   private guildRepository: DiscordGuildRepository;
@@ -31,28 +29,30 @@ export class GuildSyncAction {
   }
 
   /**
-   * Syncs one or more guilds with the database.
+   * Syncs a collection of guilds with the database.
    *
-   * Upserts the guild data, then fetches and syncs all members
-   * who have a registered user account in our database.
+   * Ensures that missing guilds are registered and performs member cleanup
+   * for existing tracked guilds.
    *
-   * @param input - Single Guild or Collection of Guilds to sync
+   * @param guildsToSync - Collection of Guilds to sync
    */
-  public async execute(
-    input: Guild | Collection<string, Guild>
-  ): Promise<void> {
-    // If input is a Collection, we treat this as a full sync (e.g. ready event)
-    const performCleanup = input instanceof Collection;
-
-    // Normalize input to a Collection for unified processing
-    const guildsToSync = performCleanup
-      ? input
-      : new Collection<string, Guild>([[input.id, input]]);
+  public async execute(guildsToSync: Collection<string, Guild>): Promise<void> {
+    const createGuildAction = new CreateGuildAction();
 
     // Sync each guild
     for (const [guildId, guild] of guildsToSync) {
       try {
-        await this.syncSingleGuild(guild, performCleanup);
+        logger.info(`Syncing guild: ${guild.name} (${guild.id})`);
+
+        const isTracked = await this.guildRepository.exists(guild.id);
+        if (!isTracked) {
+          logger.info(
+            `Guild ${guild.name} (${guild.id}) is not tracked. Creating it and its default Chronicle.`
+          );
+          await createGuildAction.execute(guild);
+        } else {
+          await this.cleanupMembers(guild);
+        }
       } catch (error) {
         logger.exception(
           `Failed to sync guild ${guild.name} (${guildId})`,
@@ -62,105 +62,91 @@ export class GuildSyncAction {
     }
   }
 
-  private async syncSingleGuild(
-    guild: Guild,
-    cleanupMembers: boolean
-  ): Promise<void> {
-    logger.info(`Syncing guild: ${guild.name} (${guild.id})`);
+  /**
+   * Cleans up members of a guild that are no longer present on Discord.
+   *
+   * @param guild - The Discord guild to perform member cleanup on.
+   */
+  private async cleanupMembers(guild: Guild): Promise<void> {
+    // Retrieve all chronicles linked to this guild
+    const links = await this.linkRepository.findByDiscordId(guild.id);
+    const chronicleIds = links.map((link) => link.chronicleId);
 
-    const existingGuild = await this.guildRepository.findById(guild.id);
-    if (!existingGuild) {
-      return; // Not tracked, so skip
-    }
+    for (const chronicleId of chronicleIds) {
+      // Evaluate if chronicle is tied to multiple guilds
+      const chronicleGuildLinks =
+        await this.linkRepository.findByChronicleId(chronicleId);
 
-    // Only update tracked guilds
-    const trackedGuild = await this.guildRepository.update(
-      {
-        discordId: guild.id,
-        name: guild.name,
-        iconUrl: guild.iconURL() || "",
-      },
-      { ignoreNotFound: true }
-    );
+      // TODO: Check guild sync feature flag here when implemented.
+      // For now, if the chronicle has > 1 guild, skip fetching members entirely.
+      if (chronicleGuildLinks.length > 1) {
+        logger.info(
+          `Skipping member cleanup for chronicle ${chronicleId} as it is linked to multiple guilds.`
+        );
+        continue;
+      }
 
-    if (!trackedGuild) {
-      return; // Not tracked, so skip
-    }
+      // Fetch DB members for this chronicle
+      const dbMemberUserIds =
+        await this.memberRepository.findIdsByChronicle(chronicleId);
 
-    const links = await this.linkRepository.findByDiscordId(
-      trackedGuild.discordId
-    );
-    const chronicleIds = links.map((l) => l.chronicleId);
+      if (dbMemberUserIds.length === 0) {
+        continue;
+      }
 
-    if (chronicleIds.length === 0) {
-      return; // No chronicles linked, nothing to sync members to
-    }
-
-    try {
-      const discordMembers = await guild.members.fetch();
-      const memberIds = Array.from(discordMembers.keys());
-
-      const identities = await Promise.all(
-        memberIds.map((id) => this.userRepository.findByDiscordId(id))
+      // Map internal user IDs to DB UserData to get their Discord IDs
+      const identities =
+        await this.userRepository.findManyByIds(dbMemberUserIds);
+      const validUsers = identities.filter(
+        (u): u is UserData => u !== null && u.discordId !== null
       );
 
-      const validUsers = identities.filter((u): u is UserData => u !== null);
+      if (validUsers.length === 0) {
+        continue;
+      }
 
-      if (cleanupMembers) {
-        const discordMemberUserIdSet = new Set(validUsers.map((u) => u.id));
+      // Map discordId -> userId to easily identify who to delete later
+      const discordToUser = new Map<string, string>();
+      for (const user of validUsers) {
+        discordToUser.set(user.discordId as string, user.id);
+      }
 
-        for (const chronicleId of chronicleIds) {
-          // Find existing members in DB for this chronicle
-          const dbMemberUserIds =
-            await this.memberRepository.findIdsByChronicle(chronicleId);
+      const discordIdsToFetch = Array.from(discordToUser.keys());
+      const activeDiscordIds = new Set<string>();
 
-          for (const dbUserId of dbMemberUserIds) {
-            if (!discordMemberUserIdSet.has(dbUserId)) {
-              await this.memberRepository
-                .delete(chronicleId, dbUserId)
-                .catch((err: Error) =>
-                  logger.exception(
-                    `Failed to delete old member ${dbUserId} from chronicle ${chronicleId}`,
-                    err
-                  )
-                );
-            }
+      // Batch fetch members from Discord (max 100 per chunk per gateway limit)
+      const CHUNK_SIZE = 100;
+      for (let i = 0; i < discordIdsToFetch.length; i += CHUNK_SIZE) {
+        const chunk = discordIdsToFetch.slice(i, i + CHUNK_SIZE);
+        try {
+          const fetchedMembers = await guild.members.fetch({ user: chunk });
+          for (const id of fetchedMembers.keys()) {
+            activeDiscordIds.add(id);
           }
+        } catch (fetchError) {
+          logger.exception(
+            `Failed to fetch batch chunk for guild ${guild.name} (${guild.id})`,
+            fetchError
+          );
         }
       }
 
-      if (validUsers.length > 0) {
-        logger.info(
-          `Found ${validUsers.length} registered users in ${guild.name}`
-        );
-
-        for (const user of validUsers) {
-          if (!user.discordId) continue;
-          const discordMember = discordMembers.get(user.discordId);
-          if (!discordMember) continue;
-
-          for (const chronicleId of chronicleIds) {
-            try {
-              // TODO: Syncing member display names across multiple chronicles linked to different guilds might create a loop or conflict.
-              // We will need a more robust solution in the future to handle name overrides depending on the context.
-              await this.memberRepository.upsert({
-                chronicleId: chronicleId,
-                userId: user.id,
-                nickname: discordMember.displayName,
-                avatarUrl: discordMember.displayAvatarURL(),
-                boosted: discordMember.premiumSince ? 1 : 0,
-              });
-            } catch (err) {
-              logger.exception(
-                `Failed to sync member ${user.id} in guild ${guild.name} for chronicle ${chronicleId}`,
-                err
+      // Identify and remove leavers
+      for (const discordId of discordIdsToFetch) {
+        if (!activeDiscordIds.has(discordId)) {
+          const userId = discordToUser.get(discordId);
+          if (userId) {
+            await this.memberRepository
+              .delete(chronicleId, userId)
+              .catch((err: Error) =>
+                logger.exception(
+                  `Failed to delete past member ${userId} from chronicle ${chronicleId}`,
+                  err
+                )
               );
-            }
           }
         }
       }
-    } catch (error) {
-      logger.exception(`Failed to sync members for guild ${guild.name}`, error);
     }
   }
 }

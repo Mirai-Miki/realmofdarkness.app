@@ -4,7 +4,6 @@ import { Events } from "discord.js";
 import { DiscordEvent } from "framework";
 import { logger } from "@realm/logger";
 import {
-  DiscordGuildRepository,
   DiscordGuildChronicleRepository,
   ChronicleMemberRepository,
   UserRepository,
@@ -24,17 +23,9 @@ class GuildMemberAddEvent extends DiscordEvent<Events.GuildMemberAdd> {
     try {
       if (member.partial) await member.fetch();
 
-      const guildRepo = new DiscordGuildRepository();
       const linkRepo = new DiscordGuildChronicleRepository();
       const userRepo = new UserRepository();
       const chronicleMemberRepo = new ChronicleMemberRepository();
-
-      const discordGuild = await guildRepo.findById(member.guild.id);
-
-      if (!discordGuild) {
-        // We don't create members for guilds that aren't tracked
-        return;
-      }
 
       const user = await userRepo.findByDiscordId(member.id);
       if (!user) {
@@ -42,7 +33,7 @@ class GuildMemberAddEvent extends DiscordEvent<Events.GuildMemberAdd> {
         return;
       }
 
-      const links = await linkRepo.findByDiscordId(discordGuild.discordId);
+      const links = await linkRepo.findByDiscordId(member.guild.id);
 
       for (const link of links) {
         await chronicleMemberRepo.upsert({
@@ -50,7 +41,6 @@ class GuildMemberAddEvent extends DiscordEvent<Events.GuildMemberAdd> {
           userId: user.id,
           nickname: member.displayName,
           avatarUrl: member.displayAvatarURL(),
-          boosted: member.premiumSince ? 1 : 0,
         });
       }
     } catch (error: unknown) {

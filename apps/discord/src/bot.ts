@@ -70,7 +70,9 @@ await loader.loadDiscordEvents(path.join(process.cwd(), srcDir), client);
  * The token is loaded from the DISCORD_TOKEN environment variable.
  */
 client.login(token).catch((error) => {
-  if (error instanceof Error)
-    logger.error(`Failed to log in ${botName} to Discord:`, { error });
-  process.exit(1);
+  logger.exception(`Failed to log in ${botName} to Discord:`, error);
+  // 2 second delay to allow the logger to process
+  setTimeout(() => {
+    process.exit(1);
+  }, 2000);
 });

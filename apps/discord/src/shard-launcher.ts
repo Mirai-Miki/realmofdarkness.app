@@ -70,7 +70,7 @@ function createShardManager(): ShardingManager {
     });
 
     shard.on("death", () => {
-      logger.error(`Shard ${shard.id} died`);
+      logger.info(`Shard ${shard.id} died`);
     });
   });
 

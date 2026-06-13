@@ -7,6 +7,7 @@ import {
   varchar,
   timestamp,
   uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import {
@@ -70,8 +71,8 @@ export const characters = pgTable(
     lastUpdated: timestamp().defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex("characters_name_user_idx").on(table.name, table.userId),
-    uniqueIndex("characters_chronicle_idx").on(table.chronicleId),
+    index("characters_user_id_idx").on(table.userId),
+    index("characters_chronicle_id_idx").on(table.chronicleId),
     uniqueIndex("characters_user_chronicle_idx").on(
       table.userId,
       table.chronicleId

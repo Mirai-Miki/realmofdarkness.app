@@ -2,72 +2,29 @@ import type { Guild as DiscordGuild } from "discord.js";
 
 import { Events } from "discord.js";
 import { DiscordEvent } from "framework";
-import { GuildSyncAction } from "./guild-sync.action";
+import { CreateGuildAction } from "./create-guild.action";
 import { ActivityService } from "../core/activity.service";
 import { logger } from "@realm/logger";
-import {
-  DiscordGuildRepository,
-  DiscordGuildChronicleRepository,
-  ChronicleRepository,
-} from "@realm/repositories";
 
 /**
  * Handles guild create events.
- * Syncs guild data when bot joins a new guild.
- * Automatically creates a default Chronicle for the new guild if one doesn't exist.
+ * Triggered when the bot joins a new guild.
+ * delegates the guild creation and default Chronicle setup to CreateGuildAction.
  */
 class GuildCreateEvent extends DiscordEvent<Events.GuildCreate> {
   readonly eventName = Events.GuildCreate as const;
   override readonly once = false;
 
-  private guildRepository = new DiscordGuildRepository();
-  private chronicleRepository = new ChronicleRepository();
-  private linkRepository = new DiscordGuildChronicleRepository();
-
   async execute(guild: DiscordGuild): Promise<void> {
     ActivityService.update(guild.client);
 
     try {
-      // 1. Check if the Guild is already tracked
-      const isTracked = await this.guildRepository.exists(guild.id);
-
-      if (!isTracked) {
-        logger.info(
-          `New guild joined: ${guild.name} (${guild.id}). Setting up default Chronicle.`
-        );
-
-        // 2. Upsert the Guild
-        await this.guildRepository.upsert({
-          discordId: guild.id,
-          name: guild.name,
-          iconUrl: guild.iconURL() || "",
-        });
-
-        // 3. Create a default Chronicle
-        const chronicle = await this.chronicleRepository.create({
-          name: guild.name, // Use guild name as default chronicle name per user request
-          iconUrl: guild.iconURL() || "",
-        });
-
-        // 4. Link the Guild to the new Chronicle
-        await this.linkRepository.link({
-          discordId: guild.id,
-          chronicleId: chronicle.id,
-        });
-
-        logger.info(
-          `Successfully created and linked default Chronicle (${chronicle.id}) for guild ${guild.id}`
-        );
-      }
+      const createGuildAction = new CreateGuildAction();
+      await createGuildAction.execute(guild);
     } catch (error) {
-      // This is fatal will cause a cascade issues when trying to do operations
-      // in that guild
+      // This is fatal and will cause a cascade of issues when trying to perform operations in that guild
       logger.fatal(`Failed to setup new guild ${guild.name}`, { error });
     }
-
-    // 5. Sync Members
-    const guildSyncAction = new GuildSyncAction();
-    await guildSyncAction.execute(guild);
   }
 }
 

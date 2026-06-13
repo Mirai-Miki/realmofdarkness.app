@@ -1,6 +1,6 @@
 {
-  "id": "5db6a151-d743-4ba4-98a7-b6ff8a72e8b0",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "68baebaa-ad2b-4622-9bf3-024c65add8eb",
+  "prevId": "5db6a151-d743-4ba4-98a7-b6ff8a72e8b0",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -145,21 +145,6 @@
           ],
           "columnsTo": [
             "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "characters_member_composite_fk": {
-          "name": "characters_member_composite_fk",
-          "tableFrom": "characters",
-          "tableTo": "chronicle_members",
-          "columnsFrom": [
-            "user_id",
-            "chronicle_id"
-          ],
-          "columnsTo": [
-            "user_id",
-            "chronicle_id"
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
