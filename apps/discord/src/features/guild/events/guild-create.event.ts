@@ -2,8 +2,8 @@ import type { Guild as DiscordGuild } from "discord.js";
 
 import { Events } from "discord.js";
 import { DiscordEvent } from "framework";
-import { CreateGuildAction } from "./create-guild.action";
-import { ActivityService } from "../core/activity.service";
+import { CreateGuildAction } from "../create-guild.action";
+import { ActivityService } from "../../core/activity.service";
 import { logger } from "@realm/logger";
 
 /**
